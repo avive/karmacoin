@@ -1,0 +1,181 @@
+// Copyright (c) 2021, Subnet Authors. cmdev2@proton.me.
+// This work is licensed under the Subnet v0.1.0 license published in the LICENSE file of this repo.
+//
+
+syntax = "proto3";
+package karma_coin.core_types;
+
+//////////////////
+//
+// Basic KarmaCoin data types
+//
+/////////////////
+
+// Supported built-in coin types
+enum CoinType {
+    COIN_TYPE_CORE = 0;   // $KCents
+    COIN_TYPE_STABLE = 1; // $KCStableCents
+    // other coin types can be added in future versions of the protocol
+}
+
+// Derived from a public key
+message AccountId {
+    // derived from pub key
+    bytes data = 1;
+}
+
+
+// A non-negative coin amount
+message Amount {
+    uint64 value = 1;
+    CoinType coin_type = 2;
+}
+
+message Balance {
+    Amount free = 1;
+    Amount reserved = 3;
+    Amount misc_frozen = 4;
+    Amount fee_frozen = 5;
+}
+
+// An public encryption key
+message PublicKey {
+    bytes key = 1;
+}
+
+message PrivateKey {
+    bytes key = 1;
+}
+
+message PreKey {
+    PublicKey pub_key = 1;
+    uint32 id = 2;
+}
+
+message KeyPair {
+    PrivateKey private_key = 1;
+    PublicKey public_key = 2;
+}
+
+message Signature {
+    uint32 scheme_id = 1;
+    bytes signature = 2;
+}
+
+message MobileNumber {
+    // 12 digits
+    string number = 1;
+}
+
+// user on-chain data
+message User {
+    AccountId account_id = 1; // account id derived from a public key
+    uint64 nonce = 2;
+    string user_name = 3; // unique across the system
+    MobileNumber mobile_number = 4; // verified current number
+    repeated Balance balances = 5;
+    repeated TraitScore trait_scores = 6;
+    repeated PreKey pre_keys = 7; // one-time enc pre-keys for e2e messaging
+}
+
+message SmsVerifier {
+    AccountId account_id = 1; // verifier account id
+    string name = 2;
+}
+
+// Data that is stored on chain
+message OnChainData {
+    repeated User users = 1;
+    repeated SmsVerifier sms_verifiers = 2;
+    repeated CharTrait traits = 3; // char trait ids supported by the system
+    repeated SignedTransaction transactions = 4; // all transactions
+}
+
+enum CharTrait {
+    CHAR_TRAIT_KIND = 0;
+    CHAR_TRAIT_HELPFUL = 1;
+    CHAR_TRAIT_SMART = 2;
+}
+
+message TraitName {
+    CharTrait trait = 1;
+    string name = 2;
+}
+
+message TraitScore {
+    CharTrait trait = 1;
+    uint32 score = 2;
+}
+
+/// transactions
+
+enum TransactionType {
+    TRANSACTION_TYPE_PAYMENT_V1 = 0;
+    TRANSACTION_TYPE_NEW_USER_V1 = 1;
+    TRANSACTION_TYPE_UPDATE_USER_V1 = 2;
+}
+
+// Update user info
+message UpdateUserV1 {
+    // Only user may change his account id by signing with private key of old accountId
+    AccountId account_id = 1;
+    // Only user may change his own nickname. Nicknames are unique.
+    string nickname = 2;
+
+    // Only Verifier may update user's mobile number as it requires verification
+    MobileNumber mobile_number = 3;
+}
+
+// Basic payment transaction with optional character appreciation
+message PaymentTransactionV1 {
+    AccountId from = 1; // account this tx is signed by
+    MobileNumber to = 2; // dest is always a mobile number (of a user or a non-user
+    Amount amount = 3; // amount in tokens to transfer
+    Amount fee = 4; // network fee provided by sender
+    Amount tip = 5; // optional extra tip to miners
+    CharTrait trait = 6; // char trait set by sender. e.g. smart
+}
+
+// new user transactions can be submitted by sms verifiers only
+message NewUserTransactionV1 {
+    // initial user balance
+    User user = 1;
+}
+
+message SignedTransaction {
+    uint64 timestamp = 1; // time transaction was signed
+    bytes transaction_data = 2; // binary transaction data
+    TransactionType type = 3; // transaction type for deserialization
+    uint32 network_id = 4; // network id to avoid confusion with testnets
+    Signature signature = 5; // signer signature on all of the above data
+}
+
+
+// events - emitted by runtime, all stored by archive nodes only
+// full nodes have only recent events
+enum SignupMethod {
+    SIGN_UP_METHOD_INVITE = 0; // user was invited by another user
+    SIGN_UP_METHOD_SIGNUP = 1; // user wasn't invited - signed up
+}
+
+message NewUserEvent {
+    uint64 timestamp = 1;
+    AccountId account_id = 2;
+    SignupMethod sign_up_method = 3;
+    Amount inviter_reward = 4; // for invites - inviter gets a reward - protocol constant
+    SmsVerifier verifier = 5;
+}
+
+// Transaction added to ledger
+message TransactionEvent {
+    uint64 height = 1; // ledger height of execution
+    SignedTransaction transaction = 2;
+    ExecutionResult result = 3;
+}
+
+enum ExecutionResult {
+    EXECUTION_RESULT_INVALID_NONCE = 0;
+    EXECUTION_RESULT_INSUFFICIENT_BALANCE = 1;
+    EXECUTION_RESULT_EXECUTED = 2;
+}
+

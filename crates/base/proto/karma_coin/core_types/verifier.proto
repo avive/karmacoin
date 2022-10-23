@@ -1,0 +1,35 @@
+// Copyright (c) 2021, Subnet Authors. cmdev2@proton.me.
+// This work is licensed under the Subnet v0.1.0 license published in the LICENSE file of this repo.
+//
+
+syntax = "proto3";
+package karma_coin.verifier;
+import "karma_coin/core_types/types.proto";
+
+message RegisterNumberRequest {
+  core_types.AccountId account_id = 1;
+  core_types.MobileNumber mobile_number = 2;
+  core_types.Signature signature = 3;
+}
+
+message RegisterNumberResponse {
+
+}
+
+message SignUpUserRequest {
+  core_types.AccountId account_id = 1;
+  core_types.MobileNumber mobile_number = 2;
+  string code = 3;
+  string nickname = 4;
+  core_types.Signature signature = 5;
+}
+
+message SignUpUserResponse {
+
+}
+
+service PhoneNumbersVerifier {
+  // Request to register a phone number. Will trigger an SMS to that number
+  rpc RegisterNumber(RegisterNumberRequest) returns (RegisterNumberResponse);
+  rpc SignUpUser(SignUpUserRequest) returns (SignUpUserResponse);
+}
