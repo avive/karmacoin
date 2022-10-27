@@ -28,9 +28,114 @@ message SubmitTransactionResponse {
   SubmitTransactionResult submit_transaction_result = 1;
 }
 
+message GetUserInfoByNumberRequest {
+  core_types.MobileNumber mobile_number = 1;
+}
+
+message GetUserInfoByNumberResponse {
+  core_types.User user = 1;
+}
+
+message GetUserInfoByAccountRequest {
+  core_types.AccountId account_id = 1;
+}
+
+message GetUserInfoByAccountResponse {
+  core_types.User user = 1;
+}
+
+message GetPhoneVerifiersRequest {
+
+}
+
+message GetPhoneVerifiersResponse {
+  repeated core_types.PhoneVerifier verifiers = 1;
+}
+
+message GetCharTraitsRequest {
+
+}
+
+message GetCharTraitsResponse {
+  repeated core_types.TraitName trait_names = 1;
+}
+
+message GetNetInfoRequest {
+}
+
+message GetNetInfoResponse {
+  uint32 network_id = 1;
+  uint64 users_count = 2;
+  uint64 genesis_time = 3;
+  string name = 4;
+  uint64 block_height = 5;
+  string api_version = 6; // provided API semantic version
+  uint64 transactions_count = 7; // number of transactions
+  uint64 appreciations_count = 8; // number of appreciations
+  uint64 new_account_reward = 9; // new account reward in kcents
+  uint64 referral_reward = 10; // referral reward in kcents
+}
+
+message GetTransactionsRequest {
+  core_types.AccountId account_from = 1;
+  core_types.AccountId account_to = 2;
+}
+
+message GetTransactionsResponse {
+  repeated core_types.Transaction transactions = 1;
+}
+
+message GetTransactionRequest {
+  bytes digest = 1;
+}
+
+message GetTransactionResponse {
+  core_types.Transaction transaction = 1;
+}
+
+message GetBlockchainEventsRequest {
+  uint64 from_block_number = 1;
+  uint64 to_block_number = 2;
+}
+
+message GetBlockchainEventsResponse {
+
+}
+
+// Unified public API provided by blockchain nodes and verifiers
 service Api {
   // check if a nickname is available
   rpc NicknameAvailable(NicknameAvailableRequest) returns (NicknameAvailableResponse);
 
+  // Submit a signed transaction to the blockchain
   rpc SubmitTransaction(SubmitTransactionRequest) returns (SubmitTransactionResponse);
+
+  // Get transactions from an account or to an account
+  rpc GetTransactionsStatus(GetTransactionsRequest) returns (GetTransactionsResponse);
+
+  rpc GetTransactions(GetTransactionsRequest) returns (GetTransactionsResponse);
+
+  // Get transaction on-chain by its digest hash
+  rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse);
+
+  // Returns on-chain user info by phone number if user exists
+  rpc GetUserInfoByNumber(GetUserInfoByNumberRequest) returns (GetUserInfoByNumberResponse);
+
+  // Returns on-chain user info by account id if user exists
+  rpc GetUserInfoByAccount(GetUserInfoByAccountRequest) returns (GetUserInfoByAccountResponse);
+
+  // Returns the identity of all phone verifiers registered on chain
+  rpc GetPhoneVerifiers(GetPhoneVerifiersRequest) returns (GetPhoneVerifiersResponse);
+
+  // Returns all char traits on-chain
+  rpc GetCharTraits(GetCharTraitsRequest) returns (GetCharTraitsResponse);
+
+  // Returns the API backing blockchain network info
+  rpc GetNetInfo(GetNetInfoRequest) returns (GetNetInfoResponse);
+
+  // Get execution events for one or more blocks
+  rpc GetBlockchainEvents(GetBlockchainEventsRequest) returns (GetBlockchainEventsResponse) {
+
+  }
+
 }

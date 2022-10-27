@@ -116,6 +116,8 @@ enum TransactionType {
     TRANSACTION_TYPE_UPDATE_USER_V1 = 2;
 }
 
+
+
 // Update user info
 message UpdateUserV1 {
     // Only user may change his account id by signing with private key of old accountId
@@ -143,12 +145,24 @@ message NewUserTransactionV1 {
     User user = 1;
 }
 
+message Transaction {
+    bytes transaction_data = 1; // binary transaction data
+    TransactionType type = 2; // transaction type for deserialization
+    TransactionStatus status = 3; // transaction status
+}
+
+enum TransactionStatus {
+    TRANSACTION_STATUS_UNKNOWN = 0;
+    TRANSACTION_STATUS_PENDING = 1;
+    TRANSACTION_STATUS_REJECTED = 2;
+    TRANSACTION_STATUS_ON_CHAIN = 3;
+}
+
 message SignedTransaction {
     uint64 timestamp = 1; // time transaction was signed
-    bytes transaction_data = 2; // binary transaction data
-    TransactionType type = 3; // transaction type for deserialization
-    uint32 network_id = 4; // network id to avoid confusion with testnets
-    Signature signature = 5; // signer signature on all of the above data
+    Transaction transaction = 2; // binary transaction data
+    uint32 network_id = 3; // network id to avoid confusion with testnets
+    Signature signature = 4; // signer signature on all of the above data
 }
 
 
@@ -169,7 +183,7 @@ message NewUserEvent {
     AccountId account_id = 2;
     SignupMethod sign_up_method = 3;
     Amount referred_reward = 4; // for invites - inviter gets a reward - protocol constant
-    Amount signup_rward = 5;
+    Amount signup_reward = 5;
     PhoneVerifier verifier = 6;
 }
 

@@ -22,7 +22,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .format(true)
         .compile(&[
             "proto/karma_coin/core_types/types.proto",
-            "proto/karma_coin/core_types/verifier.proto"],
+            "proto/karma_coin/core_types/verifier.proto",
+            "proto/karma_coin/core_types/api.proto"],
                  &["proto"])
         .unwrap_or_else(|e| panic!("Failed to compile protos {:?}", e));
 

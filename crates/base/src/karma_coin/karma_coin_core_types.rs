@@ -170,21 +170,30 @@ pub struct NewUserTransactionV1 {
     pub user: ::core::option::Option<User>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Transaction {
+    /// binary transaction data
+    #[prost(bytes = "vec", tag = "1")]
+    pub transaction_data: ::prost::alloc::vec::Vec<u8>,
+    /// transaction type for deserialization
+    #[prost(enumeration = "TransactionType", tag = "2")]
+    pub r#type: i32,
+    /// transaction status
+    #[prost(enumeration = "TransactionStatus", tag = "3")]
+    pub status: i32,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SignedTransaction {
     /// time transaction was signed
     #[prost(uint64, tag = "1")]
     pub timestamp: u64,
     /// binary transaction data
-    #[prost(bytes = "vec", tag = "2")]
-    pub transaction_data: ::prost::alloc::vec::Vec<u8>,
-    /// transaction type for deserialization
-    #[prost(enumeration = "TransactionType", tag = "3")]
-    pub r#type: i32,
+    #[prost(message, optional, tag = "2")]
+    pub transaction: ::core::option::Option<Transaction>,
     /// network id to avoid confusion with testnets
-    #[prost(uint32, tag = "4")]
+    #[prost(uint32, tag = "3")]
     pub network_id: u32,
     /// signer signature on all of the above data
-    #[prost(message, optional, tag = "5")]
+    #[prost(message, optional, tag = "4")]
     pub signature: ::core::option::Option<Signature>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -199,7 +208,7 @@ pub struct NewUserEvent {
     #[prost(message, optional, tag = "4")]
     pub referred_reward: ::core::option::Option<Amount>,
     #[prost(message, optional, tag = "5")]
-    pub signup_rward: ::core::option::Option<Amount>,
+    pub signup_reward: ::core::option::Option<Amount>,
     #[prost(message, optional, tag = "6")]
     pub verifier: ::core::option::Option<PhoneVerifier>,
 }
@@ -240,6 +249,14 @@ pub enum TransactionType {
     PaymentV1 = 0,
     NewUserV1 = 1,
     UpdateUserV1 = 2,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum TransactionStatus {
+    Unknown = 0,
+    Pending = 1,
+    Rejected = 2,
+    OnChain = 3,
 }
 /// events - emitted by runtime, all stored by archive nodes only
 /// full nodes have only recent events
