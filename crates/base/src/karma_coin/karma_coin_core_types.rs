@@ -1,3 +1,9 @@
+//////////////////
+//
+// Basic KarmaCoin data types
+//
+/////////////////
+
 /// Derived from a public key
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct AccountId {
@@ -84,8 +90,9 @@ pub struct User {
     #[prost(message, repeated, tag = "7")]
     pub pre_keys: ::prost::alloc::vec::Vec<PreKey>,
 }
+/// Phone verifier is an entity that verifies account mobile phone numbers
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct SmsVerifier {
+pub struct PhoneVerifier {
     /// verifier account id
     #[prost(message, optional, tag = "1")]
     pub account_id: ::core::option::Option<AccountId>,
@@ -98,10 +105,10 @@ pub struct OnChainData {
     #[prost(message, repeated, tag = "1")]
     pub users: ::prost::alloc::vec::Vec<User>,
     #[prost(message, repeated, tag = "2")]
-    pub sms_verifiers: ::prost::alloc::vec::Vec<SmsVerifier>,
+    pub sms_verifiers: ::prost::alloc::vec::Vec<PhoneVerifier>,
     /// char trait ids supported by the system
-    #[prost(enumeration = "CharTrait", repeated, tag = "3")]
-    pub traits: ::prost::alloc::vec::Vec<i32>,
+    #[prost(message, repeated, tag = "3")]
+    pub traits: ::prost::alloc::vec::Vec<TraitName>,
     /// all transactions
     #[prost(message, repeated, tag = "4")]
     pub transactions: ::prost::alloc::vec::Vec<SignedTransaction>,
@@ -190,9 +197,11 @@ pub struct NewUserEvent {
     pub sign_up_method: i32,
     /// for invites - inviter gets a reward - protocol constant
     #[prost(message, optional, tag = "4")]
-    pub inviter_reward: ::core::option::Option<Amount>,
+    pub referred_reward: ::core::option::Option<Amount>,
     #[prost(message, optional, tag = "5")]
-    pub verifier: ::core::option::Option<SmsVerifier>,
+    pub signup_rward: ::core::option::Option<Amount>,
+    #[prost(message, optional, tag = "6")]
+    pub verifier: ::core::option::Option<PhoneVerifier>,
 }
 /// Transaction added to ledger
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -204,13 +213,9 @@ pub struct TransactionEvent {
     pub transaction: ::core::option::Option<SignedTransaction>,
     #[prost(enumeration = "ExecutionResult", tag = "3")]
     pub result: i32,
+    #[prost(enumeration = "FeeType", tag = "4")]
+    pub fee_type: i32,
 }
-//////////////////
-//
-// Basic KarmaCoin data types
-//
-/////////////////
-
 /// Supported built-in coin types
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
@@ -241,10 +246,18 @@ pub enum TransactionType {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum SignupMethod {
-    /// user was invited by another user
-    SignUpMethodInvite = 0,
-    /// user wasn't invited - signed up
+    /// user was referred by another user
+    SignUpMethodReferred = 0,
+    /// user wasn't referred - signed up
     SignUpMethodSignup = 1,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum FeeType {
+    /// fee is minted by the protocol
+    Mint = 0,
+    /// fee is paid by the transaction signer
+    User = 1,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]

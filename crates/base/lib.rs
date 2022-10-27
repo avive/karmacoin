@@ -3,3 +3,4 @@
 //
 
 extern crate serde;
+pub mod karma_coin;
