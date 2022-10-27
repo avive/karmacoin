@@ -4,6 +4,7 @@
 
 syntax = "proto3";
 package karma_coin.verifier;
+
 import "karma_coin/core_types/types.proto";
 
 message RegisterNumberRequest {

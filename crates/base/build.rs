@@ -20,7 +20,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build_server(true)
         .out_dir("src/karma_coin")
         .format(true)
-        .compile(&["proto/karma_coin/core_types/types.proto", "proto/karma_coin/core_types/verifier.proto"], &["proto"])
+        .compile(&[
+            "proto/karma_coin/core_types/types.proto",
+            "proto/karma_coin/core_types/verifier.proto"],
+                 &["proto"])
         .unwrap_or_else(|e| panic!("Failed to compile protos {:?}", e));
 
     let src = Path::new("src/karma_coin");
