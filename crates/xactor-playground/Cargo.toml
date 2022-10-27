@@ -1,0 +1,16 @@
+[package]
+name = "xactor-playground"
+version = "0.1.0"
+authors = ["0xgfgx <subnetter@pm.me>"]
+edition = "2018"
+
+[dependencies.tokio]
+version = "1.8.1"
+features = ["full"]
+
+[dependencies]
+xactor = { path = "../xactor", version = "0.7.9", features = ["runtime-tokio"], default-features = false}
+xactor-derive = { path = "../xactor-derive" }
+
+async-trait = "0.1.41"
+futures = "0.3.5"

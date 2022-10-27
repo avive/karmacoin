@@ -1,5 +1,11 @@
 [workspace]
 
 members = [
-    "crates/base"
+    "crates/base",
+    "crates/xactor",
+    "crates/xactor-derive",
+    "crates/xactor-playground",
+    "crates/db",
+    "crates/server",
+    "crates/server-app"
 ]

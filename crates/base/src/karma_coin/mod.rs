@@ -5,5 +5,6 @@
 use karma_coin_core_types as core_types;
 
 pub mod google_protobuf;
+pub mod karma_coin_api;
 pub mod karma_coin_core_types;
 pub mod karma_coin_verifier;

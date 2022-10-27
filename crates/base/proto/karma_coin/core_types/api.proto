@@ -103,7 +103,7 @@ message GetBlockchainEventsResponse {
 }
 
 // Unified public API provided by blockchain nodes and verifiers
-service Api {
+service ApiService {
   // check if a nickname is available
   rpc NicknameAvailable(NicknameAvailableRequest) returns (NicknameAvailableResponse);
 

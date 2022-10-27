@@ -117,15 +117,15 @@ pub enum SubmitTransactionResult {
     Submitted = 1,
 }
 #[doc = r" Generated client implementations."]
-pub mod api_client {
+pub mod api_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
     #[doc = " Unified public API provided by blockchain nodes and verifiers"]
     #[derive(Debug, Clone)]
-    pub struct ApiClient<T> {
+    pub struct ApiServiceClient<T> {
         inner: tonic::client::Grpc<T>,
     }
-    impl ApiClient<tonic::transport::Channel> {
+    impl ApiServiceClient<tonic::transport::Channel> {
         #[doc = r" Attempt to create a new client by connecting to a given endpoint."]
         pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
         where
@@ -136,7 +136,7 @@ pub mod api_client {
             Ok(Self::new(conn))
         }
     }
-    impl<T> ApiClient<T>
+    impl<T> ApiServiceClient<T>
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::ResponseBody: Body + Send + Sync + 'static,
@@ -147,7 +147,10 @@ pub mod api_client {
             let inner = tonic::client::Grpc::new(inner);
             Self { inner }
         }
-        pub fn with_interceptor<F>(inner: T, interceptor: F) -> ApiClient<InterceptedService<T, F>>
+        pub fn with_interceptor<F>(
+            inner: T,
+            interceptor: F,
+        ) -> ApiServiceClient<InterceptedService<T, F>>
         where
             F: FnMut(tonic::Request<()>) -> Result<tonic::Request<()>, tonic::Status>,
             T: tonic::codegen::Service<
@@ -159,7 +162,7 @@ pub mod api_client {
             <T as tonic::codegen::Service<http::Request<tonic::body::BoxBody>>>::Error:
                 Into<StdError> + Send + Sync,
         {
-            ApiClient::new(InterceptedService::new(inner, interceptor))
+            ApiServiceClient::new(InterceptedService::new(inner, interceptor))
         }
         #[doc = r" Compress requests with `gzip`."]
         #[doc = r""]
@@ -186,8 +189,9 @@ pub mod api_client {
                 )
             })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path =
-                http::uri::PathAndQuery::from_static("/karma_coin.api.Api/NicknameAvailable");
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.api.ApiService/NicknameAvailable",
+            );
             self.inner.unary(request.into_request(), path, codec).await
         }
         #[doc = " Submit a signed transaction to the blockchain"]
@@ -202,8 +206,9 @@ pub mod api_client {
                 )
             })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path =
-                http::uri::PathAndQuery::from_static("/karma_coin.api.Api/SubmitTransaction");
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.api.ApiService/SubmitTransaction",
+            );
             self.inner.unary(request.into_request(), path, codec).await
         }
         #[doc = " Get transactions from an account or to an account"]
@@ -218,8 +223,9 @@ pub mod api_client {
                 )
             })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path =
-                http::uri::PathAndQuery::from_static("/karma_coin.api.Api/GetTransactionsStatus");
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.api.ApiService/GetTransactionsStatus",
+            );
             self.inner.unary(request.into_request(), path, codec).await
         }
         pub async fn get_transactions(
@@ -233,7 +239,8 @@ pub mod api_client {
                 )
             })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/karma_coin.api.Api/GetTransactions");
+            let path =
+                http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetTransactions");
             self.inner.unary(request.into_request(), path, codec).await
         }
         #[doc = " Get transaction on-chain by its digest hash"]
@@ -248,7 +255,8 @@ pub mod api_client {
                 )
             })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/karma_coin.api.Api/GetTransaction");
+            let path =
+                http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetTransaction");
             self.inner.unary(request.into_request(), path, codec).await
         }
         #[doc = " Returns on-chain user info by phone number if user exists"]
@@ -263,8 +271,9 @@ pub mod api_client {
                 )
             })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path =
-                http::uri::PathAndQuery::from_static("/karma_coin.api.Api/GetUserInfoByNumber");
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.api.ApiService/GetUserInfoByNumber",
+            );
             self.inner.unary(request.into_request(), path, codec).await
         }
         #[doc = " Returns on-chain user info by account id if user exists"]
@@ -279,8 +288,9 @@ pub mod api_client {
                 )
             })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path =
-                http::uri::PathAndQuery::from_static("/karma_coin.api.Api/GetUserInfoByAccount");
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.api.ApiService/GetUserInfoByAccount",
+            );
             self.inner.unary(request.into_request(), path, codec).await
         }
         #[doc = " Returns the identity of all phone verifiers registered on chain"]
@@ -295,8 +305,9 @@ pub mod api_client {
                 )
             })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path =
-                http::uri::PathAndQuery::from_static("/karma_coin.api.Api/GetPhoneVerifiers");
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.api.ApiService/GetPhoneVerifiers",
+            );
             self.inner.unary(request.into_request(), path, codec).await
         }
         #[doc = " Returns all char traits on-chain"]
@@ -311,7 +322,8 @@ pub mod api_client {
                 )
             })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/karma_coin.api.Api/GetCharTraits");
+            let path =
+                http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetCharTraits");
             self.inner.unary(request.into_request(), path, codec).await
         }
         #[doc = " Returns the API backing blockchain network info"]
@@ -326,7 +338,8 @@ pub mod api_client {
                 )
             })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/karma_coin.api.Api/GetNetInfo");
+            let path =
+                http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetNetInfo");
             self.inner.unary(request.into_request(), path, codec).await
         }
         #[doc = " Get execution events for one or more blocks"]
@@ -341,19 +354,20 @@ pub mod api_client {
                 )
             })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path =
-                http::uri::PathAndQuery::from_static("/karma_coin.api.Api/GetBlockchainEvents");
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.api.ApiService/GetBlockchainEvents",
+            );
             self.inner.unary(request.into_request(), path, codec).await
         }
     }
 }
 #[doc = r" Generated server implementations."]
-pub mod api_server {
+pub mod api_service_server {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
-    #[doc = "Generated trait containing gRPC methods that should be implemented for use with ApiServer."]
+    #[doc = "Generated trait containing gRPC methods that should be implemented for use with ApiServiceServer."]
     #[async_trait]
-    pub trait Api: Send + Sync + 'static {
+    pub trait ApiService: Send + Sync + 'static {
         #[doc = " check if a nickname is available"]
         async fn nickname_available(
             &self,
@@ -411,13 +425,13 @@ pub mod api_server {
     }
     #[doc = " Unified public API provided by blockchain nodes and verifiers"]
     #[derive(Debug)]
-    pub struct ApiServer<T: Api> {
+    pub struct ApiServiceServer<T: ApiService> {
         inner: _Inner<T>,
         accept_compression_encodings: EnabledCompressionEncodings,
         send_compression_encodings: EnabledCompressionEncodings,
     }
     struct _Inner<T>(Arc<T>);
-    impl<T: Api> ApiServer<T> {
+    impl<T: ApiService> ApiServiceServer<T> {
         pub fn new(inner: T) -> Self {
             let inner = Arc::new(inner);
             let inner = _Inner(inner);
@@ -444,9 +458,9 @@ pub mod api_server {
             self
         }
     }
-    impl<T, B> tonic::codegen::Service<http::Request<B>> for ApiServer<T>
+    impl<T, B> tonic::codegen::Service<http::Request<B>> for ApiServiceServer<T>
     where
-        T: Api,
+        T: ApiService,
         B: Body + Send + Sync + 'static,
         B::Error: Into<StdError> + Send + 'static,
     {
@@ -459,10 +473,10 @@ pub mod api_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/karma_coin.api.Api/NicknameAvailable" => {
+                "/karma_coin.api.ApiService/NicknameAvailable" => {
                     #[allow(non_camel_case_types)]
-                    struct NicknameAvailableSvc<T: Api>(pub Arc<T>);
-                    impl<T: Api> tonic::server::UnaryService<super::NicknameAvailableRequest>
+                    struct NicknameAvailableSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::NicknameAvailableRequest>
                         for NicknameAvailableSvc<T>
                     {
                         type Response = super::NicknameAvailableResponse;
@@ -492,10 +506,10 @@ pub mod api_server {
                     };
                     Box::pin(fut)
                 }
-                "/karma_coin.api.Api/SubmitTransaction" => {
+                "/karma_coin.api.ApiService/SubmitTransaction" => {
                     #[allow(non_camel_case_types)]
-                    struct SubmitTransactionSvc<T: Api>(pub Arc<T>);
-                    impl<T: Api> tonic::server::UnaryService<super::SubmitTransactionRequest>
+                    struct SubmitTransactionSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::SubmitTransactionRequest>
                         for SubmitTransactionSvc<T>
                     {
                         type Response = super::SubmitTransactionResponse;
@@ -525,10 +539,10 @@ pub mod api_server {
                     };
                     Box::pin(fut)
                 }
-                "/karma_coin.api.Api/GetTransactionsStatus" => {
+                "/karma_coin.api.ApiService/GetTransactionsStatus" => {
                     #[allow(non_camel_case_types)]
-                    struct GetTransactionsStatusSvc<T: Api>(pub Arc<T>);
-                    impl<T: Api> tonic::server::UnaryService<super::GetTransactionsRequest>
+                    struct GetTransactionsStatusSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::GetTransactionsRequest>
                         for GetTransactionsStatusSvc<T>
                     {
                         type Response = super::GetTransactionsResponse;
@@ -559,10 +573,12 @@ pub mod api_server {
                     };
                     Box::pin(fut)
                 }
-                "/karma_coin.api.Api/GetTransactions" => {
+                "/karma_coin.api.ApiService/GetTransactions" => {
                     #[allow(non_camel_case_types)]
-                    struct GetTransactionsSvc<T: Api>(pub Arc<T>);
-                    impl<T: Api> tonic::server::UnaryService<super::GetTransactionsRequest> for GetTransactionsSvc<T> {
+                    struct GetTransactionsSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::GetTransactionsRequest>
+                        for GetTransactionsSvc<T>
+                    {
                         type Response = super::GetTransactionsResponse;
                         type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
                         fn call(
@@ -590,10 +606,12 @@ pub mod api_server {
                     };
                     Box::pin(fut)
                 }
-                "/karma_coin.api.Api/GetTransaction" => {
+                "/karma_coin.api.ApiService/GetTransaction" => {
                     #[allow(non_camel_case_types)]
-                    struct GetTransactionSvc<T: Api>(pub Arc<T>);
-                    impl<T: Api> tonic::server::UnaryService<super::GetTransactionRequest> for GetTransactionSvc<T> {
+                    struct GetTransactionSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::GetTransactionRequest>
+                        for GetTransactionSvc<T>
+                    {
                         type Response = super::GetTransactionResponse;
                         type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
                         fn call(
@@ -621,10 +639,11 @@ pub mod api_server {
                     };
                     Box::pin(fut)
                 }
-                "/karma_coin.api.Api/GetUserInfoByNumber" => {
+                "/karma_coin.api.ApiService/GetUserInfoByNumber" => {
                     #[allow(non_camel_case_types)]
-                    struct GetUserInfoByNumberSvc<T: Api>(pub Arc<T>);
-                    impl<T: Api> tonic::server::UnaryService<super::GetUserInfoByNumberRequest>
+                    struct GetUserInfoByNumberSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService>
+                        tonic::server::UnaryService<super::GetUserInfoByNumberRequest>
                         for GetUserInfoByNumberSvc<T>
                     {
                         type Response = super::GetUserInfoByNumberResponse;
@@ -655,10 +674,11 @@ pub mod api_server {
                     };
                     Box::pin(fut)
                 }
-                "/karma_coin.api.Api/GetUserInfoByAccount" => {
+                "/karma_coin.api.ApiService/GetUserInfoByAccount" => {
                     #[allow(non_camel_case_types)]
-                    struct GetUserInfoByAccountSvc<T: Api>(pub Arc<T>);
-                    impl<T: Api> tonic::server::UnaryService<super::GetUserInfoByAccountRequest>
+                    struct GetUserInfoByAccountSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService>
+                        tonic::server::UnaryService<super::GetUserInfoByAccountRequest>
                         for GetUserInfoByAccountSvc<T>
                     {
                         type Response = super::GetUserInfoByAccountResponse;
@@ -689,10 +709,10 @@ pub mod api_server {
                     };
                     Box::pin(fut)
                 }
-                "/karma_coin.api.Api/GetPhoneVerifiers" => {
+                "/karma_coin.api.ApiService/GetPhoneVerifiers" => {
                     #[allow(non_camel_case_types)]
-                    struct GetPhoneVerifiersSvc<T: Api>(pub Arc<T>);
-                    impl<T: Api> tonic::server::UnaryService<super::GetPhoneVerifiersRequest>
+                    struct GetPhoneVerifiersSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::GetPhoneVerifiersRequest>
                         for GetPhoneVerifiersSvc<T>
                     {
                         type Response = super::GetPhoneVerifiersResponse;
@@ -722,10 +742,12 @@ pub mod api_server {
                     };
                     Box::pin(fut)
                 }
-                "/karma_coin.api.Api/GetCharTraits" => {
+                "/karma_coin.api.ApiService/GetCharTraits" => {
                     #[allow(non_camel_case_types)]
-                    struct GetCharTraitsSvc<T: Api>(pub Arc<T>);
-                    impl<T: Api> tonic::server::UnaryService<super::GetCharTraitsRequest> for GetCharTraitsSvc<T> {
+                    struct GetCharTraitsSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::GetCharTraitsRequest>
+                        for GetCharTraitsSvc<T>
+                    {
                         type Response = super::GetCharTraitsResponse;
                         type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
                         fn call(
@@ -753,10 +775,10 @@ pub mod api_server {
                     };
                     Box::pin(fut)
                 }
-                "/karma_coin.api.Api/GetNetInfo" => {
+                "/karma_coin.api.ApiService/GetNetInfo" => {
                     #[allow(non_camel_case_types)]
-                    struct GetNetInfoSvc<T: Api>(pub Arc<T>);
-                    impl<T: Api> tonic::server::UnaryService<super::GetNetInfoRequest> for GetNetInfoSvc<T> {
+                    struct GetNetInfoSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::GetNetInfoRequest> for GetNetInfoSvc<T> {
                         type Response = super::GetNetInfoResponse;
                         type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
                         fn call(
@@ -784,10 +806,11 @@ pub mod api_server {
                     };
                     Box::pin(fut)
                 }
-                "/karma_coin.api.Api/GetBlockchainEvents" => {
+                "/karma_coin.api.ApiService/GetBlockchainEvents" => {
                     #[allow(non_camel_case_types)]
-                    struct GetBlockchainEventsSvc<T: Api>(pub Arc<T>);
-                    impl<T: Api> tonic::server::UnaryService<super::GetBlockchainEventsRequest>
+                    struct GetBlockchainEventsSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService>
+                        tonic::server::UnaryService<super::GetBlockchainEventsRequest>
                         for GetBlockchainEventsSvc<T>
                     {
                         type Response = super::GetBlockchainEventsResponse;
@@ -828,7 +851,7 @@ pub mod api_server {
             }
         }
     }
-    impl<T: Api> Clone for ApiServer<T> {
+    impl<T: ApiService> Clone for ApiServiceServer<T> {
         fn clone(&self) -> Self {
             let inner = self.inner.clone();
             Self {
@@ -838,7 +861,7 @@ pub mod api_server {
             }
         }
     }
-    impl<T: Api> Clone for _Inner<T> {
+    impl<T: ApiService> Clone for _Inner<T> {
         fn clone(&self) -> Self {
             Self(self.0.clone())
         }
@@ -848,7 +871,7 @@ pub mod api_server {
             write!(f, "{:?}", self.0)
         }
     }
-    impl<T: Api> tonic::transport::NamedService for ApiServer<T> {
-        const NAME: &'static str = "karma_coin.api.Api";
+    impl<T: ApiService> tonic::transport::NamedService for ApiServiceServer<T> {
+        const NAME: &'static str = "karma_coin.api.ApiService";
     }
 }

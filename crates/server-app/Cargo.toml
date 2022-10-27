@@ -1,0 +1,28 @@
+[package]
+name = "server-app"
+description = "An executable server process with support to cli flags and config file"
+version = "0.1.0"
+authors = ["subnetter <subnetter@pm.me>"]
+edition = "2018"
+
+[dependencies.tokio]
+version = "1.8.1"
+features = ["full"]
+
+[dependencies]
+base = { path = "../base" }
+db = { path = "../db" }
+server = { path = "../server"}
+
+xactor = { path = "../xactor", version = "0.7.9", features = ["runtime-tokio"], default-features = false}
+xactor-derive = { path = "../xactor-derive" }
+
+async-trait = "0.1.41"
+futures = "0.3.5"
+
+log = "*"
+env_logger = "*"
+getopts = "*"
+anyhow = "1.0"
+clap = "2.33.3"
+

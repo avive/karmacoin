@@ -4,3 +4,6 @@
 
 extern crate serde;
 pub mod karma_coin;
+pub mod server_config_service;
+pub mod test_helpers;
+pub mod logging_service;
