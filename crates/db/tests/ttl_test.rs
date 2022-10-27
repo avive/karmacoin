@@ -6,10 +6,11 @@ extern crate log;
 
 use anyhow::Result;
 
-use db::db_service::{Compact, DataItem, DatabaseService, Destroy, ReadItem, WriteItem};
+use db::db_service::{Compact, DataItem, DatabaseService, Destroy, ReadItem, WriteItem, TESTS_COL_FAMILY};
 
 use bytes::Bytes;
 use std::time::Duration;
+use rocksdb::{ColumnFamilyDescriptor, Options};
 use tokio::time::sleep;
 
 use db::db_service;
@@ -21,6 +22,14 @@ async fn test_ttl() {
     enable_logger();
 
     let addr = DatabaseService::from_registry().await.unwrap();
+
+    DatabaseService::config_db(db_service::Configure {
+        drop_on_exit: true,
+        db_name: "test_db".to_string(),
+        col_descriptors: vec![
+            ColumnFamilyDescriptor::new(TESTS_COL_FAMILY, Options::default()),
+        ],
+    }).await.unwrap();
 
     let key1 = Bytes::from("key_2");
     // println!("key1: {:?}", key1);

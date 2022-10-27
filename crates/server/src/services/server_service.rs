@@ -129,7 +129,6 @@ impl ServerService {
         tokio::task::spawn(async move {
             // all services that should be started must be added below
             let res = Server::builder()
-                //.add_service(ProviderCoreServiceServer::new(messaging_service))
                 .add_service(ApiServiceServer::new(ApiService::default()))
                 //.add_service(health_service)
                 .serve(grpc_server_addr)

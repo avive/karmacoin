@@ -5,10 +5,11 @@
 #[cfg_attr(test, macro_use)]
 extern crate log;
 
-use db::db_service::{DataItem, DatabaseService, Destroy, ReadItem, WriteItem};
+use db::db_service::{DataItem, DatabaseService, Destroy, ReadItem, WriteItem, TESTS_COL_FAMILY};
 
 use base::test_helpers::enable_logger;
 use bytes::Bytes;
+use rocksdb::{ColumnFamilyDescriptor, Options};
 use db::db_service;
 use xactor::*;
 
@@ -17,6 +18,14 @@ async fn test_read_write() {
     enable_logger();
 
     let addr = DatabaseService::from_registry().await.unwrap();
+
+    DatabaseService::config_db(db_service::Configure {
+        drop_on_exit: true,
+        db_name: "test_db".to_string(),
+        col_descriptors: vec![
+            ColumnFamilyDescriptor::new(TESTS_COL_FAMILY, Options::default()),
+        ],
+    }).await.unwrap();
 
     let key1 = Bytes::from("key_1");
     debug!("key1: {:?}", key1);
@@ -56,6 +65,15 @@ async fn test_read_write() {
 #[tokio::test]
 async fn test_read_write_string_keys() {
     enable_logger();
+
+    DatabaseService::config_db(db_service::Configure {
+        drop_on_exit: true,
+        db_name: "test_db".to_string(),
+        col_descriptors: vec![
+            ColumnFamilyDescriptor::new(TESTS_COL_FAMILY, Options::default()),
+        ],
+    }).await.unwrap();
+
 
     let addr = DatabaseService::from_registry().await.unwrap();
 
