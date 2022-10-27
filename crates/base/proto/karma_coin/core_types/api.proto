@@ -1,0 +1,36 @@
+// Copyright (c) 2021, Subnet Authors. cmdev2@proton.me.
+// This work is licensed under the Subnet v0.1.0 license published in the LICENSE file of this repo.
+//
+
+syntax = "proto3";
+package karma_coin.api;
+
+import "karma_coin/core_types/types.proto";
+
+message NicknameAvailableRequest {
+  string nickname = 1;
+}
+
+message NicknameAvailableResponse {
+
+}
+
+message SubmitTransactionRequest {
+     core_types.SignedTransaction transaction = 1;
+}
+
+enum SubmitTransactionResult {
+  SUBMIT_TRANSACTION_RESULT_INVALID = 0;
+  SUBMIT_TRANSACTION_RESULT_SUBMITTED = 1;
+}
+
+message SubmitTransactionResponse {
+  SubmitTransactionResult submit_transaction_result = 1;
+}
+
+service Api {
+  // check if a nickname is available
+  rpc NicknameAvailable(NicknameAvailableRequest) returns (NicknameAvailableResponse);
+
+  rpc SubmitTransaction(SubmitTransactionRequest) returns (SubmitTransactionResponse);
+}
