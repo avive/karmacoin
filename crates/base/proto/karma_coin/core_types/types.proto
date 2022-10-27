@@ -11,13 +11,6 @@ package karma_coin.core_types;
 //
 /////////////////
 
-// Supported built-in coin types
-enum CoinType {
-    COIN_TYPE_CORE = 0;   // $KCents
-    COIN_TYPE_STABLE = 1; // $KCStableCents
-    // other coin types can be added in future versions of the protocol
-}
-
 // Derived from a public key
 message AccountId {
     // derived from pub key
@@ -29,6 +22,13 @@ message AccountId {
 message Amount {
     uint64 value = 1;
     CoinType coin_type = 2;
+}
+
+// Supported built-in coin types
+enum CoinType {
+    COIN_TYPE_CORE = 0;   // $KCents
+    COIN_TYPE_STABLE = 1; // $KCStableCents
+    // other coin types can be added in future versions of the protocol
 }
 
 message Balance {
@@ -78,7 +78,8 @@ message User {
     repeated PreKey pre_keys = 7; // one-time enc pre-keys for e2e messaging
 }
 
-message SmsVerifier {
+// Phone verifier is an entity that verifies account mobile phone numbers
+message PhoneVerifier {
     AccountId account_id = 1; // verifier account id
     string name = 2;
 }
@@ -86,8 +87,8 @@ message SmsVerifier {
 // Data that is stored on chain
 message OnChainData {
     repeated User users = 1;
-    repeated SmsVerifier sms_verifiers = 2;
-    repeated CharTrait traits = 3; // char trait ids supported by the system
+    repeated PhoneVerifier sms_verifiers = 2;
+    repeated TraitName traits = 3; // char trait ids supported by the system
     repeated SignedTransaction transactions = 4; // all transactions
 }
 
@@ -154,16 +155,22 @@ message SignedTransaction {
 // events - emitted by runtime, all stored by archive nodes only
 // full nodes have only recent events
 enum SignupMethod {
-    SIGN_UP_METHOD_INVITE = 0; // user was invited by another user
-    SIGN_UP_METHOD_SIGNUP = 1; // user wasn't invited - signed up
+    SIGN_UP_METHOD_REFERRED = 0; // user was referred by another user
+    SIGN_UP_METHOD_SIGNUP = 1; // user wasn't referred - signed up
+}
+
+enum FeeType {
+    FEE_TYPE_MINT = 0; // fee is minted by the protocol
+    FEE_TYPE_USER = 1; // fee is paid by the transaction signer
 }
 
 message NewUserEvent {
     uint64 timestamp = 1;
     AccountId account_id = 2;
     SignupMethod sign_up_method = 3;
-    Amount inviter_reward = 4; // for invites - inviter gets a reward - protocol constant
-    SmsVerifier verifier = 5;
+    Amount referred_reward = 4; // for invites - inviter gets a reward - protocol constant
+    Amount signup_rward = 5;
+    PhoneVerifier verifier = 6;
 }
 
 // Transaction added to ledger
@@ -171,6 +178,7 @@ message TransactionEvent {
     uint64 height = 1; // ledger height of execution
     SignedTransaction transaction = 2;
     ExecutionResult result = 3;
+    FeeType fee_type = 4;
 }
 
 enum ExecutionResult {
