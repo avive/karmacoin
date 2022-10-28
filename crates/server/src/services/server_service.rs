@@ -86,6 +86,8 @@ impl Handler<Startup> for ServerService {
             .await?
             .unwrap();
 
+        // configure the db
+
         DatabaseService::config_db(db::db_service::Configure {
             drop_on_exit,
             db_name,

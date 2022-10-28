@@ -4,7 +4,7 @@
 
 use anyhow::Result;
 use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
-use tonic::{Request, Response, Status};
+use tonic::{IntoRequest, Request, Response, Status};
 use base::karma_coin::karma_coin_api::{GetBlockchainEventsRequest, GetBlockchainEventsResponse, GetCharTraitsRequest, GetCharTraitsResponse, GetNetInfoRequest, GetNetInfoResponse, GetPhoneVerifiersRequest, GetPhoneVerifiersResponse, GetTransactionRequest, GetTransactionResponse, GetTransactionsRequest, GetTransactionsResponse, GetUserInfoByAccountRequest, GetUserInfoByAccountResponse, GetUserInfoByNumberRequest, GetUserInfoByNumberResponse, NicknameAvailableRequest, NicknameAvailableResponse, SubmitTransactionRequest, SubmitTransactionResponse};
 use xactor::*;
 
@@ -29,12 +29,26 @@ impl Actor for ApiService {
 
 impl Service for ApiService {}
 
-/// AdminService implements the ServerAdminService trait which defines the grpc methods
-/// it provides for clients over the network
+#[message(result = "Result<Ok>")]
+pub(crate) struct GetNickNameAvailable(NicknameAvailableRequest);
+
+#[async_trait::async_trait]
+impl Handler<GetNickNameAvailable> for ApiService {
+    async fn handle(
+        &mut self,
+        _ctx: &mut Context<Self>,
+        _msg: GetNickNameAvailable,
+    ) -> Result<NicknameAvailableResponse> {
+        unimplemented!()
+    }
+}
+
+
+/// ApiService implements the ApiServiceTrait trait which defines the grpc rpc methods it provides for clients over the network
 #[tonic::async_trait]
 impl ApiServiceTrait for ApiService {
     async fn nickname_available(&self, request: Request<NicknameAvailableRequest>) -> std::result::Result<Response<NicknameAvailableResponse>, Status> {
-        todo!()
+        Ok(Response::new(ApiService::from_registry().await?.call(GetNickNameAvailable(request.into())).await?))
     }
 
     async fn submit_transaction(&self, request: Request<SubmitTransactionRequest>) -> std::result::Result<Response<SubmitTransactionResponse>, Status> {
