@@ -89,7 +89,7 @@ pub struct GetTransactionsRequest {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetTransactionsResponse {
     #[prost(message, repeated, tag = "1")]
-    pub transactions: ::prost::alloc::vec::Vec<super::core_types::Transaction>,
+    pub transactions: ::prost::alloc::vec::Vec<super::core_types::SignedTransaction>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetTransactionRequest {
@@ -99,7 +99,7 @@ pub struct GetTransactionRequest {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetTransactionResponse {
     #[prost(message, optional, tag = "1")]
-    pub transaction: ::core::option::Option<super::core_types::Transaction>,
+    pub transaction: ::core::option::Option<super::core_types::SignedTransaction>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetBlockchainEventsRequest {

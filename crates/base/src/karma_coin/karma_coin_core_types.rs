@@ -109,9 +109,30 @@ pub struct OnChainData {
     /// char trait ids supported by the system
     #[prost(message, repeated, tag = "3")]
     pub traits: ::prost::alloc::vec::Vec<TraitName>,
-    /// all transactions
+    /// signed transactions- all for archive, only recent for standard nodes
     #[prost(message, repeated, tag = "4")]
     pub transactions: ::prost::alloc::vec::Vec<SignedTransaction>,
+    /// the blockchain
+    #[prost(message, repeated, tag = "5")]
+    pub blocks: ::prost::alloc::vec::Vec<Block>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Block {
+    #[prost(message, optional, tag = "1")]
+    pub author: ::core::option::Option<AccountId>,
+    #[prost(uint64, tag = "2")]
+    pub height: u64,
+    /// of the signed transactions in this block
+    #[prost(bytes = "vec", repeated, tag = "3")]
+    pub transactions_hashes: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
+    #[prost(message, optional, tag = "4")]
+    pub signature: ::core::option::Option<Signature>,
+    /// digest of block in consensus at the previous height
+    #[prost(bytes = "vec", tag = "5")]
+    pub prev_block_digest: ::prost::alloc::vec::Vec<u8>,
+    /// block digest includes hash of all above data
+    #[prost(bytes = "vec", tag = "6")]
+    pub digest: ::prost::alloc::vec::Vec<u8>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TraitName {
@@ -170,15 +191,20 @@ pub struct NewUserTransactionV1 {
     pub user: ::core::option::Option<User>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct Transaction {
+pub struct TransactionData {
     /// binary transaction data
     #[prost(bytes = "vec", tag = "1")]
     pub transaction_data: ::prost::alloc::vec::Vec<u8>,
     /// transaction type for deserialization
     #[prost(enumeration = "TransactionType", tag = "2")]
     pub r#type: i32,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct TransactionWithStatus {
+    #[prost(message, optional, tag = "1")]
+    pub data: ::core::option::Option<TransactionData>,
     /// transaction status
-    #[prost(enumeration = "TransactionStatus", tag = "3")]
+    #[prost(enumeration = "TransactionStatus", tag = "2")]
     pub status: i32,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -188,7 +214,7 @@ pub struct SignedTransaction {
     pub timestamp: u64,
     /// binary transaction data
     #[prost(message, optional, tag = "2")]
-    pub transaction: ::core::option::Option<Transaction>,
+    pub transaction_data: ::core::option::Option<TransactionData>,
     /// network id to avoid confusion with testnets
     #[prost(uint32, tag = "3")]
     pub network_id: u32,

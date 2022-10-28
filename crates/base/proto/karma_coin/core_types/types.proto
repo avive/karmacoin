@@ -89,7 +89,17 @@ message OnChainData {
     repeated User users = 1;
     repeated PhoneVerifier sms_verifiers = 2;
     repeated TraitName traits = 3; // char trait ids supported by the system
-    repeated SignedTransaction transactions = 4; // all transactions
+    repeated SignedTransaction transactions = 4; // signed transactions- all for archive, only recent for standard nodes
+    repeated Block blocks = 5; // the blockchain
+}
+
+message Block {
+    AccountId author = 1;
+    uint64 height = 2;
+    repeated bytes transactions_hashes = 3; // of the signed transactions in this block
+    core_types.Signature signature = 4;
+    bytes prev_block_digest = 5; // digest of block in consensus at the previous height
+    bytes digest = 6; // block digest includes hash of all above data
 }
 
 enum CharTrait {
@@ -115,8 +125,6 @@ enum TransactionType {
     TRANSACTION_TYPE_NEW_USER_V1 = 1;
     TRANSACTION_TYPE_UPDATE_USER_V1 = 2;
 }
-
-
 
 // Update user info
 message UpdateUserV1 {
@@ -145,10 +153,14 @@ message NewUserTransactionV1 {
     User user = 1;
 }
 
-message Transaction {
+message TransactionData {
     bytes transaction_data = 1; // binary transaction data
     TransactionType type = 2; // transaction type for deserialization
-    TransactionStatus status = 3; // transaction status
+}
+
+message TransactionWithStatus {
+    TransactionData data = 1;
+    TransactionStatus status = 2; // transaction status
 }
 
 enum TransactionStatus {
@@ -160,7 +172,7 @@ enum TransactionStatus {
 
 message SignedTransaction {
     uint64 timestamp = 1; // time transaction was signed
-    Transaction transaction = 2; // binary transaction data
+    TransactionData transaction_Data = 2; // binary transaction data
     uint32 network_id = 3; // network id to avoid confusion with testnets
     Signature signature = 4; // signer signature on all of the above data
 }

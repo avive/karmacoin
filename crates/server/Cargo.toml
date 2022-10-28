@@ -16,7 +16,7 @@ db = { path = "../db" }
 xactor = { path = "../xactor", version = "0.7.9", features = ["runtime-tokio"], default-features = false}
 xactor-derive = { path = "../xactor-derive" }
 
-rocksdb = "0.18.0"
+rocksdb = "0.19.0"
 
 serde = { version = "1.0", features = ["derive"] }
 serde_bytes = "0.11"

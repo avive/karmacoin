@@ -82,7 +82,7 @@ message GetTransactionsRequest {
 }
 
 message GetTransactionsResponse {
-  repeated core_types.Transaction transactions = 1;
+  repeated core_types.SignedTransaction transactions = 1;
 }
 
 message GetTransactionRequest {
@@ -90,7 +90,7 @@ message GetTransactionRequest {
 }
 
 message GetTransactionResponse {
-  core_types.Transaction transaction = 1;
+  core_types.SignedTransaction transaction = 1;
 }
 
 message GetBlockchainEventsRequest {
@@ -110,7 +110,7 @@ service ApiService {
   // Submit a signed transaction to the blockchain
   rpc SubmitTransaction(SubmitTransactionRequest) returns (SubmitTransactionResponse);
 
-  // Get transactions from an account or to an account
+  // Get transactions from an account or to an account. Submitted transactions may be in pool or on chain
   rpc GetTransactionsStatus(GetTransactionsRequest) returns (GetTransactionsResponse);
 
   rpc GetTransactions(GetTransactionsRequest) returns (GetTransactionsResponse);

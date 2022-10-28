@@ -2,9 +2,10 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use std::fmt::Error;
 use anyhow::Result;
 use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
-use tonic::{IntoRequest, Request, Response, Status};
+use tonic::{Code, IntoRequest, Request, Response, Status};
 use base::karma_coin::karma_coin_api::{GetBlockchainEventsRequest, GetBlockchainEventsResponse, GetCharTraitsRequest, GetCharTraitsResponse, GetNetInfoRequest, GetNetInfoResponse, GetPhoneVerifiersRequest, GetPhoneVerifiersResponse, GetTransactionRequest, GetTransactionResponse, GetTransactionsRequest, GetTransactionsResponse, GetUserInfoByAccountRequest, GetUserInfoByAccountResponse, GetUserInfoByNumberRequest, GetUserInfoByNumberResponse, NicknameAvailableRequest, NicknameAvailableResponse, SubmitTransactionRequest, SubmitTransactionResponse};
 use xactor::*;
 
@@ -29,7 +30,7 @@ impl Actor for ApiService {
 
 impl Service for ApiService {}
 
-#[message(result = "Result<Ok>")]
+#[message(result = "Result<NicknameAvailableResponse>")]
 pub(crate) struct GetNickNameAvailable(NicknameAvailableRequest);
 
 #[async_trait::async_trait]
@@ -47,14 +48,19 @@ impl Handler<GetNickNameAvailable> for ApiService {
 /// ApiService implements the ApiServiceTrait trait which defines the grpc rpc methods it provides for clients over the network
 #[tonic::async_trait]
 impl ApiServiceTrait for ApiService {
-    async fn nickname_available(&self, request: Request<NicknameAvailableRequest>) -> std::result::Result<Response<NicknameAvailableResponse>, Status> {
-        Ok(Response::new(ApiService::from_registry().await?.call(GetNickNameAvailable(request.into())).await?))
+    async fn nickname_available(&self, request: Request<NicknameAvailableRequest>) -> Result<Response<NicknameAvailableResponse>, Status> {
+        let service = ApiService::from_registry().await
+            .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?;
+
+        let res = service.call(GetNickNameAvailable(request.into_inner()))
+            .await
+            .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?
+            .map_err(|_| Status::internal("internal error"))?;
+
+        Ok(Response::new(res))
     }
 
-    async fn submit_transaction(
-        &self,
-        request: Request<SubmitTransactionRequest>,
-    ) -> std::result::Result<Response<SubmitTransactionResponse>, Status> {
+    async fn submit_transaction(&self, request: Request<SubmitTransactionRequest>) -> std::result::Result<Response<SubmitTransactionResponse>, Status> {
         todo!()
     }
 

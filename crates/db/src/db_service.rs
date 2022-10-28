@@ -22,7 +22,13 @@ pub const TESTS_COL_FAMILY: &str = "tests_cf"; // col family for db tests
 /// cfs
 pub const VERIFIERS_COL_FAMILY: &str = "verifiers_cf"; // col family for verifiers data
 pub const USERS_COL_FAMILY: &str = "users_cf"; // col family for user's data
+pub const NICKS_COL_FAMILY: &str = "nicks_cf"; // col family for unique nicks
+
 pub const NET_SETTINGS_COL_FAMILY: &str = "net_settings_cf"; // col family for network settings
+
+pub const TRANSACTIONS_COL_FAMILY: &str = "txs_cf"; // signed transactions keyed by their hash
+pub const CHAIN_COL_FAMILY: &str = "chain_cf"; // blocks keyed by block number
+
 
 // todo: use DbValue instead of all (Bytes, u64) tuples used below
 /// DbValue is binary data and ttl stored in the db by key.
@@ -268,17 +274,16 @@ impl Handler<ReadAllItems> for DatabaseService {
 
         let mut res: Vec<(Bytes, DbValue)> = vec![];
 
-        if iter.valid() && msg.from.is_some() {
+        if msg.from.is_some() {
             // we skip the first result if from was provided
             let _ = iter.next();
         }
 
-        while iter.valid() {
-            if let Some(kv_bytes) = iter.next() {
-                let key = Bytes::copy_from_slice(kv_bytes.0.as_ref());
-                let (value, ttl) = parse_value(kv_bytes.1.as_ref())?;
-                res.push((key, DbValue { value, ttl }))
-            }
+        for item in iter {
+            let kv_bytes = item.unwrap();
+            let key = Bytes::copy_from_slice(kv_bytes.0.as_ref());
+            let (value, ttl) = parse_value(kv_bytes.1.as_ref())?;
+            res.push((key, DbValue { value, ttl }));
 
             if msg.max_results != 0 && res.len() >= msg.max_results as usize {
                 break;
