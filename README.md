@@ -1,20 +1,11 @@
-# Subnet
-Subnet is a web3 digital communications platform.
-This repository is an experimental implementation of the Subnet protocol v0.1 in Rust.
-The project includes code for service provider's full p2p nodes, terminal clients and comperhansive scenario tests.
-It also includes the [Subnet interactive playground](https://asciinema.org/a/W51QFvKxyFq64kOQJh2gVRqVL). 
-Use the playground to experiment with protocol features.
+# KarmaCoin
+About... 
 
 ## Building
 ```cargo build```
 
 ## Testing
 ```cargo test```
-
-## Running the playground
-1. Build the project.
-1. Copy the playground config files from `debug_config` to `target/debug`
-1. `./target/debug/playground`
 
 ---
 
@@ -108,7 +99,7 @@ Wallet
 
 ---
 
-Copyright (c) 2021 by the [Subnet Authors](https://github.com/subnetter?tab=repositories). This work is licensed under the Subnet License v0.1.0.
+Copyright (c) 2021 by the [KarmaCoin Authors](https://github.com/). This work is licensed under the KarmaCoin License v0.1.0.
 
 
 

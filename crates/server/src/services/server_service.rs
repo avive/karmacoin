@@ -1,7 +1,6 @@
-//  Copyright (c) 2021, Subnet Authors. cmdev2@proton.me.
-//  This work is licensed under the Subnet v0.1.0 license published in the LICENSE file of this repo.
+// Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
+// This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
-
 
 use anyhow::Result;
 //use base::
@@ -15,8 +14,8 @@ use base::server_config_service::{
     GRPC_SERVER_PORT_CONFIG_KEY, PEER_NAME_CONFIG_KEY,
 };
 use db::db_service::{
-    DatabaseService, Destroy, PROVIDER_COL_FAMILY, PROVIDER_DISTRIBUTED_DATA_COL_FAMILY,
-    PROVIDER_USER_DATA_COL_FAMILY, TESTS_COL_FAMILY,
+    DatabaseService, Destroy, NET_SETTINGS_COL_FAMILY, TESTS_COL_FAMILY, USERS_COL_FAMILY,
+    VERIFIERS_COL_FAMILY,
 };
 use tonic::transport::Server;
 use xactor::*;
@@ -92,12 +91,9 @@ impl Handler<Startup> for ServerService {
             drop_on_exit,
             db_name,
             col_descriptors: vec![
-                ColumnFamilyDescriptor::new(PROVIDER_COL_FAMILY, Options::default()),
-                ColumnFamilyDescriptor::new(PROVIDER_USER_DATA_COL_FAMILY, Options::default()),
-                ColumnFamilyDescriptor::new(
-                    PROVIDER_DISTRIBUTED_DATA_COL_FAMILY,
-                    Options::default(),
-                ),
+                ColumnFamilyDescriptor::new(VERIFIERS_COL_FAMILY, Options::default()),
+                ColumnFamilyDescriptor::new(USERS_COL_FAMILY, Options::default()),
+                ColumnFamilyDescriptor::new(NET_SETTINGS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TESTS_COL_FAMILY, Options::default()),
             ],
         })

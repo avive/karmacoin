@@ -1,5 +1,5 @@
-// Copyright (c) 2021, Subnet Authors. cmdev2@proton.me.
-// This work is licensed under the Subnet v0.1.0 license published in the LICENSE file of this repo.
+// Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
+// This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
 use std::path::Path;
@@ -20,11 +20,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build_server(true)
         .out_dir("src/karma_coin")
         .format(true)
-        .compile(&[
-            "proto/karma_coin/core_types/types.proto",
-            "proto/karma_coin/core_types/verifier.proto",
-            "proto/karma_coin/core_types/api.proto"],
-                 &["proto"])
+        .compile(
+            &[
+                "proto/karma_coin/core_types/types.proto",
+                "proto/karma_coin/core_types/verifier.proto",
+                "proto/karma_coin/core_types/api.proto",
+            ],
+            &["proto"],
+        )
         .unwrap_or_else(|e| panic!("Failed to compile protos {:?}", e));
 
     let src = Path::new("src/karma_coin");

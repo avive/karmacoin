@@ -1,5 +1,5 @@
-//  Copyright (c) 2021, Subnet Authors. cmdev2@proton.me.
-//  This work is licensed under the Subnet v0.1.0 license published in the LICENSE file of this repo.
+// Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
+// This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
 use anyhow::Result;
@@ -51,43 +51,73 @@ impl ApiServiceTrait for ApiService {
         Ok(Response::new(ApiService::from_registry().await?.call(GetNickNameAvailable(request.into())).await?))
     }
 
-    async fn submit_transaction(&self, request: Request<SubmitTransactionRequest>) -> std::result::Result<Response<SubmitTransactionResponse>, Status> {
+    async fn submit_transaction(
+        &self,
+        request: Request<SubmitTransactionRequest>,
+    ) -> std::result::Result<Response<SubmitTransactionResponse>, Status> {
         todo!()
     }
 
-    async fn get_transactions_status(&self, request: Request<GetTransactionsRequest>) -> std::result::Result<Response<GetTransactionsResponse>, Status> {
+    async fn get_transactions_status(
+        &self,
+        request: Request<GetTransactionsRequest>,
+    ) -> std::result::Result<Response<GetTransactionsResponse>, Status> {
         todo!()
     }
 
-    async fn get_transactions(&self, request: Request<GetTransactionsRequest>) -> std::result::Result<Response<GetTransactionsResponse>, Status> {
+    async fn get_transactions(
+        &self,
+        request: Request<GetTransactionsRequest>,
+    ) -> std::result::Result<Response<GetTransactionsResponse>, Status> {
         todo!()
     }
 
-    async fn get_transaction(&self, request: Request<GetTransactionRequest>) -> std::result::Result<Response<GetTransactionResponse>, Status> {
+    async fn get_transaction(
+        &self,
+        request: Request<GetTransactionRequest>,
+    ) -> std::result::Result<Response<GetTransactionResponse>, Status> {
         todo!()
     }
 
-    async fn get_user_info_by_number(&self, request: Request<GetUserInfoByNumberRequest>) -> std::result::Result<Response<GetUserInfoByNumberResponse>, Status> {
+    async fn get_user_info_by_number(
+        &self,
+        request: Request<GetUserInfoByNumberRequest>,
+    ) -> std::result::Result<Response<GetUserInfoByNumberResponse>, Status> {
         todo!()
     }
 
-    async fn get_user_info_by_account(&self, request: Request<GetUserInfoByAccountRequest>) -> std::result::Result<Response<GetUserInfoByAccountResponse>, Status> {
+    async fn get_user_info_by_account(
+        &self,
+        request: Request<GetUserInfoByAccountRequest>,
+    ) -> std::result::Result<Response<GetUserInfoByAccountResponse>, Status> {
         todo!()
     }
 
-    async fn get_phone_verifiers(&self, request: Request<GetPhoneVerifiersRequest>) -> std::result::Result<Response<GetPhoneVerifiersResponse>, Status> {
+    async fn get_phone_verifiers(
+        &self,
+        request: Request<GetPhoneVerifiersRequest>,
+    ) -> std::result::Result<Response<GetPhoneVerifiersResponse>, Status> {
         todo!()
     }
 
-    async fn get_char_traits(&self, request: Request<GetCharTraitsRequest>) -> std::result::Result<Response<GetCharTraitsResponse>, Status> {
+    async fn get_char_traits(
+        &self,
+        request: Request<GetCharTraitsRequest>,
+    ) -> std::result::Result<Response<GetCharTraitsResponse>, Status> {
         todo!()
     }
 
-    async fn get_net_info(&self, request: Request<GetNetInfoRequest>) -> std::result::Result<Response<GetNetInfoResponse>, Status> {
+    async fn get_net_info(
+        &self,
+        request: Request<GetNetInfoRequest>,
+    ) -> std::result::Result<Response<GetNetInfoResponse>, Status> {
         todo!()
     }
 
-    async fn get_blockchain_events(&self, request: Request<GetBlockchainEventsRequest>) -> std::result::Result<Response<GetBlockchainEventsResponse>, Status> {
+    async fn get_blockchain_events(
+        &self,
+        request: Request<GetBlockchainEventsRequest>,
+    ) -> std::result::Result<Response<GetBlockchainEventsResponse>, Status> {
         todo!()
     }
 }

@@ -1,5 +1,5 @@
-// Copyright (c) 2021, Subnet Authors. cmdev2@proton.me.
-// This work is licensed under the Subnet v0.1.0 license published in the LICENSE file of this repo.
+// Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
+// This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
 extern crate rocksdb;
@@ -19,10 +19,10 @@ use xactor::*;
 pub const DB_NAME: &str = "upsetter"; // todo: this must come from config
 pub const TESTS_COL_FAMILY: &str = "tests_cf"; // col family for db tests
 
-/// provider server related cfs
-pub const PROVIDER_COL_FAMILY: &str = "provider_cf"; // col family for provider non-users data
-pub const PROVIDER_USER_DATA_COL_FAMILY: &str = "provider_user_data_cf"; // col family for user's data
-pub const PROVIDER_DISTRIBUTED_DATA_COL_FAMILY: &str = "provider_distributed_data_cf"; // col family for distributed data storage system
+/// cfs
+pub const VERIFIERS_COL_FAMILY: &str = "verifiers_cf"; // col family for verifiers data
+pub const USERS_COL_FAMILY: &str = "users_cf"; // col family for user's data
+pub const NET_SETTINGS_COL_FAMILY: &str = "net_settings_cf"; // col family for network settings
 
 // todo: use DbValue instead of all (Bytes, u64) tuples used below
 /// DbValue is binary data and ttl stored in the db by key.

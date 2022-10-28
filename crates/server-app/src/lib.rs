@@ -1,5 +1,5 @@
-// Copyright (c) 2021, Subnet Authors. cmdev2@proton.me.
-// This work is licensed under the Subnet v0.1.0 license published in the LICENSE file of this repo.
+// Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
+// This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
 #[macro_use]
@@ -20,10 +20,10 @@ use xactor::*;
 
 // Start a client app - good for testability / integration testing
 pub async fn start() -> std::result::Result<(), Box<dyn std::error::Error>> {
-    let matches = App::new("Subnet Playground")
+    let matches = App::new("KarmaCoin Server")
         .version("0.1.0")
-        .author("Foo Bar. <foo@bar.goo>")
-        .about("Does awesome things")
+        .author("AE. <a@karmaco.in>")
+        .about("The coin for all of us")
         .arg(
             Arg::with_name("config")
                 .short("c")
