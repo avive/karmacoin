@@ -1,16 +1,18 @@
-// Copyright (c) 2021, Subnet Authors. cmdev2@proton.me.
-// This work is licensed under the Subnet v0.1.0 license published in the LICENSE file of this repo.
+// Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
+// This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
 extern crate log;
 
 use anyhow::Result;
 
-use db::db_service::{Compact, DataItem, DatabaseService, Destroy, ReadItem, WriteItem, TESTS_COL_FAMILY};
+use db::db_service::{
+    Compact, DataItem, DatabaseService, Destroy, ReadItem, WriteItem, TESTS_COL_FAMILY,
+};
 
 use bytes::Bytes;
-use std::time::Duration;
 use rocksdb::{ColumnFamilyDescriptor, Options};
+use std::time::Duration;
 use tokio::time::sleep;
 
 use db::db_service;
@@ -26,10 +28,13 @@ async fn test_ttl() {
     DatabaseService::config_db(db_service::Configure {
         drop_on_exit: true,
         db_name: "test_db".to_string(),
-        col_descriptors: vec![
-            ColumnFamilyDescriptor::new(TESTS_COL_FAMILY, Options::default()),
-        ],
-    }).await.unwrap();
+        col_descriptors: vec![ColumnFamilyDescriptor::new(
+            TESTS_COL_FAMILY,
+            Options::default(),
+        )],
+    })
+    .await
+    .unwrap();
 
     let key1 = Bytes::from("key_2");
     // println!("key1: {:?}", key1);

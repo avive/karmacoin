@@ -18,4 +18,4 @@ All client method calls to GRPC services provided by nodes which do not use the 
 Identity Bundles and DialupInfo includes the identity's server or client implemented protocol version.
 
 
-Copyright (c) 2021 by the [Subnet Authors](https://github.com/subnetter?tab=repositories). This work is licensed under the Subnet License v0.1.0.
+Copyright (c) 2022 by the [KarmaCoin Authors](https://github.com/). This work is licensed under the KarmaCoin License v0.1.0.

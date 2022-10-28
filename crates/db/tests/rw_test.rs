@@ -1,5 +1,5 @@
-// Copyright (c) 2021, Subnet Authors. cmdev2@proton.me.
-// This work is licensed under the Subnet v0.1.0 license published in the LICENSE file of this repo.
+// Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
+// This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
 #[cfg_attr(test, macro_use)]
@@ -9,8 +9,8 @@ use db::db_service::{DataItem, DatabaseService, Destroy, ReadItem, WriteItem, TE
 
 use base::test_helpers::enable_logger;
 use bytes::Bytes;
-use rocksdb::{ColumnFamilyDescriptor, Options};
 use db::db_service;
+use rocksdb::{ColumnFamilyDescriptor, Options};
 use xactor::*;
 
 #[tokio::test]
@@ -22,10 +22,13 @@ async fn test_read_write() {
     DatabaseService::config_db(db_service::Configure {
         drop_on_exit: true,
         db_name: "test_db".to_string(),
-        col_descriptors: vec![
-            ColumnFamilyDescriptor::new(TESTS_COL_FAMILY, Options::default()),
-        ],
-    }).await.unwrap();
+        col_descriptors: vec![ColumnFamilyDescriptor::new(
+            TESTS_COL_FAMILY,
+            Options::default(),
+        )],
+    })
+    .await
+    .unwrap();
 
     let key1 = Bytes::from("key_1");
     debug!("key1: {:?}", key1);
@@ -69,11 +72,13 @@ async fn test_read_write_string_keys() {
     DatabaseService::config_db(db_service::Configure {
         drop_on_exit: true,
         db_name: "test_db".to_string(),
-        col_descriptors: vec![
-            ColumnFamilyDescriptor::new(TESTS_COL_FAMILY, Options::default()),
-        ],
-    }).await.unwrap();
-
+        col_descriptors: vec![ColumnFamilyDescriptor::new(
+            TESTS_COL_FAMILY,
+            Options::default(),
+        )],
+    })
+    .await
+    .unwrap();
 
     let addr = DatabaseService::from_registry().await.unwrap();
 
