@@ -211,7 +211,7 @@ pub mod api_service_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        #[doc = " Get transactions from an account or to an account"]
+        #[doc = " Get transactions from an account or to an account. Submitted transactions may be in pool or on chain"]
         pub async fn get_transactions_status(
             &mut self,
             request: impl tonic::IntoRequest<super::GetTransactionsRequest>,
@@ -378,7 +378,7 @@ pub mod api_service_server {
             &self,
             request: tonic::Request<super::SubmitTransactionRequest>,
         ) -> Result<tonic::Response<super::SubmitTransactionResponse>, tonic::Status>;
-        #[doc = " Get transactions from an account or to an account"]
+        #[doc = " Get transactions from an account or to an account. Submitted transactions may be in pool or on chain"]
         async fn get_transactions_status(
             &self,
             request: tonic::Request<super::GetTransactionsRequest>,

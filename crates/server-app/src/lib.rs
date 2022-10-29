@@ -9,7 +9,7 @@ extern crate clap;
 extern crate db;
 
 use base::logging_service::{InitLogger, LoggingService};
-use base::server_config_service::{ServerConfigService, SetConfigFile, PEER_NAME_CONFIG_KEY};
+use base::server_config_service::{SERVER_NAME_CONFIG_KEY, ServerConfigService, SetConfigFile};
 use server::server_service::{ServerService, Startup};
 use tokio::signal;
 
@@ -47,7 +47,7 @@ pub async fn start() -> std::result::Result<(), Box<dyn std::error::Error>> {
             .unwrap();
     }
 
-    let peer_name = ServerConfigService::get(PEER_NAME_CONFIG_KEY.into())
+    let server_name = ServerConfigService::get(SERVER_NAME_CONFIG_KEY.into())
         .await?
         .unwrap();
 
@@ -55,7 +55,7 @@ pub async fn start() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let logging = LoggingService::from_registry().await.unwrap();
     let _ = logging
         .call(InitLogger {
-            peer_name: peer_name.clone(),
+            peer_name: server_name.clone(),
             brief: true, // todo: take from config
         })
         .await
@@ -74,7 +74,7 @@ pub async fn start() -> std::result::Result<(), Box<dyn std::error::Error>> {
         .expect("failed to listen for ctrl-c signal");
 
     debug!("stopping server-app via ctrl-c signal...");
-    tokio::task::spawn(async {
+    spawn(async {
         // stop the db so it has a chance to destroy itself if it is configured to destroy storage on stop...
         let mut db_service = DatabaseService::from_registry().await.unwrap();
         let _ = db_service.stop(None);

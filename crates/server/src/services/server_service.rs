@@ -9,14 +9,9 @@ use rocksdb::{ColumnFamilyDescriptor, Options};
 use crate::services::api_service::ApiService;
 use base::karma_coin::karma_coin_api::api_service_server::ApiServiceServer;
 
-use base::server_config_service::{
-    ServerConfigService, DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY, GRPC_HOST_CONFIG_KEY,
-    GRPC_SERVER_PORT_CONFIG_KEY, PEER_NAME_CONFIG_KEY,
-};
-use db::db_service::{
-    DatabaseService, Destroy, NET_SETTINGS_COL_FAMILY, TESTS_COL_FAMILY, USERS_COL_FAMILY,
-    VERIFIERS_COL_FAMILY,
-};
+use base::server_config_service::{ServerConfigService, DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY,
+                                  SERVER_NAME_CONFIG_KEY, GRPC_SERVER_HOST_CONFIG_KEY, GRPC_SERVER_HOST_PORT_CONFIG_KEY};
+use db::db_service::{CHAIN_COL_FAMILY, DatabaseService, Destroy, NET_SETTINGS_COL_FAMILY, TESTS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY, VERIFIERS_COL_FAMILY};
 use tonic::transport::Server;
 use xactor::*;
 
@@ -67,13 +62,13 @@ impl Handler<Startup> for ServerService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, _msg: Startup) -> Result<()> {
         info!("configuring db...");
 
-        let peer_name = ServerConfigService::get(PEER_NAME_CONFIG_KEY.into())
+        let server_name = ServerConfigService::get(SERVER_NAME_CONFIG_KEY.into())
             .await?
             .unwrap();
-        let host = ServerConfigService::get(GRPC_HOST_CONFIG_KEY.into())
+        let host = ServerConfigService::get(GRPC_SERVER_HOST_CONFIG_KEY.into())
             .await?
             .unwrap();
-        let port = ServerConfigService::get_u64(GRPC_SERVER_PORT_CONFIG_KEY.into())
+        let port = ServerConfigService::get_u64(GRPC_SERVER_HOST_PORT_CONFIG_KEY.into())
             .await?
             .unwrap() as u32;
 
@@ -95,11 +90,13 @@ impl Handler<Startup> for ServerService {
                 ColumnFamilyDescriptor::new(USERS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(NET_SETTINGS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TESTS_COL_FAMILY, Options::default()),
+                ColumnFamilyDescriptor::new(CHAIN_COL_FAMILY, Options::default()),
+                ColumnFamilyDescriptor::new(TRANSACTIONS_COL_FAMILY, Options::default()),
             ],
         })
         .await?;
 
-        self.start_grpc_server(port, host, peer_name).await?;
+        self.start_grpc_server(port, host, server_name).await?;
 
         info!("services started");
 

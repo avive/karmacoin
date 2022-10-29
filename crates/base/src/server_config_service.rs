@@ -9,21 +9,22 @@ use xactor::*;
 
 pub const DEFAULT_GRPC_SERVER_PORT: i64 = 9080;
 pub const DEFAULT_GRPC_ADMIN_PORT: i64 = 9888;
-pub const DEFAULT_START_ADMIN_SERVICE: bool = true;
-pub const DEFAULT_START_GRPC_SERVICE: bool = true;
+pub const DEFAULT_START_GRPC_SERVER: bool = true;
+pub const DEFAULT_START_VERIFIER_SERVICE: bool = true;
+pub const DEFAULT_START_API_SERVICE: bool = true;
 pub const DEFAULT_DROP_DB_ON_EXIT: bool = true;
 
 /// ConfigService for servers
 
 pub const DB_NAME_CONFIG_KEY: &str = "db_name";
 pub const DROP_DB_CONFIG_KEY: &str = "drop_db_on_exit";
-pub const PEER_NAME_CONFIG_KEY: &str = "peer_name";
-pub const GRPC_HOST_CONFIG_KEY: &str = "grpc_host"; // grpc api service host
-pub const GRPC_SERVER_PORT_CONFIG_KEY: &str = "grpc_server_port"; // grpc api service port
+pub const SERVER_NAME_CONFIG_KEY: &str = "peer_name";
+pub const GRPC_SERVER_HOST_CONFIG_KEY: &str = "grpc_host"; //
+pub const GRPC_SERVER_HOST_PORT_CONFIG_KEY: &str = "grpc_admin_port";
 pub const NET_ID_CONFIG_KEY: &str = "net_id";
 pub const GRPC_ADMIN_PORT_CONFIG_KEY: &str = "grpc_admin_port";
-pub const START_GRPC_SERVER_ADMIN_SERVICE_CONFIG_KEY: &str = "start_grpc_admin_service";
-pub const START_GRPC_SERVICE_CONFIG_KEY: &str = "start_grpc_service";
+pub const START_VERIFIER_SERVICE_CONFIG_KEY: &str = "start_verifier_service";
+pub const START_API_SERVICE_CONFIG_KEY: &str = "start_api_service";
 
 pub struct ServerConfigService {
     config: Config,
@@ -46,31 +47,31 @@ impl Default for ServerConfigService {
         // todo: set default blockchain server config for server
 
         config
-            .set_default(NET_ID_CONFIG_KEY, 0)
+            .set_default(NET_ID_CONFIG_KEY, 1)
             .unwrap()
             .set_default(DROP_DB_CONFIG_KEY, DEFAULT_DROP_DB_ON_EXIT)
             .unwrap()
-            .set_default(START_GRPC_SERVICE_CONFIG_KEY, DEFAULT_START_GRPC_SERVICE)
+            .set_default(START_VERIFIER_SERVICE_CONFIG_KEY, DEFAULT_START_VERIFIER_SERVICE)
             .unwrap()
             .set_default(
-                START_GRPC_SERVER_ADMIN_SERVICE_CONFIG_KEY,
-                DEFAULT_START_ADMIN_SERVICE,
+                START_API_SERVICE_CONFIG_KEY,
+                DEFAULT_START_API_SERVICE,
             )
             .unwrap()
-            .set_default(GRPC_SERVER_PORT_CONFIG_KEY, DEFAULT_GRPC_SERVER_PORT)
+            .set_default(GRPC_SERVER_HOST_PORT_CONFIG_KEY, DEFAULT_GRPC_SERVER_PORT)
             .unwrap()
             .set_default(GRPC_ADMIN_PORT_CONFIG_KEY, DEFAULT_GRPC_ADMIN_PORT)
             .unwrap()
-            .set_default(GRPC_HOST_CONFIG_KEY, "[::1]")
+            .set_default(GRPC_SERVER_HOST_CONFIG_KEY, "[::1]")
             .unwrap()
             // we always want to have a peer name - even a generic one
-            .set_default(PEER_NAME_CONFIG_KEY, "my_peer")
+            .set_default(SERVER_NAME_CONFIG_KEY, "karma_coin_provider_1")
             .unwrap()
-            .set_default(DB_NAME_CONFIG_KEY, "upsetter_db")
+            .set_default(DB_NAME_CONFIG_KEY, "karmacoin_db")
             .unwrap()
             // Add in settings from the environment (with a prefix of APP)
             // Eg.. `APP_DEBUG=1 ./target/app` would set the `debug` key
-            .merge(Environment::with_prefix("UPSETTER"))
+            .merge(Environment::with_prefix("KARMACOIN"))
             .unwrap();
 
         ServerConfigService { config }
