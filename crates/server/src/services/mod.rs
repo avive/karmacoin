@@ -7,3 +7,4 @@
 mod api_service;
 
 pub mod server_service;
+pub mod verifier_service;

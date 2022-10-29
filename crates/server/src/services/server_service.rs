@@ -13,7 +13,9 @@ use base::server_config_service::{ServerConfigService, DB_NAME_CONFIG_KEY, DROP_
                                   SERVER_NAME_CONFIG_KEY, GRPC_SERVER_HOST_CONFIG_KEY, GRPC_SERVER_HOST_PORT_CONFIG_KEY};
 use db::db_service::{CHAIN_COL_FAMILY, DatabaseService, Destroy, NET_SETTINGS_COL_FAMILY, TESTS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY, VERIFIERS_COL_FAMILY};
 use tonic::transport::Server;
+use base::karma_coin::karma_coin_verifier::phone_numbers_verifier_service_server::PhoneNumbersVerifierServiceServer;
 use xactor::*;
+use crate::services::verifier_service::VerifierService;
 
 pub const SNP_PROTOCOL_VERSION: &str = "0.1.0";
 
@@ -114,18 +116,17 @@ impl ServerService {
         );
 
         // start health service and indicate we are serving MyMessagingService
-        // let (mut health_reporter, health_service) = tonic_health::server::health_reporter();
-        // health_reporter
-        //    .set_serving::<ProviderCoreServiceServer<ServerMessagingService>>()
-        //    .await;
-
-        // todo: server admin service should be deployed on different server with different port for security and only be available inside provider network or only locally.
-
-        tokio::task::spawn(async move {
+        let (mut health_reporter, health_service) = tonic_health::server::health_reporter();
+        health_reporter
+            .set_serving::<ApiServiceServer<ApiService>>()
+            .await;
+        
+        spawn(async move {
             // all services that should be started must be added below
             let res = Server::builder()
                 .add_service(ApiServiceServer::new(ApiService::default()))
-                //.add_service(health_service)
+                .add_service(PhoneNumbersVerifierServiceServer::new(VerifierService::default()))
+                .add_service(health_service)
                 .serve(grpc_server_addr)
                 .await;
 
