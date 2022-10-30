@@ -17,7 +17,7 @@ impl Service for LoggingService {}
 #[async_trait::async_trait]
 impl Actor for LoggingService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        debug!("LoggingService started");
+        info!("LoggingService started");
         Ok(())
     }
 }

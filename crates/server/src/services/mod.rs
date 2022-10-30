@@ -7,4 +7,5 @@
 mod api_service;
 
 pub mod server_service;
-pub mod verifier_service;
+pub (crate) mod verifier_service;
+pub (crate) mod db_config_service;

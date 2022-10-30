@@ -16,19 +16,6 @@ use rocksdb::{ColumnFamilyDescriptor, Options};
 use std::{env, fs};
 use xactor::*;
 
-pub const DB_NAME: &str = "upsetter"; // todo: this must come from config
-pub const TESTS_COL_FAMILY: &str = "tests_cf"; // col family for db tests
-
-/// cfs
-pub const VERIFIERS_COL_FAMILY: &str = "verifiers_cf"; // col family for verifiers data
-pub const USERS_COL_FAMILY: &str = "users_cf"; // col family for user's data
-pub const NICKS_COL_FAMILY: &str = "nicks_cf"; // col family for unique nicks
-
-pub const NET_SETTINGS_COL_FAMILY: &str = "net_settings_cf"; // col family for network settings
-
-pub const TRANSACTIONS_COL_FAMILY: &str = "txs_cf"; // signed transactions keyed by their hash
-pub const CHAIN_COL_FAMILY: &str = "chain_cf"; // blocks keyed by block number
-
 
 // todo: use DbValue instead of all (Bytes, u64) tuples used below
 /// DbValue is binary data and ttl stored in the db by key.

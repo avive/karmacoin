@@ -56,7 +56,7 @@ pub async fn start() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let _ = logging
         .call(InitLogger {
             peer_name: server_name.clone(),
-            brief: true, // todo: take from config
+            brief: false, // todo: take from config
         })
         .await
         .unwrap();

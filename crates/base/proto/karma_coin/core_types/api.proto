@@ -7,12 +7,12 @@ package karma_coin.api;
 
 import "karma_coin/core_types/types.proto";
 
-message NicknameAvailableRequest {
+message GetUserInfoByNickRequest {
   string nickname = 1;
 }
 
-message NicknameAvailableResponse {
-
+message GetUserInfoByNickResponse {
+  core_types.User user = 1;
 }
 
 message SubmitTransactionRequest {
@@ -105,18 +105,7 @@ message GetBlockchainEventsResponse {
 // Unified public API provided by blockchain nodes and verifiers
 service ApiService {
   // check if a nickname is available
-  rpc NicknameAvailable(NicknameAvailableRequest) returns (NicknameAvailableResponse);
-
-  // Submit a signed transaction to the blockchain
-  rpc SubmitTransaction(SubmitTransactionRequest) returns (SubmitTransactionResponse);
-
-  // Get transactions from an account or to an account. Submitted transactions may be in pool or on chain
-  rpc GetTransactionsStatus(GetTransactionsRequest) returns (GetTransactionsResponse);
-
-  rpc GetTransactions(GetTransactionsRequest) returns (GetTransactionsResponse);
-
-  // Get transaction on-chain by its digest hash
-  rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse);
+  rpc GetUserInfoByNick(GetUserInfoByNickRequest) returns (GetUserInfoByNickResponse);
 
   // Returns on-chain user info by phone number if user exists
   rpc GetUserInfoByNumber(GetUserInfoByNumberRequest) returns (GetUserInfoByNumberResponse);
@@ -132,6 +121,17 @@ service ApiService {
 
   // Returns the API backing blockchain network info
   rpc GetNetInfo(GetNetInfoRequest) returns (GetNetInfoResponse);
+
+  // Submit a signed transaction to the blockchain
+  rpc SubmitTransaction(SubmitTransactionRequest) returns (SubmitTransactionResponse);
+
+  // Get transactions from an account or to an account. Submitted transactions may be in pool or on chain
+  rpc GetTransactionsStatus(GetTransactionsRequest) returns (GetTransactionsResponse);
+
+  rpc GetTransactions(GetTransactionsRequest) returns (GetTransactionsResponse);
+
+  // Get transaction on-chain by its digest hash
+  rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse);
 
   // Get execution events for one or more blocks
   rpc GetBlockchainEvents(GetBlockchainEventsRequest) returns (GetBlockchainEventsResponse) {

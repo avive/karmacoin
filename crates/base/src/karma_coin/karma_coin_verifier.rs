@@ -51,6 +51,7 @@ pub enum SignUpUserResult {
 pub mod phone_numbers_verifier_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
+    #[doc = " phone numbers verifier api service"]
     #[derive(Debug, Clone)]
     pub struct PhoneNumbersVerifierServiceClient<T> {
         inner: tonic::client::Grpc<T>,
@@ -159,6 +160,7 @@ pub mod phone_numbers_verifier_service_server {
             request: tonic::Request<super::SignUpUserRequest>,
         ) -> Result<tonic::Response<super::SignUpUserResponse>, tonic::Status>;
     }
+    #[doc = " phone numbers verifier api service"]
     #[derive(Debug)]
     pub struct PhoneNumbersVerifierServiceServer<T: PhoneNumbersVerifierService> {
         inner: _Inner<T>,

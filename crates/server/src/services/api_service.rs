@@ -6,7 +6,7 @@ use std::fmt::Error;
 use anyhow::Result;
 use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
 use tonic::{Code, IntoRequest, Request, Response, Status};
-use base::karma_coin::karma_coin_api::{GetBlockchainEventsRequest, GetBlockchainEventsResponse, GetCharTraitsRequest, GetCharTraitsResponse, GetNetInfoRequest, GetNetInfoResponse, GetPhoneVerifiersRequest, GetPhoneVerifiersResponse, GetTransactionRequest, GetTransactionResponse, GetTransactionsRequest, GetTransactionsResponse, GetUserInfoByAccountRequest, GetUserInfoByAccountResponse, GetUserInfoByNumberRequest, GetUserInfoByNumberResponse, NicknameAvailableRequest, NicknameAvailableResponse, SubmitTransactionRequest, SubmitTransactionResponse};
+use base::karma_coin::karma_coin_api::{GetBlockchainEventsRequest, GetBlockchainEventsResponse, GetCharTraitsRequest, GetCharTraitsResponse, GetNetInfoRequest, GetNetInfoResponse, GetPhoneVerifiersRequest, GetPhoneVerifiersResponse, GetTransactionRequest, GetTransactionResponse, GetTransactionsRequest, GetTransactionsResponse, GetUserInfoByAccountRequest, GetUserInfoByAccountResponse, GetUserInfoByNickRequest, GetUserInfoByNickResponse, GetUserInfoByNumberRequest, GetUserInfoByNumberResponse, SubmitTransactionRequest, SubmitTransactionResponse};
 use xactor::*;
 
 /// ApiService is a system service that provides access to provider server persisted data as well as an interface to admin the provider's server. It provides a GRPC admin service defined in ServerAdminService. This service is designed to be used by provider admin clients.
@@ -15,7 +15,7 @@ pub(crate) struct ApiService {}
 
 impl Default for ApiService {
     fn default() -> Self {
-        debug!("Api Service started");
+        info!("Api Service started");
         ApiService {}
     }
 }
@@ -23,23 +23,23 @@ impl Default for ApiService {
 #[async_trait::async_trait]
 impl Actor for ApiService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        debug!("ApiService started");
+        info!("ApiService started");
         Ok(())
     }
 }
 
 impl Service for ApiService {}
 
-#[message(result = "Result<NicknameAvailableResponse>")]
-pub(crate) struct GetNickNameAvailable(NicknameAvailableRequest);
+#[message(result = "Result<GetUserInfoByNickResponse>")]
+pub(crate) struct GetUserInfoByNick(GetUserInfoByNickRequest);
 
 #[async_trait::async_trait]
-impl Handler<GetNickNameAvailable> for ApiService {
+impl Handler<GetUserInfoByNick> for ApiService {
     async fn handle(
         &mut self,
         _ctx: &mut Context<Self>,
-        _msg: GetNickNameAvailable,
-    ) -> Result<NicknameAvailableResponse> {
+        _msg: GetUserInfoByNick,
+    ) -> Result<GetUserInfoByNickResponse> {
         unimplemented!()
     }
 }
@@ -48,11 +48,11 @@ impl Handler<GetNickNameAvailable> for ApiService {
 /// ApiService implements the ApiServiceTrait trait which defines the grpc rpc methods it provides for clients over the network
 #[tonic::async_trait]
 impl ApiServiceTrait for ApiService {
-    async fn nickname_available(&self, request: Request<NicknameAvailableRequest>) -> Result<Response<NicknameAvailableResponse>, Status> {
+    async fn get_user_info_by_nick(&self, request: Request<GetUserInfoByNickRequest>) -> Result<Response<GetUserInfoByNickResponse>, Status> {
         let service = ApiService::from_registry().await
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?;
 
-        let res = service.call(GetNickNameAvailable(request.into_inner()))
+        let res = service.call(GetUserInfoByNick(request.into_inner()))
             .await
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?
             .map_err(|_| Status::internal("internal error"))?;

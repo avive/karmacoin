@@ -1,10 +1,13 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct NicknameAvailableRequest {
+pub struct GetUserInfoByNickRequest {
     #[prost(string, tag = "1")]
     pub nickname: ::prost::alloc::string::String,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct NicknameAvailableResponse {}
+pub struct GetUserInfoByNickResponse {
+    #[prost(message, optional, tag = "1")]
+    pub user: ::core::option::Option<super::core_types::User>,
+}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SubmitTransactionRequest {
     #[prost(message, optional, tag = "1")]
@@ -178,10 +181,10 @@ pub mod api_service_client {
             self
         }
         #[doc = " check if a nickname is available"]
-        pub async fn nickname_available(
+        pub async fn get_user_info_by_nick(
             &mut self,
-            request: impl tonic::IntoRequest<super::NicknameAvailableRequest>,
-        ) -> Result<tonic::Response<super::NicknameAvailableResponse>, tonic::Status> {
+            request: impl tonic::IntoRequest<super::GetUserInfoByNickRequest>,
+        ) -> Result<tonic::Response<super::GetUserInfoByNickResponse>, tonic::Status> {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::new(
                     tonic::Code::Unknown,
@@ -190,73 +193,8 @@ pub mod api_service_client {
             })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/karma_coin.api.ApiService/NicknameAvailable",
+                "/karma_coin.api.ApiService/GetUserInfoByNick",
             );
-            self.inner.unary(request.into_request(), path, codec).await
-        }
-        #[doc = " Submit a signed transaction to the blockchain"]
-        pub async fn submit_transaction(
-            &mut self,
-            request: impl tonic::IntoRequest<super::SubmitTransactionRequest>,
-        ) -> Result<tonic::Response<super::SubmitTransactionResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
-            let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static(
-                "/karma_coin.api.ApiService/SubmitTransaction",
-            );
-            self.inner.unary(request.into_request(), path, codec).await
-        }
-        #[doc = " Get transactions from an account or to an account. Submitted transactions may be in pool or on chain"]
-        pub async fn get_transactions_status(
-            &mut self,
-            request: impl tonic::IntoRequest<super::GetTransactionsRequest>,
-        ) -> Result<tonic::Response<super::GetTransactionsResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
-            let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static(
-                "/karma_coin.api.ApiService/GetTransactionsStatus",
-            );
-            self.inner.unary(request.into_request(), path, codec).await
-        }
-        pub async fn get_transactions(
-            &mut self,
-            request: impl tonic::IntoRequest<super::GetTransactionsRequest>,
-        ) -> Result<tonic::Response<super::GetTransactionsResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
-            let codec = tonic::codec::ProstCodec::default();
-            let path =
-                http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetTransactions");
-            self.inner.unary(request.into_request(), path, codec).await
-        }
-        #[doc = " Get transaction on-chain by its digest hash"]
-        pub async fn get_transaction(
-            &mut self,
-            request: impl tonic::IntoRequest<super::GetTransactionRequest>,
-        ) -> Result<tonic::Response<super::GetTransactionResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
-            let codec = tonic::codec::ProstCodec::default();
-            let path =
-                http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetTransaction");
             self.inner.unary(request.into_request(), path, codec).await
         }
         #[doc = " Returns on-chain user info by phone number if user exists"]
@@ -342,6 +280,71 @@ pub mod api_service_client {
                 http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetNetInfo");
             self.inner.unary(request.into_request(), path, codec).await
         }
+        #[doc = " Submit a signed transaction to the blockchain"]
+        pub async fn submit_transaction(
+            &mut self,
+            request: impl tonic::IntoRequest<super::SubmitTransactionRequest>,
+        ) -> Result<tonic::Response<super::SubmitTransactionResponse>, tonic::Status> {
+            self.inner.ready().await.map_err(|e| {
+                tonic::Status::new(
+                    tonic::Code::Unknown,
+                    format!("Service was not ready: {}", e.into()),
+                )
+            })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.api.ApiService/SubmitTransaction",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        #[doc = " Get transactions from an account or to an account. Submitted transactions may be in pool or on chain"]
+        pub async fn get_transactions_status(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetTransactionsRequest>,
+        ) -> Result<tonic::Response<super::GetTransactionsResponse>, tonic::Status> {
+            self.inner.ready().await.map_err(|e| {
+                tonic::Status::new(
+                    tonic::Code::Unknown,
+                    format!("Service was not ready: {}", e.into()),
+                )
+            })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.api.ApiService/GetTransactionsStatus",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        pub async fn get_transactions(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetTransactionsRequest>,
+        ) -> Result<tonic::Response<super::GetTransactionsResponse>, tonic::Status> {
+            self.inner.ready().await.map_err(|e| {
+                tonic::Status::new(
+                    tonic::Code::Unknown,
+                    format!("Service was not ready: {}", e.into()),
+                )
+            })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path =
+                http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetTransactions");
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        #[doc = " Get transaction on-chain by its digest hash"]
+        pub async fn get_transaction(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetTransactionRequest>,
+        ) -> Result<tonic::Response<super::GetTransactionResponse>, tonic::Status> {
+            self.inner.ready().await.map_err(|e| {
+                tonic::Status::new(
+                    tonic::Code::Unknown,
+                    format!("Service was not ready: {}", e.into()),
+                )
+            })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path =
+                http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetTransaction");
+            self.inner.unary(request.into_request(), path, codec).await
+        }
         #[doc = " Get execution events for one or more blocks"]
         pub async fn get_blockchain_events(
             &mut self,
@@ -369,29 +372,10 @@ pub mod api_service_server {
     #[async_trait]
     pub trait ApiService: Send + Sync + 'static {
         #[doc = " check if a nickname is available"]
-        async fn nickname_available(
+        async fn get_user_info_by_nick(
             &self,
-            request: tonic::Request<super::NicknameAvailableRequest>,
-        ) -> Result<tonic::Response<super::NicknameAvailableResponse>, tonic::Status>;
-        #[doc = " Submit a signed transaction to the blockchain"]
-        async fn submit_transaction(
-            &self,
-            request: tonic::Request<super::SubmitTransactionRequest>,
-        ) -> Result<tonic::Response<super::SubmitTransactionResponse>, tonic::Status>;
-        #[doc = " Get transactions from an account or to an account. Submitted transactions may be in pool or on chain"]
-        async fn get_transactions_status(
-            &self,
-            request: tonic::Request<super::GetTransactionsRequest>,
-        ) -> Result<tonic::Response<super::GetTransactionsResponse>, tonic::Status>;
-        async fn get_transactions(
-            &self,
-            request: tonic::Request<super::GetTransactionsRequest>,
-        ) -> Result<tonic::Response<super::GetTransactionsResponse>, tonic::Status>;
-        #[doc = " Get transaction on-chain by its digest hash"]
-        async fn get_transaction(
-            &self,
-            request: tonic::Request<super::GetTransactionRequest>,
-        ) -> Result<tonic::Response<super::GetTransactionResponse>, tonic::Status>;
+            request: tonic::Request<super::GetUserInfoByNickRequest>,
+        ) -> Result<tonic::Response<super::GetUserInfoByNickResponse>, tonic::Status>;
         #[doc = " Returns on-chain user info by phone number if user exists"]
         async fn get_user_info_by_number(
             &self,
@@ -417,6 +401,25 @@ pub mod api_service_server {
             &self,
             request: tonic::Request<super::GetNetInfoRequest>,
         ) -> Result<tonic::Response<super::GetNetInfoResponse>, tonic::Status>;
+        #[doc = " Submit a signed transaction to the blockchain"]
+        async fn submit_transaction(
+            &self,
+            request: tonic::Request<super::SubmitTransactionRequest>,
+        ) -> Result<tonic::Response<super::SubmitTransactionResponse>, tonic::Status>;
+        #[doc = " Get transactions from an account or to an account. Submitted transactions may be in pool or on chain"]
+        async fn get_transactions_status(
+            &self,
+            request: tonic::Request<super::GetTransactionsRequest>,
+        ) -> Result<tonic::Response<super::GetTransactionsResponse>, tonic::Status>;
+        async fn get_transactions(
+            &self,
+            request: tonic::Request<super::GetTransactionsRequest>,
+        ) -> Result<tonic::Response<super::GetTransactionsResponse>, tonic::Status>;
+        #[doc = " Get transaction on-chain by its digest hash"]
+        async fn get_transaction(
+            &self,
+            request: tonic::Request<super::GetTransactionRequest>,
+        ) -> Result<tonic::Response<super::GetTransactionResponse>, tonic::Status>;
         #[doc = " Get execution events for one or more blocks"]
         async fn get_blockchain_events(
             &self,
@@ -473,20 +476,20 @@ pub mod api_service_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/karma_coin.api.ApiService/NicknameAvailable" => {
+                "/karma_coin.api.ApiService/GetUserInfoByNick" => {
                     #[allow(non_camel_case_types)]
-                    struct NicknameAvailableSvc<T: ApiService>(pub Arc<T>);
-                    impl<T: ApiService> tonic::server::UnaryService<super::NicknameAvailableRequest>
-                        for NicknameAvailableSvc<T>
+                    struct GetUserInfoByNickSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::GetUserInfoByNickRequest>
+                        for GetUserInfoByNickSvc<T>
                     {
-                        type Response = super::NicknameAvailableResponse;
+                        type Response = super::GetUserInfoByNickResponse;
                         type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::NicknameAvailableRequest>,
+                            request: tonic::Request<super::GetUserInfoByNickRequest>,
                         ) -> Self::Future {
                             let inner = self.0.clone();
-                            let fut = async move { (*inner).nickname_available(request).await };
+                            let fut = async move { (*inner).get_user_info_by_nick(request).await };
                             Box::pin(fut)
                         }
                     }
@@ -495,140 +498,7 @@ pub mod api_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = NicknameAvailableSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
-                        let res = grpc.unary(method, req).await;
-                        Ok(res)
-                    };
-                    Box::pin(fut)
-                }
-                "/karma_coin.api.ApiService/SubmitTransaction" => {
-                    #[allow(non_camel_case_types)]
-                    struct SubmitTransactionSvc<T: ApiService>(pub Arc<T>);
-                    impl<T: ApiService> tonic::server::UnaryService<super::SubmitTransactionRequest>
-                        for SubmitTransactionSvc<T>
-                    {
-                        type Response = super::SubmitTransactionResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
-                        fn call(
-                            &mut self,
-                            request: tonic::Request<super::SubmitTransactionRequest>,
-                        ) -> Self::Future {
-                            let inner = self.0.clone();
-                            let fut = async move { (*inner).submit_transaction(request).await };
-                            Box::pin(fut)
-                        }
-                    }
-                    let accept_compression_encodings = self.accept_compression_encodings;
-                    let send_compression_encodings = self.send_compression_encodings;
-                    let inner = self.inner.clone();
-                    let fut = async move {
-                        let inner = inner.0;
-                        let method = SubmitTransactionSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
-                        let res = grpc.unary(method, req).await;
-                        Ok(res)
-                    };
-                    Box::pin(fut)
-                }
-                "/karma_coin.api.ApiService/GetTransactionsStatus" => {
-                    #[allow(non_camel_case_types)]
-                    struct GetTransactionsStatusSvc<T: ApiService>(pub Arc<T>);
-                    impl<T: ApiService> tonic::server::UnaryService<super::GetTransactionsRequest>
-                        for GetTransactionsStatusSvc<T>
-                    {
-                        type Response = super::GetTransactionsResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
-                        fn call(
-                            &mut self,
-                            request: tonic::Request<super::GetTransactionsRequest>,
-                        ) -> Self::Future {
-                            let inner = self.0.clone();
-                            let fut =
-                                async move { (*inner).get_transactions_status(request).await };
-                            Box::pin(fut)
-                        }
-                    }
-                    let accept_compression_encodings = self.accept_compression_encodings;
-                    let send_compression_encodings = self.send_compression_encodings;
-                    let inner = self.inner.clone();
-                    let fut = async move {
-                        let inner = inner.0;
-                        let method = GetTransactionsStatusSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
-                        let res = grpc.unary(method, req).await;
-                        Ok(res)
-                    };
-                    Box::pin(fut)
-                }
-                "/karma_coin.api.ApiService/GetTransactions" => {
-                    #[allow(non_camel_case_types)]
-                    struct GetTransactionsSvc<T: ApiService>(pub Arc<T>);
-                    impl<T: ApiService> tonic::server::UnaryService<super::GetTransactionsRequest>
-                        for GetTransactionsSvc<T>
-                    {
-                        type Response = super::GetTransactionsResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
-                        fn call(
-                            &mut self,
-                            request: tonic::Request<super::GetTransactionsRequest>,
-                        ) -> Self::Future {
-                            let inner = self.0.clone();
-                            let fut = async move { (*inner).get_transactions(request).await };
-                            Box::pin(fut)
-                        }
-                    }
-                    let accept_compression_encodings = self.accept_compression_encodings;
-                    let send_compression_encodings = self.send_compression_encodings;
-                    let inner = self.inner.clone();
-                    let fut = async move {
-                        let inner = inner.0;
-                        let method = GetTransactionsSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
-                        let res = grpc.unary(method, req).await;
-                        Ok(res)
-                    };
-                    Box::pin(fut)
-                }
-                "/karma_coin.api.ApiService/GetTransaction" => {
-                    #[allow(non_camel_case_types)]
-                    struct GetTransactionSvc<T: ApiService>(pub Arc<T>);
-                    impl<T: ApiService> tonic::server::UnaryService<super::GetTransactionRequest>
-                        for GetTransactionSvc<T>
-                    {
-                        type Response = super::GetTransactionResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
-                        fn call(
-                            &mut self,
-                            request: tonic::Request<super::GetTransactionRequest>,
-                        ) -> Self::Future {
-                            let inner = self.0.clone();
-                            let fut = async move { (*inner).get_transaction(request).await };
-                            Box::pin(fut)
-                        }
-                    }
-                    let accept_compression_encodings = self.accept_compression_encodings;
-                    let send_compression_encodings = self.send_compression_encodings;
-                    let inner = self.inner.clone();
-                    let fut = async move {
-                        let inner = inner.0;
-                        let method = GetTransactionSvc(inner);
+                        let method = GetUserInfoByNickSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
                             accept_compression_encodings,
@@ -796,6 +666,139 @@ pub mod api_service_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = GetNetInfoSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
+                            accept_compression_encodings,
+                            send_compression_encodings,
+                        );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/karma_coin.api.ApiService/SubmitTransaction" => {
+                    #[allow(non_camel_case_types)]
+                    struct SubmitTransactionSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::SubmitTransactionRequest>
+                        for SubmitTransactionSvc<T>
+                    {
+                        type Response = super::SubmitTransactionResponse;
+                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::SubmitTransactionRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).submit_transaction(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = SubmitTransactionSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
+                            accept_compression_encodings,
+                            send_compression_encodings,
+                        );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/karma_coin.api.ApiService/GetTransactionsStatus" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetTransactionsStatusSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::GetTransactionsRequest>
+                        for GetTransactionsStatusSvc<T>
+                    {
+                        type Response = super::GetTransactionsResponse;
+                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetTransactionsRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut =
+                                async move { (*inner).get_transactions_status(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetTransactionsStatusSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
+                            accept_compression_encodings,
+                            send_compression_encodings,
+                        );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/karma_coin.api.ApiService/GetTransactions" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetTransactionsSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::GetTransactionsRequest>
+                        for GetTransactionsSvc<T>
+                    {
+                        type Response = super::GetTransactionsResponse;
+                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetTransactionsRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).get_transactions(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetTransactionsSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
+                            accept_compression_encodings,
+                            send_compression_encodings,
+                        );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/karma_coin.api.ApiService/GetTransaction" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetTransactionSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::GetTransactionRequest>
+                        for GetTransactionSvc<T>
+                    {
+                        type Response = super::GetTransactionResponse;
+                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetTransactionRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).get_transaction(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetTransactionSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
                             accept_compression_encodings,

@@ -8,7 +8,11 @@ use anyhow::Result;
 use base::karma_coin::karma_coin_verifier::phone_numbers_verifier_service_server::PhoneNumbersVerifierService;
 
 use tonic::{Code, IntoRequest, Request, Response, Status};
-use base::karma_coin::karma_coin_api::{GetBlockchainEventsRequest, GetBlockchainEventsResponse, GetCharTraitsRequest, GetCharTraitsResponse, GetNetInfoRequest, GetNetInfoResponse, GetPhoneVerifiersRequest, GetPhoneVerifiersResponse, GetTransactionRequest, GetTransactionResponse, GetTransactionsRequest, GetTransactionsResponse, GetUserInfoByAccountRequest, GetUserInfoByAccountResponse, GetUserInfoByNumberRequest, GetUserInfoByNumberResponse, NicknameAvailableRequest, NicknameAvailableResponse, SubmitTransactionRequest, SubmitTransactionResponse};
+use base::karma_coin::karma_coin_api::{GetBlockchainEventsRequest, GetBlockchainEventsResponse, GetCharTraitsRequest,
+                                       GetCharTraitsResponse, GetNetInfoRequest, GetNetInfoResponse, GetPhoneVerifiersRequest,
+                                       GetPhoneVerifiersResponse, GetTransactionRequest, GetTransactionResponse, GetTransactionsRequest,
+                                       GetTransactionsResponse, GetUserInfoByAccountRequest, GetUserInfoByAccountResponse,
+                                       GetUserInfoByNumberRequest, GetUserInfoByNumberResponse, SubmitTransactionRequest, SubmitTransactionResponse};
 use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, RegisterNumberResponse, SignUpUserRequest, SignUpUserResponse};
 use xactor::*;
 
@@ -18,7 +22,7 @@ pub(crate) struct VerifierService {}
 
 impl Default for VerifierService {
     fn default() -> Self {
-        debug!("Api Service started");
+        info!("VerifierService created");
         VerifierService {}
     }
 }
@@ -26,7 +30,7 @@ impl Default for VerifierService {
 #[async_trait::async_trait]
 impl Actor for VerifierService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        debug!("VerifierService started");
+        info!("VerifierService started");
         Ok(())
     }
 }
