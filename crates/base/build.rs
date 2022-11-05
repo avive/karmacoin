@@ -20,6 +20,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build_server(true)
         .out_dir("src/karma_coin")
         .format(true)
+        .type_attribute("Amount", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .type_attribute("PublicKey", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .type_attribute("MobileNumber", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .type_attribute("Balance", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .type_attribute("TraitScore", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .type_attribute("PreKey", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .type_attribute("AccountId", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .type_attribute("User", "#[derive(serde::Serialize, serde::Deserialize)]")
         .compile(
             &[
                 "proto/karma_coin/core_types/types.proto",

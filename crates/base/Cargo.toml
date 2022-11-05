@@ -21,7 +21,6 @@ prost = "0.8"
 prost-types = "0.8"
 prost-helper = "0.5"
 tokio-stream = "0.1.7"
-
 xactor = { path = "../xactor", version = "0.7.9", features = ["runtime-tokio"], default-features = false}
 xactor-derive = { path = "../xactor-derive" }
 
@@ -37,7 +36,7 @@ datetime = "*"
 chrono = "*"
 async-trait = "0.1.41"
 futures = "0.3.5"
-hex = "0.3.2"
+hex = "0.4.3"
 custom_error = "1.8.0"
 log = "0.4.8"
 env_logger = "*"
@@ -45,12 +44,11 @@ config = "0.13.1"
 orion = "0"
 
 [dependencies.rand_core]
-version = "0.5"
+version = "0.6.4"
 default-features = false
 
 [dependencies.rand]
-version = "0.6"
-features = ["i128_support"]
+version = "0.8.5"
 
 [dependencies.fnv]
 version = "1.0"

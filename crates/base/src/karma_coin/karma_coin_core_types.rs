@@ -5,21 +5,21 @@
 /////////////////
 
 /// Derived from a public key
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct AccountId {
     /// derived from pub key
     #[prost(bytes = "vec", tag = "1")]
     pub data: ::prost::alloc::vec::Vec<u8>,
 }
 /// A non-negative coin amount
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct Amount {
     #[prost(uint64, tag = "1")]
     pub value: u64,
     #[prost(enumeration = "CoinType", tag = "2")]
     pub coin_type: i32,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct Balance {
     #[prost(message, optional, tag = "1")]
     pub free: ::core::option::Option<Amount>,
@@ -31,7 +31,7 @@ pub struct Balance {
     pub fee_frozen: ::core::option::Option<Amount>,
 }
 /// An public encryption key
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct PublicKey {
     #[prost(bytes = "vec", tag = "1")]
     pub key: ::prost::alloc::vec::Vec<u8>,
@@ -41,7 +41,7 @@ pub struct PrivateKey {
     #[prost(bytes = "vec", tag = "1")]
     pub key: ::prost::alloc::vec::Vec<u8>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct PreKey {
     #[prost(message, optional, tag = "1")]
     pub pub_key: ::core::option::Option<PublicKey>,
@@ -62,14 +62,14 @@ pub struct Signature {
     #[prost(bytes = "vec", tag = "2")]
     pub signature: ::prost::alloc::vec::Vec<u8>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct MobileNumber {
     /// 12 digits
     #[prost(string, tag = "1")]
     pub number: ::prost::alloc::string::String,
 }
 /// user on-chain data
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct User {
     /// account id derived from a public key
     #[prost(message, optional, tag = "1")]
@@ -141,7 +141,7 @@ pub struct TraitName {
     #[prost(string, tag = "2")]
     pub name: ::prost::alloc::string::String,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct TraitScore {
     #[prost(enumeration = "CharTrait", tag = "1")]
     pub r#trait: i32,

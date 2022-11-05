@@ -45,7 +45,10 @@ pub enum SignUpUserResult {
     NicknameTaken = 0,
     InvalidCode = 1,
     InvalidSignature = 2,
-    PhoneAlreadyRegistered = 3,
+    PhoneAlreadyRegisteredOtherAccount = 3,
+    PhoneAlreadyRegisteredThisAccount = 4,
+    CodeSent = 5,
+    AccountCreated = 6,
 }
 #[doc = r" Generated client implementations."]
 pub mod phone_numbers_verifier_service_client {
@@ -125,6 +128,7 @@ pub mod phone_numbers_verifier_service_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
+        #[doc = " Request to sign-up a user with a verification code"]
         pub async fn sign_up_user(
             &mut self,
             request: impl tonic::IntoRequest<super::SignUpUserRequest>,
@@ -155,6 +159,7 @@ pub mod phone_numbers_verifier_service_server {
             &self,
             request: tonic::Request<super::RegisterNumberRequest>,
         ) -> Result<tonic::Response<super::RegisterNumberResponse>, tonic::Status>;
+        #[doc = " Request to sign-up a user with a verification code"]
         async fn sign_up_user(
             &self,
             request: tonic::Request<super::SignUpUserRequest>,

@@ -36,7 +36,10 @@ enum SignUpUserResult {
   SIGN_UP_USER_RESULT_NICKNAME_TAKEN = 0;
   SIGN_UP_USER_RESULT_INVALID_CODE = 1;
   SIGN_UP_USER_RESULT_INVALID_SIGNATURE = 2;
-  SIGN_UP_USER_RESULT_PHONE_ALREADY_REGISTERED = 3;
+  SIGN_UP_USER_RESULT_PHONE_ALREADY_REGISTERED_OTHER_ACCOUNT = 3;
+  SIGN_UP_USER_RESULT_PHONE_ALREADY_REGISTERED_THIS_ACCOUNT = 4;
+  SIGN_UP_USER_RESULT_CODE_SENT = 5;
+  SIGN_UP_USER_RESULT_ACCOUNT_CREATED = 6;
 }
 
 message SignUpUserResponse {
@@ -47,5 +50,7 @@ message SignUpUserResponse {
 service PhoneNumbersVerifierService {
   // Request to register a phone number. Will trigger an SMS to that number
   rpc RegisterNumber(RegisterNumberRequest) returns (RegisterNumberResponse);
+
+  // Request to sign-up a user with a verification code
   rpc SignUpUser(SignUpUserRequest) returns (SignUpUserResponse);
 }
