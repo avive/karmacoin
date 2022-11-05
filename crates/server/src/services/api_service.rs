@@ -3,11 +3,15 @@
 //
 
 use std::fmt::Error;
+use std::future::Future;
 use anyhow::Result;
+use bytes::Bytes;
 use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
 use tonic::{Code, IntoRequest, Request, Response, Status};
 use base::karma_coin::karma_coin_api::{GetBlockchainEventsRequest, GetBlockchainEventsResponse, GetCharTraitsRequest, GetCharTraitsResponse, GetNetInfoRequest, GetNetInfoResponse, GetPhoneVerifiersRequest, GetPhoneVerifiersResponse, GetTransactionRequest, GetTransactionResponse, GetTransactionsRequest, GetTransactionsResponse, GetUserInfoByAccountRequest, GetUserInfoByAccountResponse, GetUserInfoByNickRequest, GetUserInfoByNickResponse, GetUserInfoByNumberRequest, GetUserInfoByNumberResponse, SubmitTransactionRequest, SubmitTransactionResponse};
+use db::db_service::{DatabaseService, ReadItem};
 use xactor::*;
+use crate::services::db_config_service::NICKS_COL_FAMILY;
 
 /// ApiService is a system service that provides access to provider server persisted data as well as an interface to admin the provider's server. It provides a GRPC admin service defined in ServerAdminService. This service is designed to be used by provider admin clients.
 #[derive(Debug, Clone)]
@@ -38,9 +42,23 @@ impl Handler<GetUserInfoByNick> for ApiService {
     async fn handle(
         &mut self,
         _ctx: &mut Context<Self>,
-        _msg: GetUserInfoByNick,
+        msg: GetUserInfoByNick,
     ) -> Result<GetUserInfoByNickResponse> {
-        unimplemented!()
+
+        let read_item = ReadItem {
+            key: Bytes::from(msg.0.nickname),
+            cf: NICKS_COL_FAMILY,
+        };
+
+        match DatabaseService::read(read_item).await? {
+            Ok(Some(result)) => Ok(GetUserInfoByNickResponse {
+                // todo: create User data object from bytes and return it
+                user: None
+            }),
+            Ok(None) => {
+                Ok(GetUserInfoByNickResponse { user: None }),
+            }
+        }
     }
 }
 

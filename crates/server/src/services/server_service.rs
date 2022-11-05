@@ -11,15 +11,15 @@ use crate::services::db_config_service::DbConfigService;
 
 use base::karma_coin::karma_coin_api::api_service_server::ApiServiceServer;
 
-use base::server_config_service::{ServerConfigService, DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY,
-                                  SERVER_NAME_CONFIG_KEY, GRPC_SERVER_HOST_CONFIG_KEY, GRPC_SERVER_HOST_PORT_CONFIG_KEY};
+use crate::services::verifier_service::VerifierService;
+use base::karma_coin::karma_coin_verifier::phone_numbers_verifier_service_server::PhoneNumbersVerifierServiceServer;
+use base::server_config_service::{
+    ServerConfigService, DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY, GRPC_SERVER_HOST_CONFIG_KEY,
+    GRPC_SERVER_HOST_PORT_CONFIG_KEY, SERVER_NAME_CONFIG_KEY,
+};
 use db::db_service::{DatabaseService, Destroy};
 use tonic::transport::Server;
-use base::karma_coin::karma_coin_verifier::phone_numbers_verifier_service_server::PhoneNumbersVerifierServiceServer;
 use xactor::*;
-use crate::services::verifier_service::VerifierService;
-
-pub const SNP_PROTOCOL_VERSION: &str = "0.1.0";
 
 /// ServerService is a full node p2p network server
 /// todo: ServerService should maintain node id identity (for protocol purposes)
@@ -29,12 +29,8 @@ pub struct ServerService {}
 #[async_trait::async_trait]
 impl Actor for ServerService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        // Init the db
-        // DatabaseService::from_registry().await.unwrap();
-
         // init and config the db
         DbConfigService::from_registry().await.unwrap();
-
         info!("ServerService started");
         Ok(())
     }
@@ -79,7 +75,6 @@ impl Handler<Startup> for ServerService {
             .await?
             .unwrap() as u32;
 
-
         self.start_grpc_server(port, host, server_name).await?;
 
         info!("GRPC server started");
@@ -107,7 +102,9 @@ impl ServerService {
             // all services that should be started must be added below
             let res = Server::builder()
                 .add_service(ApiServiceServer::new(ApiService::default()))
-                .add_service(PhoneNumbersVerifierServiceServer::new(VerifierService::default()))
+                .add_service(PhoneNumbersVerifierServiceServer::new(
+                    VerifierService::default(),
+                ))
                 .add_service(health_service)
                 .serve(grpc_server_addr)
                 .await;
