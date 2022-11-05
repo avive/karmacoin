@@ -101,8 +101,7 @@ async fn test_read_write_string_keys() {
         ttl: 0,
     };
 
-    let _ = addr
-        .call(write_req)
+    addr.call(write_req)
         .await
         .expect("failed to write to db")
         .expect("");
@@ -112,5 +111,5 @@ async fn test_read_write_string_keys() {
     let data = res.expect("expected data from db").unwrap();
     assert_eq!(data.0, value2, "expected to get stored value");
 
-    let _ = addr.call(Destroy).await.expect("failed to delete the db");
+    addr.call(Destroy).await.expect("failed to delete the db");
 }
