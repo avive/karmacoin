@@ -55,7 +55,7 @@ pub struct KeyPair {
     #[prost(message, optional, tag = "2")]
     pub public_key: ::core::option::Option<PublicKey>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct Signature {
     #[prost(uint32, tag = "1")]
     pub scheme_id: u32,
@@ -154,12 +154,15 @@ pub struct UpdateUserV1 {
     /// Only user may change his account id by signing with private key of old accountId
     #[prost(message, optional, tag = "1")]
     pub account_id: ::core::option::Option<AccountId>,
-    /// Only user may change his own nickname. Nicknames are unique.
+    /// new requested nickname
     #[prost(string, tag = "2")]
     pub nickname: ::prost::alloc::string::String,
-    /// Only Verifier may update user's mobile number as it requires verification
+    /// Updated verified number
     #[prost(message, optional, tag = "3")]
     pub mobile_number: ::core::option::Option<MobileNumber>,
+    /// verifier data about phone
+    #[prost(message, optional, tag = "4")]
+    pub verify_number_response: ::core::option::Option<VerifyNumberResponse>,
 }
 /// Basic payment transaction with optional character appreciation
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -183,16 +186,32 @@ pub struct PaymentTransactionV1 {
     #[prost(enumeration = "CharTrait", tag = "6")]
     pub r#trait: i32,
 }
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct VerifyNumberResponse {
+    #[prost(uint64, tag = "1")]
+    pub timestamp: u64,
+    #[prost(enumeration = "VerifyNumberResult", tag = "2")]
+    pub result: i32,
+    #[prost(message, optional, tag = "3")]
+    pub account_id: ::core::option::Option<AccountId>,
+    #[prost(message, optional, tag = "4")]
+    pub mobile_number: ::core::option::Option<MobileNumber>,
+    #[prost(message, optional, tag = "5")]
+    pub signature: ::core::option::Option<Signature>,
+}
 /// new user transactions can be submitted by sms verifiers only
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct NewUserTransactionV1 {
     /// initial user balance
     #[prost(message, optional, tag = "1")]
     pub user: ::core::option::Option<User>,
+    #[prost(message, optional, tag = "2")]
+    pub verify_number_response: ::core::option::Option<VerifyNumberResponse>,
 }
+/// serialized transaction data
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TransactionData {
-    /// binary transaction data
+    /// binary transaction data (e.g. NewUserTxV1, PaymentV1, etc...)
     #[prost(bytes = "vec", tag = "1")]
     pub transaction_data: ::prost::alloc::vec::Vec<u8>,
     /// transaction type for deserialization
@@ -212,14 +231,17 @@ pub struct SignedTransaction {
     /// time transaction was signed
     #[prost(uint64, tag = "1")]
     pub timestamp: u64,
+    /// tx nonce
+    #[prost(uint64, tag = "2")]
+    pub nonce: u64,
     /// binary transaction data
-    #[prost(message, optional, tag = "2")]
+    #[prost(message, optional, tag = "3")]
     pub transaction_data: ::core::option::Option<TransactionData>,
     /// network id to avoid confusion with testnets
-    #[prost(uint32, tag = "3")]
+    #[prost(uint32, tag = "4")]
     pub network_id: u32,
     /// signer signature on all of the above data
-    #[prost(message, optional, tag = "4")]
+    #[prost(message, optional, tag = "5")]
     pub signature: ::core::option::Option<Signature>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -275,6 +297,16 @@ pub enum TransactionType {
     PaymentV1 = 0,
     NewUserV1 = 1,
     UpdateUserV1 = 2,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum VerifyNumberResult {
+    NicknameTaken = 0,
+    InvalidCode = 1,
+    InvalidSignature = 2,
+    NumberAlreadyRegisteredOtherAccount = 3,
+    NumberAlreadyRegisteredThisAccount = 4,
+    Verified = 5,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]

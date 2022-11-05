@@ -137,5 +137,4 @@ service ApiService {
   rpc GetBlockchainEvents(GetBlockchainEventsRequest) returns (GetBlockchainEventsResponse) {
 
   }
-
 }

@@ -8,7 +8,9 @@ use anyhow::Result;
 pub const TESTS_COL_FAMILY: &str = "tests_cf"; // col family for db tests
 pub const VERIFIERS_COL_FAMILY: &str = "verifiers_cf"; // col family for verifiers data
 pub const USERS_COL_FAMILY: &str = "users_cf"; // col family for user's data. index: accountId, data: User
-pub const NICKS_COL_FAMILY: &str = "nicks_cf"; // col family for unique nicks. data: accountId.
+pub const NICKS_COL_FAMILY: &str = "nicks_cf"; // col family for unique nicks (binencoded strings). data: accountId.
+
+// tracking codes sent to new users before they are users
 pub const VERIFICATION_CODES_COL_FAMILY: &str = "verification_codes_cf"; // index: verification_code, data: accountId. ttl: 24 hours
 pub const MOBILE_NUMBERS_COL_FAMILY: &str = "mobile_number_cf"; // col family for unique numbers of registered users. data: accountId
 pub const NET_SETTINGS_COL_FAMILY: &str = "net_settings_cf"; // col family for network settings.

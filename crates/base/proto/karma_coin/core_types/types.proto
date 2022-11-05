@@ -128,13 +128,18 @@ enum TransactionType {
 
 // Update user info
 message UpdateUserV1 {
+
     // Only user may change his account id by signing with private key of old accountId
     AccountId account_id = 1;
-    // Only user may change his own nickname. Nicknames are unique.
+
+    // new requested nickname
     string nickname = 2;
 
-    // Only Verifier may update user's mobile number as it requires verification
+    // Updated verified number
     MobileNumber mobile_number = 3;
+
+    // verifier data about phone
+    VerifyNumberResponse verify_number_response = 4;
 }
 
 // Basic payment transaction with optional character appreciation
@@ -147,14 +152,33 @@ message PaymentTransactionV1 {
     CharTrait trait = 6; // char trait set by sender. e.g. smart
 }
 
+enum VerifyNumberResult {
+    VERIFY_NUMBER_RESULT_NICKNAME_TAKEN = 0;
+    VERIFY_NUMBER_RESULT_INVALID_CODE = 1;
+    VERIFY_NUMBER_RESULT_INVALID_SIGNATURE = 2;
+    VERIFY_NUMBER_RESULT_NUMBER_ALREADY_REGISTERED_OTHER_ACCOUNT = 3;
+    VERIFY_NUMBER_RESULT_NUMBER_ALREADY_REGISTERED_THIS_ACCOUNT = 4;
+    VERIFY_NUMBER_RESULT_VERIFIED = 5;
+}
+
+message VerifyNumberResponse {
+    uint64 timestamp = 1;
+    VerifyNumberResult result = 2;
+    core_types.AccountId account_id = 3;
+    core_types.MobileNumber mobile_number = 4;
+    core_types.Signature signature = 5;
+}
+
 // new user transactions can be submitted by sms verifiers only
 message NewUserTransactionV1 {
     // initial user balance
     User user = 1;
+    VerifyNumberResponse verify_number_response = 2;
 }
 
+// serialized transaction data
 message TransactionData {
-    bytes transaction_data = 1; // binary transaction data
+    bytes transaction_data = 1; // binary transaction data (e.g. NewUserTxV1, PaymentV1, etc...)
     TransactionType type = 2; // transaction type for deserialization
 }
 
@@ -172,9 +196,10 @@ enum TransactionStatus {
 
 message SignedTransaction {
     uint64 timestamp = 1; // time transaction was signed
-    TransactionData transaction_Data = 2; // binary transaction data
-    uint32 network_id = 3; // network id to avoid confusion with testnets
-    Signature signature = 4; // signer signature on all of the above data
+    uint64 nonce = 2; // tx nonce
+    TransactionData transaction_Data = 3; // binary transaction data
+    uint32 network_id = 4; // network id to avoid confusion with testnets
+    Signature signature = 5; // signer signature on all of the above data
 }
 
 

@@ -21,6 +21,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .out_dir("src/karma_coin")
         .format(true)
         .type_attribute("Amount", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .type_attribute("Signature", "#[derive(serde::Serialize, serde::Deserialize)]")
         .type_attribute("PublicKey", "#[derive(serde::Serialize, serde::Deserialize)]")
         .type_attribute("MobileNumber", "#[derive(serde::Serialize, serde::Deserialize)]")
         .type_attribute("Balance", "#[derive(serde::Serialize, serde::Deserialize)]")

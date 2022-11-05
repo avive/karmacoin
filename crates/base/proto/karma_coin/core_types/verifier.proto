@@ -14,17 +14,18 @@ message RegisterNumberRequest {
 }
 
 enum RegisterNumberResult {
-  REGISTER_NUMBER_RESULT_INVALID_NUMBER =0;
+  REGISTER_NUMBER_RESULT_INVALID_NUMBER = 0;
   REGISTER_NUMBER_RESULT_INVALID_SIGNATURE = 1;
   REGISTER_NUMBER_RESULT_PHONE_ALREADY_REGISTERED = 2;
   REGISTER_NUMBER_RESULT_PHONE_ACCOUNT_EXISTS = 3;
+  REGISTER_NUMBER_RESULT_CODE_SENT = 4;
 }
 
 message RegisterNumberResponse {
   RegisterNumberResult result = 1;
 }
 
-message SignUpUserRequest {
+message VerifyNumberRequest {
   core_types.AccountId account_id = 1;
   core_types.MobileNumber mobile_number = 2;
   string code = 3; // auth code received via sms
@@ -32,25 +33,14 @@ message SignUpUserRequest {
   core_types.Signature signature = 5;
 }
 
-enum SignUpUserResult {
-  SIGN_UP_USER_RESULT_NICKNAME_TAKEN = 0;
-  SIGN_UP_USER_RESULT_INVALID_CODE = 1;
-  SIGN_UP_USER_RESULT_INVALID_SIGNATURE = 2;
-  SIGN_UP_USER_RESULT_PHONE_ALREADY_REGISTERED_OTHER_ACCOUNT = 3;
-  SIGN_UP_USER_RESULT_PHONE_ALREADY_REGISTERED_THIS_ACCOUNT = 4;
-  SIGN_UP_USER_RESULT_CODE_SENT = 5;
-  SIGN_UP_USER_RESULT_ACCOUNT_CREATED = 6;
-}
 
-message SignUpUserResponse {
-  SignUpUserResult result = 1;
-}
+
 
 // phone numbers verifier api service
 service PhoneNumbersVerifierService {
   // Request to register a phone number. Will trigger an SMS to that number
   rpc RegisterNumber(RegisterNumberRequest) returns (RegisterNumberResponse);
 
-  // Request to sign-up a user with a verification code
-  rpc SignUpUser(SignUpUserRequest) returns (SignUpUserResponse);
+  // Request to verify a number by providing code
+  rpc VerifyNumber(VerifyNumberRequest) returns (core_types.VerifyNumberResponse);
 }

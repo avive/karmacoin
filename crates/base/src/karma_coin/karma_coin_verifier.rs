@@ -13,7 +13,7 @@ pub struct RegisterNumberResponse {
     pub result: i32,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct SignUpUserRequest {
+pub struct VerifyNumberRequest {
     #[prost(message, optional, tag = "1")]
     pub account_id: ::core::option::Option<super::core_types::AccountId>,
     #[prost(message, optional, tag = "2")]
@@ -26,11 +26,6 @@ pub struct SignUpUserRequest {
     #[prost(message, optional, tag = "5")]
     pub signature: ::core::option::Option<super::core_types::Signature>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct SignUpUserResponse {
-    #[prost(enumeration = "SignUpUserResult", tag = "1")]
-    pub result: i32,
-}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum RegisterNumberResult {
@@ -38,17 +33,7 @@ pub enum RegisterNumberResult {
     InvalidSignature = 1,
     PhoneAlreadyRegistered = 2,
     PhoneAccountExists = 3,
-}
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
-#[repr(i32)]
-pub enum SignUpUserResult {
-    NicknameTaken = 0,
-    InvalidCode = 1,
-    InvalidSignature = 2,
-    PhoneAlreadyRegisteredOtherAccount = 3,
-    PhoneAlreadyRegisteredThisAccount = 4,
-    CodeSent = 5,
-    AccountCreated = 6,
+    CodeSent = 4,
 }
 #[doc = r" Generated client implementations."]
 pub mod phone_numbers_verifier_service_client {
@@ -128,11 +113,12 @@ pub mod phone_numbers_verifier_service_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        #[doc = " Request to sign-up a user with a verification code"]
-        pub async fn sign_up_user(
+        #[doc = " Request to verify a number by providing code"]
+        pub async fn verify_number(
             &mut self,
-            request: impl tonic::IntoRequest<super::SignUpUserRequest>,
-        ) -> Result<tonic::Response<super::SignUpUserResponse>, tonic::Status> {
+            request: impl tonic::IntoRequest<super::VerifyNumberRequest>,
+        ) -> Result<tonic::Response<super::super::core_types::VerifyNumberResponse>, tonic::Status>
+        {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::new(
                     tonic::Code::Unknown,
@@ -141,7 +127,7 @@ pub mod phone_numbers_verifier_service_client {
             })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/karma_coin.verifier.PhoneNumbersVerifierService/SignUpUser",
+                "/karma_coin.verifier.PhoneNumbersVerifierService/VerifyNumber",
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
@@ -159,11 +145,11 @@ pub mod phone_numbers_verifier_service_server {
             &self,
             request: tonic::Request<super::RegisterNumberRequest>,
         ) -> Result<tonic::Response<super::RegisterNumberResponse>, tonic::Status>;
-        #[doc = " Request to sign-up a user with a verification code"]
-        async fn sign_up_user(
+        #[doc = " Request to verify a number by providing code"]
+        async fn verify_number(
             &self,
-            request: tonic::Request<super::SignUpUserRequest>,
-        ) -> Result<tonic::Response<super::SignUpUserResponse>, tonic::Status>;
+            request: tonic::Request<super::VerifyNumberRequest>,
+        ) -> Result<tonic::Response<super::super::core_types::VerifyNumberResponse>, tonic::Status>;
     }
     #[doc = " phone numbers verifier api service"]
     #[derive(Debug)]
@@ -249,20 +235,21 @@ pub mod phone_numbers_verifier_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/karma_coin.verifier.PhoneNumbersVerifierService/SignUpUser" => {
+                "/karma_coin.verifier.PhoneNumbersVerifierService/VerifyNumber" => {
                     #[allow(non_camel_case_types)]
-                    struct SignUpUserSvc<T: PhoneNumbersVerifierService>(pub Arc<T>);
+                    struct VerifyNumberSvc<T: PhoneNumbersVerifierService>(pub Arc<T>);
                     impl<T: PhoneNumbersVerifierService>
-                        tonic::server::UnaryService<super::SignUpUserRequest> for SignUpUserSvc<T>
+                        tonic::server::UnaryService<super::VerifyNumberRequest>
+                        for VerifyNumberSvc<T>
                     {
-                        type Response = super::SignUpUserResponse;
+                        type Response = super::super::core_types::VerifyNumberResponse;
                         type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::SignUpUserRequest>,
+                            request: tonic::Request<super::VerifyNumberRequest>,
                         ) -> Self::Future {
                             let inner = self.0.clone();
-                            let fut = async move { (*inner).sign_up_user(request).await };
+                            let fut = async move { (*inner).verify_number(request).await };
                             Box::pin(fut)
                         }
                     }
@@ -271,7 +258,7 @@ pub mod phone_numbers_verifier_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = SignUpUserSvc(inner);
+                        let method = VerifyNumberSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
                             accept_compression_encodings,
