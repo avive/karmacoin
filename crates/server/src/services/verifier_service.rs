@@ -2,29 +2,36 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use std::convert::TryFrom;
 use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ByteOrder};
 use bytes::Bytes;
-use ed25519_dalek::Verifier;
+use ed25519_dalek::{Keypair , Verifier};
 use rand_chacha::ChaCha20Rng;
 use rand::prelude::*;
 use rand_core::SeedableRng;
 use base::karma_coin::karma_coin_verifier::phone_numbers_verifier_service_server::PhoneNumbersVerifierService;
 use tonic::{Request, Response, Status};
+use base::hex_utils::hex_from_string;
 use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, RegisterNumberResponse, RegisterNumberResult, VerifyNumberRequest};
-use base::karma_coin::karma_coin_core_types::{VerifyNumberResult, VerifyNumberResponse, VerifyNumberResult::*};
+use base::karma_coin::karma_coin_core_types::{VerifyNumberResult, VerifyNumberResponse, VerifyNumberResult::*, KeyPair, PrivateKey, PublicKey};
+use base::server_config_service::{ServerConfigService, VERIFIER_ID_PRIVATE_KEY, VERIFIER_ID_PUBLIC_KEY};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use xactor::*;
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, VERIFICATION_CODES_COL_FAMILY};
 
 /// ApiService is a system service that provides access to provider server persisted data as well as an interface to admin the provider's server. It provides a GRPC admin service defined in ServerAdminService. This service is designed to be used by provider admin clients.
 #[derive(Debug, Clone)]
-pub(crate) struct VerifierService {}
+pub(crate) struct VerifierService {
+    id_key_pair : Option<KeyPair>
+}
 
 impl Default for VerifierService {
     fn default() -> Self {
         info!("VerifierService created");
-        VerifierService {}
+        VerifierService {
+            id_key_pair: None,
+        }
     }
 }
 
@@ -34,6 +41,38 @@ impl Actor for VerifierService {
         info!("VerifierService started");
 
         // todo: pull keys from config if they exist, otherwise generate new key pair for signing
+
+        match ServerConfigService::get(VERIFIER_ID_PRIVATE_KEY.into())
+            .await? {
+            Some(key) => {
+                // key is a hex string in config
+                let private_key_data = hex_from_string(key).unwrap();
+
+                match ServerConfigService::get(VERIFIER_ID_PUBLIC_KEY.into())
+                    .await? {
+                    Some(pub_key) => {
+                        let pub_key_data = hex_from_string(pub_key).unwrap();
+                        self.id_key_pair = Some(KeyPair {
+                            private_key: Some(PrivateKey {
+                                key: private_key_data,
+                            }),
+                            public_key: Some(PublicKey {
+                                key: pub_key_data,
+                            })
+                        });
+                    },
+                    None => {
+                        panic!("invalid config: missing verifier id public key");
+                    }
+                }
+
+            },
+            None => {
+                // no private key in config - generate new key pair
+                self.id_key_pair = Some(KeyPair::new());
+                info!("Generated a new random verifier id key pair");
+            }
+        }
 
         Ok(())
     }
@@ -114,26 +153,14 @@ impl Handler<Verify> for VerifierService {
         }).await?;
 
         if auth_data.is_none() {
-            return Ok(VerifyNumberResponse {
-               result: VerifyNumberResult::InvalidCode as i32,
-               timestamp: 0,
-               mobile_number: None,
-               account_id: None,
-               signature: None
-            });
+            return Ok(VerifyNumberResponse::from(InvalidCode));
         }
 
         // check that code was sent to the caller's account id
         let sent_account_id = auth_data.unwrap().0.to_vec();
         if account_id.data != sent_account_id {
             // code was sent to a different account
-            return Ok(VerifyNumberResponse {
-                result: InvalidCode as i32,
-                timestamp: 0,
-                mobile_number: None,
-                account_id: None,
-                signature: None
-            })
+            return Ok(VerifyNumberResponse::from(InvalidCode));
         }
 
         // todo: check that no other account was created with this mobile number
@@ -144,13 +171,7 @@ impl Handler<Verify> for VerifierService {
             key: Bytes::from(bincode::serialize(&phone_number.number).unwrap()),
             cf: MOBILE_NUMBERS_COL_FAMILY
         }).await? {
-            return Ok(VerifyNumberResponse {
-                result: NumberAlreadyRegisteredOtherAccount as i32,
-                timestamp: 0,
-                mobile_number: None,
-                account_id: None,
-                signature: None
-            })
+            return Ok(VerifyNumberResponse::from(NumberAlreadyRegisteredOtherAccount));
         }
 
         // check for unique nickname requested
@@ -160,24 +181,12 @@ impl Handler<Verify> for VerifierService {
             key: Bytes::from(nick_name_key),
             cf: MOBILE_NUMBERS_COL_FAMILY
         }).await? {
-            return Ok(VerifyNumberResponse {
-                result: NicknameTaken as i32,
-                timestamp: 0,
-                mobile_number: None,
-                account_id: None,
-                signature: None
-            })
+            return Ok(VerifyNumberResponse::from(NicknameTaken));
         }
 
         // todo: create signed Response and return it
 
-        Ok(VerifyNumberResponse {
-            result: Verified as i32,
-            timestamp: 0,
-            mobile_number: None,
-            account_id: None,
-            signature: None
-        })
+        Ok(VerifyNumberResponse::from(Verified))
 
     }
 }

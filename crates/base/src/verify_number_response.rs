@@ -1,6 +1,29 @@
-use crate::karma_coin::karma_coin_core_types::VerifyNumberResponse;
+use crate::karma_coin::karma_coin_core_types::{VerifyNumberResponse, VerifyNumberResult};
 use anyhow::Result;
 use ed25519_dalek::Signer;
+use chrono::prelude::*;
+
+impl VerifyNumberResponse {
+
+    // we can't implement default here due to prost::message required derivation
+    fn new() -> Self {
+        VerifyNumberResponse {
+            timestamp: Utc::now().timestamp_nanos() as u64,
+            result: 0,
+            account_id: None,
+            mobile_number: None,
+            signature: None
+        }
+    }
+}
+
+impl From<VerifyNumberResult> for VerifyNumberResponse {
+    fn from(result: VerifyNumberResult) -> Self {
+        let mut resp = VerifyNumberResponse::new();
+        resp.result = result as i32;
+        resp
+    }
+}
 
 impl VerifyNumberResponse {
 

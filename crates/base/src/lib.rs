@@ -8,3 +8,5 @@ pub mod logging_service;
 pub mod server_config_service;
 pub mod test_helpers;
 pub mod verify_number_response;
+pub mod hex_utils;
+pub mod key_pair;

@@ -30,7 +30,8 @@ pub const START_API_SERVICE_CONFIG_KEY: &str = "start_api_service";
 pub const VERIFIER_NAME: &str = "KarmaCoinVerifier_v1";
 
 // private identity key (ed25519)
-pub const PRIVATE_ID_KEY: &str = "id_private_key";
+pub const VERIFIER_ID_PRIVATE_KEY: &str = "id_key_private";
+pub const VERIFIER_ID_PUBLIC_KEY: &str = "id_key_public";
 
 pub struct ServerConfigService {
     config: Config,
@@ -39,7 +40,7 @@ pub struct ServerConfigService {
 #[async_trait::async_trait]
 impl Actor for ServerConfigService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        debug!("server ConfigService started");
+        info!("server ConfigService started");
         Ok(())
     }
 }
@@ -50,6 +51,7 @@ impl Default for ServerConfigService {
     fn default() -> Self {
         let mut config = Config::default();
 
+        info!("Configuring server...");
         // todo: set default blockchain server config for server
 
         // todo: update to new config release api and stop using deprecated patterns

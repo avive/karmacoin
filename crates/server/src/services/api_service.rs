@@ -51,12 +51,12 @@ impl Handler<GetUserInfoByNick> for ApiService {
         };
 
         match DatabaseService::read(read_item).await? {
-            Ok(Some(result)) => Ok(GetUserInfoByNickResponse {
+            Some(_) => Ok(GetUserInfoByNickResponse {
                 // todo: create User data object from bytes and return it
                 user: None
             }),
-            Ok(None) => {
-                Ok(GetUserInfoByNickResponse { user: None }),
+            None => {
+                Ok(GetUserInfoByNickResponse { user: None })
             }
         }
     }
