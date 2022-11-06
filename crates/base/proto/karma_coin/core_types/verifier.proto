@@ -33,14 +33,11 @@ message VerifyNumberRequest {
   core_types.Signature signature = 5;
 }
 
-
-
-
-// phone numbers verifier api service
+// mobile phone numbers verifier api service
 service PhoneNumbersVerifierService {
   // Request to register a phone number. Will trigger an SMS to that number
   rpc RegisterNumber(RegisterNumberRequest) returns (RegisterNumberResponse);
 
-  // Request to verify a number by providing code
+  // Request to verify a number by providing code sent via sms from verifier
   rpc VerifyNumber(VerifyNumberRequest) returns (core_types.VerifyNumberResponse);
 }

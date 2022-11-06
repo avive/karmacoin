@@ -138,14 +138,14 @@ message UpdateUserV1 {
     // Updated verified number
     MobileNumber mobile_number = 3;
 
-    // verifier data about phone
+    // verifier attestation regarding the number and the account
     VerifyNumberResponse verify_number_response = 4;
 }
 
 // Basic payment transaction with optional character appreciation
 message PaymentTransactionV1 {
     AccountId from = 1; // account this tx is signed by
-    MobileNumber to = 2; // dest is always a mobile number (of a user or a non-user
+    MobileNumber to = 2; // dest is always a mobile number (of a user or a non-user)
     Amount amount = 3; // amount in tokens to transfer
     Amount fee = 4; // network fee provided by sender
     Amount tip = 5; // optional extra tip to miners

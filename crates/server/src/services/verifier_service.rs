@@ -32,6 +32,9 @@ impl Default for VerifierService {
 impl Actor for VerifierService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
         info!("VerifierService started");
+
+        // todo: pull keys from config if they exist, otherwise generate new key pair for signing
+
         Ok(())
     }
 }

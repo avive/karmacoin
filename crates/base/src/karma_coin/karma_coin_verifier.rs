@@ -39,7 +39,7 @@ pub enum RegisterNumberResult {
 pub mod phone_numbers_verifier_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
-    #[doc = " phone numbers verifier api service"]
+    #[doc = " mobile phone numbers verifier api service"]
     #[derive(Debug, Clone)]
     pub struct PhoneNumbersVerifierServiceClient<T> {
         inner: tonic::client::Grpc<T>,
@@ -113,7 +113,7 @@ pub mod phone_numbers_verifier_service_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        #[doc = " Request to verify a number by providing code"]
+        #[doc = " Request to verify a number by providing code sent via sms from verifier"]
         pub async fn verify_number(
             &mut self,
             request: impl tonic::IntoRequest<super::VerifyNumberRequest>,
@@ -145,13 +145,13 @@ pub mod phone_numbers_verifier_service_server {
             &self,
             request: tonic::Request<super::RegisterNumberRequest>,
         ) -> Result<tonic::Response<super::RegisterNumberResponse>, tonic::Status>;
-        #[doc = " Request to verify a number by providing code"]
+        #[doc = " Request to verify a number by providing code sent via sms from verifier"]
         async fn verify_number(
             &self,
             request: tonic::Request<super::VerifyNumberRequest>,
         ) -> Result<tonic::Response<super::super::core_types::VerifyNumberResponse>, tonic::Status>;
     }
-    #[doc = " phone numbers verifier api service"]
+    #[doc = " mobile phone numbers verifier api service"]
     #[derive(Debug)]
     pub struct PhoneNumbersVerifierServiceServer<T: PhoneNumbersVerifierService> {
         inner: _Inner<T>,

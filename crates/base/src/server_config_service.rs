@@ -26,6 +26,12 @@ pub const GRPC_ADMIN_PORT_CONFIG_KEY: &str = "grpc_admin_port";
 pub const START_VERIFIER_SERVICE_CONFIG_KEY: &str = "start_verifier_service";
 pub const START_API_SERVICE_CONFIG_KEY: &str = "start_api_service";
 
+// todo: add verifier name
+pub const VERIFIER_NAME: &str = "KarmaCoinVerifier_v1";
+
+// private identity key (ed25519)
+pub const PRIVATE_ID_KEY: &str = "id_private_key";
+
 pub struct ServerConfigService {
     config: Config,
 }
@@ -45,6 +51,8 @@ impl Default for ServerConfigService {
         let mut config = Config::default();
 
         // todo: set default blockchain server config for server
+
+        // todo: update to new config release api and stop using deprecated patterns
 
         config
             .set_default(NET_ID_CONFIG_KEY, 1)
@@ -73,6 +81,8 @@ impl Default for ServerConfigService {
             // Eg.. `APP_DEBUG=1 ./target/app` would set the `debug` key
             .merge(Environment::with_prefix("KARMACOIN"))
             .unwrap();
+
+        // todo: if id private key not set then generate random keypair and store private key
 
         ServerConfigService { config }
     }

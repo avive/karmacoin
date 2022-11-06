@@ -160,7 +160,7 @@ pub struct UpdateUserV1 {
     /// Updated verified number
     #[prost(message, optional, tag = "3")]
     pub mobile_number: ::core::option::Option<MobileNumber>,
-    /// verifier data about phone
+    /// verifier attestation regarding the number and the account
     #[prost(message, optional, tag = "4")]
     pub verify_number_response: ::core::option::Option<VerifyNumberResponse>,
 }
@@ -170,7 +170,7 @@ pub struct PaymentTransactionV1 {
     /// account this tx is signed by
     #[prost(message, optional, tag = "1")]
     pub from: ::core::option::Option<AccountId>,
-    /// dest is always a mobile number (of a user or a non-user
+    /// dest is always a mobile number (of a user or a non-user)
     #[prost(message, optional, tag = "2")]
     pub to: ::core::option::Option<MobileNumber>,
     /// amount in tokens to transfer

@@ -4,7 +4,7 @@ use ed25519_dalek::Signer;
 
 impl VerifyNumberResponse {
 
-    /// Sign a channel bundle by channel id and by channel creator
+    /// Sign a response with the verifier's keypair
     pub fn sign(
         &mut self,
         key_pair: &ed25519_dalek::Keypair,
