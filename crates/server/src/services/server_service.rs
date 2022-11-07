@@ -3,18 +3,13 @@
 //
 
 use anyhow::Result;
-//use base::
-use rocksdb::{ColumnFamilyDescriptor, Options};
-
 use crate::services::api_service::ApiService;
 use crate::services::db_config_service::DbConfigService;
-
 use base::karma_coin::karma_coin_api::api_service_server::ApiServiceServer;
-
 use crate::services::verifier_service::VerifierService;
 use base::karma_coin::karma_coin_verifier::phone_numbers_verifier_service_server::PhoneNumbersVerifierServiceServer;
 use base::server_config_service::{
-    ServerConfigService, DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY, GRPC_SERVER_HOST_CONFIG_KEY,
+    ServerConfigService, GRPC_SERVER_HOST_CONFIG_KEY,
     GRPC_SERVER_HOST_PORT_CONFIG_KEY, SERVER_NAME_CONFIG_KEY,
 };
 use db::db_service::{DatabaseService, Destroy};
@@ -92,10 +87,14 @@ impl ServerService {
             peer_name, grpc_server_addr
         );
 
-        // start health service and indicate we are serving MyMessagingService
-        let (mut health_reporter, health_service) = tonic_health::server::health_reporter();
-        health_reporter
+        let (mut api_health_reporter, api_health_service) = tonic_health::server::health_reporter();
+        api_health_reporter
             .set_serving::<ApiServiceServer<ApiService>>()
+            .await;
+
+        let (mut verifier_health_reporter, verifier_health_service) = tonic_health::server::health_reporter();
+        verifier_health_reporter
+            .set_serving::<PhoneNumbersVerifierServiceServer<VerifierService>>()
             .await;
 
         spawn(async move {
@@ -105,7 +104,8 @@ impl ServerService {
                 .add_service(PhoneNumbersVerifierServiceServer::new(
                     VerifierService::default(),
                 ))
-                .add_service(health_service)
+                .add_service(api_health_service)
+                .add_service(verifier_health_service)
                 .serve(grpc_server_addr)
                 .await;
 

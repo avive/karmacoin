@@ -5,17 +5,46 @@ use xactor::*;
 use anyhow::Result;
 
 /// cfs and data modeling
-pub const TESTS_COL_FAMILY: &str = "tests_cf"; // col family for db tests
-pub const VERIFIERS_COL_FAMILY: &str = "verifiers_cf"; // col family for verifiers data
-pub const USERS_COL_FAMILY: &str = "users_cf"; // col family for user's data. index: accountId, data: User
-pub const NICKS_COL_FAMILY: &str = "nicks_cf"; // col family for unique nicks (binencoded strings). data: accountId.
 
-// tracking codes sent to new users before they are users
-pub const VERIFICATION_CODES_COL_FAMILY: &str = "verification_codes_cf"; // index: verification_code, data: accountId. ttl: 24 hours
-pub const MOBILE_NUMBERS_COL_FAMILY: &str = "mobile_number_cf"; // col family for unique numbers of registered users. data: accountId
-pub const NET_SETTINGS_COL_FAMILY: &str = "net_settings_cf"; // col family for network settings.
-pub const TRANSACTIONS_COL_FAMILY: &str = "txs_cf"; // signed transactions keyed by their hash
-pub const BLOCKS_COL_FAMILY: &str = "blocks_cf"; // blocks keyed by block number - the blockchain
+////
+// Verier local data
+//////////////
+
+// Tracking codes sent to new users before they are users
+// index: verification_code, data: accountId. ttl: 24 hours
+pub const VERIFICATION_CODES_COL_FAMILY: &str = "verification_codes_cf";
+
+/////
+//// Blockchain-based data indexes - indexing on-chain data
+/////////////////
+
+// col family the network settings
+pub const NET_SETTINGS_COL_FAMILY: &str = "net_settings_cf";
+
+// col family for verifiers data. index: accountId, data: Verifier dial-up info
+pub const VERIFIERS_COL_FAMILY: &str = "verifiers_cf";
+
+// User's data. index: accountId, data: User
+pub const USERS_COL_FAMILY: &str = "users_cf";
+
+// Unique nicks (bin-coded strings). data: accountId.
+pub const NICKS_COL_FAMILY: &str = "nicks_cf";
+
+// Unique numbers of registered users. index: mobile number. data: accountId
+pub const MOBILE_NUMBERS_COL_FAMILY: &str = "mobile_number_cf";
+
+// signed transactions indexed by their hash. Data: SignTransaction
+pub const TRANSACTIONS_COL_FAMILY: &str = "txs_cf";
+
+// blocks keyed by block number - the blockchain. index: block height. Data: Block
+pub const BLOCKS_COL_FAMILY: &str = "blocks_cf";
+
+// valid transactions submitted to the chain and not yet processed. Queued in pool
+pub const TXS_POOL_COL_FAMILY: &str = "txs_mem_pool_cf";
+
+/////////////////////
+
+pub const TESTS_COL_FAMILY: &str = "tests_cf"; // col family for db tests
 
 
 #[derive(Debug, Clone)]
@@ -55,6 +84,7 @@ impl Actor for DbConfigService {
                 ColumnFamilyDescriptor::new(NET_SETTINGS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TESTS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(BLOCKS_COL_FAMILY, Options::default()),
+                ColumnFamilyDescriptor::new(TXS_POOL_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TRANSACTIONS_COL_FAMILY, Options::default()),
             ],
         })

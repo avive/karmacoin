@@ -53,6 +53,7 @@ impl Actor for VerifierService {
                                 key: pub_key_data,
                             })
                         });
+                        info!("loaded verifier id key pair from config")
                     },
                     None => {
                         panic!("invalid config: missing verifier id public key");

@@ -2,8 +2,6 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use std::fmt::Error;
-use std::future::Future;
 use anyhow::Result;
 use bytes::Bytes;
 use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
@@ -78,31 +76,6 @@ impl ApiServiceTrait for ApiService {
         Ok(Response::new(res))
     }
 
-    async fn submit_transaction(&self, request: Request<SubmitTransactionRequest>) -> std::result::Result<Response<SubmitTransactionResponse>, Status> {
-        todo!()
-    }
-
-    async fn get_transactions_status(
-        &self,
-        request: Request<GetTransactionsRequest>,
-    ) -> std::result::Result<Response<GetTransactionsResponse>, Status> {
-        todo!()
-    }
-
-    async fn get_transactions(
-        &self,
-        request: Request<GetTransactionsRequest>,
-    ) -> std::result::Result<Response<GetTransactionsResponse>, Status> {
-        todo!()
-    }
-
-    async fn get_transaction(
-        &self,
-        request: Request<GetTransactionRequest>,
-    ) -> std::result::Result<Response<GetTransactionResponse>, Status> {
-        todo!()
-    }
-
     async fn get_user_info_by_number(
         &self,
         request: Request<GetUserInfoByNumberRequest>,
@@ -135,6 +108,31 @@ impl ApiServiceTrait for ApiService {
         &self,
         request: Request<GetNetInfoRequest>,
     ) -> std::result::Result<Response<GetNetInfoResponse>, Status> {
+        todo!()
+    }
+
+    async fn submit_transaction(&self, request: Request<SubmitTransactionRequest>) -> std::result::Result<Response<SubmitTransactionResponse>, Status> {
+        todo!()
+    }
+
+    async fn get_transactions_status(
+        &self,
+        request: Request<GetTransactionsRequest>,
+    ) -> std::result::Result<Response<GetTransactionsResponse>, Status> {
+        todo!()
+    }
+
+    async fn get_transactions(
+        &self,
+        request: Request<GetTransactionsRequest>,
+    ) -> std::result::Result<Response<GetTransactionsResponse>, Status> {
+        todo!()
+    }
+
+    async fn get_transaction(
+        &self,
+        request: Request<GetTransactionRequest>,
+    ) -> std::result::Result<Response<GetTransactionResponse>, Status> {
         todo!()
     }
 
