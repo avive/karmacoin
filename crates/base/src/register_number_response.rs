@@ -1,32 +1,28 @@
-use crate::karma_coin::karma_coin_core_types::{VerifyNumberResponse, VerifyNumberResult};
 use anyhow::Result;
 use ed25519_dalek::{Keypair, Signer};
 use chrono::prelude::*;
+use crate::karma_coin::karma_coin_verifier::{RegisterNumberResponse, RegisterNumberResult};
 
-impl VerifyNumberResponse {
+impl RegisterNumberResponse {
 
     // we can't implement default here due to prost::message required derivation
     fn new() -> Self {
-        VerifyNumberResponse {
-            timestamp: Utc::now().timestamp_nanos() as u64,
+        RegisterNumberResponse {
             result: 0,
-            nickname : "".into(),
-            account_id: None,
-            mobile_number: None,
             signature: None
         }
     }
 }
 
-impl From<VerifyNumberResult> for VerifyNumberResponse {
-    fn from(result: VerifyNumberResult) -> Self {
-        let mut resp = VerifyNumberResponse::new();
+impl From<RegisterNumberResult> for RegisterNumberResponse {
+    fn from(result: RegisterNumberResult) -> Self {
+        let mut resp = RegisterNumberResponse::new();
         resp.result = result as i32;
         resp
     }
 }
 
-impl VerifyNumberResponse {
+impl RegisterNumberResponse {
 
     pub fn sign(
         &mut self,

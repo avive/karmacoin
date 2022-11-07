@@ -164,9 +164,10 @@ enum VerifyNumberResult {
 message VerifyNumberResponse {
     uint64 timestamp = 1;
     VerifyNumberResult result = 2;
-    core_types.AccountId account_id = 3;
-    core_types.MobileNumber mobile_number = 4;
-    core_types.Signature signature = 5;
+    AccountId account_id = 3;
+    MobileNumber mobile_number = 4;
+    string Nickname = 5;
+    Signature signature = 6;
 }
 
 // new user transactions can be submitted by sms verifiers only

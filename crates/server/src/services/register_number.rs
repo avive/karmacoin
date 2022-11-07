@@ -1,16 +1,15 @@
 use anyhow::{anyhow, Result};
-use byteorder::{LittleEndian, ByteOrder};
+use byteorder::{ByteOrder, LittleEndian};
 use bytes::Bytes;
-use ed25519_dalek::{Verifier};
-use rand_chacha::ChaCha20Rng;
-use rand::prelude::*;
-use rand_core::SeedableRng;
-use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, RegisterNumberResponse, RegisterNumberResult};
-use base::karma_coin::karma_coin_core_types::{VerifyNumberResult::*};
+use ed25519_dalek::Verifier;
+use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, RegisterNumberResponse, RegisterNumberResult::*, RegisterNumberResult};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use xactor::*;
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, VERIFICATION_CODES_COL_FAMILY};
 use crate::services::verifier_service::VerifierService;
+
+use rand::prelude::*;
+use rand_chacha::ChaCha20Rng;
 
 #[message(result = "Result<RegisterNumberResponse>")]
 pub(crate) struct RegisterNumber(pub RegisterNumberRequest);
@@ -43,6 +42,8 @@ impl Handler<RegisterNumber> for VerifierService {
 
         let phone_number = req.mobile_number.ok_or(anyhow!("missing mobile phone number"))?;
 
+        let verifier_key_pair = self.id_key_pair.as_ref().unwrap().to_ed2559_kaypair();
+
         // check signature by accountId private key on data so we know caller has private key for accountId
 
         // check if number is already registered to another user
@@ -54,13 +55,14 @@ impl Handler<RegisterNumber> for VerifierService {
 
             // compare account ids
             return if user_data.0 == account_id.data {
-                Ok(RegisterNumberResponse {
-                    result: NumberAlreadyRegisteredThisAccount as i32
-                })
+                let mut resp = RegisterNumberResponse::from(NumberAlreadyRegistered);
+                resp.sign(&verifier_key_pair)?;
+                Ok(resp)
             } else {
-                Ok(RegisterNumberResponse {
-                    result: NumberAlreadyRegisteredOtherAccount as i32
-                })
+
+                let mut resp = RegisterNumberResponse::from(NumberAccountExists);
+                resp.sign(&verifier_key_pair)?;
+                Ok(resp)
             }
         }
 
@@ -83,10 +85,8 @@ impl Handler<RegisterNumber> for VerifierService {
             ttl: 60 * 60 * 24, // 24 hours ttl
         }).await?;
 
-
-        Ok(RegisterNumberResponse {
-            result: RegisterNumberResult::CodeSent as i32
-        })
-
+        let mut resp = RegisterNumberResponse::from(RegisterNumberResult::CodeSent);
+        resp.sign(&verifier_key_pair)?;
+        Ok(resp)
     }
 }

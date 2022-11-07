@@ -11,6 +11,8 @@ pub struct RegisterNumberRequest {
 pub struct RegisterNumberResponse {
     #[prost(enumeration = "RegisterNumberResult", tag = "1")]
     pub result: i32,
+    #[prost(message, optional, tag = "2")]
+    pub signature: ::core::option::Option<super::core_types::Signature>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct VerifyNumberRequest {
@@ -31,8 +33,8 @@ pub struct VerifyNumberRequest {
 pub enum RegisterNumberResult {
     InvalidNumber = 0,
     InvalidSignature = 1,
-    PhoneAlreadyRegistered = 2,
-    PhoneAccountExists = 3,
+    NumberAlreadyRegistered = 2,
+    NumberAccountExists = 3,
     CodeSent = 4,
 }
 #[doc = r" Generated client implementations."]

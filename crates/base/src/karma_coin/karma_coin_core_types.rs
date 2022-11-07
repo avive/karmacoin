@@ -196,7 +196,9 @@ pub struct VerifyNumberResponse {
     pub account_id: ::core::option::Option<AccountId>,
     #[prost(message, optional, tag = "4")]
     pub mobile_number: ::core::option::Option<MobileNumber>,
-    #[prost(message, optional, tag = "5")]
+    #[prost(string, tag = "5")]
+    pub nickname: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "6")]
     pub signature: ::core::option::Option<Signature>,
 }
 /// new user transactions can be submitted by sms verifiers only

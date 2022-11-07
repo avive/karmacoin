@@ -33,13 +33,17 @@ impl Handler<Verify> for VerifierService {
         };
 
         let account_id = req.account_id.ok_or(anyhow!("missing account id"))?;
+        let nickname = req.nickname;
         let signature_data = req.signature.ok_or(anyhow!("missing signature"))?;
+
         let signature = ed25519_dalek::Signature::from_bytes(&signature_data.signature)?;
         let signer_pub_key = ed25519_dalek::PublicKey::from_bytes(account_id.data.as_slice())?;
         signer_pub_key.verify(&buf, &signature)?;
 
         // decode auth code number
         let auth_code : u32 = req.code.parse::<u32>().map_err(|_| anyhow!("invalid auth code"))?;
+
+        let verifier_key_pair = self.id_key_pair.as_ref().unwrap().to_ed2559_kaypair();
 
         // db key based on auth code
         let mut auth_code_buf = [0; 4];
@@ -51,14 +55,18 @@ impl Handler<Verify> for VerifierService {
         }).await?;
 
         if auth_data.is_none() {
-            return Ok(VerifyNumberResponse::from(InvalidCode));
+            let mut resp = VerifyNumberResponse::from(InvalidCode);
+            resp.sign(&verifier_key_pair)?;
+            return Ok(resp);
         }
 
         // check that code was sent to the caller's account id
         let sent_account_id = auth_data.unwrap().0.to_vec();
         if account_id.data != sent_account_id {
             // code was sent to a different account
-            return Ok(VerifyNumberResponse::from(InvalidCode));
+            let mut resp = VerifyNumberResponse::from(InvalidCode);
+            resp.sign(&verifier_key_pair)?;
+            return Ok(resp);
         }
 
         // todo: check that no other account was created with this mobile number
@@ -69,25 +77,32 @@ impl Handler<Verify> for VerifierService {
             key: Bytes::from(bincode::serialize(&phone_number.number).unwrap()),
             cf: MOBILE_NUMBERS_COL_FAMILY
         }).await? {
-            return Ok(VerifyNumberResponse::from(NumberAlreadyRegisteredOtherAccount));
+            let mut resp = VerifyNumberResponse::from(NumberAlreadyRegisteredOtherAccount);
+            resp.sign(&verifier_key_pair)?;
+            return Ok(resp);
         }
 
         // check for unique nickname requested
 
-        let nick_name_key = bincode::serialize(&req.nickname).unwrap();
+        let nick_name_key = bincode::serialize(&nickname).unwrap();
         if let Some(_) = DatabaseService::read(ReadItem {
             key: Bytes::from(nick_name_key),
             cf: MOBILE_NUMBERS_COL_FAMILY
         }).await? {
-            return Ok(VerifyNumberResponse::from(NicknameTaken));
+            let mut resp = VerifyNumberResponse::from(NicknameTaken);
+            resp.sign(&verifier_key_pair)?;
+            return Ok(resp);
         }
 
         // create signed Response and return it
         let mut resp = VerifyNumberResponse::from(Verified);
+
+        // signed attestation details - user account id, nickname and verified mobile number
         resp.account_id = Some(account_id);
+        resp.nickname = nickname;
         resp.mobile_number = Some(phone_number);
 
-        resp.sign(self.id_key_pair.as_ref().unwrap().to_ed2559_kaypair())?;
+        resp.sign(&self.id_key_pair.as_ref().unwrap().to_ed2559_kaypair())?;
         Ok(resp)
 
     }
