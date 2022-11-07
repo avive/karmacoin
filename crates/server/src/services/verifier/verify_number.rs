@@ -78,7 +78,7 @@ impl Handler<Verify> for VerifierService {
         let phone_number = req.mobile_number.ok_or(anyhow!("missing mobile phone number"))?;
 
         if let Some(_) = DatabaseService::read(ReadItem {
-            key: Bytes::from(bincode::serialize(&phone_number.number).unwrap()),
+            key: Bytes::from(phone_number.number.as_bytes().to_vec()),
             cf: MOBILE_NUMBERS_COL_FAMILY
         }).await? {
             let mut resp = VerifyNumberResponse::from(NumberAlreadyRegisteredOtherAccount);
@@ -87,7 +87,7 @@ impl Handler<Verify> for VerifierService {
         }
 
         // verify that the requested nickname not registered to another user
-        let nick_name_key = Bytes::from(bincode::serialize(&nickname).unwrap());
+        let nick_name_key = Bytes::from(nickname.as_bytes().to_vec());
         if let Some(_) = DatabaseService::read(ReadItem {
             key: nick_name_key.clone(),
             cf: NICKS_COL_FAMILY

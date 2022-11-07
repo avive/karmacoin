@@ -52,7 +52,7 @@ impl Handler<RegisterNumber> for VerifierService {
 
         // check if number is already registered to another user
         if let Some(user_data) = DatabaseService::read(ReadItem {
-            key: Bytes::from(bincode::serialize(&phone_number.number).unwrap()),
+            key: Bytes::from(phone_number.number.as_bytes().to_vec()),
             cf: MOBILE_NUMBERS_COL_FAMILY
         }).await? {
             // number already registered for a user account

@@ -69,7 +69,8 @@ impl Handler<Startup> for ServerService {
         let port = ServerConfigService::get_u64(GRPC_SERVER_HOST_PORT_CONFIG_KEY.into())
             .await?
             .unwrap() as u32;
-
+        
+        
         self.start_grpc_server(port, host, server_name).await?;
 
         info!("GRPC server started");

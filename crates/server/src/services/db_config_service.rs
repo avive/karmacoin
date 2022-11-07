@@ -4,11 +4,16 @@
 
 use rocksdb::{ColumnFamilyDescriptor, Options};
 use base::server_config_service::{DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY, ServerConfigService};
-use db::db_service::DatabaseService;
+use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use xactor::*;
 use anyhow::Result;
+use bytes::Bytes;
 
 /// db data modeling - column families and their stored data
+/// Encoding conventions:
+/// - string keys are utf8 encoded to bytes
+/// - Numbers are LittleEndian encoded
+/// - Protobuf objects are serialized using prost
 
 ////
 // Verier local data
@@ -30,6 +35,10 @@ pub const RESERVED_NICKS_COL_FAMILY: &str = "reserbed_nicks_cf";
 
 // col family the network settings
 pub const NET_SETTINGS_COL_FAMILY: &str = "net_settings_cf";
+
+// key holds bool value indicating if db was initialized or needs initliaztion with
+// static data
+pub const DB_INITIALIZED_KEY: &str = "db_initialized_key";
 
 // col family for verifiers data. index: accountId, data: Verifier dial-up info
 pub const VERIFIERS_COL_FAMILY: &str = "verifiers_cf";
@@ -96,6 +105,25 @@ impl Actor for DbConfigService {
                 ColumnFamilyDescriptor::new(TXS_POOL_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TRANSACTIONS_COL_FAMILY, Options::default()),
             ],
+        }).await?;
+
+        let init_key = Bytes::from(DB_INITIALIZED_KEY.as_bytes());
+
+        if DatabaseService::read(ReadItem {
+            key: init_key.clone(),
+            cf: NET_SETTINGS_COL_FAMILY
+        }).await?.is_none() {
+            // todo: initialize db static data here
+        }
+
+        // mark that db is configured with static data
+        DatabaseService::write(WriteItem {
+            data: DataItem {
+                key: init_key,
+                value: Bytes::from("1".as_bytes().to_vec()),
+             },
+            cf: NET_SETTINGS_COL_FAMILY,
+            ttl: 0
         }).await?;
 
         Ok(())

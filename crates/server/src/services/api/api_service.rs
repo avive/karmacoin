@@ -9,6 +9,9 @@ use tonic::{Code, IntoRequest, Request, Response, Status};
 use base::karma_coin::karma_coin_api::{GetBlockchainEventsRequest, GetBlockchainEventsResponse, GetCharTraitsRequest, GetCharTraitsResponse, GetNetInfoRequest, GetNetInfoResponse, GetPhoneVerifiersRequest, GetPhoneVerifiersResponse, GetTransactionRequest, GetTransactionResponse, GetTransactionsRequest, GetTransactionsResponse, GetUserInfoByAccountRequest, GetUserInfoByAccountResponse, GetUserInfoByNickRequest, GetUserInfoByNickResponse, GetUserInfoByNumberRequest, GetUserInfoByNumberResponse, SubmitTransactionRequest, SubmitTransactionResponse};
 use db::db_service::{DatabaseService, ReadItem};
 use xactor::*;
+use crate::services::api::user_by_account_id::GetUserInfoByAccountId;
+use crate::services::api::user_by_nick::GetUserInfoByNick;
+use crate::services::api::user_by_number::GetUserInfoByNumber;
 use crate::services::db_config_service::NICKS_COL_FAMILY;
 
 /// ApiService is a system service that provides access to provider server persisted data as well as an interface to admin the provider's server. It provides a GRPC admin service defined in ServerAdminService. This service is designed to be used by provider admin clients.
@@ -17,7 +20,7 @@ pub(crate) struct ApiService {}
 
 impl Default for ApiService {
     fn default() -> Self {
-        info!("Api Service started");
+        info!("Api Service created");
         ApiService {}
     }
 }
@@ -32,39 +35,12 @@ impl Actor for ApiService {
 
 impl Service for ApiService {}
 
-#[message(result = "Result<GetUserInfoByNickResponse>")]
-pub(crate) struct GetUserInfoByNick(GetUserInfoByNickRequest);
-
-#[async_trait::async_trait]
-impl Handler<GetUserInfoByNick> for ApiService {
-    async fn handle(
-        &mut self,
-        _ctx: &mut Context<Self>,
-        msg: GetUserInfoByNick,
-    ) -> Result<GetUserInfoByNickResponse> {
-
-        let read_item = ReadItem {
-            key: Bytes::from(msg.0.nickname),
-            cf: NICKS_COL_FAMILY,
-        };
-
-        match DatabaseService::read(read_item).await? {
-            Some(_) => Ok(GetUserInfoByNickResponse {
-                // todo: create User data object from bytes and return it
-                user: None
-            }),
-            None => {
-                Ok(GetUserInfoByNickResponse { user: None })
-            }
-        }
-    }
-}
-
 
 /// ApiService implements the ApiServiceTrait trait which defines the grpc rpc methods it provides for clients over the network
 #[tonic::async_trait]
 impl ApiServiceTrait for ApiService {
     async fn get_user_info_by_nick(&self, request: Request<GetUserInfoByNickRequest>) -> Result<Response<GetUserInfoByNickResponse>, Status> {
+
         let service = ApiService::from_registry().await
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?;
 
@@ -80,14 +56,32 @@ impl ApiServiceTrait for ApiService {
         &self,
         request: Request<GetUserInfoByNumberRequest>,
     ) -> std::result::Result<Response<GetUserInfoByNumberResponse>, Status> {
-        todo!()
+
+        let service = ApiService::from_registry().await
+            .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?;
+
+        let res = service.call(GetUserInfoByNumber(request.into_inner()))
+            .await
+            .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?
+            .map_err(|_| Status::internal("internal error"))?;
+
+        Ok(Response::new(res))
     }
 
     async fn get_user_info_by_account(
         &self,
         request: Request<GetUserInfoByAccountRequest>,
     ) -> std::result::Result<Response<GetUserInfoByAccountResponse>, Status> {
-        todo!()
+
+        let service = ApiService::from_registry().await
+            .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?;
+
+        let res = service.call(GetUserInfoByAccountId(request.into_inner()))
+            .await
+            .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?
+            .map_err(|_| Status::internal("internal error"))?;
+
+        Ok(Response::new(res))
     }
 
     async fn get_phone_verifiers(

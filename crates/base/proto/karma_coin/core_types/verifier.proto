@@ -4,8 +4,18 @@
 
 syntax = "proto3";
 package karma_coin.verifier;
-
 import "karma_coin/core_types/types.proto";
+
+// VeriferInfo is used to return the network the id and dialup info of active verifiers
+message VerifierInfo {
+  string name = 1;
+  core_types.AccountId account_id = 2;
+  string verifier_endpoint_ip4 = 3; // ip:port
+  string verifier_endpoint_ip6 = 4; // ip:port
+  string api_endpoint_ip4 = 5; // ip:port
+  string api_endpoint_ip6 = 6; // ip:port
+  core_types.Signature signature = 7;
+}
 
 message RegisterNumberRequest {
   core_types.AccountId account_id = 1;

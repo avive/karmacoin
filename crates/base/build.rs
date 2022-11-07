@@ -20,6 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build_server(true)
         .out_dir("src/karma_coin")
         .format(true)
+        .type_attribute("VerifierInfo", "#[derive(serde::Serialize, serde::Deserialize)]")
         .type_attribute("Amount", "#[derive(serde::Serialize, serde::Deserialize)]")
         .type_attribute("Signature", "#[derive(serde::Serialize, serde::Deserialize)]")
         .type_attribute("PublicKey", "#[derive(serde::Serialize, serde::Deserialize)]")

@@ -75,7 +75,7 @@ impl Default for ServerConfigService {
             .set_default(GRPC_SERVER_HOST_CONFIG_KEY, "[::1]")
             .unwrap()
             // we always want to have a peer name - even a generic one
-            .set_default(SERVER_NAME_CONFIG_KEY, "karma_coin_provider_1")
+            .set_default(SERVER_NAME_CONFIG_KEY, "kc_verifier_1")
             .unwrap()
             .set_default(DB_NAME_CONFIG_KEY, "karmacoin_db")
             .unwrap()

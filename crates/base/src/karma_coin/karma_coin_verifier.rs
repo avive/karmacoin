@@ -1,3 +1,25 @@
+/// VeriferInfo is used to return the network the id and dialup info of active verifiers
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
+pub struct VerifierInfo {
+    #[prost(string, tag = "1")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "2")]
+    pub account_id: ::core::option::Option<super::core_types::AccountId>,
+    /// ip:port
+    #[prost(string, tag = "3")]
+    pub verifier_endpoint_ip4: ::prost::alloc::string::String,
+    /// ip:port
+    #[prost(string, tag = "4")]
+    pub verifier_endpoint_ip6: ::prost::alloc::string::String,
+    /// ip:port
+    #[prost(string, tag = "5")]
+    pub api_endpoint_ip4: ::prost::alloc::string::String,
+    /// ip:port
+    #[prost(string, tag = "6")]
+    pub api_endpoint_ip6: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "7")]
+    pub signature: ::core::option::Option<super::core_types::Signature>,
+}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RegisterNumberRequest {
     #[prost(message, optional, tag = "1")]

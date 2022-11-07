@@ -68,6 +68,10 @@ impl Actor for VerifierService {
             }
         }
 
+        // todo: add verifier the local db list of legit verifiers, so it returned via the api
+        let _key_pair = self.id_key_pair.as_ref().unwrap();
+        
+
         Ok(())
     }
 }
