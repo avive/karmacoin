@@ -9,3 +9,5 @@ mod api_service;
 pub mod server_service;
 pub (crate) mod verifier_service;
 pub (crate) mod db_config_service;
+pub (crate) mod register_number;
+pub (crate) mod verify_number;

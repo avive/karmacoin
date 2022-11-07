@@ -1,6 +1,6 @@
 use crate::karma_coin::karma_coin_core_types::{VerifyNumberResponse, VerifyNumberResult};
 use anyhow::Result;
-use ed25519_dalek::Signer;
+use ed25519_dalek::{Keypair, Signer};
 use chrono::prelude::*;
 
 impl VerifyNumberResponse {
@@ -27,10 +27,10 @@ impl From<VerifyNumberResult> for VerifyNumberResponse {
 
 impl VerifyNumberResponse {
 
-    /// Sign a response with the verifier's keypair
+    /// Sign self with a verifier's keypair
     pub fn sign(
         &mut self,
-        key_pair: &ed25519_dalek::Keypair,
+        key_pair: Keypair,
     ) -> Result<()> {
         use prost::Message;
         let mut buf = Vec::with_capacity(self.encoded_len());

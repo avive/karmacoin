@@ -4,12 +4,11 @@
 
 use bytes::{BufMut, BytesMut};
 use ed25519_dalek::{Keypair, KEYPAIR_LENGTH};
-use rand_core::OsRng;
 
 use crate::karma_coin::karma_coin_core_types::{KeyPair, PrivateKey, PublicKey};
 
 impl KeyPair {
-    pub fn to_ed2559_kaypair(&self) -> ed25519_dalek::Keypair {
+    pub fn to_ed2559_kaypair(&self) -> Keypair {
         let mut buf = BytesMut::with_capacity(KEYPAIR_LENGTH);
 
         buf.put(self.private_key.as_ref().unwrap().key.as_slice());
