@@ -1,3 +1,7 @@
+// Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
+// This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
+//
+
 use anyhow::{anyhow, Result};
 use byteorder::{ByteOrder, LittleEndian};
 use bytes::Bytes;
@@ -6,7 +10,7 @@ use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, RegisterNumbe
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use xactor::*;
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, VERIFICATION_CODES_COL_FAMILY};
-use crate::services::verifier_service::VerifierService;
+use crate::services::verifier::verifier_service::VerifierService;
 
 use rand::prelude::*;
 use rand_chacha::ChaCha20Rng;

@@ -1,13 +1,17 @@
+// Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
+// This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
+//
+
 use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ByteOrder};
 use bytes::Bytes;
 use ed25519_dalek::{Verifier};
 use base::karma_coin::karma_coin_verifier::VerifyNumberRequest;
 use base::karma_coin::karma_coin_core_types::{VerifyNumberResponse, VerifyNumberResult::*, PublicKey};
-use db::db_service::{DatabaseService, ReadItem};
+use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use xactor::*;
-use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, VERIFICATION_CODES_COL_FAMILY};
-use crate::services::verifier_service::VerifierService;
+use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, NICKS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, VERIFICATION_CODES_COL_FAMILY};
+use crate::services::verifier::verifier_service::VerifierService;
 
 #[message(result = "Result<VerifyNumberResponse>")]
 pub(crate) struct Verify(pub VerifyNumberRequest);
@@ -69,7 +73,7 @@ impl Handler<Verify> for VerifierService {
             return Ok(resp);
         }
 
-        // todo: check that no other account was created with this mobile number
+        // check that no other account was created with this mobile number
 
         let phone_number = req.mobile_number.ok_or(anyhow!("missing mobile phone number"))?;
 
@@ -82,17 +86,33 @@ impl Handler<Verify> for VerifierService {
             return Ok(resp);
         }
 
-        // check for unique nickname requested
-
-        let nick_name_key = bincode::serialize(&nickname).unwrap();
+        // verify that the requested nickname not registered to another user
+        let nick_name_key = Bytes::from(bincode::serialize(&nickname).unwrap());
         if let Some(_) = DatabaseService::read(ReadItem {
-            key: Bytes::from(nick_name_key),
-            cf: MOBILE_NUMBERS_COL_FAMILY
+            key: nick_name_key.clone(),
+            cf: NICKS_COL_FAMILY
         }).await? {
             let mut resp = VerifyNumberResponse::from(NicknameTaken);
             resp.sign(&verifier_key_pair)?;
             return Ok(resp);
         }
+
+        // verify the the requested nickname is not reserved by a new user over the last 24 hours
+        if let Some(_) = DatabaseService::read(ReadItem {
+            key: nick_name_key.clone(),
+            cf: RESERVED_NICKS_COL_FAMILY
+        }).await? {
+            let mut resp = VerifyNumberResponse::from(NicknameTaken);
+            resp.sign(&verifier_key_pair)?;
+            return Ok(resp);
+        }
+
+        // reserve the nickname for the caller account for 24 hours
+        DatabaseService::write(WriteItem {
+            data: DataItem { key: nick_name_key, value: Bytes::from(account_id.data.to_vec()) },
+            cf: RESERVED_NICKS_COL_FAMILY,
+            ttl: 60 * 60 * 24
+        }).await?;
 
         // create signed Response and return it
         let mut resp = VerifyNumberResponse::from(Verified);
@@ -101,7 +121,6 @@ impl Handler<Verify> for VerifierService {
         resp.account_id = Some(account_id);
         resp.nickname = nickname;
         resp.mobile_number = Some(phone_number);
-
         resp.sign(&self.id_key_pair.as_ref().unwrap().to_ed2559_kaypair())?;
         Ok(resp)
 

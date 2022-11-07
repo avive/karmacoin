@@ -1,10 +1,14 @@
+// Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
+// This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
+//
+
 use rocksdb::{ColumnFamilyDescriptor, Options};
 use base::server_config_service::{DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY, ServerConfigService};
 use db::db_service::DatabaseService;
 use xactor::*;
 use anyhow::Result;
 
-/// cfs and data modeling
+/// db data modeling - column families and their stored data
 
 ////
 // Verier local data
@@ -14,8 +18,14 @@ use anyhow::Result;
 // index: verification_code, data: accountId. ttl: 24 hours
 pub const VERIFICATION_CODES_COL_FAMILY: &str = "verification_codes_cf";
 
+// Unique reserved nicks (bin-coded strings). data: accountId. ttl: 24 hours
+// Nicks are reserved by new users when they verify their phone so they can claim the nicks
+// in up to 24 hours from verification via the CreateUser transaction
+pub const RESERVED_NICKS_COL_FAMILY: &str = "reserbed_nicks_cf";
+
+
 /////
-//// Blockchain-based data indexes - indexing on-chain data
+//// Blockchain-based data - indexing on-chain data and the chain itself
 /////////////////
 
 // col family the network settings
@@ -71,7 +81,6 @@ impl Actor for DbConfigService {
             .unwrap();
 
         // configure the db
-
         DatabaseService::config_db(db::db_service::Configure {
             drop_on_exit,
             db_name,
@@ -87,8 +96,7 @@ impl Actor for DbConfigService {
                 ColumnFamilyDescriptor::new(TXS_POOL_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TRANSACTIONS_COL_FAMILY, Options::default()),
             ],
-        })
-            .await?;
+        }).await?;
 
         Ok(())
     }

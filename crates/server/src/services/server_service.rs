@@ -3,10 +3,10 @@
 //
 
 use anyhow::Result;
-use crate::services::api_service::ApiService;
+use crate::services::api::api_service::ApiService;
 use crate::services::db_config_service::DbConfigService;
 use base::karma_coin::karma_coin_api::api_service_server::ApiServiceServer;
-use crate::services::verifier_service::VerifierService;
+use crate::services::verifier::verifier_service::VerifierService;
 use base::karma_coin::karma_coin_verifier::phone_numbers_verifier_service_server::PhoneNumbersVerifierServiceServer;
 use base::server_config_service::{
     ServerConfigService, GRPC_SERVER_HOST_CONFIG_KEY,

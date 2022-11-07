@@ -10,8 +10,8 @@ use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, RegisterNumbe
 use base::karma_coin::karma_coin_core_types::{VerifyNumberResponse, KeyPair, PrivateKey, PublicKey};
 use base::server_config_service::{ServerConfigService, VERIFIER_ID_PRIVATE_KEY, VERIFIER_ID_PUBLIC_KEY};
 use xactor::*;
-use crate::services::register_number::RegisterNumber;
-use crate::services::verify_number::Verify;
+use crate::services::verifier::register_number::RegisterNumber;
+use crate::services::verifier::verify_number::Verify;
 
 /// ApiService is a system service that provides access to provider server persisted data as well as an interface to admin the provider's server. It provides a GRPC admin service defined in ServerAdminService. This service is designed to be used by provider admin clients.
 #[derive(Debug, Clone)]
@@ -64,7 +64,7 @@ impl Actor for VerifierService {
             None => {
                 // no private key in config - generate new key pair
                 self.id_key_pair = Some(KeyPair::new());
-                info!("Generated a new random verifier id key pair");
+                info!("generated a new random verifier id key pair");
             }
         }
 
