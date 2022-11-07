@@ -5,6 +5,7 @@
 
 
 pub (crate) mod api_service;
-mod user_by_nick;
-mod user_by_number;
-mod user_by_account_id;
+mod get_user_by_nick;
+mod get_user_by_number;
+mod get_user_by_account_id;
+mod get_char_traits;

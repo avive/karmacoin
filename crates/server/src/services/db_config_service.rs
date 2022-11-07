@@ -6,8 +6,10 @@ use rocksdb::{ColumnFamilyDescriptor, Options};
 use base::server_config_service::{DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY, ServerConfigService};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use xactor::*;
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use bytes::Bytes;
+use base::karma_coin::karma_coin_core_types::CharTrait::{Helpful, Kind, Smart};
+use base::karma_coin::karma_coin_core_types::{TraitName, Traits};
 
 /// db data modeling - column families and their stored data
 /// Encoding conventions:
@@ -39,6 +41,7 @@ pub const NET_SETTINGS_COL_FAMILY: &str = "net_settings_cf";
 // key holds bool value indicating if db was initialized or needs initliaztion with
 // static data
 pub const DB_INITIALIZED_KEY: &str = "db_initialized_key";
+pub const DB_SUPPORTED_TRAITS_KEY: &str = "supported_traits_key";
 
 // col family for verifiers data. index: accountId, data: Verifier dial-up info
 pub const VERIFIERS_COL_FAMILY: &str = "verifiers_cf";
@@ -66,8 +69,10 @@ pub const TXS_POOL_COL_FAMILY: &str = "txs_mem_pool_cf";
 pub const TESTS_COL_FAMILY: &str = "tests_cf"; // col family for db tests
 
 
+
 #[derive(Debug, Clone)]
-pub(crate) struct DbConfigService {}
+pub(crate) struct DbConfigService {
+}
 
 impl Default for DbConfigService {
     fn default() -> Self {
@@ -107,13 +112,35 @@ impl Actor for DbConfigService {
             ],
         }).await?;
 
+        // cehck if db was initialized with static net-specific data
         let init_key = Bytes::from(DB_INITIALIZED_KEY.as_bytes());
-
         if DatabaseService::read(ReadItem {
             key: init_key.clone(),
             cf: NET_SETTINGS_COL_FAMILY
         }).await?.is_none() {
-            // todo: initialize db static data here
+            // initialize db static data here
+            let traits = Traits {
+                // todo: traits should come from config file
+                named_traits: vec![
+                    TraitName::new(Kind, "Kind"),
+                    TraitName::new(Helpful, "Helpful"),
+                    TraitName::new(Smart, "Smart"),
+                ]
+            };
+
+            use prost::Message;
+            let mut buf = Vec::with_capacity(traits.encoded_len());
+            if traits.encode(&mut buf).is_err() {
+                return Err(anyhow!("failed to encode default traits"));
+            };
+
+            // store default char traits
+            DatabaseService::write(WriteItem {
+                data: DataItem { key: Bytes::from(DB_SUPPORTED_TRAITS_KEY.as_bytes()),
+                    value: Bytes::from(buf) },
+                cf: NET_SETTINGS_COL_FAMILY,
+                ttl: 0
+            }).await?;
         }
 
         // mark that db is configured with static data

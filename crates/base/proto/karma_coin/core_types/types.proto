@@ -102,6 +102,7 @@ message Block {
     bytes digest = 6; // block digest includes hash of all above data
 }
 
+// Supported char traits
 enum CharTrait {
     CHAR_TRAIT_KIND = 0;
     CHAR_TRAIT_HELPFUL = 1;
@@ -109,8 +110,13 @@ enum CharTrait {
 }
 
 message TraitName {
-    CharTrait trait = 1;
+    CharTrait char_trait = 1;
     string name = 2;
+}
+
+// A set of traits
+message Traits {
+    repeated TraitName named_traits = 1;
 }
 
 message TraitScore {

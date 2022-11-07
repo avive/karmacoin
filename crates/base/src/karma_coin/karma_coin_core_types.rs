@@ -134,12 +134,18 @@ pub struct Block {
     #[prost(bytes = "vec", tag = "6")]
     pub digest: ::prost::alloc::vec::Vec<u8>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct TraitName {
     #[prost(enumeration = "CharTrait", tag = "1")]
-    pub r#trait: i32,
+    pub char_trait: i32,
     #[prost(string, tag = "2")]
     pub name: ::prost::alloc::string::String,
+}
+/// A set of traits
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
+pub struct Traits {
+    #[prost(message, repeated, tag = "1")]
+    pub named_traits: ::prost::alloc::vec::Vec<TraitName>,
 }
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct TraitScore {
@@ -284,6 +290,7 @@ pub enum CoinType {
     /// $KCStableCents
     Stable = 1,
 }
+/// Supported char traits
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum CharTrait {
