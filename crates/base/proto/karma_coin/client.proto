@@ -1,0 +1,98 @@
+syntax = "proto3";
+package karma_coin.client;
+import "karma_coin/core_types/types.proto";
+
+message ConfigureRequest {
+  string nickname = 1; // user's nickname
+}
+
+message ConfigureResponse {
+
+}
+
+message SignUpRequest {
+  string verifier_endpoint = 1; // verifier grpc endpoint. e.g [:1]:5438
+  string api_endpoint = 2; // karmacoin api endpoint. e.g. [:1]:2351
+  core_types.AccountId verifier_account_id = 3; // verifier account id that should be trusted
+}
+
+message SignUpResponse {
+
+}
+
+message GetAccountStateRequest {
+
+}
+
+message UpdatePhoneNumberRequest {
+
+}
+
+message UpdatePhoneNumberResponse {
+
+}
+
+message UpdateUserInfoRequest {
+
+}
+
+message UpdateUserInfoResponse {
+
+}
+
+message SendCoinRequest {
+  // receiver's mobile phone number
+  core_types.MobileNumber mobile_number = 1;
+
+  // amount to send
+  core_types.Amount amount = 2;
+
+  // transaction fee
+  core_types.Amount fee = 3;
+
+  // char trait to appreciate
+  core_types.CharTrait char_trait = 4;
+}
+
+message SendCoinResponse {
+
+}
+
+message GetAccountStateResponse {
+  // public user info includes balances, karma score, etc...
+  core_types.User user = 1;
+
+  // all transactions known to client for the user's account
+  repeated core_types.SignedTransaction transactions = 2;
+
+}
+
+// A simple client API used for instrumenting a client and integration tests
+service ClientApi {
+  // Configure the client with config data
+  rpc Configure(ConfigureRequest) returns (ConfigureResponse) {
+
+  }
+
+  // Sign up using mobile number
+  rpc SignUp(SignUpRequest) returns (SignUpResponse) {
+
+  }
+
+  // Update user public info such as nickname or phone number
+  rpc UpdateUserInfo(UpdateUserInfoRequest) returns (UpdateUserInfoResponse) {
+
+  }
+
+  // Send a coin to another user and optionally appreciate
+  rpc SendCoin(SendCoinRequest) returns (SendCoinResponse) {
+
+  }
+
+
+  // Get current account state such as balance, karma score, char traits and transactions
+  rpc GetAccountData(GetAccountStateRequest) returns (GetAccountStateResponse) {
+
+  }
+
+}

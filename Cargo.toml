@@ -7,5 +7,7 @@ members = [
     "crates/xactor-playground",
     "crates/db",
     "crates/server",
-    "crates/server-app"
+    "crates/server-app",
+    "crates/client",
+    "crates/client-app"
 ]
