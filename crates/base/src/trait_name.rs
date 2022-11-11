@@ -2,9 +2,6 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use bytes::{BufMut, BytesMut};
-use ed25519_dalek::{Keypair, KEYPAIR_LENGTH};
-
 use crate::karma_coin::karma_coin_core_types::{CharTrait, KeyPair, PrivateKey, PublicKey, TraitName};
 
 impl TraitName {

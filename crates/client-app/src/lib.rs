@@ -10,11 +10,11 @@ extern crate db;
 
 use base::client_config_service::{ClientConfigService, SetConfigFile, CLIENT_NAME_CONFIG_KEY};
 use base::logging_service::{InitLogger, LoggingService};
-use base::server_config_service::{GRPC_HOST_CONFIG_KEY, GRPC_SERVER_PORT_CONFIG_KEY};
 use clap::{App, Arg};
-use client::simple_client::{SimpleClient, StartGrpcServer};
+use client::client::{Client, StartGrpcServer};
 use db::db_service::DatabaseService;
 use tokio::signal;
+use base::server_config_service::{GRPC_SERVER_HOST_CONFIG_KEY, GRPC_SERVER_HOST_PORT_CONFIG_KEY};
 use xactor::*;
 
 // Start a client app - good for testability / integration testing
@@ -49,10 +49,10 @@ pub async fn start() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let client_name = ClientConfigService::get(CLIENT_NAME_CONFIG_KEY.into())
         .await?
         .unwrap();
-    let grpc_host = ClientConfigService::get(GRPC_HOST_CONFIG_KEY.into())
+    let grpc_host = ClientConfigService::get(GRPC_SERVER_HOST_CONFIG_KEY.into())
         .await?
         .unwrap();
-    let grpc_port = ClientConfigService::get_u64(GRPC_SERVER_PORT_CONFIG_KEY.into())
+    let grpc_port = ClientConfigService::get_u64(GRPC_SERVER_HOST_PORT_CONFIG_KEY.into())
         .await?
         .unwrap();
 
@@ -70,7 +70,7 @@ pub async fn start() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
     // test logging
 
-    let client = SimpleClient::from_registry().await.unwrap();
+    let client = Client::from_registry().await.unwrap();
     let _ = client
         .call(StartGrpcServer {
             grpc_port: grpc_port as u32,
