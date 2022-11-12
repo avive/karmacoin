@@ -33,6 +33,8 @@ impl Default for ClientConfigService {
     fn default() -> Self {
         let mut config = Config::default();
 
+        // todo: update to the modern config builder pattern in the latest release, and stop using detracted patterns
+
         config
             .set_default(DROP_DB_CONFIG_KEY, true)
             .unwrap()

@@ -189,11 +189,6 @@ message TransactionData {
     TransactionType type = 2; // transaction type for deserialization
 }
 
-message TransactionWithStatus {
-    TransactionData data = 1;
-    TransactionStatus status = 2; // transaction status
-}
-
 enum TransactionStatus {
     TRANSACTION_STATUS_UNKNOWN = 0;
     TRANSACTION_STATUS_PENDING = 1;
@@ -209,6 +204,10 @@ message SignedTransaction {
     Signature signature = 5; // signer signature on all of the above data
 }
 
+message SignedTransactionWithStatus {
+    SignedTransaction transaction = 1;
+    TransactionStatus status = 2; // transaction status
+}
 
 // events - emitted by runtime, all stored by archive nodes only
 // full nodes have only recent events

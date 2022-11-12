@@ -6,10 +6,8 @@ use rocksdb::{ColumnFamilyDescriptor, Options};
 use base::server_config_service::{DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY, ServerConfigService};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use xactor::*;
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use bytes::Bytes;
-use base::karma_coin::karma_coin_core_types::CharTrait::{Helpful, Kind, Smart};
-use base::karma_coin::karma_coin_core_types::{TraitName, Traits};
 
 /// db data modeling - column families and their stored data
 /// Encoding conventions:
@@ -79,8 +77,6 @@ pub const TXS_POOL_COL_FAMILY: &str = "txs_mem_pool_cf";
 // Used for db testing - doesn't hold any app data
 pub const TESTS_COL_FAMILY: &str = "tests_cf"; // col family for db tests
 
-
-
 #[derive(Debug, Clone)]
 pub(crate) struct DbConfigService {
 }
@@ -123,51 +119,14 @@ impl Actor for DbConfigService {
             ],
         }).await?;
 
-        // cehck if db was initialized with static net-specific data
+        // check if db was initialized with static net-specific data
+        // including genesis config
         let init_key = Bytes::from(DB_INITIALIZED_KEY.as_bytes());
         if DatabaseService::read(ReadItem {
             key: init_key.clone(),
             cf: NET_SETTINGS_COL_FAMILY
         }).await?.is_none() {
-            // initialize db static GENESIS data here
-            let traits = Traits {
-                // todo: traits should come from config file
-                named_traits: vec![
-                    TraitName::new(Kind, "Kind"),
-                    TraitName::new(Helpful, "Helpful"),
-                    TraitName::new(Smart, "Smart"),
-                ]
-            };
-
-            use prost::Message;
-            let mut buf = Vec::with_capacity(traits.encoded_len());
-            if traits.encode(&mut buf).is_err() {
-                return Err(anyhow!("failed to encode default traits"));
-            };
-
-            // store default char traits
-            DatabaseService::write(WriteItem {
-                data: DataItem { key: Bytes::from(DB_SUPPORTED_TRAITS_KEY.as_bytes()),
-                    value: Bytes::from(buf) },
-                cf: NET_SETTINGS_COL_FAMILY,
-                ttl: 0
-            }).await?;
-
-        /*
-            todo: initialize these settings - genesis config:
-
-            uint32 network_id = 1;
-            uint64 users_count = 2;
-            uint64 genesis_time = 3;
-            string name = 4;
-            uint64 block_height = 5;
-            string api_version = 6; // provided API semantic version
-            uint64 transactions_count = 7; // number of transactions
-            uint64 appreciations_count = 8; // number of appreciations
-            uint64 new_account_reward = 9; // new account reward in kcents
-            uint64 referral_reward = 10; // referral reward in kcents
-        */
-
+            DbConfigService::config_genesis().await?;
         }
 
         // mark that db is configured with static data

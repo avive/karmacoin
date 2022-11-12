@@ -54,6 +54,7 @@ pub struct GetCharTraitsResponse {
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetNetInfoRequest {}
+/// All genesis data as well as versioning info should be returned
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetNetInfoResponse {
     #[prost(uint32, tag = "1")]
@@ -92,7 +93,7 @@ pub struct GetTransactionsRequest {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetTransactionsResponse {
     #[prost(message, repeated, tag = "1")]
-    pub transactions: ::prost::alloc::vec::Vec<super::core_types::SignedTransaction>,
+    pub transactions: ::prost::alloc::vec::Vec<super::core_types::SignedTransactionWithStatus>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetTransactionRequest {
@@ -102,7 +103,7 @@ pub struct GetTransactionRequest {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetTransactionResponse {
     #[prost(message, optional, tag = "1")]
-    pub transaction: ::core::option::Option<super::core_types::SignedTransaction>,
+    pub transaction: ::core::option::Option<super::core_types::SignedTransactionWithStatus>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetBlockchainEventsRequest {
@@ -297,23 +298,8 @@ pub mod api_service_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        #[doc = " Get transactions from an account or to an account. Submitted transactions may be in pool or on chain"]
-        pub async fn get_transactions_status(
-            &mut self,
-            request: impl tonic::IntoRequest<super::GetTransactionsRequest>,
-        ) -> Result<tonic::Response<super::GetTransactionsResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
-            let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static(
-                "/karma_coin.api.ApiService/GetTransactionsStatus",
-            );
-            self.inner.unary(request.into_request(), path, codec).await
-        }
+        #[doc = " Get all transactions between two account, included transactions in the pool and not yet on-chain"]
+        #[doc = " Results include txs current status"]
         pub async fn get_transactions(
             &mut self,
             request: impl tonic::IntoRequest<super::GetTransactionsRequest>,
@@ -329,7 +315,7 @@ pub mod api_service_client {
                 http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetTransactions");
             self.inner.unary(request.into_request(), path, codec).await
         }
-        #[doc = " Get transaction on-chain by its digest hash"]
+        #[doc = " Get transaction data by its digest hash. Transaction may be in pool or on-chain"]
         pub async fn get_transaction(
             &mut self,
             request: impl tonic::IntoRequest<super::GetTransactionRequest>,
@@ -406,16 +392,13 @@ pub mod api_service_server {
             &self,
             request: tonic::Request<super::SubmitTransactionRequest>,
         ) -> Result<tonic::Response<super::SubmitTransactionResponse>, tonic::Status>;
-        #[doc = " Get transactions from an account or to an account. Submitted transactions may be in pool or on chain"]
-        async fn get_transactions_status(
-            &self,
-            request: tonic::Request<super::GetTransactionsRequest>,
-        ) -> Result<tonic::Response<super::GetTransactionsResponse>, tonic::Status>;
+        #[doc = " Get all transactions between two account, included transactions in the pool and not yet on-chain"]
+        #[doc = " Results include txs current status"]
         async fn get_transactions(
             &self,
             request: tonic::Request<super::GetTransactionsRequest>,
         ) -> Result<tonic::Response<super::GetTransactionsResponse>, tonic::Status>;
-        #[doc = " Get transaction on-chain by its digest hash"]
+        #[doc = " Get transaction data by its digest hash. Transaction may be in pool or on-chain"]
         async fn get_transaction(
             &self,
             request: tonic::Request<super::GetTransactionRequest>,
@@ -699,40 +682,6 @@ pub mod api_service_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = SubmitTransactionSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
-                        let res = grpc.unary(method, req).await;
-                        Ok(res)
-                    };
-                    Box::pin(fut)
-                }
-                "/karma_coin.api.ApiService/GetTransactionsStatus" => {
-                    #[allow(non_camel_case_types)]
-                    struct GetTransactionsStatusSvc<T: ApiService>(pub Arc<T>);
-                    impl<T: ApiService> tonic::server::UnaryService<super::GetTransactionsRequest>
-                        for GetTransactionsStatusSvc<T>
-                    {
-                        type Response = super::GetTransactionsResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
-                        fn call(
-                            &mut self,
-                            request: tonic::Request<super::GetTransactionsRequest>,
-                        ) -> Self::Future {
-                            let inner = self.0.clone();
-                            let fut =
-                                async move { (*inner).get_transactions_status(request).await };
-                            Box::pin(fut)
-                        }
-                    }
-                    let accept_compression_encodings = self.accept_compression_encodings;
-                    let send_compression_encodings = self.send_compression_encodings;
-                    let inner = self.inner.clone();
-                    let fut = async move {
-                        let inner = inner.0;
-                        let method = GetTransactionsStatusSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
                             accept_compression_encodings,

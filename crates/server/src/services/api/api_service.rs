@@ -125,13 +125,6 @@ impl ApiServiceTrait for ApiService {
         todo!()
     }
 
-    async fn get_transactions_status(
-        &self,
-        _request: Request<GetTransactionsRequest>,
-    ) -> Result<Response<GetTransactionsResponse>, Status> {
-        todo!()
-    }
-
     async fn get_transactions(
         &self,
         _request: Request<GetTransactionsRequest>,

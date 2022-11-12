@@ -52,9 +52,8 @@ impl Default for ServerConfigService {
         let mut config = Config::default();
 
         info!("Configuring server...");
-        // todo: set default blockchain server config for server
 
-        // todo: update to new config release api and stop using deprecated patterns
+        // todo: update to the modern config builder pattern in the latest release, and stop using detracted patterns
 
         config
             .set_default(NET_ID_CONFIG_KEY, 1)

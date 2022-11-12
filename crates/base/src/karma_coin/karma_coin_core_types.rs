@@ -227,14 +227,6 @@ pub struct TransactionData {
     pub r#type: i32,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct TransactionWithStatus {
-    #[prost(message, optional, tag = "1")]
-    pub data: ::core::option::Option<TransactionData>,
-    /// transaction status
-    #[prost(enumeration = "TransactionStatus", tag = "2")]
-    pub status: i32,
-}
-#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SignedTransaction {
     /// time transaction was signed
     #[prost(uint64, tag = "1")]
@@ -251,6 +243,14 @@ pub struct SignedTransaction {
     /// signer signature on all of the above data
     #[prost(message, optional, tag = "5")]
     pub signature: ::core::option::Option<Signature>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SignedTransactionWithStatus {
+    #[prost(message, optional, tag = "1")]
+    pub transaction: ::core::option::Option<SignedTransaction>,
+    /// transaction status
+    #[prost(enumeration = "TransactionStatus", tag = "2")]
+    pub status: i32,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct NewUserEvent {

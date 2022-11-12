@@ -63,6 +63,7 @@ message GetCharTraitsResponse {
 message GetNetInfoRequest {
 }
 
+// All genesis data as well as versioning info should be returned
 message GetNetInfoResponse {
   uint32 network_id = 1;
   uint64 users_count = 2;
@@ -82,7 +83,7 @@ message GetTransactionsRequest {
 }
 
 message GetTransactionsResponse {
-  repeated core_types.SignedTransaction transactions = 1;
+  repeated core_types.SignedTransactionWithStatus transactions = 1;
 }
 
 message GetTransactionRequest {
@@ -90,7 +91,7 @@ message GetTransactionRequest {
 }
 
 message GetTransactionResponse {
-  core_types.SignedTransaction transaction = 1;
+  core_types.SignedTransactionWithStatus transaction = 1;
 }
 
 message GetBlockchainEventsRequest {
@@ -125,12 +126,11 @@ service ApiService {
   // Submit a signed transaction to the blockchain
   rpc SubmitTransaction(SubmitTransactionRequest) returns (SubmitTransactionResponse);
 
-  // Get transactions from an account or to an account. Submitted transactions may be in pool or on chain
-  rpc GetTransactionsStatus(GetTransactionsRequest) returns (GetTransactionsResponse);
-
+  // Get all transactions between two account, included transactions in the pool and not yet on-chain
+  // Results include txs current status
   rpc GetTransactions(GetTransactionsRequest) returns (GetTransactionsResponse);
 
-  // Get transaction on-chain by its digest hash
+  // Get transaction data by its digest hash. Transaction may be in pool or on-chain
   rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse);
 
   // Get execution events for one or more blocks
