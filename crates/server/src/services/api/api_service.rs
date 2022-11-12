@@ -92,7 +92,7 @@ impl ApiServiceTrait for ApiService {
 
     async fn get_phone_verifiers(
         &self,
-        request: Request<GetPhoneVerifiersRequest>,
+        _request: Request<GetPhoneVerifiersRequest>,
     ) -> std::result::Result<Response<GetPhoneVerifiersResponse>, Status> {
         todo!()
     }
@@ -116,40 +116,40 @@ impl ApiServiceTrait for ApiService {
 
     async fn get_net_info(
         &self,
-        request: Request<GetNetInfoRequest>,
+        _request: Request<GetNetInfoRequest>,
     ) -> std::result::Result<Response<GetNetInfoResponse>, Status> {
         todo!()
     }
 
-    async fn submit_transaction(&self, request: Request<SubmitTransactionRequest>) -> std::result::Result<Response<SubmitTransactionResponse>, Status> {
+    async fn submit_transaction(&self,_request: Request<SubmitTransactionRequest>) -> std::result::Result<Response<SubmitTransactionResponse>, Status> {
         todo!()
     }
 
     async fn get_transactions_status(
         &self,
-        request: Request<GetTransactionsRequest>,
-    ) -> std::result::Result<Response<GetTransactionsResponse>, Status> {
+        _request: Request<GetTransactionsRequest>,
+    ) -> Result<Response<GetTransactionsResponse>, Status> {
         todo!()
     }
 
     async fn get_transactions(
         &self,
-        request: Request<GetTransactionsRequest>,
-    ) -> std::result::Result<Response<GetTransactionsResponse>, Status> {
+        _request: Request<GetTransactionsRequest>,
+    ) -> Result<Response<GetTransactionsResponse>, Status> {
         todo!()
     }
 
     async fn get_transaction(
         &self,
-        request: Request<GetTransactionRequest>,
-    ) -> std::result::Result<Response<GetTransactionResponse>, Status> {
+        _request: Request<GetTransactionRequest>,
+    ) -> Result<Response<GetTransactionResponse>, Status> {
         todo!()
     }
 
     async fn get_blockchain_events(
         &self,
-        request: Request<GetBlockchainEventsRequest>,
-    ) -> std::result::Result<Response<GetBlockchainEventsResponse>, Status> {
+        _request: Request<GetBlockchainEventsRequest>,
+    ) -> Result<Response<GetBlockchainEventsResponse>, Status> {
         todo!()
     }
 }

@@ -129,7 +129,7 @@ impl Actor for DbConfigService {
             key: init_key.clone(),
             cf: NET_SETTINGS_COL_FAMILY
         }).await?.is_none() {
-            // initialize db static data here
+            // initialize db static GENESIS data here
             let traits = Traits {
                 // todo: traits should come from config file
                 named_traits: vec![
@@ -152,6 +152,22 @@ impl Actor for DbConfigService {
                 cf: NET_SETTINGS_COL_FAMILY,
                 ttl: 0
             }).await?;
+
+        /*
+            todo: initialize these settings - genesis config:
+
+            uint32 network_id = 1;
+            uint64 users_count = 2;
+            uint64 genesis_time = 3;
+            string name = 4;
+            uint64 block_height = 5;
+            string api_version = 6; // provided API semantic version
+            uint64 transactions_count = 7; // number of transactions
+            uint64 appreciations_count = 8; // number of appreciations
+            uint64 new_account_reward = 9; // new account reward in kcents
+            uint64 referral_reward = 10; // referral reward in kcents
+        */
+
         }
 
         // mark that db is configured with static data
