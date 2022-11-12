@@ -1,7 +1,7 @@
 [package]
 name = "base"
 version = "0.1.0"
-authors = ["subnetter <subnetter@pm.me>"]
+authors = ["ae <a@karmaco.in>"]
 edition = "2018"
 
 [build-dependencies]

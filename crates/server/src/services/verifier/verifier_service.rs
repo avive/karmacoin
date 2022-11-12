@@ -59,7 +59,6 @@ impl Actor for VerifierService {
                         panic!("invalid config: missing verifier id public key");
                     }
                 }
-
             },
             None => {
                 // no private key in config - generate new key pair

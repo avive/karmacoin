@@ -1,7 +1,6 @@
-// Copyright (c) 2021, Subnet Authors. cmdev2@proton.me.
-// This work is licensed under the Subnet v0.1.0 license published in the LICENSE file of this repo.
+// Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
+// This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
-
 
 use anyhow::Result;
 use base::client_config_service::ClientConfigService;
@@ -33,27 +32,6 @@ pub struct Client {
 
     // A name server client used to communicate with a name service
     // pub(crate) blockchain_service_client: Option<BlockchainServiceClient<Channel>>,
-}
-
-impl Client {
-    /*
-    pub(crate) fn get_client_entity(&self) -> Result<EntityId> {
-        Ok(self
-            .client_bundle
-            .as_ref()
-            .ok_or_else(|| anyhow!("missing client bundle"))?
-            .client_id
-            .as_ref()
-            .ok_or_else(|| anyhow!("missing client id"))?
-            .clone())
-    }
-
-    /// Client's payment address - derived from public id for now
-    pub(crate) fn get_payment_address(&self) -> Result<Address> {
-        Ok(Address {
-            data: self.client_id.public.to_bytes()[12..].to_vec(),
-        })
-    }*/
 }
 
 impl Default for Client {

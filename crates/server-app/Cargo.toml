@@ -2,7 +2,7 @@
 name = "server-app"
 description = "An executable server process with support to cli flags and config file"
 version = "0.1.0"
-authors = ["subnetter <subnetter@pm.me>"]
+authors = ["ae <a@karmaco.in>"]
 edition = "2018"
 
 [dependencies.tokio]
