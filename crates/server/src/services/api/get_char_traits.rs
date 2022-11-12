@@ -6,9 +6,9 @@ use anyhow::Result;
 use bytes::Bytes;
 use db::db_service::{DatabaseService, ReadItem};
 use xactor::*;
-use crate::services::db_config_service::{DB_SUPPORTED_TRAITS_KEY, NET_SETTINGS_COL_FAMILY, NICKS_COL_FAMILY, USERS_COL_FAMILY};
-use base::karma_coin::karma_coin_api::{GetCharTraitsRequest, GetCharTraitsResponse, GetUserInfoByNickRequest, GetUserInfoByNickResponse};
-use base::karma_coin::karma_coin_core_types::{Traits, User};
+use crate::services::db_config_service::{DB_SUPPORTED_TRAITS_KEY, NET_SETTINGS_COL_FAMILY};
+use base::karma_coin::karma_coin_api::{GetCharTraitsRequest, GetCharTraitsResponse};
+use base::karma_coin::karma_coin_core_types::{Traits};
 use crate::services::api::api_service::ApiService;
 use prost::Message;
 
@@ -20,7 +20,7 @@ impl Handler<GetCharTraits> for ApiService {
     async fn handle(
         &mut self,
         _ctx: &mut Context<Self>,
-        msg: GetCharTraits,
+        _msg: GetCharTraits,
     ) -> Result<GetCharTraitsResponse> {
 
         // lookup accountId by nickname

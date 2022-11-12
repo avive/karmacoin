@@ -38,13 +38,13 @@ impl Handler<RegisterNumber> for VerifierService {
             return Err(anyhow!("failed to encode source data to binary data"));
         };
 
-        let account_id = req.account_id.ok_or(anyhow!("missing account id"))?;
-        let signature_data = req.signature.ok_or(anyhow!("missing signature"))?;
+        let account_id = req.account_id.ok_or_else(|| anyhow!("missing account id"))?;
+        let signature_data = req.signature.ok_or_else(|| anyhow!("missing signature"))?;
         let signature = ed25519_dalek::Signature::from_bytes(&signature_data.signature)?;
         let signer_pub_key = ed25519_dalek::PublicKey::from_bytes(account_id.data.as_slice())?;
         signer_pub_key.verify(&buf, &signature)?;
 
-        let phone_number = req.mobile_number.ok_or(anyhow!("missing mobile phone number"))?;
+        let phone_number = req.mobile_number.ok_or_else(|| anyhow!("missing mobile phone number"))?;
 
         let verifier_key_pair = self.id_key_pair.as_ref().unwrap().to_ed2559_kaypair();
 

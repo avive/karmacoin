@@ -7,7 +7,7 @@ use byteorder::{LittleEndian, ByteOrder};
 use bytes::Bytes;
 use ed25519_dalek::{Verifier};
 use base::karma_coin::karma_coin_verifier::VerifyNumberRequest;
-use base::karma_coin::karma_coin_core_types::{VerifyNumberResponse, VerifyNumberResult::*, PublicKey};
+use base::karma_coin::karma_coin_core_types::{VerifyNumberResponse, VerifyNumberResult::*};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use xactor::*;
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, NICKS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, VERIFICATION_CODES_COL_FAMILY};
@@ -75,7 +75,7 @@ impl Handler<Verify> for VerifierService {
 
         // check that no other account was created with this mobile number
 
-        let phone_number = req.mobile_number.ok_or(anyhow!("missing mobile phone number"))?;
+        let phone_number = req.mobile_number.ok_or_else(|| anyhow!("missing mobile phone number"))?;
 
         if let Some(_) = DatabaseService::read(ReadItem {
             key: Bytes::from(phone_number.number.as_bytes().to_vec()),
@@ -88,6 +88,7 @@ impl Handler<Verify> for VerifierService {
 
         // verify that the requested nickname not registered to another user
         let nick_name_key = Bytes::from(nickname.as_bytes().to_vec());
+
         if let Some(_) = DatabaseService::read(ReadItem {
             key: nick_name_key.clone(),
             cf: NICKS_COL_FAMILY

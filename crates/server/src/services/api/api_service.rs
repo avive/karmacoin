@@ -3,17 +3,22 @@
 //
 
 use anyhow::Result;
-use bytes::Bytes;
 use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
-use tonic::{Code, IntoRequest, Request, Response, Status};
-use base::karma_coin::karma_coin_api::{GetBlockchainEventsRequest, GetBlockchainEventsResponse, GetCharTraitsRequest, GetCharTraitsResponse, GetNetInfoRequest, GetNetInfoResponse, GetPhoneVerifiersRequest, GetPhoneVerifiersResponse, GetTransactionRequest, GetTransactionResponse, GetTransactionsRequest, GetTransactionsResponse, GetUserInfoByAccountRequest, GetUserInfoByAccountResponse, GetUserInfoByNickRequest, GetUserInfoByNickResponse, GetUserInfoByNumberRequest, GetUserInfoByNumberResponse, SubmitTransactionRequest, SubmitTransactionResponse};
-use db::db_service::{DatabaseService, ReadItem};
+use tonic::{Request, Response, Status};
+use base::karma_coin::karma_coin_api::{GetBlockchainEventsRequest, GetBlockchainEventsResponse,
+                                       GetCharTraitsRequest, GetCharTraitsResponse,
+                                       GetNetInfoRequest, GetNetInfoResponse, GetPhoneVerifiersRequest,
+                                       GetPhoneVerifiersResponse, GetTransactionRequest, GetTransactionResponse,
+                                       GetTransactionsRequest, GetTransactionsResponse, GetUserInfoByAccountRequest,
+                                       GetUserInfoByAccountResponse, GetUserInfoByNickRequest,
+                                       GetUserInfoByNickResponse, GetUserInfoByNumberRequest,
+                                       GetUserInfoByNumberResponse, SubmitTransactionRequest,
+                                       SubmitTransactionResponse};
 use xactor::*;
 use crate::services::api::get_char_traits::GetCharTraits;
 use crate::services::api::get_user_by_account_id::GetUserInfoByAccountId;
 use crate::services::api::get_user_by_nick::GetUserInfoByNick;
 use crate::services::api::get_user_by_number::GetUserInfoByNumber;
-use crate::services::db_config_service::NICKS_COL_FAMILY;
 
 /// ApiService is a system service that provides access to provider server persisted data as well as an interface to admin the provider's server. It provides a GRPC admin service defined in ServerAdminService. This service is designed to be used by provider admin clients.
 #[derive(Debug, Clone)]

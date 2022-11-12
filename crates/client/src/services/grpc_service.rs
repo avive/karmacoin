@@ -5,7 +5,6 @@
 use tonic::{Request, Response, Status};
 use base::karma_coin::karma_coin_client::client_api_server::ClientApi;
 use base::karma_coin::karma_coin_client::{ConfigureRequest, ConfigureResponse, GetAccountStateRequest, GetAccountStateResponse, SendCoinRequest, SendCoinResponse, SignUpRequest, SignUpResponse, UpdateUserInfoRequest, UpdateUserInfoResponse};
-use xactor::*;
 
 /// SimpleClientGrpcService is a network service which provides a client grpc api
 /// We use it to simulate user actions with a client for use cases such as setting service provider and

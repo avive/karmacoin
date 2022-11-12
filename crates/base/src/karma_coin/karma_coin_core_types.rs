@@ -290,7 +290,7 @@ pub enum CoinType {
     /// $KCStableCents
     Stable = 1,
 }
-/// Supported char traits
+/// Supported char traits. Enum values are the traits unique id
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum CharTrait {

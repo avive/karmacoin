@@ -66,7 +66,7 @@ impl Default for Client {
 
         Client {
             client_name: "KarmaCoinSimpleClient".into(),
-            client_id,
+            client_id: client_id,
             pre_key: StaticSecret::new(&mut OsRng),
         }
     }

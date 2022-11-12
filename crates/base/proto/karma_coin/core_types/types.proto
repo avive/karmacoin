@@ -102,7 +102,7 @@ message Block {
     bytes digest = 6; // block digest includes hash of all above data
 }
 
-// Supported char traits
+// Supported char traits. Enum values are the traits unique id
 enum CharTrait {
     CHAR_TRAIT_KIND = 0;
     CHAR_TRAIT_HELPFUL = 1;

@@ -28,44 +28,55 @@ pub const VERIFICATION_CODES_COL_FAMILY: &str = "verification_codes_cf";
 // Unique reserved nicks (bin-coded strings). data: accountId. ttl: 24 hours
 // Nicks are reserved by new users when they verify their phone so they can claim the nicks
 // in up to 24 hours from verification via the CreateUser transaction
-pub const RESERVED_NICKS_COL_FAMILY: &str = "reserbed_nicks_cf";
+pub const RESERVED_NICKS_COL_FAMILY: &str = "reserved_nicks_cf";
 
 
 /////
-//// Blockchain-based data - indexing on-chain data and the chain itself
+//// Blockchain-based data - indexing on-chain data and its blocks
 /////////////////
 
-// col family the network settings
+// col family the network settings. Various settings are accessible via keys.
 pub const NET_SETTINGS_COL_FAMILY: &str = "net_settings_cf";
 
-// key holds bool value indicating if db was initialized or needs initliaztion with
-// static data
+// value: bool indicating if the local db was initialized or needs initiation with static data
 pub const DB_INITIALIZED_KEY: &str = "db_initialized_key";
+
+// Value: a serialized vector of all supported Traits
+// this data is in consensus on genesis and may only change via a runtime upgrade
 pub const DB_SUPPORTED_TRAITS_KEY: &str = "supported_traits_key";
 
-// col family for verifiers data. index: accountId, data: Verifier dial-up info
+// col family for verifiers on-chain data. index: accountId, data: Verifier dial-up info
+// this data is in consensus on genesis and can only change via a runtime update
 pub const VERIFIERS_COL_FAMILY: &str = "verifiers_cf";
 
-// User's data. index: accountId, data: User
+// A mapping of account ids to users. key: accountId, data: User
+// This is on-chain data.
+// All users accounts in consensus on-chain.
 pub const USERS_COL_FAMILY: &str = "users_cf";
 
-// Unique nicks (bin-coded strings). data: accountId.
+// A mapping of nicknames to account ids.
+// This is on-chain data derived from on-chain users accounts data.
+// key: nickname (utf8 encoded string). value: accountId.
 pub const NICKS_COL_FAMILY: &str = "nicks_cf";
 
-// Unique numbers of registered users. index: mobile number. data: accountId
+// A mapping from mobile phone numbers to registered users.
+// This is on-chain data derived from on-chain users accounts data.
+// key: mobile number (utf-8 encoded). value: accountId
 pub const MOBILE_NUMBERS_COL_FAMILY: &str = "mobile_number_cf";
 
-// signed transactions indexed by their hash. Data: SignTransaction
+// Signed transactions indexed by their hash. Data: SignTransaction
+// This is on-chain data
 pub const TRANSACTIONS_COL_FAMILY: &str = "txs_cf";
 
-// blocks keyed by block number - the blockchain. index: block height. Data: Block
+// Blocks keyed by block number - the blockchain. index: block height. value: Block
+// This is the actual blockchain
 pub const BLOCKS_COL_FAMILY: &str = "blocks_cf";
 
-// valid transactions submitted to the chain and not yet processed. Queued in pool
+// Valid transactions submitted to the chain, not yet processed and queued in the txs pool
+// This is off-chain tx pool data
 pub const TXS_POOL_COL_FAMILY: &str = "txs_mem_pool_cf";
 
-/////////////////////
-
+// Used for db testing - doesn't hold any app data
 pub const TESTS_COL_FAMILY: &str = "tests_cf"; // col family for db tests
 
 
