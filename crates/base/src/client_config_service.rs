@@ -61,6 +61,7 @@ pub struct SetConfigFile {
 impl Handler<SetConfigFile> for ClientConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: SetConfigFile) -> Result<()> {
         // todo: verify config file exists and is readable by this process
+        #[allow(deprecated)]
         self.config
             .merge(config::File::with_name(msg.config_file.as_str()).required(false))
             .unwrap();
@@ -146,6 +147,7 @@ pub struct SetValue {
 #[async_trait::async_trait]
 impl Handler<SetValue> for ClientConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: SetValue) -> Result<()> {
+        #[allow(deprecated)]
         match self.config.set(msg.key.as_str(), msg.value) {
             Ok(_) => Ok(()),
             Err(e) => Err(anyhow!("{:?}", e)),

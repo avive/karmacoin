@@ -26,9 +26,9 @@ pub const SNP_PROTOCOL_VERSION: &str = "0.1.0";
 pub struct Client {
     pub(crate) client_name: String,
     /// client long term ed25519 id
-    pub(crate) client_id: Keypair,
+    pub(crate) _client_id: Keypair,
     /// for now we assume only 1 pre-key for the client and we don't create new ones yet
-    pub(crate) pre_key: StaticSecret,
+    pub(crate) _pre_key: StaticSecret,
 
     // A name server client used to communicate with a name service
     // pub(crate) blockchain_service_client: Option<BlockchainServiceClient<Channel>>,
@@ -44,8 +44,8 @@ impl Default for Client {
 
         Client {
             client_name: "KarmaCoinSimpleClient".into(),
-            client_id: client_id,
-            pre_key: StaticSecret::new(&mut OsRng),
+            _client_id: client_id,
+            _pre_key: StaticSecret::new(OsRng),
         }
     }
 }

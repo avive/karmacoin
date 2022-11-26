@@ -210,6 +210,7 @@ pub struct SetValue {
 #[async_trait::async_trait]
 impl Handler<SetValue> for ServerConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: SetValue) -> Result<()> {
+        #[allow(deprecated)]
         match self.config.set(msg.key.as_str(), msg.value) {
             Ok(_) => Ok(()),
             Err(e) => Err(anyhow!("{:?}", e)),
@@ -226,6 +227,7 @@ pub struct SetU64 {
 #[async_trait::async_trait]
 impl Handler<SetU64> for ServerConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: SetU64) -> Result<()> {
+        #[allow(deprecated)]
         match self.config.set(msg.key.as_str(), msg.value.to_string()) {
             Ok(_) => Ok(()),
             Err(e) => Err(anyhow!("{:?}", e)),
@@ -242,6 +244,7 @@ pub struct SetBool {
 #[async_trait::async_trait]
 impl Handler<SetBool> for ServerConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: SetBool) -> Result<()> {
+        #[allow(deprecated)]
         match self.config.set(msg.key.as_str(), msg.value) {
             Ok(_) => Ok(()),
             Err(e) => Err(anyhow!("{:?}", e)),
