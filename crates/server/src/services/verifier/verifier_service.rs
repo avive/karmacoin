@@ -51,7 +51,8 @@ impl Actor for VerifierService {
                             }),
                             public_key: Some(PublicKey {
                                 key: pub_key_data,
-                            })
+                            }),
+                            scheme: 0
                         });
                         info!("loaded verifier id key pair from config")
                     },

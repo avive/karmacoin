@@ -42,7 +42,7 @@ impl VerifyNumberResponse {
 
         use crate::karma_coin::karma_coin_core_types::Signature;
         self.signature = Some(Signature {
-            scheme_id: 0,
+            scheme: 0,
             signature: key_pair.sign(&buf).as_ref().to_vec(),
         });
 
@@ -50,7 +50,7 @@ impl VerifyNumberResponse {
         self.encode(&mut buf1)?;
 
         self.signature = Some(Signature {
-            scheme_id: 0,
+            scheme: 0,
             signature: key_pair.sign(&buf1).as_ref().to_vec(),
         });
         Ok(())

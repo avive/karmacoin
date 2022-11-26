@@ -8,12 +8,10 @@ package karma_coin.core_types;
 //////////////////
 //
 // Basic KarmaCoin data types
-//
 /////////////////
 
 // Derived from a public key
 message AccountId {
-    // derived from pub key
     bytes data = 1;
 }
 
@@ -31,11 +29,16 @@ enum CoinType {
     // other coin types can be added in future versions of the protocol
 }
 
+// Supported signature schemes
+enum KeyScheme {
+    KEY_SCHEME_ED25519 = 0;
+}
+
 message Balance {
     Amount free = 1;
-    Amount reserved = 3;
-    Amount misc_frozen = 4;
-    Amount fee_frozen = 5;
+    Amount reserved = 2;
+    Amount misc_frozen = 3;
+    Amount fee_frozen = 4;
 }
 
 // An public encryption key
@@ -50,20 +53,22 @@ message PrivateKey {
 message PreKey {
     PublicKey pub_key = 1;
     uint32 id = 2;
+    KeyScheme scheme = 3;
 }
 
 message KeyPair {
     PrivateKey private_key = 1;
     PublicKey public_key = 2;
+    KeyScheme scheme = 3;
 }
 
 message Signature {
-    uint32 scheme_id = 1;
+    KeyScheme scheme = 1;
     bytes signature = 2;
 }
 
 message MobileNumber {
-    // 12 digits
+    // always up to 12 digits which including country code
     string number = 1;
 }
 

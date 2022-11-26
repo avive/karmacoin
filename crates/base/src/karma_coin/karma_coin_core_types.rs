@@ -1,13 +1,11 @@
 //////////////////
 //
 // Basic KarmaCoin data types
-//
 /////////////////
 
 /// Derived from a public key
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct AccountId {
-    /// derived from pub key
     #[prost(bytes = "vec", tag = "1")]
     pub data: ::prost::alloc::vec::Vec<u8>,
 }
@@ -23,11 +21,11 @@ pub struct Amount {
 pub struct Balance {
     #[prost(message, optional, tag = "1")]
     pub free: ::core::option::Option<Amount>,
-    #[prost(message, optional, tag = "3")]
+    #[prost(message, optional, tag = "2")]
     pub reserved: ::core::option::Option<Amount>,
-    #[prost(message, optional, tag = "4")]
+    #[prost(message, optional, tag = "3")]
     pub misc_frozen: ::core::option::Option<Amount>,
-    #[prost(message, optional, tag = "5")]
+    #[prost(message, optional, tag = "4")]
     pub fee_frozen: ::core::option::Option<Amount>,
 }
 /// An public encryption key
@@ -47,6 +45,8 @@ pub struct PreKey {
     pub pub_key: ::core::option::Option<PublicKey>,
     #[prost(uint32, tag = "2")]
     pub id: u32,
+    #[prost(enumeration = "KeyScheme", tag = "3")]
+    pub scheme: i32,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct KeyPair {
@@ -54,17 +54,19 @@ pub struct KeyPair {
     pub private_key: ::core::option::Option<PrivateKey>,
     #[prost(message, optional, tag = "2")]
     pub public_key: ::core::option::Option<PublicKey>,
+    #[prost(enumeration = "KeyScheme", tag = "3")]
+    pub scheme: i32,
 }
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct Signature {
-    #[prost(uint32, tag = "1")]
-    pub scheme_id: u32,
+    #[prost(enumeration = "KeyScheme", tag = "1")]
+    pub scheme: i32,
     #[prost(bytes = "vec", tag = "2")]
     pub signature: ::prost::alloc::vec::Vec<u8>,
 }
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct MobileNumber {
-    /// 12 digits
+    /// always up to 12 digits which including country code
     #[prost(string, tag = "1")]
     pub number: ::prost::alloc::string::String,
 }
@@ -289,6 +291,12 @@ pub enum CoinType {
     Core = 0,
     /// $KCStableCents
     Stable = 1,
+}
+/// Supported signature schemes
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum KeyScheme {
+    Ed25519 = 0,
 }
 /// Supported char traits. Enum values are the traits unique id
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]

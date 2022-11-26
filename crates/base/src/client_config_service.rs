@@ -31,27 +31,23 @@ impl Service for ClientConfigService {}
 
 impl Default for ClientConfigService {
     fn default() -> Self {
-        let mut config = Config::default();
 
-        // todo: update to the modern config builder pattern in the latest release, and stop using detracted patterns
 
-        config
+        let config = Config::builder()
             .set_default(DROP_DB_CONFIG_KEY, true)
             .unwrap()
             .set_default(GRPC_SERVER_HOST_PORT_CONFIG_KEY, 8081)
             .unwrap()
             .set_default(GRPC_SERVER_HOST_CONFIG_KEY, "[::1]")
             .unwrap()
-            // we always want to have a peer name - even a generic one
-            .set_default("client_name", "client_anon")
-            .unwrap()
             .set_default(DB_NAME_CONFIG_KEY, "client_db")
             .unwrap()
-            // Add in settings from the environment (with a prefix of APP)
-            // Eg.. `APP_DEBUG=1 ./target/app` would set the `debug` key
-            .merge(Environment::with_prefix("UPSETTER_CLIENT"))
+            .set_default("client_name", "client_anon")
+            .unwrap()
+            .add_source(Environment::with_prefix("KC_CLIENT"))
+            .build()
             .unwrap();
-
+        
         ClientConfigService { config }
     }
 }

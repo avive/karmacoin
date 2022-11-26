@@ -27,23 +27,23 @@ impl ClientGrpcService {
 /// methods in the client's public api.
 #[tonic::async_trait]
 impl ClientApi for ClientGrpcService {
-    async fn configure(&self, request: Request<ConfigureRequest>) -> std::result::Result<Response<ConfigureResponse>, Status> {
+    async fn configure(&self, _request: Request<ConfigureRequest>) -> Result<Response<ConfigureResponse>, Status> {
         todo!()
     }
 
-    async fn sign_up(&self, request: Request<SignUpRequest>) -> std::result::Result<Response<SignUpResponse>, Status> {
+    async fn sign_up(&self, _request: Request<SignUpRequest>) -> Result<Response<SignUpResponse>, Status> {
         todo!()
     }
 
-    async fn update_user_info(&self, request: Request<UpdateUserInfoRequest>) -> std::result::Result<Response<UpdateUserInfoResponse>, Status> {
+    async fn update_user_info(&self, _request: Request<UpdateUserInfoRequest>) -> Result<Response<UpdateUserInfoResponse>, Status> {
         todo!()
     }
 
-    async fn send_coin(&self, request: Request<SendCoinRequest>) -> std::result::Result<Response<SendCoinResponse>, Status> {
+    async fn send_coin(&self, _request: Request<SendCoinRequest>) -> Result<Response<SendCoinResponse>, Status> {
         todo!()
     }
 
-    async fn get_account_data(&self, request: Request<GetAccountStateRequest>) -> std::result::Result<Response<GetAccountStateResponse>, Status> {
+    async fn get_account_data(&self, _request: Request<GetAccountStateRequest>) -> Result<Response<GetAccountStateResponse>, Status> {
         todo!()
     }
 }

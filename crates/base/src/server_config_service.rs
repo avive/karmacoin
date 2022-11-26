@@ -49,13 +49,15 @@ impl Service for ServerConfigService {}
 
 impl Default for ServerConfigService {
     fn default() -> Self {
-        let mut config = Config::default();
+        //let mut config = Config::default();
 
         info!("Configuring server...");
 
         // todo: update to the modern config builder pattern in the latest release, and stop using detracted patterns
 
-        config
+        let builder = Config::builder();
+
+        let config = builder
             .set_default(NET_ID_CONFIG_KEY, 1)
             .unwrap()
             .set_default(DROP_DB_CONFIG_KEY, DEFAULT_DROP_DB_ON_EXIT)
@@ -80,8 +82,13 @@ impl Default for ServerConfigService {
             .unwrap()
             // Add in settings from the environment (with a prefix of APP)
             // Eg.. `APP_DEBUG=1 ./target/app` would set the `debug` key
-            .merge(Environment::with_prefix("KARMACOIN"))
-            .unwrap();
+
+            .add_source(
+                Environment::with_prefix("KARMACOIN")
+                    .try_parsing(true)
+                    .separator("_")
+                    .list_separator(" "),
+            ).build().unwrap();
 
         // todo: if id private key not set then generate random keypair and store private key
 
@@ -137,9 +144,13 @@ pub struct SetConfigFile {
 #[async_trait::async_trait]
 impl Handler<SetConfigFile> for ServerConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: SetConfigFile) -> Result<()> {
+
         // todo: verify config file exists and is readable by this process
-        self.config
-            .merge(config::File::with_name(msg.config_file.as_str()).required(false))
+
+        let _config = Config::builder()
+            // Add in `./Settings.toml`
+            .add_source(config::File::with_name(msg.config_file.as_str()))
+            .build()
             .unwrap();
 
         debug!(
