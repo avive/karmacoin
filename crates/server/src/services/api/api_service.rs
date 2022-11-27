@@ -45,6 +45,8 @@ impl Service for ApiService {}
 /// ApiService implements the ApiServiceTrait trait which defines the grpc rpc methods it provides for clients over the network
 #[tonic::async_trait]
 impl ApiServiceTrait for ApiService {
+
+    /// Returns user info by nickname
     async fn get_user_info_by_nick(&self, request: Request<GetUserInfoByNickRequest>) -> Result<Response<GetUserInfoByNickResponse>, Status> {
 
         let service = ApiService::from_registry().await
@@ -58,6 +60,7 @@ impl ApiServiceTrait for ApiService {
         Ok(Response::new(res))
     }
 
+    /// Returns user info by verified mobile phone number
     async fn get_user_info_by_number(
         &self,
         request: Request<GetUserInfoByNumberRequest>,
@@ -74,6 +77,7 @@ impl ApiServiceTrait for ApiService {
         Ok(Response::new(res))
     }
 
+    /// Returns user info by his unique account id
     async fn get_user_info_by_account(
         &self,
         request: Request<GetUserInfoByAccountRequest>,
@@ -90,6 +94,7 @@ impl ApiServiceTrait for ApiService {
         Ok(Response::new(res))
     }
 
+    /// Returns supported phone verifiers identity (on-chain data)
     async fn get_phone_verifiers(
         &self,
         _request: Request<GetPhoneVerifiersRequest>,
@@ -97,6 +102,7 @@ impl ApiServiceTrait for ApiService {
         todo!()
     }
 
+    /// Returns the supported character traits
     async fn get_char_traits(
         &self,
         request: Request<GetCharTraitsRequest>,
@@ -114,6 +120,7 @@ impl ApiServiceTrait for ApiService {
 
     }
 
+    /// Returns network info (on-chain data)
     async fn get_net_info(
         &self,
         _request: Request<GetNetInfoRequest>,
@@ -121,10 +128,12 @@ impl ApiServiceTrait for ApiService {
         todo!()
     }
 
+    /// Submit a transaction for processing
     async fn submit_transaction(&self,_request: Request<SubmitTransactionRequest>) -> std::result::Result<Response<SubmitTransactionResponse>, Status> {
         todo!()
     }
 
+    /// Returns all transactions to, and or from and account
     async fn get_transactions(
         &self,
         _request: Request<GetTransactionsRequest>,
@@ -132,6 +141,7 @@ impl ApiServiceTrait for ApiService {
         todo!()
     }
 
+    /// Get a signed transaction by its hash
     async fn get_transaction(
         &self,
         _request: Request<GetTransactionRequest>,
@@ -139,6 +149,7 @@ impl ApiServiceTrait for ApiService {
         todo!()
     }
 
+    /// Returns all transactions processing events from a block height to a block height
     async fn get_blockchain_events(
         &self,
         _request: Request<GetBlockchainEventsRequest>,

@@ -80,9 +80,6 @@ impl Default for ServerConfigService {
             .unwrap()
             .set_default(DB_NAME_CONFIG_KEY, "karmacoin_db")
             .unwrap()
-            // Add in settings from the environment (with a prefix of APP)
-            // Eg.. `APP_DEBUG=1 ./target/app` would set the `debug` key
-
             .add_source(
                 Environment::with_prefix("KARMACOIN")
                     .try_parsing(true)

@@ -5,13 +5,19 @@
 use db::db_service::{DatabaseService, DataItem, WriteItem};
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
+use config::Config;
+
 use base::karma_coin::karma_coin_core_types::CharTrait::{Helpful, Kind, Smart};
 use base::karma_coin::karma_coin_core_types::{TraitName, Traits};
 use crate::services::db_config_service::{DB_SUPPORTED_TRAITS_KEY, DbConfigService, NET_SETTINGS_COL_FAMILY};
 
+const GENESIS_FILE_NAME: &str = "genesis_config.toml";
+
 impl DbConfigService {
     /// Config genesis static persistent data
     pub(crate) async fn config_genesis() -> Result<()> {
+
+        info!("running genesis config...");
 
         let traits = Traits {
             // todo: traits should come from config file
@@ -35,6 +41,15 @@ impl DbConfigService {
             cf: NET_SETTINGS_COL_FAMILY,
             ttl: 0
         }).await?;
+
+        // todo: load config from file and store in db
+
+        let builder = Config::builder();
+
+
+        let _config = builder.add_source(config::File::with_name(GENESIS_FILE_NAME))
+            .build()
+            .unwrap();
 
         /*
             todo: initialize these settings - genesis config:
