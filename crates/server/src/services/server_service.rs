@@ -58,7 +58,8 @@ pub struct Startup {}
 #[async_trait::async_trait]
 impl Handler<Startup> for ServerService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, _msg: Startup) -> Result<()> {
-        info!("configuring the server...");
+
+        info!("configuring KarmaCoin server...");
 
         let server_name = ServerConfigService::get(SERVER_NAME_CONFIG_KEY.into())
             .await?

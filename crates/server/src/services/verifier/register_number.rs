@@ -94,3 +94,27 @@ impl Handler<RegisterNumber> for VerifierService {
         Ok(resp)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use base::test_helpers::enable_logger;
+    use db::db_service::DatabaseService;
+    use xactor::Service;
+    use crate::services::db_config_service::DbConfigService;
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn register_number_test() {
+
+        // init logging
+        enable_logger();
+
+        // config the db
+        DbConfigService::from_registry().await.unwrap();
+
+        // do the test here...
+
+        // drop the db
+        let mut db_service = DatabaseService::from_registry().await.unwrap();
+        db_service.stop(None).expect("failed to stop the db");
+    }
+}

@@ -22,7 +22,7 @@ use xactor::*;
 pub async fn start() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("KarmaCoin Server")
         .version("0.1.0")
-        .author("AE. <a@karmaco.in>")
+        .author("AE  <a@karmaco.in>")
         .about("The coin for all of us")
         .arg(
             Arg::with_name("config")
