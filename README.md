@@ -1,5 +1,6 @@
 # KarmaCoin Server and Verifier
-This repo includes the source code for KarmaCoin api server, blockchain node and mobile phone numbers verifier.
+This repo includes the source code for KarmaCoin server. The server provides the KarmaCoin API, is a KarmaCoin blockchain node and optionally, a mobile phone numbers verifier.
+
 To learn more about KarmaCoin visit https://karmaco.in
 
 ---
