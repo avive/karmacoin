@@ -43,7 +43,7 @@ let t = Utc::now().timestamp_nanos() as u64
 
 ---
 
-Copyright (c) 2021 by the [KarmaCoin Authors](https://github.com/). This work is licensed under the KarmaCoin License v0.1.0.
+Copyright (c) 2022 by the [KarmaCoin Authors](https://github.com/). This work is licensed under the KarmaCoin License v0.1.0.
 
 
 
