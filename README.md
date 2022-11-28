@@ -1,5 +1,23 @@
-# KarmaCoin
-About... 
+# Introducing KarmaCoin
+A cryptocurrency designed for giving first and payments later. Provides a first-rate mobile-native user experience for the rest of us. Becomes valuable out of real-world value created by usage and not by speculation and hype.
+
+# KarmaCoin - the coin we all need
+The world needs a global decentralized cryptocurrency that is actually used by millions of everyday people to fulfill the full potential of crypto as an alternative to national currencies.
+
+# The social graph we need
+The world needs a global, objective and decentralized social graph of core relationships between people and between people and orgs in order to create meaningful digital decentralized identities. The identities are critical for creating an impactful web3 future.
+
+# A solid open source blockchain
+KarmaCoin is maintained by a permissioned and decentralized modern blockchain technology.
+
+# A coin for all of us
+People use one simple, mobile native wallet app and don't have to deal with any crypto keys.
+
+
+# Hello Karma Score
+Karma score is a measure of a person's positive character traits. It is created by real people appreciating other people using the KarmaCoin mobile app.
+
+---
 
 ## Building
 ```cargo build```
