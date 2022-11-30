@@ -97,10 +97,14 @@ impl Handler<RegisterNumber> for VerifierService {
 
 #[cfg(test)]
 mod tests {
+    use ed25519_dalek::ed25519::signature::SignerMut;
+    use base::karma_coin::karma_coin_core_types::MobileNumber;
     use base::test_helpers::enable_logger;
     use db::db_service::DatabaseService;
     use xactor::Service;
     use crate::services::db_config_service::DbConfigService;
+    use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, RegisterNumberResult::*, RegisterNumberResult};
+    use crate::services::verifier::register_number::RegisterNumber;
 
     #[tokio::test(flavor = "multi_thread")]
     async fn register_number_test() {
@@ -112,6 +116,11 @@ mod tests {
         DbConfigService::from_registry().await.unwrap();
 
         // do the test here...
+
+        let mut register_number_request = RegisterNumberRequest::new();
+
+        // req.sign().await.unwrap();
+        let req = RegisterNumber(register_number_request);
 
         // drop the db
         let mut db_service = DatabaseService::from_registry().await.unwrap();

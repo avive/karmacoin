@@ -4,28 +4,21 @@
 
 use anyhow::Result;
 use ed25519_dalek::{Keypair, Signer};
-use crate::karma_coin::karma_coin_verifier::{RegisterNumberResponse, RegisterNumberResult};
+use crate::karma_coin::karma_coin_verifier::RegisterNumberRequest;
 
-impl RegisterNumberResponse {
+impl RegisterNumberRequest {
 
     // we can't implement default here due to prost::message required derivation
     pub fn new() -> Self {
-        RegisterNumberResponse {
-            result: 0,
-            signature: None
+        RegisterNumberRequest {
+            account_id: None,
+            mobile_number: None,
+            signature: None,
         }
     }
 }
 
-impl From<RegisterNumberResult> for RegisterNumberResponse {
-    fn from(result: RegisterNumberResult) -> Self {
-        let mut resp = RegisterNumberResponse::new();
-        resp.result = result as i32;
-        resp
-    }
-}
-
-impl RegisterNumberResponse {
+impl RegisterNumberRequest {
 
     pub fn sign(
         &mut self,

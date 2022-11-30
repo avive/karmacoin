@@ -11,5 +11,6 @@ pub mod verify_number_response;
 pub mod hex_utils;
 pub mod key_pair;
 pub mod register_number_response;
+pub mod register_number_request;
 pub mod trait_name;
 pub mod client_config_service;
