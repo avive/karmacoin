@@ -16,3 +16,5 @@ Cargo.lock
 /crates/db/*-db
 /node_modules
 .run/
+*.log
+crates/server/karmacoin_db/
