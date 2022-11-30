@@ -81,7 +81,7 @@ impl Service for VerifierService {}
 #[tonic::async_trait]
 impl PhoneNumbersVerifierService for VerifierService {
 
-    // User requests to register a mobile phone number
+    /// User requests to register a mobile phone number
     async fn register_number(&self, request: Request<RegisterNumberRequest>) -> std::result::Result<Response<RegisterNumberResponse>, Status> {
 
          let service = VerifierService::from_registry().await
@@ -95,6 +95,7 @@ impl PhoneNumbersVerifierService for VerifierService {
         Ok(Response::new(res))
     }
 
+    /// User requests to verify a number with code received via text message
     async fn verify_number(&self, request: Request<VerifyNumberRequest>) -> std::result::Result<Response<VerifyNumberResponse>, Status> {
 
         let service = VerifierService::from_registry().await

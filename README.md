@@ -9,7 +9,9 @@ To learn more about KarmaCoin visit https://karmaco.in
 ```cargo build```
 
 ## Testing
-```cargo test```
+!Use [cargo-nextest](https://nexte.st/) test runner.
+
+```cargo nextest run```
 
 ---
 
