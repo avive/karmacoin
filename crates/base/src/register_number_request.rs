@@ -19,7 +19,6 @@ impl RegisterNumberRequest {
 }
 
 impl RegisterNumberRequest {
-
     pub fn sign(
         &mut self,
         key_pair: &Keypair,

@@ -110,5 +110,19 @@ impl PhoneNumbersVerifierService for VerifierService {
     }
 }
 
+// write a unit test for register_number() and verify_number() methods
+#[cfg(test)]
+mod tests {
+    //use super::*;
+
+    #[tokio::test]
+    async fn test_register_number() {
+        //let service = VerifierService::default();
+
+    }
+}
+
+
+
 
 

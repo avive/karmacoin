@@ -117,7 +117,7 @@ mod tests {
 
         // do the test here...
 
-        let mut register_number_request = RegisterNumberRequest::new();
+        let register_number_request = RegisterNumberRequest::new();
 
         // req.sign().await.unwrap();
         let req = RegisterNumber(register_number_request);

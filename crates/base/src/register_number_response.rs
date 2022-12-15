@@ -7,7 +7,6 @@ use ed25519_dalek::{Keypair, Signer};
 use crate::karma_coin::karma_coin_verifier::{RegisterNumberResponse, RegisterNumberResult};
 
 impl RegisterNumberResponse {
-
     // we can't implement default here due to prost::message required derivation
     pub fn new() -> Self {
         RegisterNumberResponse {
@@ -26,7 +25,6 @@ impl From<RegisterNumberResult> for RegisterNumberResponse {
 }
 
 impl RegisterNumberResponse {
-
     pub fn sign(
         &mut self,
         key_pair: &Keypair,
