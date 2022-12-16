@@ -67,7 +67,7 @@ pub async fn start() -> std::result::Result<(), Box<dyn std::error::Error>> {
     server.call(Startup {}).await??;
 
     // test logging
-    debug!("Services started");
+    info!("Services started");
 
     signal::ctrl_c()
         .await

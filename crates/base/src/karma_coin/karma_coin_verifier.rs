@@ -33,7 +33,12 @@ pub struct RegisterNumberRequest {
 pub struct RegisterNumberResponse {
     #[prost(enumeration = "RegisterNumberResult", tag = "1")]
     pub result: i32,
-    #[prost(message, optional, tag = "2")]
+    /// auth code received via sms
+    /// Warning: for testing ONLY for testing purposes.
+    /// In production code this is empty string and client must get code the from sms/text message.
+    #[prost(int32, tag = "2")]
+    pub code: i32,
+    #[prost(message, optional, tag = "3")]
     pub signature: ::core::option::Option<super::core_types::Signature>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -43,8 +48,8 @@ pub struct VerifyNumberRequest {
     #[prost(message, optional, tag = "2")]
     pub mobile_number: ::core::option::Option<super::core_types::MobileNumber>,
     /// auth code received via sms
-    #[prost(string, tag = "3")]
-    pub code: ::prost::alloc::string::String,
+    #[prost(int32, tag = "3")]
+    pub code: i32,
     #[prost(string, tag = "4")]
     pub nickname: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "5")]

@@ -35,23 +35,18 @@ impl Handler<Verify> for VerifierService {
         if cloned_req.encode(&mut buf).is_err() {
             return Err(anyhow!("failed to encode source data to binary data"));
         };
-
         let account_id = req.account_id.ok_or(anyhow!("missing account id"))?;
         let nickname = req.nickname;
         let signature_data = req.signature.ok_or(anyhow!("missing signature"))?;
-
         let signature = ed25519_dalek::Signature::from_bytes(&signature_data.signature)?;
         let signer_pub_key = ed25519_dalek::PublicKey::from_bytes(account_id.data.as_slice())?;
         signer_pub_key.verify(&buf, &signature)?;
-
-        // decode auth code number
-        let auth_code : u32 = req.code.parse::<u32>().map_err(|_| anyhow!("invalid auth code"))?;
 
         let verifier_key_pair = self.id_key_pair.as_ref().unwrap().to_ed2559_kaypair();
 
         // db key based on auth code
         let mut auth_code_buf = [0; 4];
-        LittleEndian::write_u32(&mut auth_code_buf, auth_code);
+        LittleEndian::write_u32(&mut auth_code_buf, req.code as u32);
 
         let auth_data = DatabaseService::read(ReadItem {
             key: Bytes::from(auth_code_buf.to_vec()),

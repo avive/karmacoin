@@ -109,6 +109,7 @@ impl Actor for DbConfigService {
             drop_on_exit,
             db_name,
             col_descriptors: vec![
+                ColumnFamilyDescriptor::new(RESERVED_NICKS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(VERIFIERS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(USERS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(NICKS_COL_FAMILY, Options::default()),

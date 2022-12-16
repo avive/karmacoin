@@ -90,7 +90,7 @@ impl PhoneNumbersVerifierService for VerifierService {
         let res = service.call(RegisterNumber(request.into_inner()))
             .await
             .map_err(|e| Status::internal(format!("failed to call verifier api: {:?}", e)))?
-            .map_err(|_| Status::internal("internal error"))?;
+            .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
 
         Ok(Response::new(res))
     }
@@ -104,7 +104,7 @@ impl PhoneNumbersVerifierService for VerifierService {
         let res = service.call(Verify(request.into_inner()))
             .await
             .map_err(|e| Status::internal(format!("failed to call verifier api: {:?}", e)))?
-            .map_err(|_| Status::internal("internal error"))?;
+            .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
 
         Ok(Response::new(res))
     }

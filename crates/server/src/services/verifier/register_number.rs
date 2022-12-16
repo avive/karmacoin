@@ -93,7 +93,8 @@ impl Handler<RegisterNumber> for VerifierService {
             ttl: 60 * 60 * 24, // 24 hours ttl
         }).await?;
 
-        let mut resp = RegisterNumberResponse::from(RegisterNumberResult::CodeSent);
+        let mut resp = RegisterNumberResponse::from(CodeSent);
+        resp.code =code;
         resp.sign(&verifier_key_pair)?;
         Ok(resp)
     }
@@ -120,7 +121,6 @@ mod tests {
         DbConfigService::from_registry().await.unwrap();
 
         // do the test here...
-        let verifier = VerifierService::from_registry().await.unwrap();
 
         let client_key_pair = KeyPair::new();
         let client_ed_key_pair = client_key_pair.to_ed2559_kaypair();
@@ -131,9 +131,11 @@ mod tests {
         register_number_request.account_id = Some(AccountId { data: account_id });
         register_number_request.sign(&client_ed_key_pair).unwrap();
 
+        let verifier = VerifierService::from_registry().await.unwrap();
+
         let req = RegisterNumber(register_number_request);
-        let res : RegisterNumberResponse = verifier.call(req).await.unwrap().unwrap();
-        assert_eq!(res.result, CodeSent as i32);
+        let resp : RegisterNumberResponse = verifier.call(req).await.unwrap().unwrap();
+        assert_eq!(resp.result, CodeSent as i32);
 
         // drop the db
         let mut db_service = DatabaseService::from_registry().await.unwrap();

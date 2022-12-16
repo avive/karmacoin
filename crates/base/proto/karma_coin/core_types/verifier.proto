@@ -33,13 +33,19 @@ enum RegisterNumberResult {
 
 message RegisterNumberResponse {
   RegisterNumberResult result = 1;
-  core_types.Signature signature = 2;
+
+  // auth code received via sms
+  // Warning: for testing ONLY for testing purposes.
+  // In production code this is empty string and client must get code the from sms/text message.
+  int32 code = 2;
+
+  core_types.Signature signature = 3;
 }
 
 message VerifyNumberRequest {
   core_types.AccountId account_id = 1;
   core_types.MobileNumber mobile_number = 2;
-  string code = 3; // auth code received via sms
+  int32 code = 3; // auth code received via sms
   string nickname = 4;
   core_types.Signature signature = 5;
 }
