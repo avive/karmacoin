@@ -5,12 +5,13 @@
 #[cfg_attr(test, macro_use)]
 extern crate log;
 
-use db::db_service::{DataItem, DatabaseService, Destroy, ReadItem, WriteItem, TESTS_COL_FAMILY};
+use db::db_service::{DataItem, DatabaseService, Destroy, ReadItem, WriteItem};
 
 use base::test_helpers::enable_logger;
 use bytes::Bytes;
 use db::db_service;
 use rocksdb::{ColumnFamilyDescriptor, Options};
+use base::client_config_service::TESTS_COL_FAMILY;
 use xactor::*;
 
 #[tokio::test]
@@ -40,7 +41,7 @@ async fn test_read_write() {
 
     let read_req = ReadItem {
         key: key1.clone(),
-        cf: db_service::TESTS_COL_FAMILY,
+        cf: TESTS_COL_FAMILY,
     };
 
     let write_req = WriteItem {
@@ -48,7 +49,7 @@ async fn test_read_write() {
             key: key1,
             value: value1,
         },
-        cf: db_service::TESTS_COL_FAMILY,
+        cf: TESTS_COL_FAMILY,
         ttl: 0,
     };
 
@@ -89,7 +90,7 @@ async fn test_read_write_string_keys() {
 
     let read_req = ReadItem {
         key: bytes::Bytes::from("key_1".as_bytes()),
-        cf: db_service::TESTS_COL_FAMILY,
+        cf: TESTS_COL_FAMILY,
     };
 
     let write_req = WriteItem {
@@ -97,7 +98,7 @@ async fn test_read_write_string_keys() {
             key: bytes::Bytes::from("key_1".as_bytes()),
             value: value1,
         },
-        cf: db_service::TESTS_COL_FAMILY,
+        cf: TESTS_COL_FAMILY,
         ttl: 0,
     };
 

@@ -41,7 +41,6 @@ impl Handler<RegisterNumber> for VerifierService {
 
         let account_id = req.account_id.ok_or_else(|| anyhow!("missing account id"))?;
 
-
         let signature_data = req.signature.ok_or_else(|| anyhow!("missing signature"))?;
         let signature = ed25519_dalek::Signature::from_bytes(&signature_data.signature)?;
         let signer_pub_key = ed25519_dalek::PublicKey::from_bytes(account_id.data.as_slice())?;
@@ -50,7 +49,7 @@ impl Handler<RegisterNumber> for VerifierService {
         let phone_number = req.mobile_number.ok_or_else(|| anyhow!("missing mobile phone number"))?;
         let verifier_key_pair = self.id_key_pair.as_ref().unwrap().to_ed2559_kaypair();
 
-        // check signature by accountId private key on data so we know caller has private key for accountId
+        // check signature by accountId matching private key on data so we know caller has private key for accountId
 
         // check if number is already registered to another user
         if let Some(user_data) = DatabaseService::read(ReadItem {
@@ -65,7 +64,6 @@ impl Handler<RegisterNumber> for VerifierService {
                 resp.sign(&verifier_key_pair)?;
                 Ok(resp)
             } else {
-
                 let mut resp = RegisterNumberResponse::from(NumberAccountExists);
                 resp.sign(&verifier_key_pair)?;
                 Ok(resp)

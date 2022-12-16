@@ -7,13 +7,14 @@ extern crate log;
 use anyhow::Result;
 
 use db::db_service::{
-    Compact, DataItem, DatabaseService, Destroy, ReadItem, WriteItem, TESTS_COL_FAMILY,
+    Compact, DataItem, DatabaseService, Destroy, ReadItem, WriteItem
 };
 
 use bytes::Bytes;
 use rocksdb::{ColumnFamilyDescriptor, Options};
 use std::time::Duration;
 use tokio::time::sleep;
+use base::client_config_service::TESTS_COL_FAMILY;
 
 use db::db_service;
 use xactor::*;
@@ -44,7 +45,7 @@ async fn test_ttl() {
 
     let read_req = ReadItem {
         key: key1.clone(),
-        cf: db_service::TESTS_COL_FAMILY,
+        cf: TESTS_COL_FAMILY,
     };
 
     let write_req = WriteItem {
@@ -52,7 +53,7 @@ async fn test_ttl() {
             key: key1,
             value: value1,
         },
-        cf: db_service::TESTS_COL_FAMILY,
+        cf: TESTS_COL_FAMILY,
         ttl: 2,
     };
 
