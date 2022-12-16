@@ -16,7 +16,7 @@ use crate::services::verifier::verifier_service::VerifierService;
 #[message(result = "Result<VerifyNumberResponse>")]
 pub(crate) struct Verify(pub VerifyNumberRequest);
 
-// Request to sign up
+/// Request to complete verification and sign up
 #[async_trait::async_trait]
 impl Handler<Verify> for VerifierService {
     async fn handle(

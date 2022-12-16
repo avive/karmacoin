@@ -33,13 +33,6 @@ impl RegisterNumberRequest {
             signature: key_pair.sign(&buf).as_ref().to_vec(),
         });
 
-        let mut buf1 = Vec::with_capacity(self.encoded_len());
-        self.encode(&mut buf1)?;
-
-        self.signature = Some(Signature {
-            scheme: 0,
-            signature: key_pair.sign(&buf1).as_ref().to_vec(),
-        });
         Ok(())
     }
 }
