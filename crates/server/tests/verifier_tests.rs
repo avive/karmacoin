@@ -358,7 +358,7 @@ async fn init_test() {
     enable_logger();
 }
 
-/// Helper
+///x§ Helper
 async fn finalize_test() {
     spawn(async {
         // stop the db so it has a chance to destroy itself if it is configured to destroy storage on stop...

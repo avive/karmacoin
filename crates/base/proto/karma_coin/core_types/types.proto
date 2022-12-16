@@ -176,6 +176,7 @@ enum VerifyNumberResult {
     VERIFY_NUMBER_RESULT_VERIFIED = 5;
 }
 
+// Created and signed by a verifier
 message VerifyNumberResponse {
     uint64 timestamp = 1;
     VerifyNumberResult result = 2;
@@ -189,6 +190,8 @@ message VerifyNumberResponse {
 message NewUserTransactionV1 {
     // initial user balance
     User user = 1;
+
+    // Evidence from a valid verifier about the new user
     VerifyNumberResponse verify_number_response = 2;
 }
 
@@ -252,4 +255,3 @@ enum ExecutionResult {
     EXECUTION_RESULT_INSUFFICIENT_BALANCE = 1;
     EXECUTION_RESULT_EXECUTED = 2;
 }
-
