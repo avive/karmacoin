@@ -6,7 +6,7 @@ use anyhow::{anyhow, Result};
 use byteorder::{ByteOrder, LittleEndian};
 use bytes::Bytes;
 use ed25519_dalek::Verifier;
-use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, RegisterNumberResponse, RegisterNumberResult::*, RegisterNumberResult};
+use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, RegisterNumberResponse, RegisterNumberResult::*};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use xactor::*;
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, VERIFICATION_CODES_COL_FAMILY};
@@ -47,9 +47,7 @@ impl Handler<RegisterNumber> for VerifierService {
         let signer_pub_key = ed25519_dalek::PublicKey::from_bytes(account_id.data.as_slice())?;
         signer_pub_key.verify(&buf, &signature)?;
 
-
         let phone_number = req.mobile_number.ok_or_else(|| anyhow!("missing mobile phone number"))?;
-
         let verifier_key_pair = self.id_key_pair.as_ref().unwrap().to_ed2559_kaypair();
 
         // check signature by accountId private key on data so we know caller has private key for accountId

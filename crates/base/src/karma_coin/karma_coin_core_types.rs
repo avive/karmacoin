@@ -321,7 +321,9 @@ pub enum VerifyNumberResult {
     NicknameTaken = 0,
     InvalidCode = 1,
     InvalidSignature = 2,
+    /// number is registerd to another account
     NumberAlreadyRegisteredOtherAccount = 3,
+    //// an account with this number already exists
     NumberAlreadyRegisteredThisAccount = 4,
     Verified = 5,
 }
