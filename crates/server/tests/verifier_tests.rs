@@ -15,22 +15,7 @@ use db::db_service::DatabaseService;
 use server::server_service::{ServerService, Startup};
 use xactor::*;
 
-async fn init_test() {
-    enable_logger();
-}
-
 /// tests in this file should be run sequentially and not in parallel
-
-async fn finalize_test() {
-    spawn(async {
-        // stop the db so it has a chance to destroy itself if it is configured to destroy storage on stop...
-        let mut db_service = DatabaseService::from_registry().await.unwrap();
-        let _ = db_service.stop(None);
-        info!("resources cleanup completed");
-    })
-        .await
-        .unwrap();
-}
 
 /// Test complete registration flow including sms verification
 #[tokio::test(flavor = "multi_thread")]
@@ -366,4 +351,21 @@ async fn verifier_number_used_test() {
 
     // drop the db
     finalize_test().await;
+}
+
+/// Helper
+async fn init_test() {
+    enable_logger();
+}
+
+/// Helper
+async fn finalize_test() {
+    spawn(async {
+        // stop the db so it has a chance to destroy itself if it is configured to destroy storage on stop...
+        let mut db_service = DatabaseService::from_registry().await.unwrap();
+        let _ = db_service.stop(None);
+        info!("resources cleanup completed");
+    })
+        .await
+        .unwrap();
 }
