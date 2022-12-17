@@ -13,6 +13,7 @@ use xactor::*;
 
 /// Blockchain service mocks a blockchain node
 /// It provides a GRPC service defined in KarmaCoinBlockchainService
+/// It is a lower-level API than the KarmaCoin API - designed to be used internally in the server
 #[derive(Debug, Clone)]
 pub(crate) struct BlockChainService {
 
