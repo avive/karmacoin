@@ -110,14 +110,6 @@ impl Handler<Verify> for VerifierService {
             ttl: 60 * 60 * 24
         }).await?;
 
-        // update mobile numbers registration with this account so no other account can register with this number
-        DatabaseService::write(WriteItem {
-            data: DataItem {
-                key: Bytes::from(phone_number.number.as_bytes().to_vec()),
-                value: Bytes::from(account_id.data.to_vec()) },
-            cf: MOBILE_NUMBERS_COL_FAMILY,
-            ttl: 0
-        }).await?;
 
         // create signed Response and return it
         let mut resp = VerifyNumberResponse::from(Verified);

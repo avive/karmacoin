@@ -194,6 +194,7 @@ pub struct PaymentTransactionV1 {
     #[prost(enumeration = "CharTrait", tag = "6")]
     pub r#trait: i32,
 }
+/// Created and signed by a verifier
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct VerifyNumberResponse {
     #[prost(uint64, tag = "1")]
@@ -215,6 +216,7 @@ pub struct NewUserTransactionV1 {
     /// initial user balance
     #[prost(message, optional, tag = "1")]
     pub user: ::core::option::Option<User>,
+    /// Evidence from a valid verifier about the new user
     #[prost(message, optional, tag = "2")]
     pub verify_number_response: ::core::option::Option<VerifyNumberResponse>,
 }
