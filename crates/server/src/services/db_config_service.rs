@@ -35,11 +35,14 @@ pub const RESERVED_NICKS_COL_FAMILY: &str = "reserved_nicks_cf";
 //// Blockchain-based data - indexing on-chain data and its blocks
 /////////////////
 
-/// col family the network settings. Various settings are accessible via keys.
+/// col family the network and blockchain settings. Various settings are accessible via keys.
 pub const NET_SETTINGS_COL_FAMILY: &str = "net_settings_cf";
 
 /// value: bool indicating if the local db was initialized or needs initiation with static data
 pub const DB_INITIALIZED_KEY: &str = "db_initialized_key";
+
+/// value: uint64 indicating current tip block height
+pub const BLOCK_TIP_KEY: &str = "block_tip_key";
 
 /// Value: a serialized vector of all supported Traits
 /// this data is in consensus on genesis and may only change via a runtime upgrade

@@ -1,16 +1,26 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct AddBlockRequest {
-    #[prost(message, optional, tag = "1")]
-    pub block: ::core::option::Option<super::core_types::Block>,
+pub struct CreateBlockRequest {
+    #[prost(message, repeated, tag = "1")]
+    pub transactions: ::prost::alloc::vec::Vec<super::core_types::SignedTransaction>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct AddBlockResponse {}
+pub struct CreateBlockResponse {}
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetBlockHeightRequest {}
+pub struct GetHeadHeightRequest {}
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetBlockHeightResponse {
+pub struct GetHeadHeightResponse {
     #[prost(uint64, tag = "1")]
     pub height: u64,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetBlockByHeightRequest {
+    #[prost(uint64, tag = "1")]
+    pub height: u64,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetBlockByHeightResponse {
+    #[prost(message, optional, tag = "1")]
+    pub block: ::core::option::Option<super::core_types::Block>,
 }
 #[doc = r" Generated client implementations."]
 pub mod blockchain_service_client {
@@ -73,11 +83,11 @@ pub mod blockchain_service_client {
             self.inner = self.inner.accept_gzip();
             self
         }
-        #[doc = " Request to register a phone number. Will trigger an SMS to that number"]
-        pub async fn add_block(
+        #[doc = " Create a block with the given transactions"]
+        pub async fn create_block(
             &mut self,
-            request: impl tonic::IntoRequest<super::AddBlockRequest>,
-        ) -> Result<tonic::Response<super::AddBlockResponse>, tonic::Status> {
+            request: impl tonic::IntoRequest<super::CreateBlockRequest>,
+        ) -> Result<tonic::Response<super::CreateBlockResponse>, tonic::Status> {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::new(
                     tonic::Code::Unknown,
@@ -86,14 +96,15 @@ pub mod blockchain_service_client {
             })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/karma_coin.blockchain.BlockchainService/AddBlock",
+                "/karma_coin.blockchain.BlockchainService/CreateBlock",
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        pub async fn get_block_height(
+        #[doc = " Get the current blockchain tip - the height of the tip block"]
+        pub async fn get_head_height(
             &mut self,
-            request: impl tonic::IntoRequest<super::GetBlockHeightRequest>,
-        ) -> Result<tonic::Response<super::GetBlockHeightResponse>, tonic::Status> {
+            request: impl tonic::IntoRequest<super::GetHeadHeightRequest>,
+        ) -> Result<tonic::Response<super::GetHeadHeightResponse>, tonic::Status> {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::new(
                     tonic::Code::Unknown,
@@ -102,7 +113,23 @@ pub mod blockchain_service_client {
             })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/karma_coin.blockchain.BlockchainService/GetBlockHeight",
+                "/karma_coin.blockchain.BlockchainService/GetHeadHeight",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        pub async fn get_block_by_height(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetBlockByHeightRequest>,
+        ) -> Result<tonic::Response<super::GetBlockByHeightResponse>, tonic::Status> {
+            self.inner.ready().await.map_err(|e| {
+                tonic::Status::new(
+                    tonic::Code::Unknown,
+                    format!("Service was not ready: {}", e.into()),
+                )
+            })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.blockchain.BlockchainService/GetBlockByHeight",
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
@@ -115,15 +142,20 @@ pub mod blockchain_service_server {
     #[doc = "Generated trait containing gRPC methods that should be implemented for use with BlockchainServiceServer."]
     #[async_trait]
     pub trait BlockchainService: Send + Sync + 'static {
-        #[doc = " Request to register a phone number. Will trigger an SMS to that number"]
-        async fn add_block(
+        #[doc = " Create a block with the given transactions"]
+        async fn create_block(
             &self,
-            request: tonic::Request<super::AddBlockRequest>,
-        ) -> Result<tonic::Response<super::AddBlockResponse>, tonic::Status>;
-        async fn get_block_height(
+            request: tonic::Request<super::CreateBlockRequest>,
+        ) -> Result<tonic::Response<super::CreateBlockResponse>, tonic::Status>;
+        #[doc = " Get the current blockchain tip - the height of the tip block"]
+        async fn get_head_height(
             &self,
-            request: tonic::Request<super::GetBlockHeightRequest>,
-        ) -> Result<tonic::Response<super::GetBlockHeightResponse>, tonic::Status>;
+            request: tonic::Request<super::GetHeadHeightRequest>,
+        ) -> Result<tonic::Response<super::GetHeadHeightResponse>, tonic::Status>;
+        async fn get_block_by_height(
+            &self,
+            request: tonic::Request<super::GetBlockByHeightRequest>,
+        ) -> Result<tonic::Response<super::GetBlockByHeightResponse>, tonic::Status>;
     }
     #[doc = " Blockchain api"]
     #[derive(Debug)]
@@ -175,18 +207,21 @@ pub mod blockchain_service_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/karma_coin.blockchain.BlockchainService/AddBlock" => {
+                "/karma_coin.blockchain.BlockchainService/CreateBlock" => {
                     #[allow(non_camel_case_types)]
-                    struct AddBlockSvc<T: BlockchainService>(pub Arc<T>);
-                    impl<T: BlockchainService> tonic::server::UnaryService<super::AddBlockRequest> for AddBlockSvc<T> {
-                        type Response = super::AddBlockResponse;
+                    struct CreateBlockSvc<T: BlockchainService>(pub Arc<T>);
+                    impl<T: BlockchainService>
+                        tonic::server::UnaryService<super::CreateBlockRequest>
+                        for CreateBlockSvc<T>
+                    {
+                        type Response = super::CreateBlockResponse;
                         type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::AddBlockRequest>,
+                            request: tonic::Request<super::CreateBlockRequest>,
                         ) -> Self::Future {
                             let inner = self.0.clone();
-                            let fut = async move { (*inner).add_block(request).await };
+                            let fut = async move { (*inner).create_block(request).await };
                             Box::pin(fut)
                         }
                     }
@@ -195,7 +230,7 @@ pub mod blockchain_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = AddBlockSvc(inner);
+                        let method = CreateBlockSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
                             accept_compression_encodings,
@@ -206,21 +241,21 @@ pub mod blockchain_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/karma_coin.blockchain.BlockchainService/GetBlockHeight" => {
+                "/karma_coin.blockchain.BlockchainService/GetHeadHeight" => {
                     #[allow(non_camel_case_types)]
-                    struct GetBlockHeightSvc<T: BlockchainService>(pub Arc<T>);
+                    struct GetHeadHeightSvc<T: BlockchainService>(pub Arc<T>);
                     impl<T: BlockchainService>
-                        tonic::server::UnaryService<super::GetBlockHeightRequest>
-                        for GetBlockHeightSvc<T>
+                        tonic::server::UnaryService<super::GetHeadHeightRequest>
+                        for GetHeadHeightSvc<T>
                     {
-                        type Response = super::GetBlockHeightResponse;
+                        type Response = super::GetHeadHeightResponse;
                         type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::GetBlockHeightRequest>,
+                            request: tonic::Request<super::GetHeadHeightRequest>,
                         ) -> Self::Future {
                             let inner = self.0.clone();
-                            let fut = async move { (*inner).get_block_height(request).await };
+                            let fut = async move { (*inner).get_head_height(request).await };
                             Box::pin(fut)
                         }
                     }
@@ -229,7 +264,41 @@ pub mod blockchain_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = GetBlockHeightSvc(inner);
+                        let method = GetHeadHeightSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
+                            accept_compression_encodings,
+                            send_compression_encodings,
+                        );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/karma_coin.blockchain.BlockchainService/GetBlockByHeight" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetBlockByHeightSvc<T: BlockchainService>(pub Arc<T>);
+                    impl<T: BlockchainService>
+                        tonic::server::UnaryService<super::GetBlockByHeightRequest>
+                        for GetBlockByHeightSvc<T>
+                    {
+                        type Response = super::GetBlockByHeightResponse;
+                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetBlockByHeightRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).get_block_by_height(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetBlockByHeightSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
                             accept_compression_encodings,

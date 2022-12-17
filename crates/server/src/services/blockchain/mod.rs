@@ -7,3 +7,5 @@
 /// API data includes on-chain users, accounts and transactions data.
 
 pub (crate) mod blockchain_service;
+pub (crate) mod get_head_height;
+pub (crate) mod create_block;

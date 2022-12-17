@@ -8,21 +8,33 @@ import "karma_coin/core_types/types.proto";
 
 // Blockchain api
 service BlockchainService {
-  // Request to register a phone number. Will trigger an SMS to that number
-  rpc AddBlock(AddBlockRequest) returns (AddBlockResponse);
-  rpc GetBlockHeight(GetBlockHeightRequest) returns (GetBlockHeightResponse);
+  // Create a block with the given transactions
+  rpc CreateBlock(CreateBlockRequest) returns (CreateBlockResponse);
+
+  // Get the current blockchain tip - the height of the tip block
+  rpc GetHeadHeight(GetHeadHeightRequest) returns (GetHeadHeightResponse);
+
+  rpc GetBlockByHeight(GetBlockByHeightRequest) returns (GetBlockByHeightResponse);
 }
 
-message AddBlockRequest {
-  core_types.Block block = 1;
+message CreateBlockRequest {
+  repeated core_types.SignedTransaction transactions = 1;
 }
 
-message AddBlockResponse {
+message CreateBlockResponse {
 }
 
-message GetBlockHeightRequest {
+message GetHeadHeightRequest {
 }
 
-message GetBlockHeightResponse {
+message GetHeadHeightResponse {
   uint64 height = 1;
+}
+
+message GetBlockByHeightRequest {
+  uint64 height = 1;
+}
+
+message GetBlockByHeightResponse {
+  core_types.Block block = 1;
 }
