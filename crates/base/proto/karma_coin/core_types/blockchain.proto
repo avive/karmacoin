@@ -1,0 +1,28 @@
+// Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
+// This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
+//
+
+syntax = "proto3";
+package karma_coin.blockchain;
+import "karma_coin/core_types/types.proto";
+
+// Blockchain api
+service BlockchainService {
+  // Request to register a phone number. Will trigger an SMS to that number
+  rpc AddBlock(AddBlockRequest) returns (AddBlockResponse);
+  rpc GetBlockHeight(GetBlockHeightRequest) returns (GetBlockHeightResponse);
+}
+
+message AddBlockRequest {
+  core_types.Block block = 1;
+}
+
+message AddBlockResponse {
+}
+
+message GetBlockHeightRequest {
+}
+
+message GetBlockHeightResponse {
+  uint64 height = 1;
+}

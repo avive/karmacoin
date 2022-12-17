@@ -42,7 +42,9 @@ impl Actor for ApiService {
 impl Service for ApiService {}
 
 
-/// ApiService implements the ApiServiceTrait trait which defines the grpc rpc methods it provides for clients over the network
+/// ApiService implements the ApiServiceTrait trait which defines the grpc rpc methods it provides for
+/// clients over the network. All returned data is canonical blockchain data according to the state
+/// of the backing blockchain noode.
 #[tonic::async_trait]
 impl ApiServiceTrait for ApiService {
 
@@ -81,7 +83,7 @@ impl ApiServiceTrait for ApiService {
     async fn get_user_info_by_account(
         &self,
         request: Request<GetUserInfoByAccountRequest>,
-    ) -> std::result::Result<Response<GetUserInfoByAccountResponse>, Status> {
+    ) -> Result<Response<GetUserInfoByAccountResponse>, Status> {
 
         let service = ApiService::from_registry().await
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?;
@@ -98,7 +100,7 @@ impl ApiServiceTrait for ApiService {
     async fn get_phone_verifiers(
         &self,
         _request: Request<GetPhoneVerifiersRequest>,
-    ) -> std::result::Result<Response<GetPhoneVerifiersResponse>, Status> {
+    ) -> Result<Response<GetPhoneVerifiersResponse>, Status> {
         todo!()
     }
 
@@ -106,7 +108,7 @@ impl ApiServiceTrait for ApiService {
     async fn get_char_traits(
         &self,
         request: Request<GetCharTraitsRequest>,
-    ) -> std::result::Result<Response<GetCharTraitsResponse>, Status> {
+    ) -> Result<Response<GetCharTraitsResponse>, Status> {
 
         let service = ApiService::from_registry().await
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?;
@@ -129,7 +131,7 @@ impl ApiServiceTrait for ApiService {
     }
 
     /// Submit a transaction for processing
-    async fn submit_transaction(&self,_request: Request<SubmitTransactionRequest>) -> std::result::Result<Response<SubmitTransactionResponse>, Status> {
+    async fn submit_transaction(&self,_request: Request<SubmitTransactionRequest>) -> Result<Response<SubmitTransactionResponse>, Status> {
         todo!()
     }
 

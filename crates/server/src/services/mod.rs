@@ -8,5 +8,6 @@
 pub mod server_service;
 pub (crate) mod db_config_service;
 pub (crate) mod verifier;
+pub (crate) mod blockchain;
 pub (crate) mod api;
 pub (crate) mod genesis_config;
