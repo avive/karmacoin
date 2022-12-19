@@ -5,7 +5,6 @@
 use anyhow::{anyhow, Result};
 use byteorder::{LittleEndian, ByteOrder};
 use bytes::Bytes;
-use ed25519_dalek::{Verifier};
 use base::karma_coin::karma_coin_verifier::VerifyNumberRequest;
 use base::karma_coin::karma_coin_core_types::{VerifyNumberResponse, VerifyNumberResult::*};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
@@ -26,23 +25,13 @@ impl Handler<Verify> for VerifierService {
     ) -> Result<VerifyNumberResponse> {
 
         let req = msg.0;
+        let nickname = req.nickname.clone();
 
-        // Verify signature
-        let mut cloned_req = req.clone();
-        cloned_req.signature = None;
-        use prost::Message;
-        let mut buf = Vec::with_capacity(cloned_req.encoded_len());
-        if cloned_req.encode(&mut buf).is_err() {
-            return Err(anyhow!("failed to encode source data to binary data"));
-        };
+        // verify request signature
+        req.verify_signature()?;
+
+        let verifier_key_pair = self.id_key_pair.as_ref().ok_or(anyhow!("missing key pair"))?.to_ed2559_kaypair();
         let account_id = req.account_id.ok_or(anyhow!("missing account id"))?;
-        let nickname = req.nickname;
-        let signature_data = req.signature.ok_or(anyhow!("missing signature"))?;
-        let signature = ed25519_dalek::Signature::from_bytes(&signature_data.signature)?;
-        let signer_pub_key = ed25519_dalek::PublicKey::from_bytes(account_id.data.as_slice())?;
-        signer_pub_key.verify(&buf, &signature)?;
-
-        let verifier_key_pair = self.id_key_pair.as_ref().unwrap().to_ed2559_kaypair();
 
         // db key based on auth code
         let mut auth_code_buf = [0; 4];

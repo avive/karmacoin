@@ -159,39 +159,33 @@ pub struct TraitScore {
 /// Update user info
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UpdateUserV1 {
-    /// Only user may change his account id by signing with private key of old accountId
-    #[prost(message, optional, tag = "1")]
-    pub account_id: ::core::option::Option<AccountId>,
     /// new requested nickname
-    #[prost(string, tag = "2")]
+    #[prost(string, tag = "1")]
     pub nickname: ::prost::alloc::string::String,
     /// Updated verified number
-    #[prost(message, optional, tag = "3")]
+    #[prost(message, optional, tag = "2")]
     pub mobile_number: ::core::option::Option<MobileNumber>,
     /// verifier attestation regarding the number and the account
-    #[prost(message, optional, tag = "4")]
+    #[prost(message, optional, tag = "3")]
     pub verify_number_response: ::core::option::Option<VerifyNumberResponse>,
 }
 /// Basic payment transaction with optional character appreciation
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PaymentTransactionV1 {
-    /// account this tx is signed by
-    #[prost(message, optional, tag = "1")]
-    pub from: ::core::option::Option<AccountId>,
     /// dest is always a mobile number (of a user or a non-user)
-    #[prost(message, optional, tag = "2")]
+    #[prost(message, optional, tag = "1")]
     pub to: ::core::option::Option<MobileNumber>,
     /// amount in tokens to transfer
-    #[prost(message, optional, tag = "3")]
+    #[prost(message, optional, tag = "2")]
     pub amount: ::core::option::Option<Amount>,
     /// network fee provided by sender
-    #[prost(message, optional, tag = "4")]
+    #[prost(message, optional, tag = "3")]
     pub fee: ::core::option::Option<Amount>,
     /// optional extra tip to miners
-    #[prost(message, optional, tag = "5")]
+    #[prost(message, optional, tag = "4")]
     pub tip: ::core::option::Option<Amount>,
     /// char trait set by sender. e.g. smart
-    #[prost(enumeration = "CharTrait", tag = "6")]
+    #[prost(enumeration = "CharTrait", tag = "5")]
     pub r#trait: i32,
 }
 /// Created and signed by a verifier
@@ -210,7 +204,7 @@ pub struct VerifyNumberResponse {
     #[prost(message, optional, tag = "6")]
     pub signature: ::core::option::Option<Signature>,
 }
-/// new user transactions can be submitted by sms verifiers only
+/// new user transactions submitted by users
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct NewUserTransactionV1 {
     /// initial user balance
@@ -228,24 +222,27 @@ pub struct TransactionData {
     pub transaction_data: ::prost::alloc::vec::Vec<u8>,
     /// transaction type for deserialization
     #[prost(enumeration = "TransactionType", tag = "2")]
-    pub r#type: i32,
+    pub transaction_type: i32,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SignedTransaction {
+    /// account this tx is signed by
+    #[prost(message, optional, tag = "1")]
+    pub signer: ::core::option::Option<AccountId>,
     /// time transaction was signed
-    #[prost(uint64, tag = "1")]
+    #[prost(uint64, tag = "2")]
     pub timestamp: u64,
     /// tx nonce
-    #[prost(uint64, tag = "2")]
+    #[prost(uint64, tag = "3")]
     pub nonce: u64,
     /// binary transaction data
-    #[prost(message, optional, tag = "3")]
+    #[prost(message, optional, tag = "4")]
     pub transaction_data: ::core::option::Option<TransactionData>,
     /// network id to avoid confusion with testnets
-    #[prost(uint32, tag = "4")]
+    #[prost(uint32, tag = "5")]
     pub network_id: u32,
     /// signer signature on all of the above data
-    #[prost(message, optional, tag = "5")]
+    #[prost(message, optional, tag = "6")]
     pub signature: ::core::option::Option<Signature>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -261,7 +258,7 @@ pub struct NewUserEvent {
     #[prost(uint64, tag = "1")]
     pub timestamp: u64,
     #[prost(message, optional, tag = "2")]
-    pub account_id: ::core::option::Option<AccountId>,
+    pub signer: ::core::option::Option<AccountId>,
     #[prost(enumeration = "SignupMethod", tag = "3")]
     pub sign_up_method: i32,
     /// for invites - inviter gets a reward - protocol constant

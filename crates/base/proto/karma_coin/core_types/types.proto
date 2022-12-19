@@ -140,27 +140,23 @@ enum TransactionType {
 // Update user info
 message UpdateUserV1 {
 
-    // Only user may change his account id by signing with private key of old accountId
-    AccountId account_id = 1;
-
     // new requested nickname
-    string nickname = 2;
+    string nickname = 1;
 
     // Updated verified number
-    MobileNumber mobile_number = 3;
+    MobileNumber mobile_number = 2;
 
     // verifier attestation regarding the number and the account
-    VerifyNumberResponse verify_number_response = 4;
+    VerifyNumberResponse verify_number_response = 3;
 }
 
 // Basic payment transaction with optional character appreciation
 message PaymentTransactionV1 {
-    AccountId from = 1; // account this tx is signed by
-    MobileNumber to = 2; // dest is always a mobile number (of a user or a non-user)
-    Amount amount = 3; // amount in tokens to transfer
-    Amount fee = 4; // network fee provided by sender
-    Amount tip = 5; // optional extra tip to miners
-    CharTrait trait = 6; // char trait set by sender. e.g. smart
+    MobileNumber to = 1; // dest is always a mobile number (of a user or a non-user)
+    Amount amount = 2; // amount in tokens to transfer
+    Amount fee = 3; // network fee provided by sender
+    Amount tip = 4; // optional extra tip to miners
+    CharTrait trait = 5; // char trait set by sender. e.g. smart
 }
 
 enum VerifyNumberResult {
@@ -186,7 +182,7 @@ message VerifyNumberResponse {
     Signature signature = 6;
 }
 
-// new user transactions can be submitted by sms verifiers only
+// new user transactions submitted by users
 message NewUserTransactionV1 {
     // initial user balance
     User user = 1;
@@ -198,7 +194,7 @@ message NewUserTransactionV1 {
 // serialized transaction data
 message TransactionData {
     bytes transaction_data = 1; // binary transaction data (e.g. NewUserTxV1, PaymentV1, etc...)
-    TransactionType type = 2; // transaction type for deserialization
+    TransactionType transaction_type = 2; // transaction type for deserialization
 }
 
 enum TransactionStatus {
@@ -209,11 +205,12 @@ enum TransactionStatus {
 }
 
 message SignedTransaction {
-    uint64 timestamp = 1; // time transaction was signed
-    uint64 nonce = 2; // tx nonce
-    TransactionData transaction_Data = 3; // binary transaction data
-    uint32 network_id = 4; // network id to avoid confusion with testnets
-    Signature signature = 5; // signer signature on all of the above data
+    AccountId signer = 1; // account this tx is signed by
+    uint64 timestamp = 2; // time transaction was signed
+    uint64 nonce = 3; // tx nonce
+    TransactionData transaction_Data = 4; // binary transaction data
+    uint32 network_id = 5; // network id to avoid confusion with testnets
+    Signature signature = 6; // signer signature on all of the above data
 }
 
 message SignedTransactionWithStatus {
@@ -235,7 +232,7 @@ enum FeeType {
 
 message NewUserEvent {
     uint64 timestamp = 1;
-    AccountId account_id = 2;
+    AccountId signer = 2;
     SignupMethod sign_up_method = 3;
     Amount referred_reward = 4; // for invites - inviter gets a reward - protocol constant
     Amount signup_reward = 5;
