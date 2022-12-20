@@ -13,11 +13,10 @@ use base::blockchain_config_service::{BlockchainConfigService, DEF_TX_FEE_KEY, S
 
 /// Process a new user transaction - update ledger state, emit tx event
 /// This method will not add the tx to a block nor index it
-///
-pub (crate) async fn process_transaction(
+/// This is a helper method for the block creator
+pub(crate) async fn process_transaction(
     transaction: &SignedTransaction,
     block_height: u64) -> Result<TransactionEvent> {
-
     let account_id = transaction.signer.as_ref().ok_or_else(|| anyhow!("missing account id in tx"))?;
 
     if (DatabaseService::read(ReadItem {
@@ -42,7 +41,7 @@ pub (crate) async fn process_transaction(
     // validate verification evidence with user provided data
     let user_mobile_number = user.mobile_number.as_ref().ok_or_else(|| anyhow!("missing mobile number"))?;
     let evidence_mobile_number = verification_evidence.mobile_number.ok_or_else(|| anyhow!("missing mobile number in verifier data"))?;
-    let user_account_id =  user.account_id.as_ref().ok_or_else(|| anyhow!("missing account id in user data"))?;
+    let user_account_id = user.account_id.as_ref().ok_or_else(|| anyhow!("missing account id in user data"))?;
     let evidence_account_id = verification_evidence.account_id.ok_or_else(|| anyhow!("missing account id in verifier data"))?;
 
     if user_account_id.data != evidence_account_id.data {
@@ -82,7 +81,7 @@ pub (crate) async fn process_transaction(
         data: DataItem {
             key: Bytes::from(account_id.data.to_vec()),
             value: Bytes::from(buf),
-         },
+        },
         cf: USERS_COL_FAMILY,
         ttl: 0,
     }).await?;
@@ -108,8 +107,10 @@ pub (crate) async fn process_transaction(
 
     // index the transaction in the db
     DatabaseService::write(WriteItem {
-        data: DataItem { key: tx_hash.clone(),
-            value: Bytes::from(tx_data) },
+        data: DataItem {
+            key: tx_hash.clone(),
+            value: Bytes::from(tx_data)
+        },
         cf: TRANSACTIONS_COL_FAMILY,
         ttl: 0,
     }).await?;

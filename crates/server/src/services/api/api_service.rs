@@ -5,20 +5,14 @@
 use anyhow::Result;
 use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
 use tonic::{Request, Response, Status};
-use base::karma_coin::karma_coin_api::{GetBlockchainEventsRequest, GetBlockchainEventsResponse,
-                                       GetCharTraitsRequest, GetCharTraitsResponse,
-                                       GetNetInfoRequest, GetNetInfoResponse, GetPhoneVerifiersRequest,
-                                       GetPhoneVerifiersResponse, GetTransactionRequest, GetTransactionResponse,
-                                       GetTransactionsRequest, GetTransactionsResponse, GetUserInfoByAccountRequest,
-                                       GetUserInfoByAccountResponse, GetUserInfoByNickRequest,
-                                       GetUserInfoByNickResponse, GetUserInfoByNumberRequest,
-                                       GetUserInfoByNumberResponse, SubmitTransactionRequest,
-                                       SubmitTransactionResponse};
+use base::karma_coin::karma_coin_api::{GetBlockchainEventsRequest, GetBlockchainEventsResponse, GetCharTraitsRequest, GetCharTraitsResponse, GetNetInfoRequest, GetNetInfoResponse, GetPhoneVerifiersRequest, GetPhoneVerifiersResponse, GetTransactionRequest, GetTransactionResponse, GetTransactionsRequest, GetTransactionsResponse, GetUserInfoByAccountRequest, GetUserInfoByAccountResponse, GetUserInfoByNickRequest, GetUserInfoByNickResponse, GetUserInfoByNumberRequest, GetUserInfoByNumberResponse, SubmitTransactionRequest, SubmitTransactionResponse, SubmitTransactionResult};
 use xactor::*;
 use crate::services::api::get_char_traits::GetCharTraits;
 use crate::services::api::get_user_by_account_id::GetUserInfoByAccountId;
 use crate::services::api::get_user_by_nick::GetUserInfoByNick;
 use crate::services::api::get_user_by_number::GetUserInfoByNumber;
+use crate::services::blockchain::block_creator::CreateBlock;
+use crate::services::blockchain::blockchain_service::BlockChainService;
 
 /// ApiService is a system service that provides access to provider server persisted data as well as an interface to admin the provider's server. It provides a GRPC admin service defined in ServerAdminService. This service is designed to be used by provider admin clients.
 #[derive(Debug, Clone)]
@@ -131,8 +125,25 @@ impl ApiServiceTrait for ApiService {
     }
 
     /// Submit a transaction for processing
-    async fn submit_transaction(&self,_request: Request<SubmitTransactionRequest>) -> Result<Response<SubmitTransactionResponse>, Status> {
-        todo!()
+    async fn submit_transaction(&self,request: Request<SubmitTransactionRequest>) -> Result<Response<SubmitTransactionResponse>, Status> {
+
+        let tx = request.into_inner().transaction.ok_or(
+            Status::invalid_argument("transaction is required")
+        )?;
+
+        // create a block with the transaction
+        let service = BlockChainService::from_registry().await
+            .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
+
+        service.call(
+            CreateBlock { transactions: vec![tx] })
+            .await
+            .map_err(|e| Status::internal(format!("failed to call blockchain api: {:?}", e)))?
+            .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
+
+        Ok(Response::new(SubmitTransactionResponse {
+            submit_transaction_result: SubmitTransactionResult::Submitted as i32}))
+
     }
 
     /// Returns all transactions to, and or from and account

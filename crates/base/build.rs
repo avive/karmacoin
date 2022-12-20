@@ -35,7 +35,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .compile(
             &[
                 "proto/karma_coin/core_types/types.proto",
-                "proto/karma_coin/core_types/blockchain.proto",
                 "proto/karma_coin/core_types/verifier.proto",
                 "proto/karma_coin/core_types/api.proto",
                 "proto/karma_coin/client.proto",

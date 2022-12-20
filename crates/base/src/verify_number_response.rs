@@ -56,11 +56,11 @@ impl VerifyNumberResponse {
     }
 
     pub fn verify_signature(&self) -> Result<()> {
-        let mut cloned_req = self.clone();
-        cloned_req.signature = None;
+        let mut cloned = self.clone();
+        cloned.signature = None;
         use prost::Message;
-        let mut buf = Vec::with_capacity(cloned_req.encoded_len());
-        if cloned_req.encode(&mut buf).is_err() {
+        let mut buf = Vec::with_capacity(cloned.encoded_len());
+        if cloned.encode(&mut buf).is_err() {
             return Err(anyhow!("failed to encode source data to binary data"));
         };
         let account_id = self.account_id.as_ref().ok_or(anyhow!("missing account id"))?;

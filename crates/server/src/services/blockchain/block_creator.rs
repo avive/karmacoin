@@ -6,19 +6,71 @@ use anyhow::Result;
 use byteorder::{BigEndian, ByteOrder};
 use bytes::Bytes;
 use prost::Message;
-use base::karma_coin::karma_coin_blockchain::{CreateBlockRequest, CreateBlockResponse};
-use base::karma_coin::karma_coin_core_types::{Block, KeyPair, TransactionType};
+use base::karma_coin::karma_coin_core_types::{Block, KeyPair, SignedTransaction, TransactionType};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use db::types::IntDbKey;
 use xactor::*;
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::get_head_height::get_tip;
-use crate::services::blockchain::new_user_tx_processor_v1;
+use crate::services::blockchain::new_user_tx_processor;
 use crate::services::db_config_service::{BLOCK_TIP_KEY, BLOCKS_COL_FAMILY, NET_SETTINGS_COL_FAMILY};
 
+#[message(result = "Result<Block>")]
+pub(crate) struct CreateBlock {
+    pub(crate) transactions: Vec<SignedTransaction>,
+}
+
+/// Create a block with zero or more transactions
+#[async_trait::async_trait]
+impl Handler<CreateBlock> for BlockChainService {
+    async fn handle(
+        &mut self,
+        _ctx: &mut Context<Self>,
+        msg: CreateBlock,
+    ) -> Result<Block> {
+        if msg.transactions.is_empty() {
+            return Err(anyhow::anyhow!("No transactions to create a block"));
+        }
+
+        let height = get_tip().await?;
+
+        let mut tx_hashes: Vec<Vec<u8>> = vec![];
+        for tx in msg.transactions.iter() {
+            // process each transaction
+            match tx.get_tx_type()? {
+                TransactionType::NewUserV1 => {
+                    match new_user_tx_processor::process_transaction(tx, height + 1).await {
+                        Ok(event) => {
+                            info!("new user transaction processed: {:?}", event);
+                            tx_hashes.push(event.transaction_hash.to_vec());
+                        },
+                        Err(e) => {
+                            error!("Failed to process new user transaction: {:?}", e);
+                        }
+                    }
+                },
+                TransactionType::PaymentV1 => {
+                    todo!("process payment transaction");
+                },
+                TransactionType::UpdateUserV1 => {
+                    todo!("process update user transaction");
+                },
+            }
+        }
+
+        let block = BlockChainService::_create_block(tx_hashes,
+                                                     height + 1,
+                                                     self.id_key_pair.as_ref().unwrap()).await?;
+
+        Ok(block)
+    }
+}
+
+/// BlockchainService block creation implementation
 impl BlockChainService {
     /// Create a block with the provided txs hashes at a given height
-    async fn create_block(transactions_hashes: Vec<Vec<u8>>,
+    /// Internal help method
+    async fn _create_block(transactions_hashes: Vec<Vec<u8>>,
                           height: u64,
         key_pair: &KeyPair
     ) -> Result<Block> {
@@ -85,56 +137,6 @@ impl BlockChainService {
 
     }
 }
-#[message(result = "Result<CreateBlockResponse>")]
-pub(crate) struct CreateBlock (pub(crate)CreateBlockRequest);
 
-/// Create a block with zero or more transactions
-#[async_trait::async_trait]
-impl Handler<CreateBlock> for BlockChainService {
-    async fn handle(
-        &mut self,
-        _ctx: &mut Context<Self>,
-        msg: CreateBlock,
-    ) -> Result<CreateBlockResponse> {
-        let req = msg.0;
-        if req.transactions.is_empty() {
-            return Err(anyhow::anyhow!("No transactions to create a block"));
-        }
-
-        let height = get_tip().await?.height;
-
-        let mut tx_hashes: Vec<Vec<u8>> = vec![];
-        for tx in req.transactions.iter() {
-            // process each transaction
-            match tx.get_tx_type()? {
-                TransactionType::NewUserV1 => {
-                    match new_user_tx_processor_v1::process_transaction(tx, height + 1).await {
-                        Ok(event) => {
-                            info!("new user transaction processed: {:?}", event);
-                            tx_hashes.push(event.transaction_hash.to_vec());
-                        },
-                        Err(e) => {
-                            error!("Failed to process new user transaction: {:?}", e);
-                        }
-                    }
-                },
-                TransactionType::PaymentV1 => {
-                    todo!("process payment transaction");
-                },
-                TransactionType::UpdateUserV1 => {
-                    todo!("process update user transaction");
-                },
-            }
-        }
-
-        let block = BlockChainService::create_block(tx_hashes,
-                                                    height + 1,
-                                                    self.id_key_pair.as_ref().unwrap()).await?;
-
-        Ok(CreateBlockResponse {
-            block: Some(block),
-        })
-    }
-}
 
 
