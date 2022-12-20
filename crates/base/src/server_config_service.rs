@@ -21,7 +21,6 @@ pub const DROP_DB_CONFIG_KEY: &str = "drop_db_on_exit";
 pub const SERVER_NAME_CONFIG_KEY: &str = "peer_name";
 pub const GRPC_SERVER_HOST_CONFIG_KEY: &str = "grpc_host"; //
 pub const GRPC_SERVER_HOST_PORT_CONFIG_KEY: &str = "grpc_admin_port";
-pub const NET_ID_CONFIG_KEY: &str = "net_id";
 pub const GRPC_ADMIN_PORT_CONFIG_KEY: &str = "grpc_admin_port";
 pub const START_VERIFIER_SERVICE_CONFIG_KEY: &str = "start_verifier_service";
 pub const START_API_SERVICE_CONFIG_KEY: &str = "start_api_service";
@@ -58,8 +57,6 @@ impl Default for ServerConfigService {
         let builder = Config::builder();
 
         let config = builder
-            .set_default(NET_ID_CONFIG_KEY, 1)
-            .unwrap()
             .set_default(DROP_DB_CONFIG_KEY, DEFAULT_DROP_DB_ON_EXIT)
             .unwrap()
             .set_default(START_VERIFIER_SERVICE_CONFIG_KEY, DEFAULT_START_VERIFIER_SERVICE)

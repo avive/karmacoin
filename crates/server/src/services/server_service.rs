@@ -14,6 +14,7 @@ use base::server_config_service::{
 };
 use db::db_service::{DatabaseService, Destroy};
 use tonic::transport::Server;
+use base::blockchain_config_service::BlockchainConfigService;
 use xactor::*;
 
 /// ServerService is a full node p2p network server
@@ -24,8 +25,11 @@ pub struct ServerService {}
 #[async_trait::async_trait]
 impl Actor for ServerService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        // init and config the db
+        // start the config services to config db, blockchain and the server
         DbConfigService::from_registry().await.unwrap();
+        BlockchainConfigService::from_registry().await.unwrap();
+        ServerConfigService::from_registry().await.unwrap();
+
         info!("ServerService started");
         Ok(())
     }

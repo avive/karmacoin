@@ -7,10 +7,13 @@ use bytes::Bytes;
 
 use base::karma_coin::karma_coin_core_types::{Amount, Balance, CoinType, SignedTransaction};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
-use crate::services::db_config_service::USERS_COL_FAMILY;
+use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, USERS_COL_FAMILY};
 use prost::Message;
+use base::blockchain_config_service::{BlockchainConfigService, DEF_TX_FEE_KEY, SIGNUP_REWARD_KEY};
 
-/// Process a new user transaction
+/// Process a new user transaction - update ledger state, emit tx event
+/// This method will not add the tx to a block nor index it
+///
 pub (crate) async fn _process_transaction(transaction: &SignedTransaction) -> Result<()> {
 
     let account_id = transaction.signer.as_ref().ok_or_else(|| anyhow!("missing account id in tx"))?;
@@ -26,23 +29,40 @@ pub (crate) async fn _process_transaction(transaction: &SignedTransaction) -> Re
 
     let new_user_tx = transaction.get_new_user_transaction_v1()?;
 
-    // Get user provider info from tx but overwrite with data that should be added
-    // according to the consensus rule
     let mut user = new_user_tx.user.ok_or_else(|| anyhow!("missing user data in tx"))?;
-
     let verification_evidence = new_user_tx.verify_number_response.ok_or_else(|| anyhow!("missing verifier data"))?;
+
+    // verify evidence signature
+    // todo: verify verifier is valid according to consensus rules
+    // and genesis config
     verification_evidence.verify_signature()?;
 
-    // todo: this must come from config - new user tx gas fees
-    let tx_fee_kcents = 1000;
-    let signup_reward_kcents = 10^9;
+    // validate verification evidence with user provided data
+    let user_mobile_number = user.mobile_number.as_ref().ok_or_else(|| anyhow!("missing mobile number"))?;
+    let evidence_mobile_number = verification_evidence.mobile_number.ok_or_else(|| anyhow!("missing mobile number in verifier data"))?;
+    let user_account_id =  user.account_id.as_ref().ok_or_else(|| anyhow!("missing account id in user data"))?;
+    let evidence_account_id = verification_evidence.account_id.ok_or_else(|| anyhow!("missing account id in verifier data"))?;
 
-    // todo: calc tx fee from user to validator
+    if user_account_id.data != evidence_account_id.data {
+        return Err(anyhow!("account id mismatch"));
+    }
+
+    if user.user_name != verification_evidence.nickname {
+        return Err(anyhow!("nickname mismatch"));
+    }
+
+    if user_mobile_number.number != evidence_mobile_number.number {
+        return Err(anyhow!("mobile number mismatch"));
+    }
+
+    // Create the user and update its data
+    let tx_fee_k_cents = BlockchainConfigService::get_u64(DEF_TX_FEE_KEY.into()).await?.unwrap();
+    let signup_reward_k_cents = BlockchainConfigService::get_u64(SIGNUP_REWARD_KEY.into()).await?.unwrap();
 
     user.nonce = 1;
     user.balances = vec![Balance {
         free: Some(Amount {
-            value: signup_reward_kcents - tx_fee_kcents,
+            value: signup_reward_k_cents - tx_fee_k_cents,
             coin_type: CoinType::Core as i32,
         }),
         reserved: None,
@@ -50,11 +70,10 @@ pub (crate) async fn _process_transaction(transaction: &SignedTransaction) -> Re
         fee_frozen: None,
     }];
 
-    // todo: figure out personality trait for joiner - brave?
-    // ahead of the curve?
+    // todo: figure out personality trait for joiner - brave? ahead of the curve?
     user.trait_scores = vec![];
 
-    // add user to db
+    // add the new user to db
     let mut buf = Vec::with_capacity(user.encoded_len());
     user.encode(&mut buf)?;
     DatabaseService::write(WriteItem {
@@ -66,9 +85,24 @@ pub (crate) async fn _process_transaction(transaction: &SignedTransaction) -> Re
         ttl: 0,
     }).await?;
 
-    // index the transaction in the db
+    // update nickname index
+    DatabaseService::write(WriteItem {
+        data: DataItem { key: Bytes::from(user.user_name.as_bytes().to_vec()), value: Bytes::from(account_id.data.to_vec()) },
+        cf: RESERVED_NICKS_COL_FAMILY,
+        ttl: 0,
+    }).await?;
 
-    // create transaction event and emit it
+    // update mobile numbers index
+    DatabaseService::write(WriteItem {
+        data: DataItem { key: Bytes::from(user_mobile_number.number.as_bytes().to_vec()), value: Bytes::from(account_id.data.to_vec()) },
+        cf: MOBILE_NUMBERS_COL_FAMILY,
+        ttl: 0,
+    }).await?;
+
+
+    // todo: index the transaction in the db
+
+    // todo: create transaction event and emit it
 
     // note that referral awards are handled in the payment tx processing logic and not here
 

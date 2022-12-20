@@ -6,6 +6,7 @@ members = [
     "crates/xactor-derive",
     "crates/xactor-playground",
     "crates/db",
+    "crates/crypto",
     "crates/server",
     "crates/server-app",
     "crates/client",

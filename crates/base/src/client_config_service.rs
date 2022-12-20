@@ -31,8 +31,6 @@ impl Service for ClientConfigService {}
 
 impl Default for ClientConfigService {
     fn default() -> Self {
-
-
         let config = Config::builder()
             .set_default(DROP_DB_CONFIG_KEY, true)
             .unwrap()

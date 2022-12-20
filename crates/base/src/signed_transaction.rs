@@ -3,12 +3,20 @@
 //
 
 use anyhow::{anyhow, Result};
+use bytes::Bytes;
 use chrono::{Duration, Utc};
 use ed25519_dalek::Verifier;
 use prost::Message;
 use crate::karma_coin::karma_coin_core_types::{NewUserTransactionV1, PaymentTransactionV1, SignedTransaction, TransactionType, UpdateUserV1};
 
 impl SignedTransaction {
+
+    pub fn get_hash(&self) -> Result<Bytes> {
+        let mut buf = Vec::with_capacity(self.encoded_len());
+        self.encode(&mut buf)?;
+        let hash = orion::hash::digest(&buf).map_err(|e| anyhow!("failed to hash data: {}", e))?;
+        Ok(Bytes::from(hash.as_ref().to_vec().clone()))
+    }
 
     /// Validate data of a newly submitted transaction before processing it
     pub fn validate(&self, user_nonce: u64) -> Result<()> {

@@ -136,6 +136,10 @@ impl Actor for DbConfigService {
             DbConfigService::config_genesis().await?;
         }
 
+        // todo: network_setting should be a service and not use the db
+        // on load - read form config and store in memory
+        // no need to use db for that
+
         // mark that db is configured with static data
         DatabaseService::write(WriteItem {
             data: DataItem {

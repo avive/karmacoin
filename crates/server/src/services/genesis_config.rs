@@ -20,7 +20,8 @@ impl DbConfigService {
         info!("running genesis config...");
 
         let traits = Traits {
-            // todo: traits should come from config file
+            // todo: traits should come from genesis config file
+            // and not be handled with db at all
             named_traits: vec![
                 TraitName::new(Kind, "Kind"),
                 TraitName::new(Helpful, "Helpful"),
@@ -35,6 +36,7 @@ impl DbConfigService {
         };
 
         // store default char traits
+        // todo: move this to genesis config
         DatabaseService::write(WriteItem {
             data: DataItem { key: Bytes::from(DB_SUPPORTED_TRAITS_KEY.as_bytes()),
                 value: Bytes::from(buf) },
@@ -42,7 +44,7 @@ impl DbConfigService {
             ttl: 0
         }).await?;
 
-        // todo: load config from file and store in db
+        // todo: load config from file and store in memorys
 
         /*
 

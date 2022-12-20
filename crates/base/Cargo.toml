@@ -41,7 +41,7 @@ custom_error = "1.8.0"
 log = "0.4.8"
 env_logger = "*"
 config = "0.13.1"
-orion = "0"
+orion = "0.17.3"
 
 [dependencies.rand_core]
 version = "0.5"
