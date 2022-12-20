@@ -7,8 +7,6 @@ use config::{Config, Environment};
 use log::*;
 use xactor::*;
 
-const GENESIS_FILE_NAME : &str = "genesis_config";
-
 pub const NET_ID_KEY: &str = "net_id";
 pub const DEF_TX_FEE_KEY : &str = "def_tx_fee";
 pub const SIGNUP_REWARD_KEY : &str = "signup_reward";
@@ -17,8 +15,10 @@ pub const SIGNUP_REFERRAL_KEY : &str = "signup_reward";
 /// This service handles the kc blockchain configuration
 /// It provides default values for development, and merges in values from
 /// a genesis config file when applicable
+#[derive(Default)]
 pub struct BlockchainConfigService {
     config: Config,
+    config_file: Option<String>
 }
 
 #[async_trait::async_trait]
@@ -44,9 +44,14 @@ impl Actor for BlockchainConfigService {
                     .separator("_")
                     .list_separator(" "),
             )
-            .add_source(config::File::with_name(GENESIS_FILE_NAME))
             .build()
             .unwrap();
+
+        // load configs from file if it was set
+        if let Some(config_file) = &self.config_file {
+            #[allow(deprecated)]
+            self.config.merge(config::File::with_name(config_file)).unwrap();
+        }
 
         self.config = config;
 
@@ -55,12 +60,6 @@ impl Actor for BlockchainConfigService {
 }
 
 impl Service for BlockchainConfigService {}
-
-impl Default for BlockchainConfigService {
-    fn default() -> Self {
-        BlockchainConfigService { config: Config::default() }
-    }
-}
 
 // helpers
 impl BlockchainConfigService {
@@ -99,6 +98,33 @@ impl BlockchainConfigService {
     pub async fn set_u64(key: String, value: u64) -> Result<()> {
         let config = BlockchainConfigService::from_registry().await?;
         config.call(SetU64 { key, value }).await?
+    }
+}
+
+#[message(result = "Result<()>")]
+pub struct SetConfigFile {
+    pub config_file: String,
+}
+
+#[async_trait::async_trait]
+impl Handler<SetConfigFile> for BlockchainConfigService {
+    async fn handle(&mut self, _ctx: &mut Context<Self>, msg: SetConfigFile) -> Result<()> {
+
+        // todo: verify config file exists and is readable by this process
+
+        #[allow(deprecated)]
+        self.config
+            .merge(config::File::with_name(&msg.config_file))
+            .unwrap();
+
+        self.config_file = Some(msg.config_file.clone());
+
+        debug!(
+            "Merging content of config file {:?}",
+            msg.config_file.as_str()
+        );
+
+        Ok(())
     }
 }
 

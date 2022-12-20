@@ -4,7 +4,10 @@ pub struct CreateBlockRequest {
     pub transactions: ::prost::alloc::vec::Vec<super::core_types::SignedTransaction>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct CreateBlockResponse {}
+pub struct CreateBlockResponse {
+    #[prost(message, optional, tag = "1")]
+    pub block: ::core::option::Option<super::core_types::Block>,
+}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetHeadHeightRequest {}
 #[derive(Clone, PartialEq, ::prost::Message)]

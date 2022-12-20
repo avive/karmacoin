@@ -15,23 +15,18 @@ use xactor::*;
 
 pub const CLIENT_NAME_CONFIG_KEY: &str = "client_name";
 
+#[derive(Debug, Clone, Default)]
 pub struct ClientConfigService {
     config: Config,
+    config_file: Option<String>
 }
 
 #[async_trait::async_trait]
 impl Actor for ClientConfigService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        debug!("Client ConfigService started");
-        Ok(())
-    }
-}
+        info!("Client ConfigService started");
 
-impl Service for ClientConfigService {}
-
-impl Default for ClientConfigService {
-    fn default() -> Self {
-        let config = Config::builder()
+        let mut config = Config::builder()
             .set_default(DROP_DB_CONFIG_KEY, true)
             .unwrap()
             .set_default(GRPC_SERVER_HOST_PORT_CONFIG_KEY, 8081)
@@ -45,10 +40,20 @@ impl Default for ClientConfigService {
             .add_source(Environment::with_prefix("KC_CLIENT"))
             .build()
             .unwrap();
-        
-        ClientConfigService { config }
+
+        // load configs from file if it was set
+        if let Some(config_file) = &self.config_file {
+            #[allow(deprecated)]
+            config.merge(config::File::with_name(config_file)).unwrap();
+        }
+
+        self.config = config;
+
+        Ok(())
     }
 }
+
+impl Service for ClientConfigService {}
 
 #[message(result = "Result<()>")]
 pub struct SetConfigFile {
@@ -64,8 +69,10 @@ impl Handler<SetConfigFile> for ClientConfigService {
             .merge(config::File::with_name(msg.config_file.as_str()).required(false))
             .unwrap();
 
+        self.config_file = Some(msg.config_file.clone());
+
         debug!(
-            "Merging content of config file {:?}",
+            "Merged content of config file {:?}",
             msg.config_file.as_str()
         );
 

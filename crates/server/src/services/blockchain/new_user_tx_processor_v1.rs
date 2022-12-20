@@ -15,7 +15,8 @@ use base::blockchain_config_service::{BlockchainConfigService, DEF_TX_FEE_KEY, S
 /// This method will not add the tx to a block nor index it
 ///
 pub (crate) async fn process_transaction(
-    transaction: &SignedTransaction, block_height: u64) -> Result<TransactionEvent> {
+    transaction: &SignedTransaction,
+    block_height: u64) -> Result<TransactionEvent> {
 
     let account_id = transaction.signer.as_ref().ok_or_else(|| anyhow!("missing account id in tx"))?;
 

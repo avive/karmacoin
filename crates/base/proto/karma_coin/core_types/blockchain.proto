@@ -22,6 +22,7 @@ message CreateBlockRequest {
 }
 
 message CreateBlockResponse {
+  core_types.Block block = 1;
 }
 
 message GetHeadHeightRequest {

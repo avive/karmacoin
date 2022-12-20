@@ -29,34 +29,20 @@ pub const START_API_SERVICE_CONFIG_KEY: &str = "start_api_service";
 pub const VERIFIER_NAME: &str = "KarmaCoinVerifier_v1";
 
 // private identity key (ed25519)
-pub const VERIFIER_ID_PRIVATE_KEY: &str = "id_key_private";
-pub const VERIFIER_ID_PUBLIC_KEY: &str = "id_key_public";
+pub const VERIFIER_ID_PRIVATE_KEY: &str = "id_verifier_key_private";
+pub const VERIFIER_ID_PUBLIC_KEY: &str = "id_verifier_key_public";
 
 pub struct ServerConfigService {
     config: Config,
+    config_file: Option<String>
 }
 
 #[async_trait::async_trait]
 impl Actor for ServerConfigService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
         info!("server ConfigService started");
-        Ok(())
-    }
-}
 
-impl Service for ServerConfigService {}
-
-impl Default for ServerConfigService {
-    fn default() -> Self {
-        //let mut config = Config::default();
-
-        info!("Configuring server...");
-
-        // todo: update to the modern config builder pattern in the latest release, and stop using detracted patterns
-
-        let builder = Config::builder();
-
-        let config = builder
+        let config = Config::builder()
             .set_default(DROP_DB_CONFIG_KEY, DEFAULT_DROP_DB_ON_EXIT)
             .unwrap()
             .set_default(START_VERIFIER_SERVICE_CONFIG_KEY, DEFAULT_START_VERIFIER_SERVICE)
@@ -84,9 +70,28 @@ impl Default for ServerConfigService {
                     .list_separator(" "),
             ).build().unwrap();
 
-        // todo: if id private key not set then generate random keypair and store private key
+        // load configs from file if it was set
+        if let Some(config_file) = &self.config_file {
+            #[allow(deprecated)]
+            self.config.merge(config::File::with_name(config_file)).unwrap();
+        }
 
-        ServerConfigService { config }
+        // todo: if id private key not set then generate random keypair and store private key
+        self.config = config;
+
+        Ok(())
+    }
+}
+
+impl Service for ServerConfigService {}
+
+impl Default for ServerConfigService {
+    fn default() -> Self {
+        info!("Configuring server...");
+        ServerConfigService {
+            config: Config::default(),
+            config_file: None,
+        }
     }
 }
 
@@ -141,11 +146,13 @@ impl Handler<SetConfigFile> for ServerConfigService {
 
         // todo: verify config file exists and is readable by this process
 
-        let _config = Config::builder()
-            // Add in `./Settings.toml`
-            .add_source(config::File::with_name(msg.config_file.as_str()))
-            .build()
+        #[allow(deprecated)]
+        self.config
+            .merge(config::File::with_name(&msg.config_file))
             .unwrap();
+
+        // save config file so it can be used if we need to reload config
+        self.config_file = Some(msg.config_file.clone());
 
         debug!(
             "Merging content of config file {:?}",

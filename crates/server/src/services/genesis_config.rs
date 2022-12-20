@@ -44,7 +44,7 @@ impl DbConfigService {
             ttl: 0
         }).await?;
 
-        // todo: load config from file and store in memorys
+        // todo: load config from file and store in memory
 
         /*
 
