@@ -6,7 +6,7 @@
 
 pub (crate) mod blockchain_service;
 pub (crate) mod get_head_height;
-pub (crate) mod create_block;
+pub (crate) mod block_creator;
 pub (crate) mod new_user_tx_processor_v1;
 pub (crate) mod payment_tx_processor_v1;
 pub (crate) mod update_tx_processor_v1;

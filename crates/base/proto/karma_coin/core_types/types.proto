@@ -243,8 +243,9 @@ message NewUserEvent {
 message TransactionEvent {
     uint64 height = 1; // ledger height of execution
     SignedTransaction transaction = 2;
-    ExecutionResult result = 3;
-    FeeType fee_type = 4;
+    bytes transaction_hash = 3;
+    ExecutionResult result = 4;
+    FeeType fee_type = 5;
 }
 
 enum ExecutionResult {

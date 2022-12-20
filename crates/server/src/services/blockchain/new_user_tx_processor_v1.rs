@@ -5,16 +5,17 @@
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
 
-use base::karma_coin::karma_coin_core_types::{Amount, Balance, CoinType, SignedTransaction};
+use base::karma_coin::karma_coin_core_types::{Amount, Balance, CoinType, ExecutionResult, FeeType, SignedTransaction, TransactionEvent};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
-use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, USERS_COL_FAMILY};
+use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY};
 use prost::Message;
 use base::blockchain_config_service::{BlockchainConfigService, DEF_TX_FEE_KEY, SIGNUP_REWARD_KEY};
 
 /// Process a new user transaction - update ledger state, emit tx event
 /// This method will not add the tx to a block nor index it
 ///
-pub (crate) async fn _process_transaction(transaction: &SignedTransaction) -> Result<()> {
+pub (crate) async fn process_transaction(
+    transaction: &SignedTransaction, block_height: u64) -> Result<TransactionEvent> {
 
     let account_id = transaction.signer.as_ref().ok_or_else(|| anyhow!("missing account id in tx"))?;
 
@@ -99,13 +100,28 @@ pub (crate) async fn _process_transaction(transaction: &SignedTransaction) -> Re
         ttl: 0,
     }).await?;
 
+    let mut tx_data = Vec::with_capacity(transaction.encoded_len());
+    transaction.encode(&mut tx_data)?;
 
-    // todo: index the transaction in the db
+    let tx_hash = transaction.get_hash()?;
 
-    // todo: create transaction event and emit it
+    // index the transaction in the db
+    DatabaseService::write(WriteItem {
+        data: DataItem { key: tx_hash.clone(),
+            value: Bytes::from(tx_data) },
+        cf: TRANSACTIONS_COL_FAMILY,
+        ttl: 0,
+    }).await?;
+
+    // todo: transfer the tx fee to the local block producer (this node)
 
     // note that referral awards are handled in the payment tx processing logic and not here
 
-
-    todo!()
+    Ok(TransactionEvent {
+        height: block_height,
+        transaction: Some(transaction.clone()),
+        transaction_hash: tx_hash.as_ref().to_vec(),
+        result: ExecutionResult::Executed as i32,
+        fee_type: FeeType::Mint as i32,
+    })
 }

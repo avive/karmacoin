@@ -11,11 +11,12 @@ use crate::karma_coin::karma_coin_core_types::{NewUserTransactionV1, PaymentTran
 
 impl SignedTransaction {
 
+    /// Returns the transaction canonical hash
     pub fn get_hash(&self) -> Result<Bytes> {
         let mut buf = Vec::with_capacity(self.encoded_len());
         self.encode(&mut buf)?;
         let hash = orion::hash::digest(&buf).map_err(|e| anyhow!("failed to hash data: {}", e))?;
-        Ok(Bytes::from(hash.as_ref().to_vec().clone()))
+        Ok(Bytes::from(hash.as_ref().to_vec()))
     }
 
     /// Validate data of a newly submitted transaction before processing it

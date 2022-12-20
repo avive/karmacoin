@@ -40,7 +40,7 @@ impl Actor for BlockChainService {
 impl Service for BlockChainService {}
 
 use base::karma_coin::karma_coin_blockchain::blockchain_service_server::BlockchainService as BlockChainServiceTrait;
-use crate::services::blockchain::create_block::CreateBlock;
+use crate::services::blockchain::block_creator::CreateBlock;
 use crate::services::blockchain::get_head_height::GetHeadHeight;
 
 #[tonic::async_trait]

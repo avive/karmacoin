@@ -277,9 +277,11 @@ pub struct TransactionEvent {
     pub height: u64,
     #[prost(message, optional, tag = "2")]
     pub transaction: ::core::option::Option<SignedTransaction>,
-    #[prost(enumeration = "ExecutionResult", tag = "3")]
+    #[prost(bytes = "vec", tag = "3")]
+    pub transaction_hash: ::prost::alloc::vec::Vec<u8>,
+    #[prost(enumeration = "ExecutionResult", tag = "4")]
     pub result: i32,
-    #[prost(enumeration = "FeeType", tag = "4")]
+    #[prost(enumeration = "FeeType", tag = "5")]
     pub fee_type: i32,
 }
 /// Supported built-in coin types
