@@ -4,7 +4,9 @@
 
 use anyhow::{anyhow, Result};
 use ed25519_dalek::{Keypair, Signer, Verifier};
+use crate::karma_coin::karma_coin_core_types::Signature;
 use crate::karma_coin::karma_coin_verifier::VerifyNumberRequest;
+use prost::Message;
 
 impl VerifyNumberRequest {
 
@@ -21,18 +23,15 @@ impl VerifyNumberRequest {
 }
 
 impl VerifyNumberRequest {
-    pub fn sign(
+    pub async fn sign(
         &mut self,
         key_pair: &Keypair,
     ) -> Result<()> {
-        use prost::Message;
         let mut buf = Vec::with_capacity(self.encoded_len());
         self.encode(&mut buf)?;
-
-        use crate::karma_coin::karma_coin_core_types::Signature;
         self.signature = Some(Signature {
             scheme: 0,
-            signature: key_pair.sign(&buf).as_ref().to_vec(),
+            signature: key_pair.sign(buf.as_slice()).as_ref().to_vec()
         });
 
         Ok(())
@@ -41,7 +40,6 @@ impl VerifyNumberRequest {
     pub fn verify_signature(&self) -> Result<()> {
         let mut cloned_req = self.clone();
         cloned_req.signature = None;
-        use prost::Message;
         let mut buf = Vec::with_capacity(cloned_req.encoded_len());
         if cloned_req.encode(&mut buf).is_err() {
             return Err(anyhow!("failed to encode source data to binary data"));

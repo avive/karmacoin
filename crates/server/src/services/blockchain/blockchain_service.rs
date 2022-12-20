@@ -63,17 +63,17 @@ impl Actor for BlockChainService {
                             }),
                             scheme: 0
                         });
-                        info!("loaded verifier id key pair from config")
+                        info!("loaded blockchain producer id key pair from config")
                     },
                     None => {
-                        panic!("invalid config: missing verifier id public key");
+                        panic!("invalid config: missing blockchain producer id public key");
                     }
                 }
             },
             None => {
-                // no private key in config - generate new key pair
+                // no private key in config - generate new one
                 self.id_key_pair = Some(KeyPair::new());
-                info!("generated a new random verifier id key pair");
+                info!("generated a new random block producer id key pair");
             }
         }
 
