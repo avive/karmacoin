@@ -2,6 +2,7 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use std::collections::HashMap;
 use anyhow::Result;
 use bytes::Bytes;
 use prost::Message;
@@ -17,7 +18,7 @@ use crate::services::db_config_service::{TXS_POOL_COL_FAMILY, TXS_POOL_KEY};
 /// todo: add support for reading pool size
 #[derive(Debug, Clone, Default)]
 pub(crate) struct MemPoolService {
-    pub(crate) transactions : Vec<SignedTransaction>
+    pub(crate) transactions : HashMap<Vec<u8>, SignedTransaction>
 }
 
 #[async_trait::async_trait]
@@ -29,10 +30,13 @@ impl Actor for MemPoolService {
             key: Bytes::from(TXS_POOL_KEY.as_bytes()),
             cf: TXS_POOL_COL_FAMILY,
         }).await? {
-            self.transactions = MemPool::decode(data.0.as_ref())?.transactions
-
+            self.transactions = HashMap::new();
+            let mempool = MemPool::decode(data.0.as_ref())?;
+            for tx in mempool.transactions {
+                self.transactions.insert(tx.get_hash().unwrap().as_ref().to_vec(), tx);
+            }
         } else {
-            self.transactions = vec![];
+            info!("Memppol is empty");
         }
 
         info!("MemPoolService started");
@@ -43,7 +47,7 @@ impl Actor for MemPoolService {
 
 impl Service for MemPoolService {}
 
-#[message(result = "Result<Vec<SignedTransaction>>")]
+#[message(result = "Result<HashMap<Vec<u8>,SignedTransaction>>")]
 pub(crate) struct GetTransactions;
 
 /// Create a block with zero or more transactions
@@ -53,7 +57,7 @@ impl Handler<GetTransactions> for MemPoolService {
         &mut self,
         _ctx: &mut Context<Self>,
         _msg: GetTransactions,
-    ) -> Result<Vec<SignedTransaction>> {
+    ) -> Result<HashMap<Vec<u8>,SignedTransaction>> {
         Ok(self.transactions.clone())
     }
 }
@@ -62,7 +66,7 @@ impl MemPoolService {
     /// Persist the mem_pool to the db
     pub(crate) async fn persist(&self) -> Result<()> {
         let mem_pool = MemPool {
-            transactions: self.transactions.clone()
+            transactions: self.transactions.values().cloned().collect()
         };
 
         let mut buf = Vec::with_capacity(mem_pool.encoded_len());
@@ -92,11 +96,28 @@ impl Handler<AddTransaction> for MemPoolService {
         _ctx: &mut Context<Self>,
         msg: AddTransaction,
     ) -> Result<()> {
-        self.transactions.push(msg.0);
+        let tx = msg.0;
+        self.transactions.insert(tx.get_hash().unwrap().as_ref().to_vec(), tx);
         self.persist().await
     }
 }
 
+
+#[message(result = "Result<()>")]
+pub(crate) struct RemoveTransaction(pub(crate) SignedTransaction);
+
+/// Create a block with zero or more transactions
+#[async_trait::async_trait]
+impl Handler<RemoveTransaction> for MemPoolService {
+    async fn handle(
+        &mut self,
+        _ctx: &mut Context<Self>,
+        msg: RemoveTransaction,
+    ) -> Result<()> {
+        self.transactions.remove(&*msg.0.get_hash().unwrap().as_ref().to_vec());
+        self.persist().await
+    }
+}
 
 
 
