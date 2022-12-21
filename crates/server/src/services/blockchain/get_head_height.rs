@@ -8,7 +8,7 @@ use bytes::Bytes;
 use db::db_service::{DatabaseService, ReadItem};
 use xactor::*;
 use crate::services::blockchain::blockchain_service::BlockChainService;
-use crate::services::db_config_service::{BLOCK_TIP_KEY, NET_SETTINGS_COL_FAMILY};
+use crate::services::db_config_service::{BLOCK_TIP_KEY, BLOCKCHAIN_DATA_COL_FAMILY};
 
 #[message(result = "Result<u64>")]
 pub(crate) struct GetHeadHeight;
@@ -29,7 +29,7 @@ impl Handler<GetHeadHeight> for BlockChainService {
 pub(crate) async fn get_tip() -> Result<u64> {
     if let Some(data) = DatabaseService::read(ReadItem {
         key: Bytes::from(BLOCK_TIP_KEY.as_bytes()),
-        cf: NET_SETTINGS_COL_FAMILY
+        cf: BLOCKCHAIN_DATA_COL_FAMILY
     }).await? {
         Ok(BigEndian::read_u64(data.0.as_ref()))
     } else {

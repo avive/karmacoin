@@ -4,7 +4,7 @@
 
 use rocksdb::{ColumnFamilyDescriptor, Options};
 use base::server_config_service::{DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY, ServerConfigService};
-use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
+use db::db_service::{DatabaseService, ReadItem};
 use xactor::*;
 use anyhow::Result;
 use bytes::Bytes;
@@ -35,14 +35,18 @@ pub const RESERVED_NICKS_COL_FAMILY: &str = "reserved_nicks_cf";
 //// Blockchain-based data - indexing on-chain data and its blocks
 /////////////////
 
-/// col family the network and blockchain settings. Various settings are accessible via keys.
-pub const NET_SETTINGS_COL_FAMILY: &str = "net_settings_cf";
+/// col family for blockchain data. Various settings are accessible via keys.
+pub const BLOCKCHAIN_DATA_COL_FAMILY: &str = "blockchain_data_cf";
 
 /// value: bool indicating if the local db was initialized or needs initiation with static data
 pub const DB_INITIALIZED_KEY: &str = "db_initialized_key";
 
 /// value: uint64 indicating current tip block height
 pub const BLOCK_TIP_KEY: &str = "block_tip_key";
+
+/// Block's transactions processing events
+/// key: block height, value: zero or more events emitted by txs in the block
+pub const BLOCK_EVENTS_COL_FAMILY: &str = "bc_events_cf";
 
 /// Value: a serialized vector of all supported Traits
 /// this data is in consensus on genesis and may only change via a runtime upgrade
@@ -118,9 +122,10 @@ impl Actor for DbConfigService {
                 ColumnFamilyDescriptor::new(NICKS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(MOBILE_NUMBERS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(VERIFICATION_CODES_COL_FAMILY, Options::default()),
-                ColumnFamilyDescriptor::new(NET_SETTINGS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TESTS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(BLOCKS_COL_FAMILY, Options::default()),
+                ColumnFamilyDescriptor::new(BLOCK_EVENTS_COL_FAMILY, Options::default()),
+                ColumnFamilyDescriptor::new(BLOCKCHAIN_DATA_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TXS_POOL_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TRANSACTIONS_COL_FAMILY, Options::default()),
             ],
@@ -131,24 +136,10 @@ impl Actor for DbConfigService {
         let init_key = Bytes::from(DB_INITIALIZED_KEY.as_bytes());
         if DatabaseService::read(ReadItem {
             key: init_key.clone(),
-            cf: NET_SETTINGS_COL_FAMILY
+            cf: BLOCKCHAIN_DATA_COL_FAMILY
         }).await?.is_none() {
             DbConfigService::config_genesis().await?;
         }
-
-        // todo: network_setting should be a service and not use the db
-        // on load - read form config and store in memory
-        // no need to use db for that
-
-        // mark that db is configured with static data
-        DatabaseService::write(WriteItem {
-            data: DataItem {
-                key: init_key,
-                value: Bytes::from("1".as_bytes().to_vec()),
-             },
-            cf: NET_SETTINGS_COL_FAMILY,
-            ttl: 0
-        }).await?;
 
         Ok(())
     }

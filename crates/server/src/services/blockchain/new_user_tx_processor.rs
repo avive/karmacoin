@@ -119,11 +119,13 @@ pub(crate) async fn process_transaction(
 
     // note that referral awards are handled in the payment tx processing logic and not here
 
-    Ok(TransactionEvent {
+    let event = TransactionEvent {
         height: block_height,
         transaction: Some(transaction.clone()),
         transaction_hash: tx_hash.as_ref().to_vec(),
         result: ExecutionResult::Executed as i32,
         fee_type: FeeType::Mint as i32,
-    })
+    };
+
+    Ok(event)
 }

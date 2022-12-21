@@ -6,7 +6,7 @@ use anyhow::Result;
 use bytes::Bytes;
 use db::db_service::{DatabaseService, ReadItem};
 use xactor::*;
-use crate::services::db_config_service::{DB_SUPPORTED_TRAITS_KEY, NET_SETTINGS_COL_FAMILY};
+use crate::services::db_config_service::{DB_SUPPORTED_TRAITS_KEY, BLOCKCHAIN_DATA_COL_FAMILY};
 use base::karma_coin::karma_coin_api::{GetCharTraitsRequest, GetCharTraitsResponse};
 use base::karma_coin::karma_coin_core_types::{Traits};
 use crate::services::api::api_service::ApiService;
@@ -26,7 +26,7 @@ impl Handler<GetCharTraits> for ApiService {
         // lookup accountId by nickname
         match DatabaseService::read(ReadItem {
             key: Bytes::from(DB_SUPPORTED_TRAITS_KEY.as_bytes()),
-            cf: NET_SETTINGS_COL_FAMILY,
+            cf: BLOCKCHAIN_DATA_COL_FAMILY,
         }).await? {
             Some(data) => {
 

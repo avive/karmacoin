@@ -5,7 +5,7 @@
 use anyhow::Result;
 use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
 use tonic::{Request, Response, Status};
-use base::karma_coin::karma_coin_api::{GetBlockchainEventsRequest, GetBlockchainEventsResponse, GetCharTraitsRequest, GetCharTraitsResponse, GetNetInfoRequest, GetNetInfoResponse, GetPhoneVerifiersRequest, GetPhoneVerifiersResponse, GetTransactionRequest, GetTransactionResponse, GetTransactionsRequest, GetTransactionsResponse, GetUserInfoByAccountRequest, GetUserInfoByAccountResponse, GetUserInfoByNickRequest, GetUserInfoByNickResponse, GetUserInfoByNumberRequest, GetUserInfoByNumberResponse, SubmitTransactionRequest, SubmitTransactionResponse, SubmitTransactionResult};
+use base::karma_coin::karma_coin_api::*;
 use xactor::*;
 use crate::services::api::get_char_traits::GetCharTraits;
 use crate::services::api::get_user_by_account_id::GetUserInfoByAccountId;
@@ -117,10 +117,7 @@ impl ApiServiceTrait for ApiService {
     }
 
     /// Returns network info (on-chain data)
-    async fn get_net_info(
-        &self,
-        _request: Request<GetNetInfoRequest>,
-    ) -> std::result::Result<Response<GetNetInfoResponse>, Status> {
+    async fn get_blockchain_data(&self, _request: Request<GetBlockchainDataRequest>) -> Result<Response<GetBlockchainDataResponse>, Status> {
         todo!()
     }
 
@@ -167,6 +164,13 @@ impl ApiServiceTrait for ApiService {
         &self,
         _request: Request<GetBlockchainEventsRequest>,
     ) -> Result<Response<GetBlockchainEventsResponse>, Status> {
+        todo!()
+    }
+
+    async fn get_genesis_data(
+        &self,
+        _request: Request<GetGenesisDataRequest>,
+    ) -> Result<Response<GetGenesisDataResponse>, Status> {
         todo!()
     }
 }

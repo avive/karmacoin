@@ -60,21 +60,28 @@ message GetCharTraitsResponse {
   repeated core_types.TraitName trait_names = 1;
 }
 
-message GetNetInfoRequest {
+
+message GetGenesisDataRequest {
+}
+
+message GetGenesisDataResponse {
+  uint32 network_id = 1; // from genesis
+  string api_version = 2; // the provided API semantic version
+  uint64 genesis_time = 3; // from genesis
+  string name = 4; // from genesis
+}
+
+message GetBlockchainDataRequest {
 }
 
 // All genesis data as well as versioning info should be returned
-message GetNetInfoResponse {
-  uint32 network_id = 1;
-  uint64 users_count = 2;
-  uint64 genesis_time = 3;
-  string name = 4;
-  uint64 block_height = 5;
-  string api_version = 6; // provided API semantic version
-  uint64 transactions_count = 7; // number of transactions
-  uint64 appreciations_count = 8; // number of appreciations
-  uint64 new_account_reward = 9; // new account reward in kcents
-  uint64 referral_reward = 10; // referral reward in kcents
+message GetBlockchainDataResponse {
+  uint64 users_count = 1; // total users count
+  uint64 block_height = 2; // current block height
+  uint64 transactions_count = 3; // number of transactions
+  uint64 appreciations_count = 4; // number of appreciations
+  uint64 new_account_reward = 5; // current new account reward in kcents
+  uint64 referral_reward = 6; // current referral reward in kcents
 }
 
 message GetTransactionsRequest {
@@ -120,8 +127,11 @@ service ApiService {
   // Returns all char traits on-chain
   rpc GetCharTraits(GetCharTraitsRequest) returns (GetCharTraitsResponse);
 
-  // Returns the API backing blockchain network info
-  rpc GetNetInfo(GetNetInfoRequest) returns (GetNetInfoResponse);
+  // Returns the current blockchain state
+  rpc GetBlockchainData(GetBlockchainDataRequest) returns (GetBlockchainDataResponse);
+
+  // Returns the current blockchain state
+  rpc GetGenesisData(GetGenesisDataRequest) returns (GetGenesisDataResponse);
 
   // Submit a signed transaction to the blockchain
   rpc SubmitTransaction(SubmitTransactionRequest) returns (SubmitTransactionResponse);

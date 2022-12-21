@@ -9,7 +9,7 @@ use bytes::Bytes;
 
 use base::karma_coin::karma_coin_core_types::CharTrait::{Helpful, Kind, Smart};
 use base::karma_coin::karma_coin_core_types::{TraitName, Traits};
-use crate::services::db_config_service::{DB_SUPPORTED_TRAITS_KEY, DbConfigService, NET_SETTINGS_COL_FAMILY};
+use crate::services::db_config_service::{DB_SUPPORTED_TRAITS_KEY, DbConfigService, BLOCKCHAIN_DATA_COL_FAMILY};
 
 //const GENESIS_FILE_NAME: &str = "genesis_config.toml";
 
@@ -40,7 +40,7 @@ impl DbConfigService {
         DatabaseService::write(WriteItem {
             data: DataItem { key: Bytes::from(DB_SUPPORTED_TRAITS_KEY.as_bytes()),
                 value: Bytes::from(buf) },
-            cf: NET_SETTINGS_COL_FAMILY,
+            cf: BLOCKCHAIN_DATA_COL_FAMILY,
             ttl: 0
         }).await?;
 

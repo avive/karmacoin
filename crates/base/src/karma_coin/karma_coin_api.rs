@@ -53,34 +53,44 @@ pub struct GetCharTraitsResponse {
     pub trait_names: ::prost::alloc::vec::Vec<super::core_types::TraitName>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetNetInfoRequest {}
-/// All genesis data as well as versioning info should be returned
+pub struct GetGenesisDataRequest {}
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetNetInfoResponse {
+pub struct GetGenesisDataResponse {
+    /// from genesis
     #[prost(uint32, tag = "1")]
     pub network_id: u32,
-    #[prost(uint64, tag = "2")]
-    pub users_count: u64,
+    /// the provided API semantic version
+    #[prost(string, tag = "2")]
+    pub api_version: ::prost::alloc::string::String,
+    /// from genesis
     #[prost(uint64, tag = "3")]
     pub genesis_time: u64,
+    /// from genesis
     #[prost(string, tag = "4")]
     pub name: ::prost::alloc::string::String,
-    #[prost(uint64, tag = "5")]
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetBlockchainDataRequest {}
+/// All genesis data as well as versioning info should be returned
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetBlockchainDataResponse {
+    /// total users count
+    #[prost(uint64, tag = "1")]
+    pub users_count: u64,
+    /// current block height
+    #[prost(uint64, tag = "2")]
     pub block_height: u64,
-    /// provided API semantic version
-    #[prost(string, tag = "6")]
-    pub api_version: ::prost::alloc::string::String,
     /// number of transactions
-    #[prost(uint64, tag = "7")]
+    #[prost(uint64, tag = "3")]
     pub transactions_count: u64,
     /// number of appreciations
-    #[prost(uint64, tag = "8")]
+    #[prost(uint64, tag = "4")]
     pub appreciations_count: u64,
-    /// new account reward in kcents
-    #[prost(uint64, tag = "9")]
+    /// current new account reward in kcents
+    #[prost(uint64, tag = "5")]
     pub new_account_reward: u64,
-    /// referral reward in kcents
-    #[prost(uint64, tag = "10")]
+    /// current referral reward in kcents
+    #[prost(uint64, tag = "6")]
     pub referral_reward: u64,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -265,11 +275,28 @@ pub mod api_service_client {
                 http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetCharTraits");
             self.inner.unary(request.into_request(), path, codec).await
         }
-        #[doc = " Returns the API backing blockchain network info"]
-        pub async fn get_net_info(
+        #[doc = " Returns the current blockchain state"]
+        pub async fn get_blockchain_data(
             &mut self,
-            request: impl tonic::IntoRequest<super::GetNetInfoRequest>,
-        ) -> Result<tonic::Response<super::GetNetInfoResponse>, tonic::Status> {
+            request: impl tonic::IntoRequest<super::GetBlockchainDataRequest>,
+        ) -> Result<tonic::Response<super::GetBlockchainDataResponse>, tonic::Status> {
+            self.inner.ready().await.map_err(|e| {
+                tonic::Status::new(
+                    tonic::Code::Unknown,
+                    format!("Service was not ready: {}", e.into()),
+                )
+            })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.api.ApiService/GetBlockchainData",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        #[doc = " Returns the current blockchain state"]
+        pub async fn get_genesis_data(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetGenesisDataRequest>,
+        ) -> Result<tonic::Response<super::GetGenesisDataResponse>, tonic::Status> {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::new(
                     tonic::Code::Unknown,
@@ -278,7 +305,7 @@ pub mod api_service_client {
             })?;
             let codec = tonic::codec::ProstCodec::default();
             let path =
-                http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetNetInfo");
+                http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetGenesisData");
             self.inner.unary(request.into_request(), path, codec).await
         }
         #[doc = " Submit a signed transaction to the blockchain"]
@@ -382,11 +409,16 @@ pub mod api_service_server {
             &self,
             request: tonic::Request<super::GetCharTraitsRequest>,
         ) -> Result<tonic::Response<super::GetCharTraitsResponse>, tonic::Status>;
-        #[doc = " Returns the API backing blockchain network info"]
-        async fn get_net_info(
+        #[doc = " Returns the current blockchain state"]
+        async fn get_blockchain_data(
             &self,
-            request: tonic::Request<super::GetNetInfoRequest>,
-        ) -> Result<tonic::Response<super::GetNetInfoResponse>, tonic::Status>;
+            request: tonic::Request<super::GetBlockchainDataRequest>,
+        ) -> Result<tonic::Response<super::GetBlockchainDataResponse>, tonic::Status>;
+        #[doc = " Returns the current blockchain state"]
+        async fn get_genesis_data(
+            &self,
+            request: tonic::Request<super::GetGenesisDataRequest>,
+        ) -> Result<tonic::Response<super::GetGenesisDataResponse>, tonic::Status>;
         #[doc = " Submit a signed transaction to the blockchain"]
         async fn submit_transaction(
             &self,
@@ -628,18 +660,20 @@ pub mod api_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/karma_coin.api.ApiService/GetNetInfo" => {
+                "/karma_coin.api.ApiService/GetBlockchainData" => {
                     #[allow(non_camel_case_types)]
-                    struct GetNetInfoSvc<T: ApiService>(pub Arc<T>);
-                    impl<T: ApiService> tonic::server::UnaryService<super::GetNetInfoRequest> for GetNetInfoSvc<T> {
-                        type Response = super::GetNetInfoResponse;
+                    struct GetBlockchainDataSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::GetBlockchainDataRequest>
+                        for GetBlockchainDataSvc<T>
+                    {
+                        type Response = super::GetBlockchainDataResponse;
                         type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::GetNetInfoRequest>,
+                            request: tonic::Request<super::GetBlockchainDataRequest>,
                         ) -> Self::Future {
                             let inner = self.0.clone();
-                            let fut = async move { (*inner).get_net_info(request).await };
+                            let fut = async move { (*inner).get_blockchain_data(request).await };
                             Box::pin(fut)
                         }
                     }
@@ -648,7 +682,40 @@ pub mod api_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = GetNetInfoSvc(inner);
+                        let method = GetBlockchainDataSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
+                            accept_compression_encodings,
+                            send_compression_encodings,
+                        );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/karma_coin.api.ApiService/GetGenesisData" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetGenesisDataSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::GetGenesisDataRequest>
+                        for GetGenesisDataSvc<T>
+                    {
+                        type Response = super::GetGenesisDataResponse;
+                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetGenesisDataRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).get_genesis_data(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetGenesisDataSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
                             accept_compression_encodings,

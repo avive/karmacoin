@@ -90,13 +90,14 @@ message PhoneVerifier {
 }
 
 // Data that is stored on chain
+/*
 message OnChainData {
     repeated User users = 1;
     repeated PhoneVerifier sms_verifiers = 2;
     repeated TraitName traits = 3; // char trait ids supported by the system
     repeated SignedTransaction transactions = 4; // signed transactions- all for archive, only recent for standard nodes
     repeated Block blocks = 5; // the blockchain
-}
+}*/
 
 message Block {
     AccountId author = 1;
@@ -164,7 +165,7 @@ enum VerifyNumberResult {
     VERIFY_NUMBER_RESULT_INVALID_CODE = 1;
     VERIFY_NUMBER_RESULT_INVALID_SIGNATURE = 2;
 
-    // number is registerd to another account
+    // number is registered to another account
     VERIFY_NUMBER_RESULT_NUMBER_ALREADY_REGISTERED_OTHER_ACCOUNT = 3;
 
     /// an account with this number already exists
@@ -246,6 +247,11 @@ message TransactionEvent {
     bytes transaction_hash = 3;
     ExecutionResult result = 4;
     FeeType fee_type = 5;
+}
+
+// Transactions processing events for a block
+message BlockEvents {
+    repeated TransactionEvent events = 1;
 }
 
 enum ExecutionResult {

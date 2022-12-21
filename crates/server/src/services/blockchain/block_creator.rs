@@ -6,14 +6,14 @@ use anyhow::Result;
 use byteorder::{BigEndian, ByteOrder};
 use bytes::Bytes;
 use prost::Message;
-use base::karma_coin::karma_coin_core_types::{Block, KeyPair, SignedTransaction, TransactionType};
+use base::karma_coin::karma_coin_core_types::{Block, BlockEvents, KeyPair, SignedTransaction, TransactionType};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use db::types::IntDbKey;
 use xactor::*;
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::get_head_height::get_tip;
 use crate::services::blockchain::new_user_tx_processor;
-use crate::services::db_config_service::{BLOCK_TIP_KEY, BLOCKS_COL_FAMILY, NET_SETTINGS_COL_FAMILY};
+use crate::services::db_config_service::{BLOCK_EVENTS_COL_FAMILY, BLOCK_TIP_KEY, BLOCKS_COL_FAMILY, BLOCKCHAIN_DATA_COL_FAMILY};
 
 #[message(result = "Result<Block>")]
 pub(crate) struct CreateBlock {
@@ -35,6 +35,8 @@ impl Handler<CreateBlock> for BlockChainService {
         let height = get_tip().await?;
 
         let mut tx_hashes: Vec<Vec<u8>> = vec![];
+        let mut block_events = BlockEvents { events: vec![] };
+
         for tx in msg.transactions.iter() {
             // process each transaction
             match tx.get_tx_type()? {
@@ -43,6 +45,7 @@ impl Handler<CreateBlock> for BlockChainService {
                         Ok(event) => {
                             info!("new user transaction processed: {:?}", event);
                             tx_hashes.push(event.transaction_hash.to_vec());
+                            block_events.events.push(event);
                         },
                         Err(e) => {
                             error!("Failed to process new user transaction: {:?}", e);
@@ -59,6 +62,7 @@ impl Handler<CreateBlock> for BlockChainService {
         }
 
         let block = BlockChainService::_create_block(tx_hashes,
+                                                     block_events,
                                                      height + 1,
                                                      self.id_key_pair.as_ref().unwrap()).await?;
 
@@ -71,8 +75,9 @@ impl BlockChainService {
     /// Create a block with the provided txs hashes at a given height
     /// Internal help method
     async fn _create_block(transactions_hashes: Vec<Vec<u8>>,
-                          height: u64,
-        key_pair: &KeyPair
+                           events: BlockEvents,
+                           height: u64,
+                           key_pair: &KeyPair
     ) -> Result<Block> {
         // create block and sign it
         let mut block = Block {
@@ -120,6 +125,20 @@ impl BlockChainService {
                 ttl: 0,
             }).await?;
 
+        // Persist block transactions processing events
+        let mut buf = Vec::with_capacity(events.encoded_len());
+        events.encode(&mut buf)?;
+        DatabaseService::write(
+            WriteItem {
+                data: DataItem {
+                    key: IntDbKey::from(height).0,
+                    value: Bytes::from(buf)
+                },
+                cf: BLOCK_EVENTS_COL_FAMILY,
+                ttl: 0,
+            }).await?;
+
+
         // update the chain tip
         let mut tip_buf = [0; 8];
         BigEndian::write_u64(&mut tip_buf, height);
@@ -128,7 +147,7 @@ impl BlockChainService {
                 data: DataItem {
                     key: BLOCK_TIP_KEY.into(),
                     value: Bytes::from(tip_buf.as_ref().to_vec()) },
-                cf: NET_SETTINGS_COL_FAMILY,
+                cf: BLOCKCHAIN_DATA_COL_FAMILY,
                 ttl: 0,
             }
         ).await?;

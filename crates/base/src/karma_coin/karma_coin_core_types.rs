@@ -101,23 +101,17 @@ pub struct PhoneVerifier {
     #[prost(string, tag = "2")]
     pub name: ::prost::alloc::string::String,
 }
-/// Data that is stored on chain
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct OnChainData {
-    #[prost(message, repeated, tag = "1")]
-    pub users: ::prost::alloc::vec::Vec<User>,
-    #[prost(message, repeated, tag = "2")]
-    pub sms_verifiers: ::prost::alloc::vec::Vec<PhoneVerifier>,
-    /// char trait ids supported by the system
-    #[prost(message, repeated, tag = "3")]
-    pub traits: ::prost::alloc::vec::Vec<TraitName>,
-    /// signed transactions- all for archive, only recent for standard nodes
-    #[prost(message, repeated, tag = "4")]
-    pub transactions: ::prost::alloc::vec::Vec<SignedTransaction>,
-    /// the blockchain
-    #[prost(message, repeated, tag = "5")]
-    pub blocks: ::prost::alloc::vec::Vec<Block>,
-}
+// Data that is stored on chain
+
+//
+//message OnChainData {
+//repeated User users = 1;
+//repeated PhoneVerifier sms_verifiers = 2;
+//repeated TraitName traits = 3; // char trait ids supported by the system
+//repeated SignedTransaction transactions = 4; // signed transactions- all for archive, only recent for standard nodes
+//repeated Block blocks = 5; // the blockchain
+//}
+
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Block {
     #[prost(message, optional, tag = "1")]
@@ -215,7 +209,7 @@ pub struct NewUserTransactionV1 {
     pub verify_number_response: ::core::option::Option<VerifyNumberResponse>,
 }
 /// serialized transaction data
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct TransactionData {
     /// binary transaction data (e.g. NewUserTxV1, PaymentV1, etc...)
     #[prost(bytes = "vec", tag = "1")]
@@ -224,7 +218,7 @@ pub struct TransactionData {
     #[prost(enumeration = "TransactionType", tag = "2")]
     pub transaction_type: i32,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct SignedTransaction {
     /// account this tx is signed by
     #[prost(message, optional, tag = "1")]
@@ -270,7 +264,7 @@ pub struct NewUserEvent {
     pub verifier: ::core::option::Option<PhoneVerifier>,
 }
 /// Transaction added to ledger
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct TransactionEvent {
     /// ledger height of execution
     #[prost(uint64, tag = "1")]
@@ -283,6 +277,12 @@ pub struct TransactionEvent {
     pub result: i32,
     #[prost(enumeration = "FeeType", tag = "5")]
     pub fee_type: i32,
+}
+/// Transactions processing events for a block
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
+pub struct BlockEvents {
+    #[prost(message, repeated, tag = "1")]
+    pub events: ::prost::alloc::vec::Vec<TransactionEvent>,
 }
 /// Supported built-in coin types
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
@@ -322,7 +322,7 @@ pub enum VerifyNumberResult {
     NicknameTaken = 0,
     InvalidCode = 1,
     InvalidSignature = 2,
-    /// number is registerd to another account
+    /// number is registered to another account
     NumberAlreadyRegisteredOtherAccount = 3,
     //// an account with this number already exists
     NumberAlreadyRegisteredThisAccount = 4,
