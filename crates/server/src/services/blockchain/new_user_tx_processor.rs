@@ -4,6 +4,7 @@
 
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
+use chrono::Utc;
 
 use base::karma_coin::karma_coin_core_types::{Amount, Balance, CoinType, ExecutionResult, FeeType, SignedTransaction, TransactionEvent};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
@@ -128,6 +129,7 @@ pub(crate) async fn process_transaction(
     // note that referral awards are handled in the payment tx processing logic and not here
 
     let event = TransactionEvent {
+        timestamp: Utc::now().timestamp_millis() as u64,
         height: block_height,
         transaction: Some(transaction.clone()),
         transaction_hash: tx_hash.as_ref().to_vec(),

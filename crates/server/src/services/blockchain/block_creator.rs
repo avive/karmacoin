@@ -35,15 +35,8 @@ impl Handler<CreateBlock> for BlockChainService {
         let height = get_tip().await?;
 
         let mut tx_hashes: Vec<Vec<u8>> = vec![];
-        let mut block_events = BlockEvents { events: vec![] };
-        let mut total_new_users = 0;
-        let mut total_new_users_reward= 0;
-        let mut total_new_users_referral_reward= 0;
+        let mut block_event = BlockEvent::new(height+1);
 
-        let mut total_fees = Amount {
-            value: 0,
-            coin_type: CoinType::Core as i32
-        };
 
         for tx in msg.transactions.iter() {
             // process each transaction
@@ -53,9 +46,9 @@ impl Handler<CreateBlock> for BlockChainService {
                         Ok(event) => {
                             info!("new user transaction processed: {:?}", event);
                             tx_hashes.push(event.transaction_hash.to_vec());
-                            total_new_users += 1;
-                            total_fees.value += event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value;
-                            block_events.events.push(event);
+                            block_event.total_signups += 1;
+                            block_event.add_fee(event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value);
+                            block_event.add_transaction_event(event);
                         },
                         Err(e) => {
                             error!("Failed to process new user transaction: {:?}", e);
@@ -72,8 +65,7 @@ impl Handler<CreateBlock> for BlockChainService {
         }
 
         let block = BlockChainService::create_block_helper(tx_hashes,
-                                                     total_fees,
-                                                     block_events,
+                                                     block_event,
                                                      height + 1,
                                                      self.id_key_pair.as_ref().unwrap()).await?;
 
@@ -86,8 +78,7 @@ impl BlockChainService {
     /// Create a block with the provided txs hashes at a given height
     /// Internal help method
     async fn create_block_helper(transactions_hashes: Vec<Vec<u8>>,
-                           fees: Amount, // tx fees for block producer
-                           events: BlockEvents,
+                           block_event: BlockEvent,
                            height: u64,
                            key_pair: &KeyPair
     ) -> Result<Block> {
@@ -95,7 +86,7 @@ impl BlockChainService {
             author: None,
             height,
             transactions_hashes,
-            fees: Some(fees),
+            fees: Some(block_event.total_fees.as_ref().unwrap().clone()),
             signature: None,
             prev_block_digest: vec![],
             digest: vec![],
@@ -137,9 +128,9 @@ impl BlockChainService {
                 ttl: 0,
             }).await?;
 
-        // Persist block events
-        let mut buf = Vec::with_capacity(events.encoded_len());
-        events.encode(&mut buf)?;
+        // Persist block event
+        let mut buf = Vec::with_capacity(block_event.encoded_len());
+        block_event.encode(&mut buf)?;
         DatabaseService::write(
             WriteItem {
                 data: DataItem {
@@ -151,7 +142,7 @@ impl BlockChainService {
             }).await?;
 
 
-        // update the chain tip
+        // inc the chain tip
         let mut tip_buf = [0; 8];
         BigEndian::write_u64(&mut tip_buf, height);
         DatabaseService::write(

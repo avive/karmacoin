@@ -266,23 +266,41 @@ pub struct NewUserEvent {
 /// Transaction added to ledger
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct TransactionEvent {
-    /// ledger height of execution
     #[prost(uint64, tag = "1")]
+    pub timestamp: u64,
+    /// ledger height of execution
+    #[prost(uint64, tag = "2")]
     pub height: u64,
-    #[prost(message, optional, tag = "2")]
+    #[prost(message, optional, tag = "3")]
     pub transaction: ::core::option::Option<SignedTransaction>,
-    #[prost(bytes = "vec", tag = "3")]
+    #[prost(bytes = "vec", tag = "4")]
     pub transaction_hash: ::prost::alloc::vec::Vec<u8>,
-    #[prost(enumeration = "ExecutionResult", tag = "4")]
+    #[prost(enumeration = "ExecutionResult", tag = "5")]
     pub result: i32,
-    #[prost(enumeration = "FeeType", tag = "5")]
+    #[prost(enumeration = "FeeType", tag = "6")]
     pub fee_type: i32,
 }
-/// Transactions processing events for a block
-#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
-pub struct BlockEvents {
-    #[prost(message, repeated, tag = "1")]
-    pub events: ::prost::alloc::vec::Vec<TransactionEvent>,
+/// Block events
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct BlockEvent {
+    #[prost(uint64, tag = "1")]
+    pub timestamp: u64,
+    #[prost(uint64, tag = "2")]
+    pub height: u64,
+    #[prost(bytes = "vec", tag = "3")]
+    pub block_hash: ::prost::alloc::vec::Vec<u8>,
+    #[prost(message, repeated, tag = "4")]
+    pub transactions_events: ::prost::alloc::vec::Vec<TransactionEvent>,
+    #[prost(uint64, tag = "5")]
+    pub total_signups: u64,
+    #[prost(uint64, tag = "6")]
+    pub total_payments: u64,
+    #[prost(message, optional, tag = "7")]
+    pub total_fees: ::core::option::Option<Amount>,
+    #[prost(message, optional, tag = "8")]
+    pub total_signup_rewards: ::core::option::Option<Amount>,
+    #[prost(message, optional, tag = "9")]
+    pub total_referral_rewards: ::core::option::Option<Amount>,
 }
 /// Supported built-in coin types
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]

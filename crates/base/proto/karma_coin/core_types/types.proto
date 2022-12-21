@@ -242,16 +242,26 @@ message NewUserEvent {
 
 // Transaction added to ledger
 message TransactionEvent {
-    uint64 height = 1; // ledger height of execution
-    SignedTransaction transaction = 2;
-    bytes transaction_hash = 3;
-    ExecutionResult result = 4;
-    FeeType fee_type = 5;
+    uint64 timestamp = 1;
+    uint64 height = 2; // ledger height of execution
+    SignedTransaction transaction = 3;
+    bytes transaction_hash = 4;
+    ExecutionResult result = 5;
+    FeeType fee_type = 6;
 }
 
-// Transactions processing events for a block
-message BlockEvents {
-    repeated TransactionEvent events = 1;
+
+// Block events
+message BlockEvent {
+    uint64 timestamp = 1;
+    uint64 height = 2;
+    bytes block_hash = 3;
+    repeated TransactionEvent transactions_events = 4;
+    uint64 total_signups = 5;
+    uint64 total_payments = 6;
+    Amount total_fees = 7;
+    Amount total_signup_rewards = 8;
+    Amount total_referral_rewards = 9;
 }
 
 enum ExecutionResult {

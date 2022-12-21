@@ -18,3 +18,4 @@ pub mod trait_name;
 pub mod client_config_service;
 pub mod signed_transaction;
 pub mod block;
+pub mod block_event;
