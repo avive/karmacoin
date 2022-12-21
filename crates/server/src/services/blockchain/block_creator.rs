@@ -47,6 +47,10 @@ impl Handler<CreateBlock> for BlockChainService {
                             block_event.total_signups += 1;
                             block_event.add_fee(event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value);
                             block_event.add_transaction_event(event);
+
+                            //
+                            // todo: locate fist payment transactions to this user (referral tx) in the pool and process it
+                            //
                         },
                         Err(e) => {
                             error!("Failed to process new user transaction: {:?}", e);
@@ -54,6 +58,8 @@ impl Handler<CreateBlock> for BlockChainService {
                     }
                 },
                 TransactionType::PaymentV1 => {
+                    // if payment to a non existent phone number then just put it back in the pool
+                    // as it should be processed only after the new user transaction is processed
                     todo!("process payment transaction");
                 },
                 TransactionType::UpdateUserV1 => {

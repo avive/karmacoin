@@ -145,6 +145,8 @@ impl ApiServiceTrait for ApiService {
         let service = BlockChainService::from_registry().await
             .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
 
+        // Submit the transaction to the mem pool
+
         service.call(
             CreateBlock { transactions: vec![tx] })
             .await

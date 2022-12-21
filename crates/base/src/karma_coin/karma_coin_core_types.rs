@@ -241,6 +241,11 @@ pub struct SignedTransaction {
     #[prost(message, optional, tag = "7")]
     pub signature: ::core::option::Option<Signature>,
 }
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
+pub struct MemPool {
+    #[prost(message, repeated, tag = "1")]
+    pub transactions: ::prost::alloc::vec::Vec<SignedTransaction>,
+}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SignedTransactionWithStatus {
     #[prost(message, optional, tag = "1")]

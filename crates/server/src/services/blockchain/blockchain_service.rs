@@ -8,7 +8,6 @@ use base::hex_utils::hex_from_string;
 use base::karma_coin::karma_coin_core_types::{KeyPair, PrivateKey, PublicKey};
 use xactor::*;
 
-
 // private identity key (ed25519)
 pub const BLOCK_PRODUCER_ID_PRIVATE_KEY: &str = "block_producer_id_key_private";
 pub const BLOCK_PRODUCER_ID_PUBLIC_KEY: &str = "block_producer_id_key_public";

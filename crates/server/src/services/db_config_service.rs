@@ -81,7 +81,11 @@ pub const BLOCKS_COL_FAMILY: &str = "blocks_cf";
 
 /// Valid transactions submitted to the chain, not yet processed and queued in the txs pool
 /// This is off-chain tx pool data
-pub const TXS_POOL_COL_FAMILY: &str = "txs_mem_pool_cf";
+/// key: tx MEM_POOL. value: MemPool
+///
+pub const TXS_POOL_KEY: &str = "txs_pool_key";
+
+pub const TXS_POOL_COL_FAMILY: &str = "txs_pool_cf";
 
 /// Used for db testing - doesn't hold any app data
 pub const TESTS_COL_FAMILY: &str = "tests_cf"; // col family for db tests

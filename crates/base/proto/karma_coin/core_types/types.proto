@@ -215,6 +215,10 @@ message SignedTransaction {
     Signature signature = 7; // signer signature on all of the above data
 }
 
+message MemPool {
+    repeated SignedTransaction transactions = 1;
+}
+
 message SignedTransactionWithStatus {
     SignedTransaction transaction = 1;
     TransactionStatus status = 2; // transaction status
