@@ -75,22 +75,6 @@ impl Handler<CreateBlock> for BlockChainService {
 /// BlockchainService block creation implementation
 impl BlockChainService {
 
-
-    /// Update blockchain stats with new block data and store in db
-    async fn update_blockchain_stats(mut stats: BlockchainStats, block_event: &BlockEvent, block: &Block) -> Result<()> {
-
-        stats.tip_height += 1;
-        stats.users += block_event.total_signups;
-        stats.fees.as_mut().unwrap().value += block_event.total_fees.as_ref().unwrap().value;
-        stats.signup_rewards.as_mut().unwrap().value += block_event.total_signup_rewards.as_ref().unwrap().value;
-        stats.referral_rewards.as_mut().unwrap().value += block_event.total_referral_rewards.as_ref().unwrap().value;
-        stats.transactions += block.transactions_hashes.len() as u64;
-        stats.last_block_time = block.time;
-        stats.payments +=  block_event.total_payments;
-
-        write_stats(stats).await
-    }
-
     /// Create a block with the provided txs hashes at a given height
     /// Internal help method
     async fn create_block_helper(transactions_hashes: Vec<Vec<u8>>,
@@ -161,11 +145,25 @@ impl BlockChainService {
                 ttl: 0,
             }).await?;
 
-
+        // Update blockchain global stats and persist
         BlockChainService::update_blockchain_stats(stats, &block_event, &block).await?;
 
         Ok(block)
+    }
 
+    /// Update blockchain stats with new block data and store in db
+    async fn update_blockchain_stats(mut stats: BlockchainStats, block_event: &BlockEvent, block: &Block) -> Result<()> {
+
+        stats.tip_height += 1;
+        stats.users += block_event.total_signups;
+        stats.fees.as_mut().unwrap().value += block_event.total_fees.as_ref().unwrap().value;
+        stats.signup_rewards.as_mut().unwrap().value += block_event.total_signup_rewards.as_ref().unwrap().value;
+        stats.referral_rewards.as_mut().unwrap().value += block_event.total_referral_rewards.as_ref().unwrap().value;
+        stats.transactions += block.transactions_hashes.len() as u64;
+        stats.last_block_time = block.time;
+        stats.payments +=  block_event.total_payments;
+
+        write_stats(stats).await
     }
 }
 

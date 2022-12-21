@@ -114,7 +114,7 @@ pub(crate) async fn process_transaction(
 
     let tx_hash = transaction.get_hash()?;
 
-    // index the transaction in the db
+    // index the transaction in the db by hash
     DatabaseService::write(WriteItem {
         data: DataItem {
             key: tx_hash.clone(),

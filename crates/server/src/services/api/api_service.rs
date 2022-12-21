@@ -117,7 +117,7 @@ impl ApiServiceTrait for ApiService {
 
     }
 
-    /// Returns blockchain current state
+    /// Get current blockchain data
     async fn get_blockchain_data(&self, request: Request<GetBlockchainDataRequest>) -> Result<Response<GetBlockchainDataResponse>, Status> {
 
         // create a block with the transaction
@@ -134,14 +134,14 @@ impl ApiServiceTrait for ApiService {
 
     }
 
-    /// Submit a transaction for processing
+    /// Submit a transaction for processing to the mem pool
     async fn submit_transaction(&self,request: Request<SubmitTransactionRequest>) -> Result<Response<SubmitTransactionResponse>, Status> {
 
         let tx = request.into_inner().transaction.ok_or(
             Status::invalid_argument("transaction is required")
         )?;
 
-        // create a block with the transaction
+        // Current implementation just creates a new block with the transaction
         let service = BlockChainService::from_registry().await
             .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
 
@@ -180,6 +180,7 @@ impl ApiServiceTrait for ApiService {
         todo!()
     }
 
+    /// Returns genesis readonly data
     async fn get_genesis_data(
         &self,
         _request: Request<GetGenesisDataRequest>,
