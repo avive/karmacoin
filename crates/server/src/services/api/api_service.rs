@@ -149,7 +149,9 @@ impl ApiServiceTrait for ApiService {
             .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?
             .map_err(|e| Status::internal(format!("failed to process transaction: {:?}", e)))?;
 
-        // start transaction processing
+        // start transaction processing to process all transactions in the mem pool
+        // in production this can be done on a timer every few seconds
+        // here we just trigger block production when a new transaction is submitted
         let service = BlockChainService::from_registry().await
             .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
 

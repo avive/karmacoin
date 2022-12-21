@@ -20,3 +20,4 @@ pub mod signed_transaction;
 pub mod block;
 pub mod block_event;
 pub mod blockchain_stats;
+pub mod signer_trait;

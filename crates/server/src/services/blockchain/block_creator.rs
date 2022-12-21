@@ -6,6 +6,7 @@ use anyhow::Result;
 use bytes::Bytes;
 use prost::Message;
 use base::karma_coin::karma_coin_core_types::*;
+use base::karma_coin::karma_coin_core_types::TransactionType::NewUserV1;
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use db::types::IntDbKey;
 use xactor::*;
@@ -42,36 +43,49 @@ impl Handler<ProcessTransactions> for BlockChainService {
 
         for (tx_hash, tx) in transactions_map.iter() {
 
+
+            // first process all new user transactions
+            // todo: index new user txs by mobile phone and use this when processing payment transactions
+
+            if tx.get_tx_type()? == NewUserV1 {
+
+                // todo: check that the transaction was not already processed - look it up by hash in the chain....
+
+                match new_user_tx_processor::process_transaction(tx, height + 1).await {
+                    Ok(event) => {
+                        info!("new user transaction processed: {:?}", event);
+                        tx_hashes.push(tx_hash.to_vec());
+                        block_event.total_signups += 1;
+                        block_event.add_fee(event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value);
+                        block_event.add_transaction_event(event);
+
+                        // todo: locate fist payment transactions to this user (referral tx) in the pool and process it
+
+                    },
+                    Err(e) => {
+                        error!("Failed to process new user transaction: {:?}", e);
+                    }
+                }
+            }
+        }
+
+        // process other transactions types
+        for (_tx_hash, tx) in transactions_map.iter() {
+
             // todo: check that the transaction was not already processed - look it up by hash in the chain....
 
-            // process each transaction
             match tx.get_tx_type()? {
-                TransactionType::NewUserV1 => {
-                    match new_user_tx_processor::process_transaction(tx, height + 1).await {
-                        Ok(event) => {
-                            info!("new user transaction processed: {:?}", event);
-                            tx_hashes.push(tx_hash.to_vec());
-                            block_event.total_signups += 1;
-                            block_event.add_fee(event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value);
-                            block_event.add_transaction_event(event);
-
-                            //
-                            // todo: locate fist payment transactions to this user (referral tx) in the pool and process it
-                            //
-                        },
-                        Err(e) => {
-                            error!("Failed to process new user transaction: {:?}", e);
-                        }
-                    }
-                },
                 TransactionType::PaymentV1 => {
-                    // if payment to a non existent phone number then just put it back in the pool
-                    // as it should be processed only after the new user transaction is processed
+                    // we need to match payment transactions to the new user transactions that were processed above
+                    // in this case referral reward may be implied
                     todo!("process payment transaction");
                 },
                 TransactionType::UpdateUserV1 => {
                     todo!("process update user transaction");
                 },
+                _ => {
+                    // ignore other transaction types
+                }
             }
         }
 
