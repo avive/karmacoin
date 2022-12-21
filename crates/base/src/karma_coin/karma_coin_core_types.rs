@@ -121,13 +121,16 @@ pub struct Block {
     /// of the signed transactions in this block
     #[prost(bytes = "vec", repeated, tag = "3")]
     pub transactions_hashes: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
+    /// total fees paid in this block
     #[prost(message, optional, tag = "4")]
-    pub signature: ::core::option::Option<Signature>,
+    pub fees: ::core::option::Option<Amount>,
     /// digest of block in consensus at the previous height
     #[prost(bytes = "vec", tag = "5")]
     pub prev_block_digest: ::prost::alloc::vec::Vec<u8>,
+    #[prost(message, optional, tag = "6")]
+    pub signature: ::core::option::Option<Signature>,
     /// block digest includes hash of all above data
-    #[prost(bytes = "vec", tag = "6")]
+    #[prost(bytes = "vec", tag = "7")]
     pub digest: ::prost::alloc::vec::Vec<u8>,
 }
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
@@ -172,14 +175,8 @@ pub struct PaymentTransactionV1 {
     /// amount in tokens to transfer
     #[prost(message, optional, tag = "2")]
     pub amount: ::core::option::Option<Amount>,
-    /// network fee provided by sender
-    #[prost(message, optional, tag = "3")]
-    pub fee: ::core::option::Option<Amount>,
-    /// optional extra tip to miners
-    #[prost(message, optional, tag = "4")]
-    pub tip: ::core::option::Option<Amount>,
     /// char trait set by sender. e.g. smart
-    #[prost(enumeration = "CharTrait", tag = "5")]
+    #[prost(enumeration = "CharTrait", tag = "3")]
     pub r#trait: i32,
 }
 /// Created and signed by a verifier
@@ -229,14 +226,17 @@ pub struct SignedTransaction {
     /// tx nonce
     #[prost(uint64, tag = "3")]
     pub nonce: u64,
-    /// binary transaction data
+    /// network fee provided by sender
     #[prost(message, optional, tag = "4")]
+    pub fee: ::core::option::Option<Amount>,
+    /// binary transaction data
+    #[prost(message, optional, tag = "5")]
     pub transaction_data: ::core::option::Option<TransactionData>,
     /// network id to avoid confusion with testnets
-    #[prost(uint32, tag = "5")]
+    #[prost(uint32, tag = "6")]
     pub network_id: u32,
     /// signer signature on all of the above data
-    #[prost(message, optional, tag = "6")]
+    #[prost(message, optional, tag = "7")]
     pub signature: ::core::option::Option<Signature>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -349,9 +349,9 @@ pub enum SignupMethod {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum FeeType {
-    /// fee is minted by the protocol
+    /// fee provided by the protocol
     Mint = 0,
-    /// fee is paid by the transaction signer
+    /// fee provided by the transaction signer
     User = 1,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]

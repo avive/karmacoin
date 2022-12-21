@@ -6,7 +6,7 @@ use anyhow::Result;
 use byteorder::{BigEndian, ByteOrder};
 use bytes::Bytes;
 use prost::Message;
-use base::karma_coin::karma_coin_core_types::{Block, BlockEvents, KeyPair, SignedTransaction, TransactionType};
+use base::karma_coin::karma_coin_core_types::*;
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use db::types::IntDbKey;
 use xactor::*;
@@ -36,6 +36,14 @@ impl Handler<CreateBlock> for BlockChainService {
 
         let mut tx_hashes: Vec<Vec<u8>> = vec![];
         let mut block_events = BlockEvents { events: vec![] };
+        let mut total_new_users = 0;
+        let mut total_new_users_reward= 0;
+        let mut total_new_users_referral_reward= 0;
+
+        let mut total_fees = Amount {
+            value: 0,
+            coin_type: CoinType::Core as i32
+        };
 
         for tx in msg.transactions.iter() {
             // process each transaction
@@ -45,6 +53,8 @@ impl Handler<CreateBlock> for BlockChainService {
                         Ok(event) => {
                             info!("new user transaction processed: {:?}", event);
                             tx_hashes.push(event.transaction_hash.to_vec());
+                            total_new_users += 1;
+                            total_fees.value += event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value;
                             block_events.events.push(event);
                         },
                         Err(e) => {
@@ -61,7 +71,8 @@ impl Handler<CreateBlock> for BlockChainService {
             }
         }
 
-        let block = BlockChainService::_create_block(tx_hashes,
+        let block = BlockChainService::create_block_helper(tx_hashes,
+                                                     total_fees,
                                                      block_events,
                                                      height + 1,
                                                      self.id_key_pair.as_ref().unwrap()).await?;
@@ -74,16 +85,17 @@ impl Handler<CreateBlock> for BlockChainService {
 impl BlockChainService {
     /// Create a block with the provided txs hashes at a given height
     /// Internal help method
-    async fn _create_block(transactions_hashes: Vec<Vec<u8>>,
+    async fn create_block_helper(transactions_hashes: Vec<Vec<u8>>,
+                           fees: Amount, // tx fees for block producer
                            events: BlockEvents,
                            height: u64,
                            key_pair: &KeyPair
     ) -> Result<Block> {
-        // create block and sign it
         let mut block = Block {
             author: None,
             height,
             transactions_hashes,
+            fees: Some(fees),
             signature: None,
             prev_block_digest: vec![],
             digest: vec![],
@@ -125,7 +137,7 @@ impl BlockChainService {
                 ttl: 0,
             }).await?;
 
-        // Persist block transactions processing events
+        // Persist block events
         let mut buf = Vec::with_capacity(events.encoded_len());
         events.encode(&mut buf)?;
         DatabaseService::write(

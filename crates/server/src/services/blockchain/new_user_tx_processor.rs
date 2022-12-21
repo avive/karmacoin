@@ -28,6 +28,13 @@ pub(crate) async fn process_transaction(
 
     transaction.validate(0)?;
 
+    let min_tx_fee_k_cents = BlockchainConfigService::get_u64(DEF_TX_FEE_KEY.into()).await?.unwrap();
+    let tx_fee : u64 = transaction.fee.as_ref().ok_or_else(|| anyhow!("missing fee in tx"))?.value;
+
+    if tx_fee < min_tx_fee_k_cents {
+        return Err(anyhow!("tx fee too low"));
+    }
+
     let new_user_tx = transaction.get_new_user_transaction_v1()?;
 
     let mut user = new_user_tx.user.ok_or_else(|| anyhow!("missing user data in tx"))?;
@@ -57,13 +64,14 @@ pub(crate) async fn process_transaction(
     }
 
     // Create the user and update its data
-    let tx_fee_k_cents = BlockchainConfigService::get_u64(DEF_TX_FEE_KEY.into()).await?.unwrap();
+
+
     let signup_reward_k_cents = BlockchainConfigService::get_u64(SIGNUP_REWARD_KEY.into()).await?.unwrap();
 
     user.nonce = 1;
     user.balances = vec![Balance {
         free: Some(Amount {
-            value: signup_reward_k_cents - tx_fee_k_cents,
+            value: signup_reward_k_cents - tx_fee,
             coin_type: CoinType::Core as i32,
         }),
         reserved: None,

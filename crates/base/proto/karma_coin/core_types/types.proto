@@ -103,9 +103,10 @@ message Block {
     AccountId author = 1;
     uint64 height = 2;
     repeated bytes transactions_hashes = 3; // of the signed transactions in this block
-    core_types.Signature signature = 4;
+    Amount fees = 4; // total fees paid in this block
     bytes prev_block_digest = 5; // digest of block in consensus at the previous height
-    bytes digest = 6; // block digest includes hash of all above data
+    core_types.Signature signature = 6;
+    bytes digest = 7; // block digest includes hash of all above data
 }
 
 // Supported char traits. Enum values are the traits unique id
@@ -155,9 +156,7 @@ message UpdateUserV1 {
 message PaymentTransactionV1 {
     MobileNumber to = 1; // dest is always a mobile number (of a user or a non-user)
     Amount amount = 2; // amount in tokens to transfer
-    Amount fee = 3; // network fee provided by sender
-    Amount tip = 4; // optional extra tip to miners
-    CharTrait trait = 5; // char trait set by sender. e.g. smart
+    CharTrait trait = 3; // char trait set by sender. e.g. smart
 }
 
 enum VerifyNumberResult {
@@ -209,9 +208,10 @@ message SignedTransaction {
     AccountId signer = 1; // account this tx is signed by
     uint64 timestamp = 2; // time transaction was signed
     uint64 nonce = 3; // tx nonce
-    TransactionData transaction_Data = 4; // binary transaction data
-    uint32 network_id = 5; // network id to avoid confusion with testnets
-    Signature signature = 6; // signer signature on all of the above data
+    Amount fee = 4; // network fee provided by sender
+    TransactionData transaction_Data = 5; // binary transaction data
+    uint32 network_id = 6; // network id to avoid confusion with testnets
+    Signature signature = 7; // signer signature on all of the above data
 }
 
 message SignedTransactionWithStatus {
@@ -227,8 +227,8 @@ enum SignupMethod {
 }
 
 enum FeeType {
-    FEE_TYPE_MINT = 0; // fee is minted by the protocol
-    FEE_TYPE_USER = 1; // fee is paid by the transaction signer
+    FEE_TYPE_MINT = 0; // fee provided by the protocol
+    FEE_TYPE_USER = 1; // fee provided by the transaction signer
 }
 
 message NewUserEvent {
