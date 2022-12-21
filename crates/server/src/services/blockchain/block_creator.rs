@@ -10,25 +10,29 @@ use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use db::types::IntDbKey;
 use xactor::*;
 use crate::services::blockchain::blockchain_service::BlockChainService;
+use crate::services::blockchain::mem_pool_service::{GetTransactions, MemPoolService, RemoveTransactionByHash};
 use crate::services::blockchain::new_user_tx_processor;
 use crate::services::blockchain::stats::{get_stats, write_stats};
 use crate::services::db_config_service::{BLOCK_EVENTS_COL_FAMILY, BLOCKS_COL_FAMILY};
 
-#[message(result = "Result<Block>")]
-pub(crate) struct CreateBlock {
-    pub(crate) transactions: Vec<SignedTransaction>,
-}
+#[message(result = "Result<Option<Block>>")]
+pub(crate) struct ProcessTransactions;
 
-/// Create a block with zero or more transactions
+/// Process transactions in the mem-pool and optionally create a block if one or more transactions were processed
 #[async_trait::async_trait]
-impl Handler<CreateBlock> for BlockChainService {
+impl Handler<ProcessTransactions> for BlockChainService {
     async fn handle(
         &mut self,
         _ctx: &mut Context<Self>,
-        msg: CreateBlock,
-    ) -> Result<Block> {
-        if msg.transactions.is_empty() {
-            return Err(anyhow::anyhow!("No transactions to create a block"));
+        _msg: ProcessTransactions,
+    ) -> Result<Option<Block>> {
+
+        let mem_pool = MemPoolService::from_registry().await?;
+        let transactions_map = mem_pool.call(GetTransactions).await??;
+
+        if transactions_map.is_empty() {
+            info!("no txs in mempool to process");
+            return Ok(None);
         }
 
         let stats = get_stats().await?;
@@ -36,14 +40,17 @@ impl Handler<CreateBlock> for BlockChainService {
         let mut tx_hashes: Vec<Vec<u8>> = vec![];
         let mut block_event = BlockEvent::new(height+1);
 
-        for tx in msg.transactions.iter() {
+        for (tx_hash, tx) in transactions_map.iter() {
+
+            // todo: check that the transaction was not already processed - look it up by hash in the chain....
+
             // process each transaction
             match tx.get_tx_type()? {
                 TransactionType::NewUserV1 => {
                     match new_user_tx_processor::process_transaction(tx, height + 1).await {
                         Ok(event) => {
                             info!("new user transaction processed: {:?}", event);
-                            tx_hashes.push(event.transaction_hash.to_vec());
+                            tx_hashes.push(tx_hash.to_vec());
                             block_event.total_signups += 1;
                             block_event.add_fee(event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value);
                             block_event.add_transaction_event(event);
@@ -68,13 +75,24 @@ impl Handler<CreateBlock> for BlockChainService {
             }
         }
 
-        let block = BlockChainService::create_block_helper(tx_hashes,
+        if tx_hashes.is_empty() {
+            info!("no txs were processed");
+            return Ok(None);
+        }
+
+        // create the block
+        let block = BlockChainService::create_block_helper(&tx_hashes,
                                                      stats,
                                                      block_event,
                                                      height + 1,
                                                      self.id_key_pair.as_ref().unwrap()).await?;
 
-        Ok(block)
+        // remove all transactions added to the block from the mem-pool
+        for tx_hash in tx_hashes.iter() {
+            mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
+        }
+
+        Ok(Some(block))
     }
 }
 
@@ -83,7 +101,7 @@ impl BlockChainService {
 
     /// Create a block with the provided txs hashes at a given height
     /// Internal help method
-    async fn create_block_helper(transactions_hashes: Vec<Vec<u8>>,
+    async fn create_block_helper(transactions_hashes: &Vec<Vec<u8>>,
                                  stats: BlockchainStats,
                                  mut block_event: BlockEvent,
                                  height: u64,
@@ -93,7 +111,7 @@ impl BlockChainService {
             time: chrono::Utc::now().timestamp_millis() as u64,
             author: None,
             height,
-            transactions_hashes,
+            transactions_hashes: transactions_hashes.clone(),
             fees: Some(block_event.total_fees.as_ref().unwrap().clone()),
             signature: None,
             prev_block_digest: vec![],

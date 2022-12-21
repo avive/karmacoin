@@ -1,5 +1,4 @@
 //////////////////
-//
 // Basic KarmaCoin data types
 /////////////////
 
@@ -241,6 +240,7 @@ pub struct SignedTransaction {
     #[prost(message, optional, tag = "7")]
     pub signature: ::core::option::Option<Signature>,
 }
+/// Pending transactions are transactions that are not yet on chain
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct MemPool {
     #[prost(message, repeated, tag = "1")]

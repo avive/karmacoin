@@ -6,7 +6,6 @@ syntax = "proto3";
 package karma_coin.core_types;
 
 //////////////////
-//
 // Basic KarmaCoin data types
 /////////////////
 
@@ -215,6 +214,7 @@ message SignedTransaction {
     Signature signature = 7; // signer signature on all of the above data
 }
 
+// Pending transactions are transactions that are not yet on chain
 message MemPool {
     repeated SignedTransaction transactions = 1;
 }
@@ -255,7 +255,6 @@ message TransactionEvent {
     FeeType fee_type = 6;
 }
 
-
 message BlockchainStats {
     uint64 last_block_time = 1;
     uint64 tip_height = 2;
@@ -266,7 +265,6 @@ message BlockchainStats {
     Amount signup_rewards = 7;
     Amount referral_rewards = 8;
 }
-
 
 // Block events
 message BlockEvent {
