@@ -1,6 +1,7 @@
-// Copyright (c) 2021, Subnet Authors. cmdev2@proton.me.
-// This work is licensed under the Subnet v0.1.0 license published in the LICENSE file of this repo.
+// Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
+// This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
+
 
 use anyhow::{anyhow, Result};
 use curve25519_dalek::edwards::CompressedEdwardsY;

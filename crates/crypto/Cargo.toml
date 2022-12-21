@@ -1,7 +1,8 @@
 [package]
 name = "crypto"
 version = "0.1.0"
-authors = ["subnetter <subnetter@pm.me>"]
+description = "Karmacoin crypto library"
+authors = ["ae <a@karmaco.in>"]
 edition = "2018"
 
 [dependencies]
