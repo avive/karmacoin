@@ -71,27 +71,11 @@ pub struct GetGenesisDataResponse {
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetBlockchainDataRequest {}
-/// All genesis data as well as versioning info should be returned
+/// Current blockchain data
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetBlockchainDataResponse {
-    /// total users count
-    #[prost(uint64, tag = "1")]
-    pub users_count: u64,
-    /// current block height
-    #[prost(uint64, tag = "2")]
-    pub block_height: u64,
-    /// number of transactions
-    #[prost(uint64, tag = "3")]
-    pub transactions_count: u64,
-    /// number of appreciations
-    #[prost(uint64, tag = "4")]
-    pub appreciations_count: u64,
-    /// current new account reward in kcents
-    #[prost(uint64, tag = "5")]
-    pub new_account_reward: u64,
-    /// current referral reward in kcents
-    #[prost(uint64, tag = "6")]
-    pub referral_reward: u64,
+    #[prost(message, optional, tag = "1")]
+    pub stats: ::core::option::Option<super::core_types::BlockchainStats>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetTransactionsRequest {

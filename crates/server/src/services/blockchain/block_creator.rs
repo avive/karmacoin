@@ -3,7 +3,6 @@
 //
 
 use anyhow::Result;
-use byteorder::{BigEndian, ByteOrder};
 use bytes::Bytes;
 use prost::Message;
 use base::karma_coin::karma_coin_core_types::*;
@@ -11,9 +10,9 @@ use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use db::types::IntDbKey;
 use xactor::*;
 use crate::services::blockchain::blockchain_service::BlockChainService;
-use crate::services::blockchain::get_head_height::get_tip;
 use crate::services::blockchain::new_user_tx_processor;
-use crate::services::db_config_service::{BLOCK_EVENTS_COL_FAMILY, BLOCK_TIP_KEY, BLOCKS_COL_FAMILY, BLOCKCHAIN_DATA_COL_FAMILY};
+use crate::services::blockchain::stats::{get_stats, write_stats};
+use crate::services::db_config_service::{BLOCK_EVENTS_COL_FAMILY, BLOCKS_COL_FAMILY};
 
 #[message(result = "Result<Block>")]
 pub(crate) struct CreateBlock {
@@ -32,11 +31,10 @@ impl Handler<CreateBlock> for BlockChainService {
             return Err(anyhow::anyhow!("No transactions to create a block"));
         }
 
-        let height = get_tip().await?;
-
+        let stats = get_stats().await?;
+        let height = stats.tip_height;
         let mut tx_hashes: Vec<Vec<u8>> = vec![];
         let mut block_event = BlockEvent::new(height+1);
-
 
         for tx in msg.transactions.iter() {
             // process each transaction
@@ -65,6 +63,7 @@ impl Handler<CreateBlock> for BlockChainService {
         }
 
         let block = BlockChainService::create_block_helper(tx_hashes,
+                                                     stats,
                                                      block_event,
                                                      height + 1,
                                                      self.id_key_pair.as_ref().unwrap()).await?;
@@ -75,14 +74,33 @@ impl Handler<CreateBlock> for BlockChainService {
 
 /// BlockchainService block creation implementation
 impl BlockChainService {
+
+
+    /// Update blockchain stats with new block data and store in db
+    async fn update_blockchain_stats(mut stats: BlockchainStats, block_event: &BlockEvent, block: &Block) -> Result<()> {
+
+        stats.tip_height += 1;
+        stats.users += block_event.total_signups;
+        stats.fees.as_mut().unwrap().value += block_event.total_fees.as_ref().unwrap().value;
+        stats.signup_rewards.as_mut().unwrap().value += block_event.total_signup_rewards.as_ref().unwrap().value;
+        stats.referral_rewards.as_mut().unwrap().value += block_event.total_referral_rewards.as_ref().unwrap().value;
+        stats.transactions += block.transactions_hashes.len() as u64;
+        stats.last_block_time = block.time;
+        stats.payments +=  block_event.total_payments;
+
+        write_stats(stats).await
+    }
+
     /// Create a block with the provided txs hashes at a given height
     /// Internal help method
     async fn create_block_helper(transactions_hashes: Vec<Vec<u8>>,
-                           block_event: BlockEvent,
-                           height: u64,
-                           key_pair: &KeyPair
+                                 stats: BlockchainStats,
+                                 mut block_event: BlockEvent,
+                                 height: u64,
+                                 key_pair: &KeyPair
     ) -> Result<Block> {
         let mut block = Block {
+            time: chrono::Utc::now().timestamp_millis() as u64,
             author: None,
             height,
             transactions_hashes,
@@ -128,7 +146,9 @@ impl BlockChainService {
                 ttl: 0,
             }).await?;
 
-        // Persist block event
+        // Update and persist block event
+        block_event.block_hash = block.digest.clone();
+
         let mut buf = Vec::with_capacity(block_event.encoded_len());
         block_event.encode(&mut buf)?;
         DatabaseService::write(
@@ -142,18 +162,7 @@ impl BlockChainService {
             }).await?;
 
 
-        // inc the chain tip
-        let mut tip_buf = [0; 8];
-        BigEndian::write_u64(&mut tip_buf, height);
-        DatabaseService::write(
-            WriteItem {
-                data: DataItem {
-                    key: BLOCK_TIP_KEY.into(),
-                    value: Bytes::from(tip_buf.as_ref().to_vec()) },
-                cf: BLOCKCHAIN_DATA_COL_FAMILY,
-                ttl: 0,
-            }
-        ).await?;
+        BlockChainService::update_blockchain_stats(stats, &block_event, &block).await?;
 
         Ok(block)
 

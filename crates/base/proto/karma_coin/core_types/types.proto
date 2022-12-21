@@ -100,13 +100,14 @@ message OnChainData {
 }*/
 
 message Block {
-    AccountId author = 1;
-    uint64 height = 2;
-    repeated bytes transactions_hashes = 3; // of the signed transactions in this block
-    Amount fees = 4; // total fees paid in this block
-    bytes prev_block_digest = 5; // digest of block in consensus at the previous height
-    core_types.Signature signature = 6;
-    bytes digest = 7; // block digest includes hash of all above data
+    uint64 time = 1;
+    AccountId author = 2;
+    uint64 height = 3;
+    repeated bytes transactions_hashes = 4; // of the signed transactions in this block
+    Amount fees = 5; // total fees paid in this block
+    bytes prev_block_digest = 6; // digest of block in consensus at the previous height
+    core_types.Signature signature = 7;
+    bytes digest = 8; // block digest includes hash of all above data
 }
 
 // Supported char traits. Enum values are the traits unique id
@@ -248,6 +249,18 @@ message TransactionEvent {
     bytes transaction_hash = 4;
     ExecutionResult result = 5;
     FeeType fee_type = 6;
+}
+
+
+message BlockchainStats {
+    uint64 last_block_time = 1;
+    uint64 tip_height = 2;
+    uint64 transactions = 3;
+    uint64 payments = 4;
+    uint64 users = 5;
+    Amount fees = 6;
+    Amount signup_rewards = 7;
+    Amount referral_rewards = 8;
 }
 
 

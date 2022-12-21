@@ -74,14 +74,9 @@ message GetGenesisDataResponse {
 message GetBlockchainDataRequest {
 }
 
-// All genesis data as well as versioning info should be returned
+// Current blockchain data
 message GetBlockchainDataResponse {
-  uint64 users_count = 1; // total users count
-  uint64 block_height = 2; // current block height
-  uint64 transactions_count = 3; // number of transactions
-  uint64 appreciations_count = 4; // number of appreciations
-  uint64 new_account_reward = 5; // current new account reward in kcents
-  uint64 referral_reward = 6; // current referral reward in kcents
+  core_types.BlockchainStats stats = 1;
 }
 
 message GetTransactionsRequest {

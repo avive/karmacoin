@@ -13,6 +13,7 @@ use crate::services::api::get_user_by_nick::GetUserInfoByNick;
 use crate::services::api::get_user_by_number::GetUserInfoByNumber;
 use crate::services::blockchain::block_creator::CreateBlock;
 use crate::services::blockchain::blockchain_service::BlockChainService;
+use crate::services::blockchain::stats::GetStats;
 
 /// ApiService is a system service that provides access to provider server persisted data as well as an interface to admin the provider's server. It provides a GRPC admin service defined in ServerAdminService. This service is designed to be used by provider admin clients.
 #[derive(Debug, Clone)]
@@ -116,9 +117,21 @@ impl ApiServiceTrait for ApiService {
 
     }
 
-    /// Returns network info (on-chain data)
-    async fn get_blockchain_data(&self, _request: Request<GetBlockchainDataRequest>) -> Result<Response<GetBlockchainDataResponse>, Status> {
-        todo!()
+    /// Returns blockchain current state
+    async fn get_blockchain_data(&self, request: Request<GetBlockchainDataRequest>) -> Result<Response<GetBlockchainDataResponse>, Status> {
+
+        // create a block with the transaction
+        let service = BlockChainService::from_registry().await
+            .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
+
+        let resp = service.call(
+            GetStats(request.into_inner()))
+            .await
+            .map_err(|e| Status::internal(format!("failed to call blockchain api: {:?}", e)))?
+            .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
+
+        Ok(Response::new(resp))
+
     }
 
     /// Submit a transaction for processing

@@ -42,7 +42,7 @@ pub const BLOCKCHAIN_DATA_COL_FAMILY: &str = "blockchain_data_cf";
 pub const DB_INITIALIZED_KEY: &str = "db_initialized_key";
 
 /// value: uint64 indicating current tip block height
-pub const BLOCK_TIP_KEY: &str = "block_tip_key";
+pub const CHAIN_STATS_KEY: &str = "chain_stats_key";
 
 /// Block's transactions processing events
 /// key: block height, value: zero or more events emitted by txs in the block

@@ -114,23 +114,25 @@ pub struct PhoneVerifier {
 
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Block {
-    #[prost(message, optional, tag = "1")]
+    #[prost(uint64, tag = "1")]
+    pub time: u64,
+    #[prost(message, optional, tag = "2")]
     pub author: ::core::option::Option<AccountId>,
-    #[prost(uint64, tag = "2")]
+    #[prost(uint64, tag = "3")]
     pub height: u64,
     /// of the signed transactions in this block
-    #[prost(bytes = "vec", repeated, tag = "3")]
+    #[prost(bytes = "vec", repeated, tag = "4")]
     pub transactions_hashes: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
     /// total fees paid in this block
-    #[prost(message, optional, tag = "4")]
+    #[prost(message, optional, tag = "5")]
     pub fees: ::core::option::Option<Amount>,
     /// digest of block in consensus at the previous height
-    #[prost(bytes = "vec", tag = "5")]
+    #[prost(bytes = "vec", tag = "6")]
     pub prev_block_digest: ::prost::alloc::vec::Vec<u8>,
-    #[prost(message, optional, tag = "6")]
+    #[prost(message, optional, tag = "7")]
     pub signature: ::core::option::Option<Signature>,
     /// block digest includes hash of all above data
-    #[prost(bytes = "vec", tag = "7")]
+    #[prost(bytes = "vec", tag = "8")]
     pub digest: ::prost::alloc::vec::Vec<u8>,
 }
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
@@ -279,6 +281,25 @@ pub struct TransactionEvent {
     pub result: i32,
     #[prost(enumeration = "FeeType", tag = "6")]
     pub fee_type: i32,
+}
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
+pub struct BlockchainStats {
+    #[prost(uint64, tag = "1")]
+    pub last_block_time: u64,
+    #[prost(uint64, tag = "2")]
+    pub tip_height: u64,
+    #[prost(uint64, tag = "3")]
+    pub transactions: u64,
+    #[prost(uint64, tag = "4")]
+    pub payments: u64,
+    #[prost(uint64, tag = "5")]
+    pub users: u64,
+    #[prost(message, optional, tag = "6")]
+    pub fees: ::core::option::Option<Amount>,
+    #[prost(message, optional, tag = "7")]
+    pub signup_rewards: ::core::option::Option<Amount>,
+    #[prost(message, optional, tag = "8")]
+    pub referral_rewards: ::core::option::Option<Amount>,
 }
 /// Block events
 #[derive(Clone, PartialEq, ::prost::Message)]

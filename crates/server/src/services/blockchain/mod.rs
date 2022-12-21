@@ -5,7 +5,7 @@
 /// Blockchain module provides low-level blockchain functionality such as creating blocks and processing transactions
 
 pub (crate) mod blockchain_service;
-pub (crate) mod get_head_height;
+pub (crate) mod stats;
 pub (crate) mod block_creator;
 pub (crate) mod new_user_tx_processor;
 pub (crate) mod payment_tx_processor_v1;
