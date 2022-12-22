@@ -15,15 +15,7 @@ impl BlockchainStats {
             fees: Some(Amount {
                 value: 0,
                 coin_type: CoinType::Core as i32
-            }),
-            signup_rewards: Some(Amount {
-                value: 0,
-                coin_type: CoinType::Core as i32
-            }),
-            referral_rewards: Some(Amount {
-                value: 0,
-                coin_type: CoinType::Core as i32
-            }),
+            })
         }
     }
 }

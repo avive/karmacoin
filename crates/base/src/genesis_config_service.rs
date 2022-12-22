@@ -9,8 +9,30 @@ use xactor::*;
 
 pub const NET_ID_KEY: &str = "net_id";
 pub const DEF_TX_FEE_KEY : &str = "def_tx_fee";
-pub const SIGNUP_REWARD_KEY : &str = "signup_reward";
-pub const SIGNUP_REFERRAL_KEY : &str = "signup_reward";
+
+
+pub const SIGNUP_REWARD_PHASE1_KEY : &str = "signup_reward_p1";
+pub const SIGNUP_REWARD_PHASE1_ALLOCATION_KEY : &str = "signup_reward_alloc_p1";
+
+pub const SIGNUP_REWARD_PHASE2_KEY : &str = "signup_reward_p2";
+pub const SIGNUP_REWARD_PHASE2_ALLOCATION_KEY : &str = "signup_reward_alloc_p2";
+
+pub const REFERRAL_REWARD_PHASE1_KEY : &str = "referral_reward_p1";
+pub const REFERRAL_REWARD_PHASE1_ALLOCATION_KEY : &str = "referral_reward_alloc_p1";
+
+pub const REFERRAL_REWARD_PHASE2_KEY : &str = "referral_reward_p2";
+pub const REFERRAL_REWARD_PHASE2_ALLOCATION_KEY : &str = "referral_reward_alloc_p2";
+
+pub const TX_FEE_SUBSIDY_TOTAL_KEY: &str = "tx_fee_subsidy_total";
+pub const TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY: &str = "tx_fee_subsidy_max_txs_per_user";
+
+pub const KARMA_REWARD_AMOUNT: &str = "karma_reward_amount";
+pub const KARMA_REWARD_TOP_N_USERS_KEY: &str = "karma_reward_top_n_users";
+pub const KARAM_REWARDS_ALLOCATION_KEY: &str = "karma_rewards_allocation";
+
+pub const TREASURY_ACCOUNT_ID_KEY: &str = "treasury_account_id";
+pub const TREASURY_PREMINT_COINS_AMOUNT_KEY: &str = "treasury_premint_coins";
+
 
 /// This service handles the kc blockchain genesis configuration
 /// It provides default values for development, and merges in values from
@@ -36,12 +58,40 @@ impl Actor for GenesisConfigService {
         let config = builder
             .set_default(NET_ID_KEY, 1)
             .unwrap()
-            .set_default(DEF_TX_FEE_KEY, 1000)
+            .set_default(DEF_TX_FEE_KEY, 100)
             .unwrap()
-            .set_default(SIGNUP_REWARD_KEY, (10^9) + 1000)
+
+            .set_default(SIGNUP_REWARD_PHASE1_KEY, 10*(10^6))
             .unwrap()
-            .set_default(SIGNUP_REFERRAL_KEY, 10^8)
+            .set_default(SIGNUP_REWARD_PHASE1_ALLOCATION_KEY, 40*(10^6))
             .unwrap()
+            .set_default(SIGNUP_REWARD_PHASE2_KEY, 10^6)
+            .unwrap()
+            .set_default(SIGNUP_REWARD_PHASE2_ALLOCATION_KEY, 100*(10^6))
+            .unwrap()
+
+            .set_default(REFERRAL_REWARD_PHASE1_KEY, 10*(10^6))
+            .unwrap()
+            .set_default(REFERRAL_REWARD_PHASE1_ALLOCATION_KEY, 40*(10^6))
+            .unwrap()
+            .set_default(REFERRAL_REWARD_PHASE2_KEY, 10^6)
+            .unwrap()
+            .set_default(REFERRAL_REWARD_PHASE2_ALLOCATION_KEY, 100*(10^6))
+            .unwrap()
+
+            .set_default(KARMA_REWARD_AMOUNT, 10*(10^6))
+            .unwrap()
+            .set_default(KARMA_REWARD_TOP_N_USERS_KEY, 1_000)
+            .unwrap()
+            .set_default(KARAM_REWARDS_ALLOCATION_KEY, 250*(10^6))
+            .unwrap()
+
+            .set_default(TX_FEE_SUBSIDY_TOTAL_KEY, 250*(10^6))
+            .unwrap()
+            .set_default(TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY, 10)
+            .unwrap()
+
+
             .add_source(
                 Environment::with_prefix("GENESIS")
                     .try_parsing(true)

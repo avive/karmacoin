@@ -98,13 +98,18 @@ impl BlockChainService {
         stats.tip_height += 1;
         stats.users += block_event.total_signups;
         stats.fees.as_mut().unwrap().value += block_event.total_fees.as_ref().unwrap().value;
-        stats.signup_rewards.as_mut().unwrap().value += block_event.total_signup_rewards.as_ref().unwrap().value;
-        stats.referral_rewards.as_mut().unwrap().value += block_event.total_referral_rewards.as_ref().unwrap().value;
+        // stats.signup_rewards.as_mut().unwrap().value += block_event.total_signup_rewards.as_ref().unwrap().value;
+        // stats.referral_rewards.as_mut().unwrap().value += block_event.total_referral_rewards.as_ref().unwrap().value;
         stats.transactions += block.transactions_hashes.len() as u64;
         stats.last_block_time = block.time;
         stats.payments +=  block_event.total_payments;
 
+
+        // todo: update tokenomics data
+
         write_stats(stats).await
+
+
     }
 }
 
