@@ -11,7 +11,7 @@ use crate::services::api::get_char_traits::GetCharTraits;
 use crate::services::api::get_user_by_account_id::GetUserInfoByAccountId;
 use crate::services::api::get_user_by_nick::GetUserInfoByNick;
 use crate::services::api::get_user_by_number::GetUserInfoByNumber;
-use crate::services::blockchain::block_creator::ProcessTransactions;
+use crate::services::blockchain::txs_processor::ProcessTransactions;
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::mem_pool_service::{AddTransaction, MemPoolService};
 use crate::services::blockchain::stats::GetStats;
