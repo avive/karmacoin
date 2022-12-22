@@ -156,7 +156,7 @@ message UpdateUserV1 {
 message PaymentTransactionV1 {
     MobileNumber to = 1; // dest is always a mobile number (of a user or a non-user)
     Amount amount = 2; // amount in tokens to transfer
-    CharTrait trait = 3; // char trait set by sender. e.g. smart
+    CharTrait char_trait = 3; // char trait set by sender. e.g. smart
 }
 
 enum VerifyNumberResult {

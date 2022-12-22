@@ -60,6 +60,37 @@ impl Handler<GetTransactions> for MemPoolService {
     }
 }
 
+
+
+#[message(result = "Result<()>")]
+pub(crate) struct RemoveOnChainTransactions;
+
+/// Remove from the pool all transactions that are already onchain
+#[async_trait::async_trait]
+impl Handler<RemoveOnChainTransactions> for MemPoolService {
+    async fn handle(
+        &mut self,
+        _ctx: &mut Context<Self>,
+        _msg: RemoveOnChainTransactions,
+    ) -> Result<()> {
+
+        let txs = self.transactions.clone();
+
+        // remove all txs which are on chain from pool
+        for (tx_hash, _) in txs.iter() {
+            // reject transaction already on chain
+            if (DatabaseService::read(ReadItem {
+                key: Bytes::from(tx_hash.clone()),
+                cf: TRANSACTIONS_COL_FAMILY
+            }).await?).is_some() {
+                self.transactions.remove(tx_hash);
+            }
+        }
+        self.persist().await
+    }
+}
+
+
 #[message(result = "Result<()>")]
 pub(crate) struct AddTransaction(pub(crate) SignedTransaction);
 

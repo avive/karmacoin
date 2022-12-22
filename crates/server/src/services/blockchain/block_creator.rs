@@ -12,10 +12,10 @@ use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use db::types::IntDbKey;
 use xactor::*;
 use crate::services::blockchain::blockchain_service::BlockChainService;
-use crate::services::blockchain::mem_pool_service::{GetTransactions, MemPoolService, RemoveTransactionByHash};
-use crate::services::blockchain::new_user_tx_processor;
+use crate::services::blockchain::mem_pool_service::{GetTransactions, MemPoolService, RemoveOnChainTransactions, RemoveTransactionByHash};
+use crate::services::blockchain::{new_user_tx_processor, payment_tx_processor};
 use crate::services::blockchain::stats::{get_stats, write_stats};
-use crate::services::db_config_service::{BLOCK_EVENTS_COL_FAMILY, BLOCKS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY};
+use crate::services::db_config_service::{BLOCK_EVENTS_COL_FAMILY, BLOCKS_COL_FAMILY, USERS_COL_FAMILY};
 
 #[message(result = "Result<Option<Block>>")]
 pub(crate) struct ProcessTransactions;
@@ -37,6 +37,12 @@ impl Handler<ProcessTransactions> for BlockChainService {
             return Ok(None);
         }
 
+        // remove from pool all transactions that are already on chain
+        mem_pool.call(RemoveOnChainTransactions).await??;
+
+        // get txs from pool post filtering
+        let transactions_map = mem_pool.call(GetTransactions).await??;
+
         let stats = get_stats().await?;
         let height = stats.tip_height;
         let mut tx_hashes: Vec<Vec<u8>> = vec![];
@@ -46,19 +52,8 @@ impl Handler<ProcessTransactions> for BlockChainService {
         let mut sign_ups: HashMap<Vec<u8>, SignedTransaction> = HashMap::new();
 
         for (tx_hash, tx) in transactions_map.iter() {
-
             if tx.get_tx_type()? != NewUserV1 {
                 // here we only process new user transactions
-                continue;
-            }
-
-            // reject transaction already on chain
-            if (DatabaseService::read(ReadItem {
-                key: Bytes::from(tx_hash.clone()),
-                cf: TRANSACTIONS_COL_FAMILY
-            }).await?).is_some() {
-                mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
-                info!("tx already exists on chain. tx_hash: {:?}", tx_hash);
                 continue;
             }
 
@@ -74,35 +69,26 @@ impl Handler<ProcessTransactions> for BlockChainService {
                     // update new signups map - used for referrals and payments
                     sign_ups.insert(result.mobile_number.as_bytes().to_vec(), tx.clone());
 
-                    // remove processed tx from the pool
-                    mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
-
                 },
                 Err(e) => {
                     error!("Failed to process new user transaction: {:?}", e);
                 }
             }
+
+            // remove the processed tx from the pool
+            mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
         }
 
         // process other transactions types
         for (tx_hash, tx) in transactions_map.iter() {
             let tx_type = tx.get_tx_type()?;
             if tx_type == NewUserV1 {
-                continue;
-            }
-
-            // reject transaction which already exists on chain
-            if (DatabaseService::read(ReadItem {
-                key: Bytes::from(tx_hash.clone()),
-                cf: TRANSACTIONS_COL_FAMILY
-            }).await?).is_some() {
-                info!("tx already exists on chain. tx_hash: {:?}", tx_hash);
-                mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
+                // we don't process new user transactions here
                 continue;
             }
 
             // Get User from chain and reject tx if user doesn't exist
-            let user = match DatabaseService::read(ReadItem {
+            let mut user = match DatabaseService::read(ReadItem {
                 key: Bytes::from(tx.signer.as_ref().unwrap().data.clone()),
                 cf: USERS_COL_FAMILY
             }).await? {
@@ -110,24 +96,32 @@ impl Handler<ProcessTransactions> for BlockChainService {
                    User::decode(data.0.as_ref())?
                 },
                 None => {
-                    info!("User not found on chain");
+                    info!("Payee user not found on chain - removing tx from mempool");
                     mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
                     continue;
                 }
             };
 
-            // validate the tx and remove invalid txs from pool
-            if tx.validate(user.nonce).await.is_err() {
-                info!("tx invalid - removing from pool");
-                mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
-                continue;
-            }
-
             match tx_type {
                 TransactionType::PaymentV1 => {
-                    // we need to match payment transactions to the new user transactions that were processed above
-                    // in this case referral reward may be implied
-                    todo!("process payment transaction");
+                    if let Some(mut payee) = payment_tx_processor::get_payee_user(tx).await? {
+                            match payment_tx_processor::process_transaction(tx, height + 1, &mut user, &mut payee, &sign_ups).await {
+                                Ok(event) => {
+                                    info!("payment transaction processed: {:?}", event);
+                                    tx_hashes.push(tx_hash.to_vec());
+                                    block_event.total_payments += 1;
+                                    block_event.add_fee(event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value);
+                                    block_event.add_transaction_event(event);
+                                },
+                                Err(e) => {
+                                    info!("payment transaction failed: {:?}", e);
+                                }
+                            }
+                        }
+                    else {
+                        info!("Payee user not found on chain - keep this tx in the mem pool");
+                        continue;
+                    }
                 },
                 TransactionType::UpdateUserV1 => {
                     todo!("process update user transaction");
@@ -136,10 +130,12 @@ impl Handler<ProcessTransactions> for BlockChainService {
                     // ignore other transaction types
                 }
             }
+
+
         }
 
         if tx_hashes.is_empty() {
-            info!("no txs were processed");
+            info!("no txs were processed - skip block creation");
             return Ok(None);
         }
 

@@ -8,6 +8,6 @@ pub (crate) mod blockchain_service;
 pub (crate) mod stats;
 pub (crate) mod block_creator;
 pub (crate) mod new_user_tx_processor;
-pub (crate) mod payment_tx_processor_v1;
+pub (crate) mod payment_tx_processor;
 pub (crate) mod update_tx_processor_v1;
 pub (crate) mod mem_pool_service;

@@ -111,7 +111,6 @@ pub(crate) async fn process_transaction(
     let mut tx_data = Vec::with_capacity(transaction.encoded_len());
     transaction.encode(&mut tx_data)?;
 
-
     // index the transaction in the db by hash
     DatabaseService::write(WriteItem {
         data: DataItem {

@@ -178,7 +178,7 @@ pub struct PaymentTransactionV1 {
     pub amount: ::core::option::Option<Amount>,
     /// char trait set by sender. e.g. smart
     #[prost(enumeration = "CharTrait", tag = "3")]
-    pub r#trait: i32,
+    pub char_trait: i32,
 }
 /// Created and signed by a verifier
 #[derive(Clone, PartialEq, ::prost::Message)]
