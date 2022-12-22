@@ -7,27 +7,27 @@ use bytes::Bytes;
 use chrono::Utc;
 
 use base::karma_coin::karma_coin_core_types::{Amount, Balance, CoinType, ExecutionResult, FeeType, SignedTransaction, TransactionEvent};
-use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
+use db::db_service::{DatabaseService, DataItem, WriteItem};
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY};
 use prost::Message;
 use base::blockchain_config_service::{BlockchainConfigService, DEF_TX_FEE_KEY, SIGNUP_REWARD_KEY};
+
+pub(crate) struct ProcessTransactionResult {
+    pub(crate) event: TransactionEvent,
+    pub(crate) mobile_number: String,
+}
 
 /// Process a new user transaction - update ledger state, emit tx event
 /// This method will not add the tx to a block nor index it
 /// This is a helper method for the block creator
 pub(crate) async fn process_transaction(
     transaction: &SignedTransaction,
-    block_height: u64) -> Result<TransactionEvent> {
+    block_height: u64) -> Result<ProcessTransactionResult> {
     let account_id = transaction.signer.as_ref().ok_or_else(|| anyhow!("missing account id in tx"))?;
+    let tx_hash = transaction.get_hash()?;
 
-    if (DatabaseService::read(ReadItem {
-        key: Bytes::from(account_id.data.clone()),
-        cf: USERS_COL_FAMILY
-    }).await?).is_some() {
-        return Err(anyhow!("account already on chain"));
-    }
-
-    transaction.validate(0)?;
+    // validate tx syntax, fields, signature, net_id before processing it
+    transaction.validate(0).await?;
 
     let min_tx_fee_k_cents = BlockchainConfigService::get_u64(DEF_TX_FEE_KEY.into()).await?.unwrap();
     let tx_fee : u64 = transaction.fee.as_ref().ok_or_else(|| anyhow!("missing fee in tx"))?.value;
@@ -65,7 +65,6 @@ pub(crate) async fn process_transaction(
     }
 
     // Create the user and update its data
-
 
     let signup_reward_k_cents = BlockchainConfigService::get_u64(SIGNUP_REWARD_KEY.into()).await?.unwrap();
 
@@ -112,7 +111,6 @@ pub(crate) async fn process_transaction(
     let mut tx_data = Vec::with_capacity(transaction.encoded_len());
     transaction.encode(&mut tx_data)?;
 
-    let tx_hash = transaction.get_hash()?;
 
     // index the transaction in the db by hash
     DatabaseService::write(WriteItem {
@@ -137,5 +135,8 @@ pub(crate) async fn process_transaction(
         fee_type: FeeType::Mint as i32,
     };
 
-    Ok(event)
+    Ok(ProcessTransactionResult {
+        event,
+        mobile_number: user_mobile_number.number.clone(),
+    })
 }

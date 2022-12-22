@@ -7,6 +7,7 @@ use bytes::Bytes;
 use chrono::{Duration, Utc};
 use ed25519_dalek::Verifier;
 use prost::Message;
+use crate::blockchain_config_service::{BlockchainConfigService, NET_ID_KEY};
 use crate::karma_coin::karma_coin_core_types::{NewUserTransactionV1, PaymentTransactionV1, SignedTransaction, TransactionType, UpdateUserV1};
 
 impl SignedTransaction {
@@ -19,19 +20,49 @@ impl SignedTransaction {
         Ok(Bytes::from(hash.as_ref().to_vec()))
     }
 
-    /// Validate data of a newly submitted transaction before processing it
-    pub fn validate(&self, user_nonce: u64) -> Result<()> {
+    /// Validate transaction has valid syntax, fields has the correct net id and is preorply
+    /// signed before processing it
+    pub async fn validate(&self, user_nonce: u64) -> Result<()> {
         if self.nonce != user_nonce + 1 {
             return Err(anyhow!("expected nonce to be user's nonce plus 1"));
         }
 
+        self.verify_syntax().await?;
+        self.verify_timestamp()?;
+        self.verify_signature()
+    }
+
+    pub async fn verify_syntax(&self) -> Result<()> {
+        if self.signer.is_none() {
+            return Err(anyhow!("signer is required"));
+        }
+
+        if self.signature.is_none() {
+            return Err(anyhow!("signature is required"));
+        }
+
+        if self.transaction_data.is_none() {
+            return Err(anyhow!("transaction data is required"));
+        }
+
+        let net_id = BlockchainConfigService::get_u64(NET_ID_KEY.into())
+            .await?
+            .unwrap();
+
+        if self.network_id as u64 != net_id {
+            return Err(anyhow!("Transaction has wrong net id - expected: {}, got: {}", net_id, self.network_id));
+        }
+
+        Ok(())
+    }
+
+    pub fn verify_timestamp(&self) -> Result<()> {
         // check timestamp is close to now - within 48 hours
         let now = Utc::now().timestamp_nanos() as u64;
         if i64::abs(now as i64 - self.timestamp as i64) > Duration::hours(48).num_nanoseconds().unwrap() {
            return Err(anyhow!("invalid timestamp - too far from now"));
         }
-
-        self.verify_signature()
+        Ok(())
     }
 
     /// Verify the signer's signature

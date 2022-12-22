@@ -2,6 +2,7 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use std::collections::HashMap;
 use anyhow::Result;
 use bytes::Bytes;
 use prost::Message;
@@ -14,7 +15,7 @@ use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::mem_pool_service::{GetTransactions, MemPoolService, RemoveTransactionByHash};
 use crate::services::blockchain::new_user_tx_processor;
 use crate::services::blockchain::stats::{get_stats, write_stats};
-use crate::services::db_config_service::{BLOCK_EVENTS_COL_FAMILY, BLOCKS_COL_FAMILY};
+use crate::services::db_config_service::{BLOCK_EVENTS_COL_FAMILY, BLOCKS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY};
 
 #[message(result = "Result<Option<Block>>")]
 pub(crate) struct ProcessTransactions;
@@ -41,40 +42,88 @@ impl Handler<ProcessTransactions> for BlockChainService {
         let mut tx_hashes: Vec<Vec<u8>> = vec![];
         let mut block_event = BlockEvent::new(height+1);
 
+        // signups indexed by mobile number
+        let mut sign_ups: HashMap<Vec<u8>, SignedTransaction> = HashMap::new();
+
         for (tx_hash, tx) in transactions_map.iter() {
 
+            if tx.get_tx_type()? != NewUserV1 {
+                // here we only process new user transactions
+                continue;
+            }
 
-            // first process all new user transactions
-            // todo: index new user txs by mobile phone and use this when processing payment transactions
+            // reject transaction already on chain
+            if (DatabaseService::read(ReadItem {
+                key: Bytes::from(tx_hash.clone()),
+                cf: TRANSACTIONS_COL_FAMILY
+            }).await?).is_some() {
+                mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
+                info!("tx already exists on chain. tx_hash: {:?}", tx_hash);
+                continue;
+            }
 
-            if tx.get_tx_type()? == NewUserV1 {
+            match new_user_tx_processor::process_transaction(tx, height + 1).await {
+                Ok(result) => {
+                    let event = result.event;
+                    info!("new user transaction processed: {:?}", event);
+                    tx_hashes.push(tx_hash.to_vec());
+                    block_event.total_signups += 1;
+                    block_event.add_fee(event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value);
+                    block_event.add_transaction_event(event);
 
-                // todo: check that the transaction was not already processed - look it up by hash in the chain....
+                    // update new signups map - used for referrals and payments
+                    sign_ups.insert(result.mobile_number.as_bytes().to_vec(), tx.clone());
 
-                match new_user_tx_processor::process_transaction(tx, height + 1).await {
-                    Ok(event) => {
-                        info!("new user transaction processed: {:?}", event);
-                        tx_hashes.push(tx_hash.to_vec());
-                        block_event.total_signups += 1;
-                        block_event.add_fee(event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value);
-                        block_event.add_transaction_event(event);
+                    // remove processed tx from the pool
+                    mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
 
-                        // todo: locate fist payment transactions to this user (referral tx) in the pool and process it
-
-                    },
-                    Err(e) => {
-                        error!("Failed to process new user transaction: {:?}", e);
-                    }
+                },
+                Err(e) => {
+                    error!("Failed to process new user transaction: {:?}", e);
                 }
             }
         }
 
         // process other transactions types
-        for (_tx_hash, tx) in transactions_map.iter() {
+        for (tx_hash, tx) in transactions_map.iter() {
+            let tx_type = tx.get_tx_type()?;
+            if tx_type == NewUserV1 {
+                continue;
+            }
 
-            // todo: check that the transaction was not already processed - look it up by hash in the chain....
+            // reject transaction which already exists on chain
+            if (DatabaseService::read(ReadItem {
+                key: Bytes::from(tx_hash.clone()),
+                cf: TRANSACTIONS_COL_FAMILY
+            }).await?).is_some() {
+                info!("tx already exists on chain. tx_hash: {:?}", tx_hash);
+                mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
+                continue;
+            }
 
-            match tx.get_tx_type()? {
+            // Get User from chain and reject tx if user doesn't exist
+            let user = match DatabaseService::read(ReadItem {
+                key: Bytes::from(tx.signer.as_ref().unwrap().data.clone()),
+                cf: USERS_COL_FAMILY
+            }).await? {
+                Some(data) => {
+                   User::decode(data.0.as_ref())?
+                },
+                None => {
+                    info!("User not found on chain");
+                    mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
+                    continue;
+                }
+            };
+
+            // validate the tx and remove invalid txs from pool
+            if tx.validate(user.nonce).await.is_err() {
+                info!("tx invalid - removing from pool");
+                mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
+                continue;
+            }
+
+            match tx_type {
                 TransactionType::PaymentV1 => {
                     // we need to match payment transactions to the new user transactions that were processed above
                     // in this case referral reward may be implied

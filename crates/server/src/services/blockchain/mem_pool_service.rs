@@ -3,13 +3,13 @@
 //
 
 use std::collections::HashMap;
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use bytes::Bytes;
 use prost::Message;
 use base::karma_coin::karma_coin_core_types::{MemPool, SignedTransaction};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use xactor::*;
-use crate::services::db_config_service::{TXS_POOL_COL_FAMILY, TXS_POOL_KEY};
+use crate::services::db_config_service::{TRANSACTIONS_COL_FAMILY, TXS_POOL_COL_FAMILY, TXS_POOL_KEY};
 
 /// Max pool size
 const MAX_SIZE: usize = 5_000;
@@ -77,7 +77,22 @@ impl Handler<AddTransaction> for MemPoolService {
         }
 
         let tx = msg.0;
-        self.transactions.insert(tx.get_hash().unwrap().as_ref().to_vec(), tx);
+        let tx_hash = tx.get_hash().unwrap().as_ref().to_vec();
+
+        // reject transaction which already exists on chain
+        if (DatabaseService::read(ReadItem {
+            key: Bytes::from(tx_hash.clone()),
+            cf: TRANSACTIONS_COL_FAMILY
+        }).await?).is_some() {
+            return Err(anyhow!("tx already on chain"));
+        }
+
+        // basic tx validation before inserting to mem pool
+        tx.verify_syntax().await?;
+        tx.verify_timestamp()?;
+        tx.verify_signature()?;
+
+        self.transactions.insert(tx_hash, tx);
         self.persist().await
     }
 }
