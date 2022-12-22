@@ -176,6 +176,3 @@ impl Handler<ProcessTransactions> for BlockChainService {
         Ok(Some(block))
     }
 }
-
-
-

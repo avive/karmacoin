@@ -27,6 +27,10 @@ impl Actor for BlockchainConfigService {
 
         info!("BlockchainConfigService initial config...");
 
+        // todo: move rewards to tokenomics service
+
+        // todo: add tokenomics constant reading from genesis file here and set default values
+
         let builder = Config::builder();
         // Set defaults and merge genesis config file to overwrite
         let config = builder

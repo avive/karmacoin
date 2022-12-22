@@ -41,8 +41,13 @@ pub const BLOCKCHAIN_DATA_COL_FAMILY: &str = "blockchain_data_cf";
 /// value: bool indicating if the local db was initialized or needs initiation with static data
 pub const DB_INITIALIZED_KEY: &str = "db_initialized_key";
 
-/// value: uint64 indicating current tip block height
-pub const CHAIN_STATS_KEY: &str = "chain_stats_key";
+/// value: chain aggregated data - number of blocks, number of transactions, etc.
+pub const CHAIN_AGG_DATA_KEY: &str = "chain_agg_data_key";
+
+/// Key for storing the chains tokenomics data. This data is used to evaluate rewards and
+/// transaction fees subsidies. Value is a protobuf encoded Tokenomics object
+/// value: tokenomics object.
+pub const _TOKENOMICS_DATA_KEY: &str = "tokenomics_data_key";
 
 /// Block's transactions processing events
 /// key: block height, value: zero or more events emitted by txs in the block

@@ -24,6 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .type_attribute("SignedTransaction", "#[derive(serde::Serialize, serde::Deserialize)]")
         .type_attribute("TransactionEvent", "#[derive(serde::Serialize, serde::Deserialize)]")
         .type_attribute("BlockEvents", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .type_attribute("TokenomicsData", "#[derive(serde::Serialize, serde::Deserialize)]")
         .type_attribute("MemPool", "#[derive(serde::Serialize, serde::Deserialize)]")
         .type_attribute("BlockchainStats", "#[derive(serde::Serialize, serde::Deserialize)]")
         .type_attribute("TraitName", "#[derive(serde::Serialize, serde::Deserialize)]")

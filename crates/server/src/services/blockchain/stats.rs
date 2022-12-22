@@ -10,7 +10,7 @@ use base::karma_coin::karma_coin_core_types::BlockchainStats;
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use xactor::*;
 use crate::services::blockchain::blockchain_service::BlockChainService;
-use crate::services::db_config_service::{BLOCKCHAIN_DATA_COL_FAMILY, CHAIN_STATS_KEY};
+use crate::services::db_config_service::{BLOCKCHAIN_DATA_COL_FAMILY, CHAIN_AGG_DATA_KEY};
 
 #[message(result = "Result<GetBlockchainDataResponse>")]
 pub(crate) struct GetStats(pub(crate) GetBlockchainDataRequest);
@@ -33,7 +33,7 @@ impl Handler<GetStats> for BlockChainService {
 /// Helper function to get the current blockchain stats
 pub(crate) async fn get_stats() -> Result<BlockchainStats> {
     if let Some(data) = DatabaseService::read(ReadItem {
-        key: Bytes::from(CHAIN_STATS_KEY.as_bytes()),
+        key: Bytes::from(CHAIN_AGG_DATA_KEY.as_bytes()),
         cf: BLOCKCHAIN_DATA_COL_FAMILY
     }).await? {
         let stats = BlockchainStats::decode(data.0.as_ref())?;
@@ -50,7 +50,7 @@ pub(crate) async fn write_stats(stats:BlockchainStats) -> Result<()> {
     DatabaseService::write(
         WriteItem {
             data: DataItem {
-                key: Bytes::from(CHAIN_STATS_KEY.as_bytes()),
+                key: Bytes::from(CHAIN_AGG_DATA_KEY.as_bytes()),
                 value: Bytes::from(buf)
             },
             cf: BLOCKCHAIN_DATA_COL_FAMILY,

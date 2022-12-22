@@ -291,22 +291,46 @@ pub struct TransactionEvent {
 }
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct BlockchainStats {
+    /// last block production time
     #[prost(uint64, tag = "1")]
     pub last_block_time: u64,
+    /// current block height
     #[prost(uint64, tag = "2")]
     pub tip_height: u64,
+    /// total number of executed transactions
     #[prost(uint64, tag = "3")]
     pub transactions: u64,
+    /// total number of payment transactions
     #[prost(uint64, tag = "4")]
     pub payments: u64,
+    /// total number of verified user accounts
     #[prost(uint64, tag = "5")]
     pub users: u64,
+    /// total tx fees collected by block producers
     #[prost(message, optional, tag = "6")]
     pub fees: ::core::option::Option<Amount>,
-    #[prost(message, optional, tag = "7")]
-    pub signup_rewards: ::core::option::Option<Amount>,
-    #[prost(message, optional, tag = "8")]
-    pub referral_rewards: ::core::option::Option<Amount>,
+}
+/// Tokenomics protocol aggregated data
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
+pub struct TokenomicsData {
+    /// total number of kCents in minted by the protocol
+    #[prost(uint64, tag = "1")]
+    pub minted: u64,
+    /// total number of kcents in circulation - including pre-mint and minted
+    #[prost(uint64, tag = "2")]
+    pub circulation: u64,
+    /// total tx fee subsidies issued by the protocol
+    #[prost(uint64, tag = "3")]
+    pub fee_subs: u64,
+    /// total signup rewards issued
+    #[prost(uint64, tag = "4")]
+    pub signup_rewards: u64,
+    /// total referral rewards issued
+    #[prost(uint64, tag = "5")]
+    pub referral_rewards: u64,
+    /// total validator rewards issued
+    #[prost(uint64, tag = "6")]
+    pub validator_rewards: u64,
 }
 /// Block events
 #[derive(Clone, PartialEq, ::prost::Message)]
