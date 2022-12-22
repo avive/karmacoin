@@ -22,4 +22,4 @@ pub mod block_event;
 pub mod blockchain_stats;
 pub mod signer_trait;
 pub mod user;
-pub mod payment_transaction_v1;
+pub mod payment_transaction;

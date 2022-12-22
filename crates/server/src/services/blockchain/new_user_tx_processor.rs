@@ -4,25 +4,19 @@
 
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
-use chrono::Utc;
 
-use base::karma_coin::karma_coin_core_types::{Amount, Balance, CoinType, ExecutionResult, FeeType, SignedTransaction, TransactionEvent};
+use base::karma_coin::karma_coin_core_types::{Amount, Balance, CoinType, SignedTransaction};
 use db::db_service::{DatabaseService, DataItem, WriteItem};
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY};
 use prost::Message;
 use base::blockchain_config_service::{BlockchainConfigService, DEF_TX_FEE_KEY, SIGNUP_REWARD_KEY};
 
-pub(crate) struct ProcessTransactionResult {
-    pub(crate) event: TransactionEvent,
-    pub(crate) mobile_number: String,
-}
 
 /// Process a new user transaction - update ledger state, emit tx event
 /// This method will not add the tx to a block nor index it
 /// This is a helper method for the block creator
-pub(crate) async fn process_transaction(
-    transaction: &SignedTransaction,
-    block_height: u64) -> Result<ProcessTransactionResult> {
+pub(crate) async fn process_transaction(transaction: &SignedTransaction) -> Result<String> {
+
     let account_id = transaction.signer.as_ref().ok_or_else(|| anyhow!("missing account id in tx"))?;
     let tx_hash = transaction.get_hash()?;
 
@@ -125,17 +119,5 @@ pub(crate) async fn process_transaction(
 
     // note that referral awards are handled in the payment tx processing logic and not here
 
-    let event = TransactionEvent {
-        timestamp: Utc::now().timestamp_millis() as u64,
-        height: block_height,
-        transaction: Some(transaction.clone()),
-        transaction_hash: tx_hash.as_ref().to_vec(),
-        result: ExecutionResult::Executed as i32,
-        fee_type: FeeType::Mint as i32,
-    };
-
-    Ok(ProcessTransactionResult {
-        event,
-        mobile_number: user_mobile_number.number.clone(),
-    })
+    Ok(user_mobile_number.number.clone())
 }

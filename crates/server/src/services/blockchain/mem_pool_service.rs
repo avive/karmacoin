@@ -145,6 +145,24 @@ impl Handler<RemoveTransactionByHash> for MemPoolService {
 }
 
 #[message(result = "Result<()>")]
+pub(crate) struct RemoveTransactionsByHashes(pub(crate) Vec<Vec<u8>>);
+
+/// Remove transactions by provided hashes
+#[async_trait::async_trait]
+impl Handler<RemoveTransactionsByHashes> for MemPoolService {
+    async fn handle(
+        &mut self,
+        _ctx: &mut Context<Self>,
+        msg: RemoveTransactionsByHashes,
+    ) -> Result<()> {
+        for tx_hash in msg.0.iter() {
+            self.transactions.remove(tx_hash.as_slice());
+        }
+        self.persist().await
+    }
+}
+
+#[message(result = "Result<()>")]
 pub(crate) struct RemoveTransaction(pub(crate) SignedTransaction);
 
 /// Remove a transaction by value

@@ -5,9 +5,8 @@
 use std::collections::HashMap;
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
-use chrono::Utc;
 use prost::Message;
-use base::karma_coin::karma_coin_core_types::{CoinType, ExecutionResult, FeeType, PaymentTransactionV1, SignedTransaction, TransactionEvent, User};
+use base::karma_coin::karma_coin_core_types::{CoinType, PaymentTransactionV1, SignedTransaction, User};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY};
 
@@ -47,10 +46,9 @@ pub(crate) async fn get_payee_user(tx: &SignedTransaction) -> Result<Option<User
 /// This is a helper method for the block creator
 pub(crate) async fn process_transaction(
     transaction: &SignedTransaction,
-    block_height: u64,
     payer: &mut User,
     payee: &mut User,
-    sign_ups: &HashMap<Vec<u8>, SignedTransaction>) -> Result<TransactionEvent> {
+    sign_ups: &HashMap<Vec<u8>, SignedTransaction>) -> Result<()> {
 
     transaction.validate(payer.nonce).await?;
 
@@ -123,12 +121,5 @@ pub(crate) async fn process_transaction(
         ttl: 0,
     }).await?;
 
-    Ok(TransactionEvent {
-        timestamp: Utc::now().timestamp_millis() as u64,
-        height: block_height,
-        transaction: Some(transaction.clone()),
-        transaction_hash: tx_hash.as_ref().to_vec(),
-        result: ExecutionResult::Executed as i32,
-        fee_type: FeeType::Mint as i32,
-    })
+    Ok(())
 }

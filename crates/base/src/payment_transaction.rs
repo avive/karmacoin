@@ -3,10 +3,11 @@
 //
 
 use anyhow::{anyhow, Result};
-use crate::karma_coin::karma_coin_core_types::{PaymentTransactionV1};
+use crate::karma_coin::karma_coin_core_types::{CoinType, PaymentTransactionV1};
 
 impl PaymentTransactionV1 {
 
+    /// Verify all fields
     pub fn verify_syntax(&self) -> Result<()> {
 
         if self.to.is_none() {
@@ -15,6 +16,10 @@ impl PaymentTransactionV1 {
 
         if self.amount.is_none() {
             return Err(anyhow!("amount is required"));
+        }
+
+        if self.amount.as_ref().unwrap().coin_type != CoinType::Core as i32 {
+            return Err(anyhow!("Only core types are supported"));
         }
 
         if self.amount.as_ref().unwrap().value == 0 {

@@ -5,6 +5,7 @@
 use std::collections::HashMap;
 use anyhow::Result;
 use bytes::Bytes;
+use chrono::Utc;
 use prost::Message;
 use base::karma_coin::karma_coin_core_types::*;
 use base::karma_coin::karma_coin_core_types::TransactionType::NewUserV1;
@@ -12,7 +13,7 @@ use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use db::types::IntDbKey;
 use xactor::*;
 use crate::services::blockchain::blockchain_service::BlockChainService;
-use crate::services::blockchain::mem_pool_service::{GetTransactions, MemPoolService, RemoveOnChainTransactions, RemoveTransactionByHash};
+use crate::services::blockchain::mem_pool_service::{GetTransactions, MemPoolService, RemoveOnChainTransactions, RemoveTransactionByHash, RemoveTransactionsByHashes};
 use crate::services::blockchain::{new_user_tx_processor, payment_tx_processor};
 use crate::services::blockchain::stats::{get_stats, write_stats};
 use crate::services::db_config_service::{BLOCK_EVENTS_COL_FAMILY, BLOCKS_COL_FAMILY, USERS_COL_FAMILY};
@@ -57,9 +58,18 @@ impl Handler<ProcessTransactions> for BlockChainService {
                 continue;
             }
 
-            match new_user_tx_processor::process_transaction(tx, height + 1).await {
-                Ok(result) => {
-                    let event = result.event;
+            let mut event = TransactionEvent {
+                timestamp: Utc::now().timestamp_millis() as u64,
+                height: height +1,
+                transaction: Some(tx.clone()),
+                transaction_hash: tx_hash.to_vec(),
+                result: ExecutionResult::Executed as i32,
+                error_message: "".to_string(),
+                fee_type: FeeType::Mint as i32,
+            };
+
+            match new_user_tx_processor::process_transaction(tx).await {
+                Ok(mobile_number) => {
                     info!("new user transaction processed: {:?}", event);
                     tx_hashes.push(tx_hash.to_vec());
                     block_event.total_signups += 1;
@@ -67,11 +77,13 @@ impl Handler<ProcessTransactions> for BlockChainService {
                     block_event.add_transaction_event(event);
 
                     // update new signups map - used for referrals and payments
-                    sign_ups.insert(result.mobile_number.as_bytes().to_vec(), tx.clone());
+                    sign_ups.insert(mobile_number.as_bytes().to_vec(), tx.clone());
 
                 },
                 Err(e) => {
                     error!("Failed to process new user transaction: {:?}", e);
+                    event.result = ExecutionResult::Invalid as i32;
+                    event.error_message = e.to_string();
                 }
             }
 
@@ -83,7 +95,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
         for (tx_hash, tx) in transactions_map.iter() {
             let tx_type = tx.get_tx_type()?;
             if tx_type == NewUserV1 {
-                // we don't process new user transactions here
+                // Skip any new user txs
                 continue;
             }
 
@@ -105,8 +117,19 @@ impl Handler<ProcessTransactions> for BlockChainService {
             match tx_type {
                 TransactionType::PaymentV1 => {
                     if let Some(mut payee) = payment_tx_processor::get_payee_user(tx).await? {
-                            match payment_tx_processor::process_transaction(tx, height + 1, &mut user, &mut payee, &sign_ups).await {
-                                Ok(event) => {
+                        let mut event = TransactionEvent {
+                            timestamp: Utc::now().timestamp_millis() as u64,
+                            height: height + 1,
+                            transaction: Some(tx.clone()),
+                            transaction_hash: tx_hash.to_vec(),
+                            result: ExecutionResult::Executed as i32,
+                            error_message: "".to_string(),
+                            fee_type: FeeType::Mint as i32,
+                        };
+
+                        match payment_tx_processor::process_transaction(tx,  &mut user, &mut payee, &sign_ups).await {
+                                Ok(_) => {
+                                    event.result = ExecutionResult::Executed as i32;
                                     info!("payment transaction processed: {:?}", event);
                                     tx_hashes.push(tx_hash.to_vec());
                                     block_event.total_payments += 1;
@@ -115,6 +138,12 @@ impl Handler<ProcessTransactions> for BlockChainService {
                                 },
                                 Err(e) => {
                                     info!("payment transaction failed: {:?}", e);
+                                    event.result = ExecutionResult::Invalid as i32;
+                                    event.error_message = e.to_string();
+
+                                    // add the invalid tx to the block event
+                                    // todo: block producer should get fee when possible from an invalid tx
+                                    block_event.add_transaction_event(event);
                                 }
                             }
                         }
@@ -130,12 +159,10 @@ impl Handler<ProcessTransactions> for BlockChainService {
                     // ignore other transaction types
                 }
             }
-
-
         }
 
         if tx_hashes.is_empty() {
-            info!("no txs were processed - skip block creation");
+            info!("no txs to add to the block - skip block creation....");
             return Ok(None);
         }
 
@@ -146,11 +173,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                                                      height + 1,
                                                      self.id_key_pair.as_ref().unwrap()).await?;
 
-        // remove all transactions added to the block from the mem-pool
-        for tx_hash in tx_hashes.iter() {
-            mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
-        }
-
+        mem_pool.call(RemoveTransactionsByHashes(tx_hashes)).await??;
         Ok(Some(block))
     }
 }
@@ -160,17 +183,17 @@ impl BlockChainService {
 
     /// Create a block with the provided txs hashes at a given height
     /// Internal help method
-    async fn create_block_helper(transactions_hashes: &Vec<Vec<u8>>,
+    async fn create_block_helper(transactions_hashes: &[Vec<u8>],
                                  stats: BlockchainStats,
                                  mut block_event: BlockEvent,
                                  height: u64,
                                  key_pair: &KeyPair
     ) -> Result<Block> {
         let mut block = Block {
-            time: chrono::Utc::now().timestamp_millis() as u64,
+            time: Utc::now().timestamp_millis() as u64,
             author: None,
             height,
-            transactions_hashes: transactions_hashes.clone(),
+            transactions_hashes: transactions_hashes.to_vec(),
             fees: Some(block_event.total_fees.as_ref().unwrap().clone()),
             signature: None,
             prev_block_digest: vec![],

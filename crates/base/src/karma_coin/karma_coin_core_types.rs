@@ -284,7 +284,9 @@ pub struct TransactionEvent {
     pub transaction_hash: ::prost::alloc::vec::Vec<u8>,
     #[prost(enumeration = "ExecutionResult", tag = "5")]
     pub result: i32,
-    #[prost(enumeration = "FeeType", tag = "6")]
+    #[prost(string, tag = "6")]
+    pub error_message: ::prost::alloc::string::String,
+    #[prost(enumeration = "FeeType", tag = "7")]
     pub fee_type: i32,
 }
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
@@ -401,7 +403,6 @@ pub enum FeeType {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum ExecutionResult {
-    InvalidNonce = 0,
-    InsufficientBalance = 1,
-    Executed = 2,
+    Executed = 0,
+    Invalid = 1,
 }

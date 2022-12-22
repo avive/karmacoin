@@ -24,7 +24,7 @@ impl SignedTransaction {
     /// signed before processing it
     pub async fn validate(&self, user_nonce: u64) -> Result<()> {
         if self.nonce != user_nonce + 1 {
-            return Err(anyhow!("expected nonce to be user's nonce plus 1"));
+            return Err(anyhow!("Invalid nonce in tx"));
         }
 
         self.verify_syntax().await?;
