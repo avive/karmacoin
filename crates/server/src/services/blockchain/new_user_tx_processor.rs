@@ -9,7 +9,7 @@ use base::karma_coin::karma_coin_core_types::{Amount, Balance, CoinType, SignedT
 use db::db_service::{DatabaseService, DataItem, WriteItem};
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY};
 use prost::Message;
-use base::blockchain_config_service::{BlockchainConfigService, DEF_TX_FEE_KEY, SIGNUP_REWARD_KEY};
+use base::genesis_config_service::{GenesisConfigService, DEF_TX_FEE_KEY, SIGNUP_REWARD_KEY};
 
 
 /// Process a new user transaction - update ledger state, emit tx event
@@ -23,7 +23,7 @@ pub(crate) async fn process_transaction(transaction: &SignedTransaction) -> Resu
     // validate tx syntax, fields, signature, net_id before processing it
     transaction.validate(0).await?;
 
-    let min_tx_fee_k_cents = BlockchainConfigService::get_u64(DEF_TX_FEE_KEY.into()).await?.unwrap();
+    let min_tx_fee_k_cents = GenesisConfigService::get_u64(DEF_TX_FEE_KEY.into()).await?.unwrap();
     let tx_fee : u64 = transaction.fee.as_ref().ok_or_else(|| anyhow!("missing fee in tx"))?.value;
 
     if tx_fee < min_tx_fee_k_cents {
@@ -60,7 +60,7 @@ pub(crate) async fn process_transaction(transaction: &SignedTransaction) -> Resu
 
     // Create the user and update its data
 
-    let signup_reward_k_cents = BlockchainConfigService::get_u64(SIGNUP_REWARD_KEY.into()).await?.unwrap();
+    let signup_reward_k_cents = GenesisConfigService::get_u64(SIGNUP_REWARD_KEY.into()).await?.unwrap();
 
     user.nonce = 1;
     user.balances = vec![Balance {

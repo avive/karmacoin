@@ -12,20 +12,20 @@ pub const DEF_TX_FEE_KEY : &str = "def_tx_fee";
 pub const SIGNUP_REWARD_KEY : &str = "signup_reward";
 pub const SIGNUP_REFERRAL_KEY : &str = "signup_reward";
 
-/// This service handles the kc blockchain configuration
+/// This service handles the kc blockchain genesis configuration
 /// It provides default values for development, and merges in values from
 /// a genesis config file when applicable
 #[derive(Default)]
-pub struct BlockchainConfigService {
+pub struct GenesisConfigService {
     config: Config,
     config_file: Option<String>
 }
 
 #[async_trait::async_trait]
-impl Actor for BlockchainConfigService {
+impl Actor for GenesisConfigService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
 
-        info!("BlockchainConfigService initial config...");
+        info!("GenesisConfigService config...");
 
         // todo: move rewards to tokenomics service
 
@@ -43,7 +43,7 @@ impl Actor for BlockchainConfigService {
             .set_default(SIGNUP_REFERRAL_KEY, 10^8)
             .unwrap()
             .add_source(
-                Environment::with_prefix("KARMACOIN")
+                Environment::with_prefix("GENESIS")
                     .try_parsing(true)
                     .separator("_")
                     .list_separator(" "),
@@ -63,44 +63,44 @@ impl Actor for BlockchainConfigService {
     }
 }
 
-impl Service for BlockchainConfigService {}
+impl Service for GenesisConfigService {}
 
 // helpers
-impl BlockchainConfigService {
+impl GenesisConfigService {
     pub async fn get(key: String) -> Result<Option<String>> {
-        let config = BlockchainConfigService::from_registry().await?;
+        let config = GenesisConfigService::from_registry().await?;
         let res = config.call(GetValue(key)).await?;
         Ok(res)
     }
 
-    // helper
+    /// helper
     pub async fn get_bool(key: String) -> Result<Option<bool>> {
-        let config = BlockchainConfigService::from_registry().await?;
+        let config = GenesisConfigService::from_registry().await?;
         let res = config.call(GetBool(key)).await?;
         Ok(res)
     }
 
-    // helper
+    /// helper
     pub async fn get_u64(key: String) -> Result<Option<u64>> {
-        let config = BlockchainConfigService::from_registry().await?;
+        let config = GenesisConfigService::from_registry().await?;
         let res = config.call(GetU64(key)).await?;
         Ok(res)
     }
 
     pub async fn set(key: String, value: String) -> Result<()> {
-        let config = BlockchainConfigService::from_registry().await?;
+        let config = GenesisConfigService::from_registry().await?;
         config.call(SetValue { key, value }).await?
     }
 
-    // helper
+    /// helper
     pub async fn set_bool(key: String, value: bool) -> Result<()> {
-        let config = BlockchainConfigService::from_registry().await?;
+        let config = GenesisConfigService::from_registry().await?;
         config.call(SetBool { key, value }).await?
     }
 
-    // helper
+    /// helper
     pub async fn set_u64(key: String, value: u64) -> Result<()> {
-        let config = BlockchainConfigService::from_registry().await?;
+        let config = GenesisConfigService::from_registry().await?;
         config.call(SetU64 { key, value }).await?
     }
 }
@@ -110,8 +110,9 @@ pub struct SetConfigFile {
     pub config_file: String,
 }
 
+/// Merge content of genesis config file into the config
 #[async_trait::async_trait]
-impl Handler<SetConfigFile> for BlockchainConfigService {
+impl Handler<SetConfigFile> for GenesisConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: SetConfigFile) -> Result<()> {
 
         // todo: verify config file exists and is readable by this process
@@ -136,7 +137,7 @@ impl Handler<SetConfigFile> for BlockchainConfigService {
 pub struct GetBool(pub String);
 
 #[async_trait::async_trait]
-impl Handler<GetBool> for BlockchainConfigService {
+impl Handler<GetBool> for GenesisConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: GetBool) -> Option<bool> {
         match self.config.get_bool(&msg.0.as_str()) {
             Ok(res) => Some(res),
@@ -149,7 +150,7 @@ impl Handler<GetBool> for BlockchainConfigService {
 pub struct GetU64(pub String);
 
 #[async_trait::async_trait]
-impl Handler<GetU64> for BlockchainConfigService {
+impl Handler<GetU64> for GenesisConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: GetU64) -> Option<u64> {
         match self.config.get_int(&msg.0.as_str()) {
             Ok(res) => Some(res as u64),
@@ -162,7 +163,7 @@ impl Handler<GetU64> for BlockchainConfigService {
 pub struct GetValue(pub String);
 
 #[async_trait::async_trait]
-impl Handler<GetValue> for BlockchainConfigService {
+impl Handler<GetValue> for GenesisConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: GetValue) -> Option<String> {
         match self.config.get_string(&msg.0.as_str()) {
             Ok(res) => Some(res),
@@ -178,7 +179,7 @@ pub struct SetValue {
 }
 
 #[async_trait::async_trait]
-impl Handler<SetValue> for BlockchainConfigService {
+impl Handler<SetValue> for GenesisConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: SetValue) -> Result<()> {
         #[allow(deprecated)]
         match self.config.set(msg.key.as_str(), msg.value) {
@@ -195,7 +196,7 @@ pub struct SetU64 {
 }
 
 #[async_trait::async_trait]
-impl Handler<SetU64> for BlockchainConfigService {
+impl Handler<SetU64> for GenesisConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: SetU64) -> Result<()> {
         #[allow(deprecated)]
         match self.config.set(msg.key.as_str(), msg.value.to_string()) {
@@ -212,7 +213,7 @@ pub struct SetBool {
 }
 
 #[async_trait::async_trait]
-impl Handler<SetBool> for BlockchainConfigService {
+impl Handler<SetBool> for GenesisConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: SetBool) -> Result<()> {
         #[allow(deprecated)]
         match self.config.set(msg.key.as_str(), msg.value) {

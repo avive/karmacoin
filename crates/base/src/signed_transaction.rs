@@ -7,7 +7,7 @@ use bytes::Bytes;
 use chrono::{Duration, Utc};
 use ed25519_dalek::Verifier;
 use prost::Message;
-use crate::blockchain_config_service::{BlockchainConfigService, NET_ID_KEY};
+use crate::genesis_config_service::{GenesisConfigService, NET_ID_KEY};
 use crate::karma_coin::karma_coin_core_types::{NewUserTransactionV1, PaymentTransactionV1, SignedTransaction, TransactionType, UpdateUserV1};
 
 impl SignedTransaction {
@@ -45,7 +45,7 @@ impl SignedTransaction {
             return Err(anyhow!("transaction data is required"));
         }
 
-        let net_id = BlockchainConfigService::get_u64(NET_ID_KEY.into())
+        let net_id = GenesisConfigService::get_u64(NET_ID_KEY.into())
             .await?
             .unwrap();
 

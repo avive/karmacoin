@@ -3,7 +3,7 @@
 //
 
 use anyhow::Result;
-use base::blockchain_config_service::BlockchainConfigService;
+use base::genesis_config_service::GenesisConfigService;
 use base::hex_utils::hex_from_string;
 use base::karma_coin::karma_coin_core_types::{KeyPair, PrivateKey, PublicKey};
 use xactor::*;
@@ -25,13 +25,13 @@ impl Actor for BlockChainService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
         info!("BlockChainService started");
 
-        match BlockchainConfigService::get(BLOCK_PRODUCER_ID_PRIVATE_KEY.into())
+        match GenesisConfigService::get(BLOCK_PRODUCER_ID_PRIVATE_KEY.into())
             .await? {
             Some(key) => {
                 // key is a hex string in config
                 let private_key_data = hex_from_string(key).unwrap();
 
-                match BlockchainConfigService::get(BLOCK_PRODUCER_ID_PUBLIC_KEY.into())
+                match GenesisConfigService::get(BLOCK_PRODUCER_ID_PUBLIC_KEY.into())
                     .await? {
                     Some(pub_key) => {
                         let pub_key_data = hex_from_string(pub_key).unwrap();
