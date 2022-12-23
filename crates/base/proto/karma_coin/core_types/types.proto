@@ -256,6 +256,7 @@ message TransactionEvent {
     FeeType fee_type = 7;
 }
 
+// Blockchain aggregated data
 message BlockchainStats {
 
     // last block production time
@@ -265,38 +266,36 @@ message BlockchainStats {
     uint64 tip_height = 2;
 
     // total number of executed transactions
-    uint64 transactions = 3;
+    uint64 transactions_count = 3;
 
     // total number of payment transactions
-    uint64 payments = 4;
+    uint64 payments_transactions_count = 4;
 
     // total number of verified user accounts
-    uint64 users = 5;
+    uint64 users_count = 5;
 
     // total tx fees collected by block producers
-    Amount fees = 6;
+    uint64 fees_amount = 6;
 
-}
+    // total number of kCents minted by the protocol since genesis
+    uint64 minted_amount = 7;
 
-// Tokenomics protocol aggregated data
-message TokenomicsData {
-    // total number of kCents in minted by the protocol
-    uint64 minted = 1;
-
-    // total number of kcents in circulation - including pre-mint and minted
-    uint64 circulation = 2;
+    // total number of kCents in circulation by minting. Not including pre-mint
+    uint64 circulation = 8;
 
     // total tx fee subsidies issued by the protocol
-    uint64 fee_subs = 3;
+    uint64 fee_subs_count = 9;
+    uint64 fee_subs_amount = 10;
 
-    // total signup rewards issued
-    uint64 signup_rewards = 4;
+    uint64 signup_rewards_count = 11;
+    uint64 signup_rewards_amount = 12;
 
-    // total referral rewards issued
-    uint64 referral_rewards = 5;
+    uint64 referral_rewards_count = 13;
+    uint64 referral_rewards_amount = 14;
 
-    // total validator rewards issued
-    uint64 validator_rewards = 6;
+    uint64 validator_rewards_count = 15;
+    uint64 validator_rewards_amount = 16;
+
 }
 
 // Block events

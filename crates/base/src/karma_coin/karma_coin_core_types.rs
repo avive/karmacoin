@@ -289,6 +289,7 @@ pub struct TransactionEvent {
     #[prost(enumeration = "FeeType", tag = "7")]
     pub fee_type: i32,
 }
+/// Blockchain aggregated data
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct BlockchainStats {
     /// last block production time
@@ -299,38 +300,39 @@ pub struct BlockchainStats {
     pub tip_height: u64,
     /// total number of executed transactions
     #[prost(uint64, tag = "3")]
-    pub transactions: u64,
+    pub transactions_count: u64,
     /// total number of payment transactions
     #[prost(uint64, tag = "4")]
-    pub payments: u64,
+    pub payments_transactions_count: u64,
     /// total number of verified user accounts
     #[prost(uint64, tag = "5")]
-    pub users: u64,
+    pub users_count: u64,
     /// total tx fees collected by block producers
-    #[prost(message, optional, tag = "6")]
-    pub fees: ::core::option::Option<Amount>,
-}
-/// Tokenomics protocol aggregated data
-#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
-pub struct TokenomicsData {
-    /// total number of kCents in minted by the protocol
-    #[prost(uint64, tag = "1")]
-    pub minted: u64,
-    /// total number of kcents in circulation - including pre-mint and minted
-    #[prost(uint64, tag = "2")]
+    #[prost(uint64, tag = "6")]
+    pub fees_amount: u64,
+    /// total number of kCents minted by the protocol since genesis
+    #[prost(uint64, tag = "7")]
+    pub minted_amount: u64,
+    /// total number of kCents in circulation by minting. Not including pre-mint
+    #[prost(uint64, tag = "8")]
     pub circulation: u64,
     /// total tx fee subsidies issued by the protocol
-    #[prost(uint64, tag = "3")]
-    pub fee_subs: u64,
-    /// total signup rewards issued
-    #[prost(uint64, tag = "4")]
-    pub signup_rewards: u64,
-    /// total referral rewards issued
-    #[prost(uint64, tag = "5")]
-    pub referral_rewards: u64,
-    /// total validator rewards issued
-    #[prost(uint64, tag = "6")]
-    pub validator_rewards: u64,
+    #[prost(uint64, tag = "9")]
+    pub fee_subs_count: u64,
+    #[prost(uint64, tag = "10")]
+    pub fee_subs_amount: u64,
+    #[prost(uint64, tag = "11")]
+    pub signup_rewards_count: u64,
+    #[prost(uint64, tag = "12")]
+    pub signup_rewards_amount: u64,
+    #[prost(uint64, tag = "13")]
+    pub referral_rewards_count: u64,
+    #[prost(uint64, tag = "14")]
+    pub referral_rewards_amount: u64,
+    #[prost(uint64, tag = "15")]
+    pub validator_rewards_count: u64,
+    #[prost(uint64, tag = "16")]
+    pub validator_rewards_amount: u64,
 }
 /// Block events
 #[derive(Clone, PartialEq, ::prost::Message)]

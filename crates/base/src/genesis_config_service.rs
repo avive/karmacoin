@@ -10,29 +10,50 @@ use xactor::*;
 pub const NET_ID_KEY: &str = "net_id";
 pub const DEF_TX_FEE_KEY : &str = "def_tx_fee";
 
-
+/// Signup reward in KCents in phase 1
 pub const SIGNUP_REWARD_PHASE1_KEY : &str = "signup_reward_p1";
+
+/// Max number of rewards for phase 1
 pub const SIGNUP_REWARD_PHASE1_ALLOCATION_KEY : &str = "signup_reward_alloc_p1";
 
+/// Signup reward in KCents in phase 2
 pub const SIGNUP_REWARD_PHASE2_KEY : &str = "signup_reward_p2";
+
+/// Max number of signup rewards for phase 2
 pub const SIGNUP_REWARD_PHASE2_ALLOCATION_KEY : &str = "signup_reward_alloc_p2";
 
+/// Referral reward in KCents in phase 1
 pub const REFERRAL_REWARD_PHASE1_KEY : &str = "referral_reward_p1";
+
+/// Max number of referral rewards for phase 1
 pub const REFERRAL_REWARD_PHASE1_ALLOCATION_KEY : &str = "referral_reward_alloc_p1";
 
+/// Referral reward in KCents in phase 2
 pub const REFERRAL_REWARD_PHASE2_KEY : &str = "referral_reward_p2";
+
+/// Max number of referral rewards for phase 2
 pub const REFERRAL_REWARD_PHASE2_ALLOCATION_KEY : &str = "referral_reward_alloc_p2";
 
+/// Total number of tx fee subsidies
 pub const TX_FEE_SUBSIDY_TOTAL_KEY: &str = "tx_fee_subsidy_total";
+
+/// Max subsided transactions per user
 pub const TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY: &str = "tx_fee_subsidy_max_txs_per_user";
 
+/// Karma reward amount in KCents
 pub const KARMA_REWARD_AMOUNT: &str = "karma_reward_amount";
+
+/// Number of users to get rewarded each period
 pub const KARMA_REWARD_TOP_N_USERS_KEY: &str = "karma_reward_top_n_users";
+
+/// Max number of karma rewards
 pub const KARAM_REWARDS_ALLOCATION_KEY: &str = "karma_rewards_allocation";
 
+/// Treasury account id
 pub const TREASURY_ACCOUNT_ID_KEY: &str = "treasury_account_id";
-pub const TREASURY_PREMINT_COINS_AMOUNT_KEY: &str = "treasury_premint_coins";
 
+/// Treasury pre-minted amount in KCents
+pub const TREASURY_PREMINT_COINS_AMOUNT_KEY: &str = "treasury_premint_coins";
 
 /// This service handles the kc blockchain genesis configuration
 /// It provides default values for development, and merges in values from
@@ -48,10 +69,6 @@ impl Actor for GenesisConfigService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
 
         info!("GenesisConfigService config...");
-
-        // todo: move rewards to tokenomics service
-
-        // todo: add tokenomics constant reading from genesis file here and set default values
 
         let builder = Config::builder();
         // Set defaults and merge genesis config file to overwrite
@@ -90,7 +107,6 @@ impl Actor for GenesisConfigService {
             .unwrap()
             .set_default(TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY, 10)
             .unwrap()
-
 
             .add_source(
                 Environment::with_prefix("GENESIS")
@@ -189,7 +205,7 @@ pub struct GetBool(pub String);
 #[async_trait::async_trait]
 impl Handler<GetBool> for GenesisConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: GetBool) -> Option<bool> {
-        match self.config.get_bool(&msg.0.as_str()) {
+        match self.config.get_bool(msg.0.as_str()) {
             Ok(res) => Some(res),
             Err(_) => None,
         }
@@ -202,7 +218,7 @@ pub struct GetU64(pub String);
 #[async_trait::async_trait]
 impl Handler<GetU64> for GenesisConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: GetU64) -> Option<u64> {
-        match self.config.get_int(&msg.0.as_str()) {
+        match self.config.get_int(msg.0.as_str()) {
             Ok(res) => Some(res as u64),
             Err(_) => None,
         }
@@ -215,7 +231,7 @@ pub struct GetValue(pub String);
 #[async_trait::async_trait]
 impl Handler<GetValue> for GenesisConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: GetValue) -> Option<String> {
-        match self.config.get_string(&msg.0.as_str()) {
+        match self.config.get_string(msg.0.as_str()) {
             Ok(res) => Some(res),
             Err(_) => None,
         }

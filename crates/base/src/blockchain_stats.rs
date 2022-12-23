@@ -2,20 +2,27 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use crate::karma_coin::karma_coin_core_types::{Amount, BlockchainStats, CoinType};
+use crate::karma_coin::karma_coin_core_types::BlockchainStats;
 
 impl BlockchainStats {
     pub fn new() -> Self {
         Self {
-            last_block_time: chrono::Utc::now().timestamp_millis() as u64,
+            last_block_time: 0,
             tip_height: 0,
-            transactions: 0,
-            payments: 0,
-            users: 0,
-            fees: Some(Amount {
-                value: 0,
-                coin_type: CoinType::Core as i32
-            })
+            transactions_count: 0,
+            payments_transactions_count: 0,
+            users_count: 0,
+            fees_amount: 0,
+            minted_amount: 0,
+            circulation: 0,
+            fee_subs_count: 0,
+            fee_subs_amount: 0,
+            signup_rewards_amount: 0,
+            signup_rewards_count: 0,
+            referral_rewards_amount: 0,
+            validator_rewards_count: 0,
+            referral_rewards_count: 0,
+            validator_rewards_amount: 0,
         }
     }
 }

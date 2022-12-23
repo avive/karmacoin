@@ -96,13 +96,13 @@ impl BlockChainService {
     async fn update_blockchain_stats(mut stats: BlockchainStats, block_event: &BlockEvent, block: &Block) -> Result<()> {
 
         stats.tip_height += 1;
-        stats.users += block_event.total_signups;
-        stats.fees.as_mut().unwrap().value += block_event.total_fees.as_ref().unwrap().value;
+        stats.users_count += block_event.total_signups;
+        stats.fees_amount += block_event.total_fees.as_ref().unwrap().value;
         // stats.signup_rewards.as_mut().unwrap().value += block_event.total_signup_rewards.as_ref().unwrap().value;
         // stats.referral_rewards.as_mut().unwrap().value += block_event.total_referral_rewards.as_ref().unwrap().value;
-        stats.transactions += block.transactions_hashes.len() as u64;
+        stats.transactions_count += block.transactions_hashes.len() as u64;
         stats.last_block_time = block.time;
-        stats.payments +=  block_event.total_payments;
+        stats.payments_transactions_count +=  block_event.total_payments;
 
 
         // todo: update tokenomics data
