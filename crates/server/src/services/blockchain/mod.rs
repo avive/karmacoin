@@ -12,3 +12,5 @@ pub (crate) mod new_user_tx_processor;
 pub (crate) mod payment_tx_processor;
 pub (crate) mod update_tx_processor_v1;
 pub (crate) mod mem_pool_service;
+pub (crate) mod tx_event_emitter;
+pub (crate) mod tokenomics;

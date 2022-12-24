@@ -6,8 +6,9 @@ use std::collections::HashMap;
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
 use prost::Message;
-use base::karma_coin::karma_coin_core_types::{CoinType, PaymentTransactionV1, SignedTransaction, User};
+use base::karma_coin::karma_coin_core_types::{CoinType, FeeType, PaymentTransactionV1, SignedTransaction, User};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
+use crate::services::blockchain::tokenomics::Tokenomics;
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY};
 
 
@@ -41,6 +42,10 @@ pub(crate) async fn get_payee_user(tx: &SignedTransaction) -> Result<Option<User
 
 }
 
+pub(crate) struct PaymentProcessingResult {
+    pub(crate) fee_type: FeeType
+}
+
 /// Process a new user transaction - update ledger state, emit tx event
 /// This method will not add the tx to a block nor index it
 /// This is a helper method for the block creator
@@ -48,9 +53,12 @@ pub(crate) async fn process_transaction(
     transaction: &SignedTransaction,
     payer: &mut User,
     payee: &mut User,
-    sign_ups: &HashMap<Vec<u8>, SignedTransaction>) -> Result<()> {
+    sign_ups: &HashMap<Vec<u8>, SignedTransaction>,
+    tokenomics: &Tokenomics) -> Result<PaymentProcessingResult> {
 
     transaction.validate(payer.nonce).await?;
+
+    let tx_fee = transaction.fee.as_ref().unwrap().value;
 
     let payment_tx: PaymentTransactionV1 = transaction.get_payment_transaction_v1()?;
     payment_tx.verify_syntax()?;
@@ -61,20 +69,32 @@ pub(crate) async fn process_transaction(
     // check that payer has sufficient balance to pay
     let coin_type = CoinType::from_i32(payment.coin_type).ok_or_else(|| anyhow!("invalid coin type"))?;
 
-    if payer.get_balance(coin_type).value < payment.value {
+    let apply_subsidy = tokenomics.should_subsidise_transaction_fee(0, tx_fee).await?;
+    let user_tx_fee = if apply_subsidy {
+        0
+    } else {
+        tx_fee
+    };
+
+    let fee_type = if apply_subsidy {
+        FeeType::Mint
+    } else {
+        FeeType::User
+    };
+
+    if payer.get_balance(coin_type).value < (payment.value + user_tx_fee) {
         return Err(anyhow!("payer has insufficient balance to pay"))
     }
 
-    // update payee balance to reflect payment
+    // update payee balance to reflect payment and tx fee (when applicable)
     let mut balance = payee.get_balance(coin_type);
     balance.value += payment.value;
     payee.update_balance(&balance);
 
     // update payer balance to reflect payment
     let mut payer_balance = payer.get_balance(coin_type);
-    payer_balance.value -= payment.value;
+    payer_balance.value -= payment.value + user_tx_fee;
     payer.update_balance(&payer_balance);
-
 
     if sign_ups.contains_key(mobile_number.as_bytes()) {
         // this is a new user referral payment
@@ -121,5 +141,9 @@ pub(crate) async fn process_transaction(
         ttl: 0,
     }).await?;
 
-    Ok(())
+    // todo: add tx_fee to block producer account
+
+    Ok(PaymentProcessingResult {
+        fee_type
+    })
 }

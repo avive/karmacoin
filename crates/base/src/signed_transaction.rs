@@ -8,7 +8,7 @@ use chrono::{Duration, Utc};
 use ed25519_dalek::Verifier;
 use prost::Message;
 use crate::genesis_config_service::{GenesisConfigService, NET_ID_KEY};
-use crate::karma_coin::karma_coin_core_types::{NewUserTransactionV1, PaymentTransactionV1, SignedTransaction, TransactionType, UpdateUserV1};
+use crate::karma_coin::karma_coin_core_types::{CoinType, NewUserTransactionV1, PaymentTransactionV1, SignedTransaction, TransactionType, UpdateUserV1};
 
 impl SignedTransaction {
 
@@ -29,7 +29,19 @@ impl SignedTransaction {
 
         self.verify_syntax().await?;
         self.verify_timestamp()?;
+        self.verify_tx_fee()?;
         self.verify_signature()
+    }
+
+    pub fn verify_tx_fee(&self) -> Result<()> {
+        let tx_fee = self.fee.as_ref().ok_or_else(|| anyhow!("No tx fee provided"))?;
+        if tx_fee.coin_type != CoinType::Core as i32 {
+            return Err(anyhow!("Invalid coin type in tx fee - must be core"));
+        }
+        if tx_fee.value == 0 {
+            return Err(anyhow!("fee must be positive"));
+        }
+        Ok(())
     }
 
     pub async fn verify_syntax(&self) -> Result<()> {

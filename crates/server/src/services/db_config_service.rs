@@ -49,6 +49,11 @@ pub const CHAIN_AGG_DATA_KEY: &str = "chain_agg_data_key";
 /// value: tokenomics object.
 pub const _TOKENOMICS_DATA_KEY: &str = "tokenomics_data_key";
 
+/// Transactions processing events
+/// key: tx_hash, value: zero or more tx events emitted by tx processing
+pub const TRANSACTIONS_EVENTS_COL_FAMILY: &str = "txs_events_cf";
+
+
 /// Block's transactions processing events
 /// key: block height, value: zero or more events emitted by txs in the block
 pub const BLOCK_EVENTS_COL_FAMILY: &str = "bc_events_cf";

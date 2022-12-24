@@ -5,16 +5,21 @@
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
 
-use base::karma_coin::karma_coin_core_types::{Amount, Balance, CoinType, SignedTransaction};
+use base::karma_coin::karma_coin_core_types::{Amount, Balance, CoinType, FeeType, SignedTransaction};
 use db::db_service::{DatabaseService, DataItem, WriteItem};
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY};
 use prost::Message;
+use crate::services::blockchain::tokenomics::Tokenomics;
 
+pub(crate) struct NewUserProcessingResult {
+    pub(crate) mobile_number: String,
+    pub(crate) fee_type: FeeType
+}
 
 /// Process a new user transaction - update ledger state, emit tx event
 /// This method will not add the tx to a block nor index it
 /// This is a helper method for the block creator
-pub(crate) async fn process_transaction(transaction: &SignedTransaction) -> Result<String> {
+pub(crate) async fn process_transaction(transaction: &SignedTransaction, tokenomics: &Tokenomics) -> Result<NewUserProcessingResult> {
 
     let account_id = transaction.signer.as_ref().ok_or_else(|| anyhow!("missing account id in tx"))?;
     let tx_hash = transaction.get_hash()?;
@@ -22,10 +27,8 @@ pub(crate) async fn process_transaction(transaction: &SignedTransaction) -> Resu
     // validate tx syntax, fields, signature, net_id before processing it
     transaction.validate(0).await?;
 
-    let tx_fee : u64 = transaction.fee.as_ref().ok_or_else(|| anyhow!("missing fee in tx"))?.value;
-
+    let tx_fee = transaction.fee.as_ref().unwrap().value;
     let new_user_tx = transaction.get_new_user_transaction_v1()?;
-
     let mut user = new_user_tx.user.ok_or_else(|| anyhow!("missing user data in tx"))?;
     let verification_evidence = new_user_tx.verify_number_response.ok_or_else(|| anyhow!("missing verifier data"))?;
 
@@ -52,16 +55,30 @@ pub(crate) async fn process_transaction(transaction: &SignedTransaction) -> Resu
         return Err(anyhow!("mobile number mismatch"));
     }
 
-    // Create the user and update its data
+    let apply_subsidy = tokenomics.should_subsidise_transaction_fee(0, tx_fee).await?;
+    let signup_reward_amount = tokenomics.get_signup_reward_amount().await?;
+    let user_tx_fee = if apply_subsidy {
+        0
+    } else {
+        tx_fee
+    };
 
-    // todo: compute rewards based on current rewards pahse and genesis config
+    if !apply_subsidy && tx_fee >= signup_reward_amount {
+        // invalid tx - tx fee is higher than the block award
+        return Err(anyhow!("tx fee is greater than signup reward and no tx fee subsidy is applied"));
+    }
 
-    let signup_reward_k_cents = 10*(10^6);
+    let fee_type = if apply_subsidy {
+        FeeType::Mint
+    } else {
+        FeeType::User
+    };
 
     user.nonce = 1;
+
     user.balances = vec![Balance {
         free: Some(Amount {
-            value: signup_reward_k_cents - tx_fee,
+            value: signup_reward_amount - user_tx_fee,
             coin_type: CoinType::Core as i32,
         }),
         reserved: None,
@@ -111,9 +128,12 @@ pub(crate) async fn process_transaction(transaction: &SignedTransaction) -> Resu
         ttl: 0,
     }).await?;
 
-    // todo: transfer the tx fee to the local block producer (this node)
+    // todo: add tx_fee to the local block producer balance (this node)
 
     // note that referral awards are handled in the payment tx processing logic and not here
 
-    Ok(user_mobile_number.number.clone())
+    Ok(NewUserProcessingResult{
+        mobile_number: user_mobile_number.number.clone(),
+        fee_type,
+    })
 }

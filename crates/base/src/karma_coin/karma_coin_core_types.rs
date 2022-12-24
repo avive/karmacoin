@@ -289,6 +289,12 @@ pub struct TransactionEvent {
     #[prost(enumeration = "FeeType", tag = "7")]
     pub fee_type: i32,
 }
+/// A collection of events for a transaction
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
+pub struct TransactionEvents {
+    #[prost(message, repeated, tag = "1")]
+    pub events: ::prost::alloc::vec::Vec<TransactionEvent>,
+}
 /// Blockchain aggregated data
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct BlockchainStats {

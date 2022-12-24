@@ -104,7 +104,6 @@ impl BlockChainService {
         stats.last_block_time = block.time;
         stats.payments_transactions_count +=  block_event.total_payments;
 
-
         // todo: update tokenomics data
 
         write_stats(stats).await

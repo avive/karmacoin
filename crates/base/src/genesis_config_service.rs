@@ -22,6 +22,9 @@ pub const SIGNUP_REWARD_PHASE2_KEY : &str = "signup_reward_p2";
 /// Max number of signup rewards for phase 2
 pub const SIGNUP_REWARD_PHASE2_ALLOCATION_KEY : &str = "signup_reward_alloc_p2";
 
+/// Referral reward in KCents in phase 3
+pub const SIGNUP_REWARD_PHASE3_KEY : &str = "signup_reward_p3";
+
 /// Referral reward in KCents in phase 1
 pub const REFERRAL_REWARD_PHASE1_KEY : &str = "referral_reward_p1";
 
@@ -34,11 +37,21 @@ pub const REFERRAL_REWARD_PHASE2_KEY : &str = "referral_reward_p2";
 /// Max number of referral rewards for phase 2
 pub const REFERRAL_REWARD_PHASE2_ALLOCATION_KEY : &str = "referral_reward_alloc_p2";
 
-/// Total number of tx fee subsidies
+
+/// Total max number of tx fee subsidies
 pub const TX_FEE_SUBSIDY_TOTAL_KEY: &str = "tx_fee_subsidy_total";
 
 /// Max subsided transactions per user
 pub const TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY: &str = "tx_fee_subsidy_max_txs_per_user";
+
+/// The Max tx fee amount that the protocol should subsidise
+pub const TX_FEE_SUBSIDY_MAX_AMOUNT: &str = "tx_fee_subsidy_max_amount";
+
+/// last block alienable for block reward
+pub const BLOCK_REWARDS_LAST_BLOCK: &str = "block_rewards_last_block";
+
+/// Block reward amount
+pub const BLOCK_REWARDS_AMOUNT: &str = "block_rewards_amount";
 
 /// Karma reward amount in KCents
 pub const KARMA_REWARD_AMOUNT: &str = "karma_reward_amount";
@@ -82,9 +95,14 @@ impl Actor for GenesisConfigService {
             .unwrap()
             .set_default(SIGNUP_REWARD_PHASE1_ALLOCATION_KEY, 40*(10^6))
             .unwrap()
+
             .set_default(SIGNUP_REWARD_PHASE2_KEY, 10^6)
             .unwrap()
             .set_default(SIGNUP_REWARD_PHASE2_ALLOCATION_KEY, 100*(10^6))
+            .unwrap()
+
+            // Phase 3 rewards post the phase 2 allocated number of users
+            .set_default(SIGNUP_REWARD_PHASE3_KEY, 1000)
             .unwrap()
 
             .set_default(REFERRAL_REWARD_PHASE1_KEY, 10*(10^6))
@@ -96,11 +114,22 @@ impl Actor for GenesisConfigService {
             .set_default(REFERRAL_REWARD_PHASE2_ALLOCATION_KEY, 100*(10^6))
             .unwrap()
 
+            // Last block eligible for block rewards
+            .set_default(BLOCK_REWARDS_LAST_BLOCK, 500*(10^6))
+            .unwrap()
+
+            // The block reward constant amount
+            .set_default(BLOCK_REWARDS_AMOUNT, 10^6)
+            .unwrap()
+
             .set_default(KARMA_REWARD_AMOUNT, 10*(10^6))
             .unwrap()
             .set_default(KARMA_REWARD_TOP_N_USERS_KEY, 1_000)
             .unwrap()
             .set_default(KARAM_REWARDS_ALLOCATION_KEY, 250*(10^6))
+            .unwrap()
+
+            .set_default(TX_FEE_SUBSIDY_MAX_AMOUNT, 1000)
             .unwrap()
 
             .set_default(TX_FEE_SUBSIDY_TOTAL_KEY, 250*(10^6))
