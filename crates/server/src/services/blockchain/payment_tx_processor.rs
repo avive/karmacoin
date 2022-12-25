@@ -46,9 +46,8 @@ pub(crate) struct PaymentProcessingResult {
     pub(crate) fee_type: FeeType
 }
 
-/// Process a new user transaction - update ledger state, emit tx event
-/// This method will not add the tx to a block nor index it
-/// This is a helper method for the block creator
+/// Process a payment transaction - update ledger state, emit tx event
+/// This is a helper method for the block creator and is used as part of block creation flow
 pub(crate) async fn process_transaction(
     transaction: &SignedTransaction,
     payer: &mut User,
@@ -59,7 +58,6 @@ pub(crate) async fn process_transaction(
     transaction.validate(payer.nonce).await?;
 
     let tx_fee = transaction.fee.as_ref().unwrap().value;
-
     let payment_tx: PaymentTransactionV1 = transaction.get_payment_transaction_v1()?;
     payment_tx.verify_syntax()?;
 
@@ -100,7 +98,7 @@ pub(crate) async fn process_transaction(
     // apply new user referral reward to the payer if applicable
     if sign_ups.contains_key(mobile_number.as_bytes()) {
 
-        // remove from signups map to prevent double referal rewards for for the same new user
+        // remove from signups map to prevent double referral rewards for for the same new user
         sign_ups.remove(mobile_number.as_bytes());
 
         // this is a new user referral payment tx - payer should get the referral fee!
@@ -125,9 +123,7 @@ pub(crate) async fn process_transaction(
         ttl: 0,
     }).await?;
 
-    // Update both payer and payee users accounts in the ledger
-
-    // Update payer
+    // Update payer balance on chain
     let mut buf = Vec::with_capacity(payer.encoded_len());
     payer.encode(&mut buf)?;
     DatabaseService::write(WriteItem {
@@ -139,7 +135,7 @@ pub(crate) async fn process_transaction(
         ttl: 0,
     }).await?;
 
-    // Update payee
+    // Update payee on chain
     let mut buf = Vec::with_capacity(payee.encoded_len());
     payee.encode(&mut buf)?;
     DatabaseService::write(WriteItem {

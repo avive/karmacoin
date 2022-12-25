@@ -17,8 +17,7 @@ pub(crate) struct NewUserProcessingResult {
 }
 
 /// Process a new user transaction - update ledger state, emit tx event
-/// This method will not add the tx to a block nor index it
-/// This is a helper method for the block creator
+/// This method will not add the tx to a block and is used as part of block creation flow
 pub(crate) async fn process_transaction(transaction: &SignedTransaction, tokenomics: &Tokenomics) -> Result<NewUserProcessingResult> {
 
     let account_id = transaction.signer.as_ref().ok_or_else(|| anyhow!("missing account id in tx"))?;
