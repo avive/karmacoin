@@ -87,7 +87,8 @@ impl BlockChainService {
             author: Some(block_producer.account_id.as_ref().unwrap().clone()),
             height,
             transactions_hashes: transactions_hashes.to_vec(),
-            fees: Some(block_event.total_fees.as_ref().unwrap().clone()),
+            fees: Some(block_event.fees_amount.as_ref().unwrap().clone()),
+            reward: None,
             signature: None,
             prev_block_digest: vec![],
             digest: vec![],
@@ -108,11 +109,18 @@ impl BlockChainService {
             info!("creating genesis block - no prev one");
         };
 
-        // compute block hash and set it
-        block.digest = block.get_hash()?.to_vec();
+        // set block reward
+
+        block.reward = Some(Amount {
+            value: tokenomics.get_block_reward_amount(height).await?,
+            coin_type: Core as i32,
+        });
 
         // sign the block
         block.sign(&key_pair.to_ed2559_kaypair())?;
+
+        // compute block hash (including the signature) and set it
+        block.digest = block.get_hash()?.to_vec();
 
         // insert the block to the db
         let mut buf = Vec::with_capacity(block.encoded_len());
@@ -146,9 +154,8 @@ impl BlockChainService {
 
         // Update block producer balance with block reward and with fees and persist
 
-        let block_rewards = tokenomics.get_block_reward_amount(height).await?;
         let mut balance = block_producer.get_balance(Core);
-        balance.value += block_rewards + block_event.total_fees.as_ref().unwrap().value;
+        balance.value += block_event.fees_amount.as_ref().unwrap().value;
         block_producer.update_balance(&balance);
         let mut buf = Vec::with_capacity(block_producer.encoded_len());
         block_producer.encode(&mut buf)?;
@@ -171,14 +178,27 @@ impl BlockChainService {
     async fn update_blockchain_stats(mut stats: BlockchainStats, block_event: &BlockEvent, block: &Block) -> Result<()> {
 
         stats.tip_height += 1;
-        stats.users_count += block_event.total_signups;
-        stats.fees_amount += block_event.total_fees.as_ref().unwrap().value;
+        stats.users_count += block_event.signups_count;
+        stats.fees_amount += block_event.fees_amount.as_ref().unwrap().value;
         stats.transactions_count += block.transactions_hashes.len() as u64;
         stats.last_block_time = block.time;
-        stats.payments_transactions_count +=  block_event.total_payments;
+        stats.payments_transactions_count +=  block_event.payments_count;
+        //stats.pa += block_event.payments_count.as_ref().unwrap().value;
+        stats.signup_rewards_amount += block_event.signup_rewards_amount.as_ref().unwrap().value;
+        stats.signup_rewards_count += block_event.signups_count;
+
+        stats.referral_rewards_amount += block_event.referral_rewards_amount.as_ref().unwrap().value;
+        stats.referral_rewards_count += block_event.referral_rewards_count;
+
         // todo: update tokenomics data
 
-        // todo: update subsidies count stats based on the the tx events in the block events (fee type)
+        let mut sub_count = 0;
+
+        for tx_event in block_event.transactions_events.iter() {
+            // todo: update subsidies count stats based on the the tx events in the block events (fee type)
+
+        }
+
 
         write_stats(stats).await
 

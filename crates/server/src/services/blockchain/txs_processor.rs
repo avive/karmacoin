@@ -69,7 +69,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                     info!("new user transaction processed: {:?}", tx_event);
                     tx_event.fee_type = res.fee_type as i32;
                     tx_hashes.push(tx_hash.to_vec());
-                    block_event.total_signups += 1;
+                    block_event.signups_count += 1;
                     block_event.add_fee(tx_event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value);
                     block_event.add_transaction_event(tx_event.clone());
                     // update new signups map - used for referrals and payments
@@ -124,7 +124,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
 
                                 info!("payment transaction processed: {:?}", tx_event);
                                 tx_hashes.push(tx_hash.to_vec());
-                                block_event.total_payments += 1;
+                                block_event.payments_count += 1;
                                 block_event.add_fee(tx_event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value);
                                 block_event.add_transaction_event(tx_event.clone());
                             },

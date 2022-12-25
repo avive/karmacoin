@@ -130,8 +130,10 @@ pub struct Block {
     pub prev_block_digest: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "7")]
     pub signature: ::core::option::Option<Signature>,
+    #[prost(message, optional, tag = "8")]
+    pub reward: ::core::option::Option<Amount>,
     /// block digest includes hash of all above data
-    #[prost(bytes = "vec", tag = "8")]
+    #[prost(bytes = "vec", tag = "9")]
     pub digest: ::prost::alloc::vec::Vec<u8>,
 }
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
@@ -352,15 +354,19 @@ pub struct BlockEvent {
     #[prost(message, repeated, tag = "4")]
     pub transactions_events: ::prost::alloc::vec::Vec<TransactionEvent>,
     #[prost(uint64, tag = "5")]
-    pub total_signups: u64,
+    pub signups_count: u64,
     #[prost(uint64, tag = "6")]
-    pub total_payments: u64,
+    pub payments_count: u64,
     #[prost(message, optional, tag = "7")]
-    pub total_fees: ::core::option::Option<Amount>,
+    pub fees_amount: ::core::option::Option<Amount>,
     #[prost(message, optional, tag = "8")]
-    pub total_signup_rewards: ::core::option::Option<Amount>,
+    pub signup_rewards_amount: ::core::option::Option<Amount>,
     #[prost(message, optional, tag = "9")]
-    pub total_referral_rewards: ::core::option::Option<Amount>,
+    pub referral_rewards_amount: ::core::option::Option<Amount>,
+    #[prost(uint64, tag = "10")]
+    pub referral_rewards_count: u64,
+    #[prost(message, optional, tag = "11")]
+    pub reward: ::core::option::Option<Amount>,
 }
 /// Supported built-in coin types
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]

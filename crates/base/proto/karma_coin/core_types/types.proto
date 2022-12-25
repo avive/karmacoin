@@ -106,7 +106,9 @@ message Block {
     Amount fees = 5; // total fees paid in this block
     bytes prev_block_digest = 6; // digest of block in consensus at the previous height
     core_types.Signature signature = 7;
-    bytes digest = 8; // block digest includes hash of all above data
+    Amount reward = 8;
+    bytes digest = 9; // block digest includes hash of all above data
+
 }
 
 // Supported char traits. Enum values are the traits unique id
@@ -309,11 +311,13 @@ message BlockEvent {
     uint64 height = 2;
     bytes block_hash = 3;
     repeated TransactionEvent transactions_events = 4;
-    uint64 total_signups = 5;
-    uint64 total_payments = 6;
-    Amount total_fees = 7;
-    Amount total_signup_rewards = 8;
-    Amount total_referral_rewards = 9;
+    uint64 signups_count = 5;
+    uint64 payments_count = 6;
+    Amount fees_amount = 7;
+    Amount signup_rewards_amount = 8;
+    Amount referral_rewards_amount = 9;
+    uint64 referral_rewards_count = 10;
+    Amount reward = 11;
 }
 
 
