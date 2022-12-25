@@ -39,13 +39,12 @@ impl Handler<ProcessTransactions> for BlockChainService {
         let transactions_map = mem_pool.call(GetTransactions).await??;
 
         if transactions_map.is_empty() {
-            info!("no txs in mempool to process");
+            info!("mem pool empty");
             return Ok(None);
         }
 
-        // get current blockchain stats
+        // get current blockchain stats and tokenomics
         let stats = get_stats().await?;
-
         let tokenomics = Tokenomics { stats: stats.clone() };
 
         let height = stats.tip_height + 1;
@@ -132,7 +131,6 @@ impl Handler<ProcessTransactions> for BlockChainService {
                                 event.result = ExecutionResult::Invalid as i32;
                                 event.error_message = e.to_string();
 
-                                // todo: block producer should get fee when possible from an invalid tx
                             }
                         }
                         BlockChainService::emit_tx_event(event).await?;
@@ -160,6 +158,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
         // create the block
         let block = BlockChainService::create_block(&tx_hashes,
                                                     stats,
+                                                    &tokenomics,
                                                     block_event,
                                                     height + 1,
                                                     self.id_key_pair.as_ref().unwrap()).await?;

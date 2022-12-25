@@ -27,12 +27,15 @@ pub const GRPC_ADMIN_PORT_CONFIG_KEY: &str = "grpc_admin_port";
 pub const START_VERIFIER_SERVICE_CONFIG_KEY: &str = "start_verifier_service";
 pub const START_API_SERVICE_CONFIG_KEY: &str = "start_api_service";
 
+pub const MEM_POOL_MAX_ITEMS_KEY: &str = "mem_pool_max_items_key";
+
 // todo: add verifier name
 pub const VERIFIER_NAME: &str = "KarmaCoinVerifier_v1";
 
 // private identity key (ed25519)
 pub const BLOCK_PRODUCER_ID_PRIVATE_KEY: &str = "block_producer_id_key_private";
 pub const BLOCK_PRODUCER_ID_PUBLIC_KEY: &str = "block_producer_id_key_public";
+pub const BLOCK_PRODUCER_USER_NAME: &str = "block_producer_user_name";
 
 // private identity key (ed25519)
 pub const VERIFIER_ID_PRIVATE_KEY: &str = "id_verifier_key_private";
@@ -69,6 +72,13 @@ impl Actor for ServerConfigService {
             .unwrap()
             .set_default(DB_NAME_CONFIG_KEY, "karmacoin_db")
             .unwrap()
+
+            .set_default(MEM_POOL_MAX_ITEMS_KEY, 5000)
+            .unwrap()
+
+            .set_default(BLOCK_PRODUCER_USER_NAME, "a block producer")
+            .unwrap()
+
             .add_source(
                 Environment::with_prefix("KARMACOIN")
                     .try_parsing(true)

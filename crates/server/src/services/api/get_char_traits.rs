@@ -23,7 +23,7 @@ impl Handler<GetCharTraits> for ApiService {
         _msg: GetCharTraits,
     ) -> Result<GetCharTraitsResponse> {
 
-        // lookup accountId by nickname
+        // read traits from db
         match DatabaseService::read(ReadItem {
             key: Bytes::from(DB_SUPPORTED_TRAITS_KEY.as_bytes()),
             cf: BLOCKCHAIN_DATA_COL_FAMILY,

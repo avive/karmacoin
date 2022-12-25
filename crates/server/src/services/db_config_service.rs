@@ -35,6 +35,8 @@ pub const RESERVED_NICKS_COL_FAMILY: &str = "reserved_nicks_cf";
 //// Blockchain-based data - indexing on-chain data and its blocks
 /////////////////
 
+// todo: add index of all block producers who got reward
+
 /// col family for blockchain data. Various settings are accessible via keys.
 pub const BLOCKCHAIN_DATA_COL_FAMILY: &str = "blockchain_data_cf";
 

@@ -135,6 +135,14 @@ impl ApiServiceTrait for ApiService {
 
     }
 
+    /// Returns genesis readonly data
+    async fn get_genesis_data(
+        &self,
+        _request: Request<GetGenesisDataRequest>,
+    ) -> Result<Response<GetGenesisDataResponse>, Status> {
+        todo!()
+    }
+
     /// Submit a transaction for processing to the mem pool
     async fn submit_transaction(&self,request: Request<SubmitTransactionRequest>) -> Result<Response<SubmitTransactionResponse>, Status> {
 
@@ -149,7 +157,7 @@ impl ApiServiceTrait for ApiService {
             .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?
             .map_err(|e| Status::internal(format!("failed to process transaction: {:?}", e)))?;
 
-        // start transaction processing to process all transactions in the mem pool
+        // s tart transaction processing to process all transactions in the mem pool
         // in production this can be done on a timer every few seconds
         // here we just trigger block production when a new transaction is submitted
         let service = BlockChainService::from_registry().await
@@ -187,14 +195,6 @@ impl ApiServiceTrait for ApiService {
         &self,
         _request: Request<GetBlockchainEventsRequest>,
     ) -> Result<Response<GetBlockchainEventsResponse>, Status> {
-        todo!()
-    }
-
-    /// Returns genesis readonly data
-    async fn get_genesis_data(
-        &self,
-        _request: Request<GetGenesisDataRequest>,
-    ) -> Result<Response<GetGenesisDataResponse>, Status> {
         todo!()
     }
 }

@@ -7,12 +7,10 @@ use anyhow::{anyhow, Result};
 use bytes::Bytes;
 use prost::Message;
 use base::karma_coin::karma_coin_core_types::{MemPool, SignedTransaction};
+use base::server_config_service::{MEM_POOL_MAX_ITEMS_KEY, ServerConfigService};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use xactor::*;
 use crate::services::db_config_service::{TRANSACTIONS_COL_FAMILY, TXS_POOL_COL_FAMILY, TXS_POOL_KEY};
-
-/// Max pool size
-const MAX_SIZE: usize = 5_000;
 
 /// A simple transactions pool service
 /// This service is used to store transactions that are not yet included in a block
@@ -103,7 +101,9 @@ impl Handler<AddTransaction> for MemPoolService {
         msg: AddTransaction,
     ) -> Result<()> {
 
-        if self.transactions.len() > MAX_SIZE {
+        let max_size = ServerConfigService::get_u64(MEM_POOL_MAX_ITEMS_KEY.into()).await?.unwrap();
+
+        if self.transactions.len() > max_size as usize {
             return Err(anyhow::anyhow!("Mempool is full - transaction discarded"));
         }
 
@@ -122,6 +122,7 @@ impl Handler<AddTransaction> for MemPoolService {
         tx.verify_syntax().await?;
         tx.verify_timestamp()?;
         tx.verify_signature()?;
+        tx.verify_tx_fee()?;
 
         self.transactions.insert(tx_hash, tx);
         self.persist().await

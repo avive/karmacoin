@@ -90,6 +90,9 @@ pub(crate) async fn process_transaction(transaction: &SignedTransaction, tokenom
     user.trait_scores = vec![];
 
     // add the new user to db
+
+    // todo: update existing user if it exists - this will happen for a block producer or a verifier
+
     let mut buf = Vec::with_capacity(user.encoded_len());
     user.encode(&mut buf)?;
     DatabaseService::write(WriteItem {
@@ -129,8 +132,8 @@ pub(crate) async fn process_transaction(transaction: &SignedTransaction, tokenom
     }).await?;
 
     // todo: add tx_fee to the local block producer balance (this node)
+    // create block producer account if it doesn't exist
 
-    // note that referral awards are handled in the payment tx processing logic and not here
 
     Ok(NewUserProcessingResult{
         mobile_number: user_mobile_number.number.clone(),

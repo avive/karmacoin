@@ -39,4 +39,6 @@ impl User {
             fee_frozen: None,
         })
     }
+
+    // todo: get 12 words phrase for user private key
 }
