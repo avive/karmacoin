@@ -6,7 +6,7 @@ use anyhow::{anyhow, Result};
 use bytes::Bytes;
 
 use base::karma_coin::karma_coin_core_types::{Amount, Balance, CoinType, FeeType, SignedTransaction};
-use db::db_service::{DatabaseService, DataItem, WriteItem};
+use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY};
 use prost::Message;
 use crate::services::blockchain::tokenomics::Tokenomics;
@@ -73,6 +73,14 @@ pub(crate) async fn process_transaction(transaction: &SignedTransaction, tokenom
     } else {
         FeeType::User
     };
+
+    // Check user account id is not already on chain
+    if let Some(_) = DatabaseService::read(ReadItem {
+        key: Bytes::from(user.account_id.as_ref().unwrap().data.clone()),
+        cf: USERS_COL_FAMILY
+    }).await? {
+        return Err(anyhow!("User with provided account id already exists on chain. You can use an update tx to update it"));
+    }
 
     user.nonce = 1;
 
