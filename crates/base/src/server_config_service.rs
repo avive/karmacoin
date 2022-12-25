@@ -28,6 +28,7 @@ pub const START_VERIFIER_SERVICE_CONFIG_KEY: &str = "start_verifier_service";
 pub const START_API_SERVICE_CONFIG_KEY: &str = "start_api_service";
 
 pub const MEM_POOL_MAX_ITEMS_KEY: &str = "mem_pool_max_items_key";
+pub const MEM_POOL_MAX_TX_AGE_HOURS: &str = "mem_pool_max_tx_age_key";
 
 // todo: add verifier name
 pub const VERIFIER_NAME: &str = "KarmaCoinVerifier_v1";
@@ -74,6 +75,9 @@ impl Actor for ServerConfigService {
             .unwrap()
 
             .set_default(MEM_POOL_MAX_ITEMS_KEY, 5000)
+            .unwrap()
+
+            .set_default(MEM_POOL_MAX_TX_AGE_HOURS, 168)
             .unwrap()
 
             .set_default(BLOCK_PRODUCER_USER_NAME, "a block producer")

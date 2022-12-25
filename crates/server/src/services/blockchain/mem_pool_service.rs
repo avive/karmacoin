@@ -7,7 +7,7 @@ use anyhow::{anyhow, Result};
 use bytes::Bytes;
 use prost::Message;
 use base::karma_coin::karma_coin_core_types::{MemPool, SignedTransaction};
-use base::server_config_service::{MEM_POOL_MAX_ITEMS_KEY, ServerConfigService};
+use base::server_config_service::{MEM_POOL_MAX_ITEMS_KEY, MEM_POOL_MAX_TX_AGE_HOURS, ServerConfigService};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use xactor::*;
 use crate::services::db_config_service::{TRANSACTIONS_COL_FAMILY, TXS_POOL_COL_FAMILY, TXS_POOL_KEY};
@@ -42,6 +42,30 @@ impl Actor for MemPoolService {
 }
 
 impl Service for MemPoolService {}
+
+#[message(result = "Result<()>")]
+pub(crate) struct RemoveOldTransactions;
+
+/// Remove old transactions from the pool
+#[async_trait::async_trait]
+impl Handler<RemoveOldTransactions> for MemPoolService {
+    async fn handle(
+        &mut self,
+        _ctx: &mut Context<Self>,
+        _msg: RemoveOldTransactions,
+    ) -> Result<()> {
+
+        let max_age = ServerConfigService::get_u64(MEM_POOL_MAX_TX_AGE_HOURS.into()).await?.unwrap();
+        let duration = chrono::Duration::hours(max_age as i64).num_milliseconds() as u64;
+        let txs = self.transactions.clone();
+        for (tx_hash, tx) in txs.iter() {
+            if tx.timestamp < (chrono::Utc::now().timestamp() as u64 - duration) {
+                self.transactions.remove(tx_hash);
+            }
+        }
+        self.persist().await
+    }
+}
 
 #[message(result = "Result<HashMap<Vec<u8>,SignedTransaction>>")]
 pub(crate) struct GetTransactions;
@@ -217,7 +241,3 @@ impl MemPoolService {
             }).await
     }
 }
-
-
-
-

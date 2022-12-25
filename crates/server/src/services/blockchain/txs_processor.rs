@@ -10,7 +10,7 @@ use base::karma_coin::karma_coin_core_types::*;
 use base::karma_coin::karma_coin_core_types::TransactionType::NewUserV1;
 use db::db_service::{DatabaseService, ReadItem};
 use crate::services::blockchain::blockchain_service::BlockChainService;
-use crate::services::blockchain::mem_pool_service::{GetTransactions, MemPoolService, RemoveOnChainTransactions, RemoveTransactionByHash, RemoveTransactionsByHashes};
+use crate::services::blockchain::mem_pool_service::{GetTransactions, MemPoolService, RemoveOldTransactions, RemoveOnChainTransactions, RemoveTransactionByHash, RemoveTransactionsByHashes};
 use crate::services::blockchain::{new_user_tx_processor, payment_tx_processor};
 use crate::services::blockchain::stats::{get_stats};
 use crate::services::db_config_service::USERS_COL_FAMILY;
@@ -46,56 +46,57 @@ impl Handler<ProcessTransactions> for BlockChainService {
         // get current blockchain stats and tokenomics
         let stats = get_stats().await?;
         let tokenomics = Tokenomics { stats: stats.clone() };
-
         let height = stats.tip_height + 1;
         let mut tx_hashes: Vec<Vec<u8>> = vec![];
+
+        // the block event for the new block
         let mut block_event = BlockEvent::new(height+1);
 
-        // new signups txs indexed by mobile number
+        // new signups txs indexed by mobile number - used for referral reward calcs
         let mut sign_ups: HashMap<Vec<u8>, SignedTransaction> = HashMap::new();
 
         for (tx_hash, tx) in transactions_map.iter() {
             if tx.get_tx_type()? != NewUserV1 {
-                // here we only process new user transactions
+                // in this loop we only process new user transactions
                 continue;
             }
 
-            let mut event = TransactionEvent::new(height, tx, tx_hash);
+            // the transaction event for the new user transaction
+            let mut tx_event = TransactionEvent::new(height, tx, tx_hash);
 
             match new_user_tx_processor::process_transaction(tx, &tokenomics).await {
                 Ok(res) => {
-                    info!("new user transaction processed: {:?}", event);
-                    event.fee_type = res.fee_type as i32;
+                    info!("new user transaction processed: {:?}", tx_event);
+                    tx_event.fee_type = res.fee_type as i32;
                     tx_hashes.push(tx_hash.to_vec());
                     block_event.total_signups += 1;
-                    block_event.add_fee(event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value);
-                    block_event.add_transaction_event(event.clone());
-
+                    block_event.add_fee(tx_event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value);
+                    block_event.add_transaction_event(tx_event.clone());
                     // update new signups map - used for referrals and payments
                     sign_ups.insert(res.mobile_number.as_bytes().to_vec(), tx.clone());
 
                 },
                 Err(e) => {
                     error!("Failed to process new user transaction: {:?}", e);
-                    event.result = ExecutionResult::Invalid as i32;
-                    event.error_message = e.to_string();
+                    tx_event.result = ExecutionResult::Invalid as i32;
+                    tx_event.error_message = e.to_string();
                 }
             }
 
             // remove the processed tx from the pool
             mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
 
-            // emit the tx processing event
-            BlockChainService::emit_tx_event(event).await?;
+            // emit the tx event
+            BlockChainService::emit_tx_event(tx_event).await?;
         }
 
         // process other transactions types
         for (tx_hash, tx) in mem_pool.call(GetTransactions).await??.iter() {
             let tx_type = tx.get_tx_type()?;
 
-            let mut event = TransactionEvent::new(height, tx, tx_hash);
+            let mut tx_event = TransactionEvent::new(height, tx, tx_hash);
 
-            // Get User from chain and reject tx if user doesn't exist
+            // Get tx issuer user from chain and reject tx if it doesn't exist
             let mut user = match DatabaseService::read(ReadItem {
                 key: Bytes::from(tx.signer.as_ref().unwrap().data.clone()),
                 cf: USERS_COL_FAMILY
@@ -106,9 +107,9 @@ impl Handler<ProcessTransactions> for BlockChainService {
                 None => {
                     info!("Tx signer user not found on chain - removing tx from mempool");
                     mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
-                    event.result = ExecutionResult::Invalid as i32;
-                    event.error_message = "Tx signer user not found on chain - discarding tx".to_string();
-                    BlockChainService::emit_tx_event(event.clone()).await?;
+                    tx_event.result = ExecutionResult::Invalid as i32;
+                    tx_event.error_message = "Tx signer user not found on chain - discarding tx".to_string();
+                    BlockChainService::emit_tx_event(tx_event.clone()).await?;
                     continue;
                 }
             };
@@ -118,26 +119,26 @@ impl Handler<ProcessTransactions> for BlockChainService {
                     if let Some(mut payee) = payment_tx_processor::get_payee_user(tx).await? {
                         match payment_tx_processor::process_transaction(tx, &mut user, &mut payee, &mut     sign_ups, &tokenomics).await {
                             Ok(res) => {
-                                event.result = ExecutionResult::Executed as i32;
-                                event.fee_type = res.fee_type as i32;
-                                info!("payment transaction processed: {:?}", event);
+                                tx_event.result = ExecutionResult::Executed as i32;
+                                tx_event.fee_type = res.fee_type as i32;
+
+                                info!("payment transaction processed: {:?}", tx_event);
                                 tx_hashes.push(tx_hash.to_vec());
                                 block_event.total_payments += 1;
-                                block_event.add_fee(event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value);
-                                block_event.add_transaction_event(event.clone());
+                                block_event.add_fee(tx_event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value);
+                                block_event.add_transaction_event(tx_event.clone());
                             },
                             Err(e) => {
                                 info!("payment transaction failed: {:?}", e);
-                                event.result = ExecutionResult::Invalid as i32;
-                                event.error_message = e.to_string();
-
+                                tx_event.result = ExecutionResult::Invalid as i32;
+                                tx_event.error_message = e.to_string();
                             }
                         }
-                        BlockChainService::emit_tx_event(event).await?;
 
+                        BlockChainService::emit_tx_event(tx_event).await?;
                     }
                     else {
-                        info!("Payee user not found on chain - keeping this tx in the mem pool for later processing");
+                        info!("Payee user not found on chain - keeping this tx in the mem pool for later processing...");
                         continue;
                     }
                 },
@@ -163,7 +164,11 @@ impl Handler<ProcessTransactions> for BlockChainService {
                                                     height + 1,
                                                     self.id_key_pair.as_ref().unwrap()).await?;
 
+        // remove processed txs from the mem pool
         mem_pool.call(RemoveTransactionsByHashes(tx_hashes)).await??;
+
+        // remove old txs from the mem pool
+        mem_pool.call(RemoveOldTransactions).await??;
         Ok(Some(block))
     }
 }

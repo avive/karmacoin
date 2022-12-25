@@ -173,13 +173,12 @@ impl BlockChainService {
         stats.tip_height += 1;
         stats.users_count += block_event.total_signups;
         stats.fees_amount += block_event.total_fees.as_ref().unwrap().value;
-        // stats.signup_rewards.as_mut().unwrap().value += block_event.total_signup_rewards.as_ref().unwrap().value;
-        // stats.referral_rewards.as_mut().unwrap().value += block_event.total_referral_rewards.as_ref().unwrap().value;
         stats.transactions_count += block.transactions_hashes.len() as u64;
         stats.last_block_time = block.time;
         stats.payments_transactions_count +=  block_event.total_payments;
-
         // todo: update tokenomics data
+
+        // todo: update subsidies count stats based on the the tx events in the block events (fee type)
 
         write_stats(stats).await
 

@@ -151,8 +151,6 @@ pub(crate) async fn process_transaction(
         ttl: 0,
     }).await?;
 
-    // todo: add tx_fee to block producer account
-
     Ok(PaymentProcessingResult {
         fee_type
     })

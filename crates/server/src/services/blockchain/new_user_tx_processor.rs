@@ -75,15 +75,14 @@ pub(crate) async fn process_transaction(transaction: &SignedTransaction, tokenom
     };
 
     // Check user account id is not already on chain
-    if let Some(_) = DatabaseService::read(ReadItem {
+    if (DatabaseService::read(ReadItem {
         key: Bytes::from(user.account_id.as_ref().unwrap().data.clone()),
         cf: USERS_COL_FAMILY
-    }).await? {
+    }).await?).is_some() {
         return Err(anyhow!("User with provided account id already exists on chain. You can use an update tx to update it"));
     }
 
     user.nonce = 1;
-
     user.balances = vec![Balance {
         free: Some(Amount {
             value: signup_reward_amount - user_tx_fee,
@@ -138,10 +137,6 @@ pub(crate) async fn process_transaction(transaction: &SignedTransaction, tokenom
         cf: TRANSACTIONS_COL_FAMILY,
         ttl: 0,
     }).await?;
-
-    // todo: add tx_fee to the local block producer balance (this node)
-    // create block producer account if it doesn't exist
-
 
     Ok(NewUserProcessingResult{
         mobile_number: user_mobile_number.number.clone(),
