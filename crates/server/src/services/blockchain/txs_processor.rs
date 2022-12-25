@@ -117,7 +117,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
             match tx_type {
                 TransactionType::PaymentV1 => {
                     if let Some(mut payee) = payment_tx_processor::get_payee_user(tx).await? {
-                        match payment_tx_processor::process_transaction(tx, &mut user, &mut payee, &sign_ups, &tokenomics).await {
+                        match payment_tx_processor::process_transaction(tx, &mut user, &mut payee, &mut     sign_ups, &tokenomics).await {
                             Ok(res) => {
                                 event.result = ExecutionResult::Executed as i32;
                                 event.fee_type = res.fee_type as i32;

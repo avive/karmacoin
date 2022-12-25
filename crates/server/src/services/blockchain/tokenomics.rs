@@ -55,7 +55,7 @@ impl Tokenomics {
     }
 
     /// Gets the current block reward for block producer based on block height
-    pub(crate) async fn get_block_reward_amount(&self, block_height: u64) -> Result<u64> {
+    pub(crate) async fn _get_block_reward_amount(&self, block_height: u64) -> Result<u64> {
         if block_height > GenesisConfigService::get_u64(BLOCK_REWARDS_LAST_BLOCK.into()).await?.unwrap() {
             // no more block rewards
             return Ok(0);

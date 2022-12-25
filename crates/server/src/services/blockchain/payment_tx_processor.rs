@@ -53,7 +53,7 @@ pub(crate) async fn process_transaction(
     transaction: &SignedTransaction,
     payer: &mut User,
     payee: &mut User,
-    sign_ups: &HashMap<Vec<u8>, SignedTransaction>,
+    sign_ups: &mut HashMap<Vec<u8>, SignedTransaction>,
     tokenomics: &Tokenomics) -> Result<PaymentProcessingResult> {
 
     transaction.validate(payer.nonce).await?;
@@ -70,6 +70,8 @@ pub(crate) async fn process_transaction(
     let coin_type = CoinType::from_i32(payment.coin_type).ok_or_else(|| anyhow!("invalid coin type"))?;
 
     let apply_subsidy = tokenomics.should_subsidise_transaction_fee(0, tx_fee).await?;
+
+    // actual fee amount to be paid by the user. 0 if fee is subsidised by the protocol
     let user_tx_fee = if apply_subsidy {
         0
     } else {
@@ -94,13 +96,21 @@ pub(crate) async fn process_transaction(
     // update payer balance to reflect payment
     let mut payer_balance = payer.get_balance(coin_type);
     payer_balance.value -= payment.value + user_tx_fee;
-    payer.update_balance(&payer_balance);
 
+    // apply new user referral reward to the payer if applicable
     if sign_ups.contains_key(mobile_number.as_bytes()) {
-        // this is a new user referral payment
+
+        // remove from signups map to prevent double referal rewards for for the same new user
+        sign_ups.remove(mobile_number.as_bytes());
+
+        // this is a new user referral payment tx - payer should get the referral fee!
         let _sign_up_tx = sign_ups.get(mobile_number.as_bytes()).unwrap();
         // todo: award signer with the referral reward if applicable
+        let referral_reward = tokenomics.get_referral_reward_amount().await?;
+        payer_balance.value += referral_reward;
     };
+
+    payer.update_balance(&payer_balance);
 
     // index the transaction in the db by hash
     let mut tx_data = Vec::with_capacity(transaction.encoded_len());

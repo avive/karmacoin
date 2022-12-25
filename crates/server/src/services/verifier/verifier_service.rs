@@ -5,10 +5,9 @@
 use anyhow::Result;
 use base::karma_coin::karma_coin_verifier::phone_numbers_verifier_service_server::PhoneNumbersVerifierService;
 use tonic::{Request, Response, Status};
-use base::hex_utils::hex_from_string;
 use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, RegisterNumberResponse, VerifyNumberRequest};
-use base::karma_coin::karma_coin_core_types::{VerifyNumberResponse, KeyPair, PrivateKey, PublicKey};
-use base::server_config_service::{ServerConfigService, VERIFIER_ID_PRIVATE_KEY, VERIFIER_ID_PUBLIC_KEY};
+use base::karma_coin::karma_coin_core_types::{VerifyNumberResponse, KeyPair};
+use base::server_config_service::{GetVerifierKeyPair, ServerConfigService};
 use xactor::*;
 use crate::services::verifier::register_number::RegisterNumber;
 use crate::services::verifier::verify_number::Verify;
@@ -33,45 +32,8 @@ impl Actor for VerifierService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
         info!("VerifierService started");
 
-        // todo: pull keys from config if they exist, otherwise generate new key pair for signing
-
-        match ServerConfigService::get(VERIFIER_ID_PRIVATE_KEY.into())
-            .await? {
-            Some(key) => {
-                // key is a hex string in config
-                let private_key_data = hex_from_string(key).unwrap();
-
-                match ServerConfigService::get(VERIFIER_ID_PUBLIC_KEY.into())
-                    .await? {
-                    Some(pub_key) => {
-                        let pub_key_data = hex_from_string(pub_key).unwrap();
-                        self.id_key_pair = Some(KeyPair {
-                            private_key: Some(PrivateKey {
-                                key: private_key_data,
-                            }),
-                            public_key: Some(PublicKey {
-                                key: pub_key_data,
-                            }),
-                            scheme: 0
-                        });
-                        info!("loaded verifier id key pair from config")
-                    },
-                    None => {
-                        panic!("invalid config: missing verifier id public key");
-                    }
-                }
-            },
-            None => {
-                // no private key in config - generate new key pair
-                self.id_key_pair = Some(KeyPair::new());
-                info!("generated a new random verifier id key pair");
-            }
-        }
-
-        // todo: add verifier the local db list of legit verifiers, so it returned via the api
-        let _key_pair = self.id_key_pair.as_ref().unwrap();
-        
-
+        // load id keypair from config
+        self.id_key_pair  = Some(ServerConfigService::from_registry().await?.call(GetVerifierKeyPair).await??);
         Ok(())
     }
 }

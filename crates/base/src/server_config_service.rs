@@ -6,6 +6,8 @@ use anyhow::{anyhow, Result};
 use config::{Config, Environment};
 use log::*;
 use xactor::*;
+use crate::hex_utils::hex_from_string;
+use crate::karma_coin::karma_coin_core_types::{KeyPair, PrivateKey, PublicKey};
 
 pub const DEFAULT_GRPC_SERVER_PORT: i64 = 9080;
 pub const DEFAULT_GRPC_ADMIN_PORT: i64 = 9888;
@@ -27,6 +29,10 @@ pub const START_API_SERVICE_CONFIG_KEY: &str = "start_api_service";
 
 // todo: add verifier name
 pub const VERIFIER_NAME: &str = "KarmaCoinVerifier_v1";
+
+// private identity key (ed25519)
+pub const BLOCK_PRODUCER_ID_PRIVATE_KEY: &str = "block_producer_id_key_private";
+pub const BLOCK_PRODUCER_ID_PUBLIC_KEY: &str = "block_producer_id_key_public";
 
 // private identity key (ed25519)
 pub const VERIFIER_ID_PRIVATE_KEY: &str = "id_verifier_key_private";
@@ -134,6 +140,95 @@ impl ServerConfigService {
         config.call(SetU64 { key, value }).await?
     }
 }
+
+
+#[message(result = "Result<KeyPair>")]
+pub struct GetBlockProducerIdKeyPair;
+
+#[async_trait::async_trait]
+impl Handler<GetBlockProducerIdKeyPair> for ServerConfigService {
+    async fn handle(&mut self, _ctx: &mut Context<Self>, _msg: GetBlockProducerIdKeyPair) -> Result<KeyPair> {
+        match ServerConfigService::get(BLOCK_PRODUCER_ID_PRIVATE_KEY.into())
+            .await? {
+            Some(key) => {
+                // key is a hex string in config
+                let private_key_data = hex_from_string(key).unwrap();
+
+                match ServerConfigService::get(BLOCK_PRODUCER_ID_PUBLIC_KEY.into())
+                    .await? {
+                    Some(pub_key) => {
+                        let pub_key_data = hex_from_string(pub_key).unwrap();
+                        info!("loaded blockchain producer id key pair from config");
+                        Ok(KeyPair {
+                            private_key: Some(PrivateKey {
+                                key: private_key_data,
+                            }),
+                            public_key: Some(PublicKey {
+                                key: pub_key_data,
+                            }),
+                            scheme: 0
+                        })
+                    },
+                    None => {
+                        panic!("invalid config file: missing block producer id public key");
+                    }
+                }
+            },
+            None => {
+                // no private key in config - generate new one
+                info!("generated a new random block producer id key pair");
+                Ok(KeyPair::new())
+
+                // todo: store keypair in config so it is obtained on next call (after blockchain service restart for example)
+            }
+        }
+    }
+}
+
+
+#[message(result = "Result<KeyPair>")]
+pub struct GetVerifierKeyPair;
+
+#[async_trait::async_trait]
+impl Handler<GetVerifierKeyPair> for ServerConfigService {
+    async fn handle(&mut self, _ctx: &mut Context<Self>, _msg: GetVerifierKeyPair) -> Result<KeyPair> {
+        match ServerConfigService::get(VERIFIER_ID_PRIVATE_KEY.into())
+            .await? {
+            Some(key) => {
+                // key is a hex string in config
+                let private_key_data = hex_from_string(key).unwrap();
+
+                match ServerConfigService::get(VERIFIER_ID_PUBLIC_KEY.into())
+                    .await? {
+                    Some(pub_key) => {
+                        let pub_key_data = hex_from_string(pub_key).unwrap();
+                        info!("loaded blockchain verifier id key pair from config");
+                        Ok(KeyPair {
+                            private_key: Some(PrivateKey {
+                                key: private_key_data,
+                            }),
+                            public_key: Some(PublicKey {
+                                key: pub_key_data,
+                            }),
+                            scheme: 0
+                        })
+                    },
+                    None => {
+                        panic!("invalid config file: missing verifier id public key");
+                    }
+                }
+            },
+            None => {
+                // no private key in config - generate new one
+                info!("generated a new random block producer id key pair");
+                Ok(KeyPair::new())
+
+                // todo: store keypair in config so it is obtained on next call
+            }
+        }
+    }
+}
+
 
 #[message(result = "Result<()>")]
 pub struct SetConfigFile {
