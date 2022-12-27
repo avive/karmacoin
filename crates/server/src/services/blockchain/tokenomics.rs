@@ -85,7 +85,7 @@ impl Tokenomics {
         }
 
         if self.stats.fee_subs_count
-            > GenesisConfigService::get_u64(TX_FEE_SUBSIDY_TOTAL_KEY.into())
+            > GenesisConfigService::get_u64(TX_FEE_SUBSIDY_ALLOCATION_KEY.into())
                 .await?
                 .unwrap()
         {

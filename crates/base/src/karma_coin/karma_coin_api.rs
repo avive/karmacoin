@@ -56,18 +56,46 @@ pub struct GetCharTraitsResponse {
 pub struct GetGenesisDataRequest {}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetGenesisDataResponse {
-    /// from genesis
     #[prost(uint32, tag = "1")]
-    pub network_id: u32,
-    /// the provided API semantic version
+    pub net_id: u32,
     #[prost(string, tag = "2")]
-    pub api_version: ::prost::alloc::string::String,
-    /// from genesis
+    pub net_name: ::prost::alloc::string::String,
     #[prost(uint64, tag = "3")]
     pub genesis_time: u64,
-    /// from genesis
-    #[prost(string, tag = "4")]
-    pub network_name: ::prost::alloc::string::String,
+    #[prost(uint64, tag = "4")]
+    pub signup_reward_phase1_alloc: u64,
+    #[prost(uint64, tag = "5")]
+    pub signup_reward_phase2_alloc: u64,
+    #[prost(uint64, tag = "6")]
+    pub signup_reward_phase1_amount: u64,
+    #[prost(uint64, tag = "7")]
+    pub signup_reward_phase2_amount: u64,
+    #[prost(uint64, tag = "8")]
+    pub signup_reward_phase3_start: u64,
+    #[prost(uint64, tag = "9")]
+    pub referral_reward_phase1_alloc: u64,
+    #[prost(uint64, tag = "10")]
+    pub referral_reward_phase2_alloc: u64,
+    #[prost(uint64, tag = "11")]
+    pub referral_reward_phase1_amount: u64,
+    #[prost(uint64, tag = "12")]
+    pub referral_reward_phase2_amount: u64,
+    #[prost(uint64, tag = "13")]
+    pub tx_fee_subsidy_max_per_user: u64,
+    #[prost(uint64, tag = "14")]
+    pub tx_fee_subsidies_alloc: u64,
+    #[prost(uint64, tag = "15")]
+    pub tx_fee_subsidy_max_amount: u64,
+    #[prost(uint64, tag = "16")]
+    pub block_reward_amount: u64,
+    #[prost(uint64, tag = "17")]
+    pub block_reward_last_block: u64,
+    #[prost(uint64, tag = "18")]
+    pub karma_reward_amount: u64,
+    #[prost(uint64, tag = "19")]
+    pub karma_reward_alloc: u64,
+    #[prost(uint64, tag = "20")]
+    pub treasury_premint_amount: u64,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetBlockchainDataRequest {}

@@ -175,7 +175,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                     BlockChainService::emit_tx_event(tx_event).await?;
                 }
                 _ => {
-                    // ignore other transaction types
+                    // ignore any other transaction types
                 }
             }
         }

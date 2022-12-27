@@ -38,7 +38,7 @@ pub const REFERRAL_REWARD_PHASE2_KEY: &str = "referral_reward_p2";
 pub const REFERRAL_REWARD_PHASE2_ALLOCATION_KEY: &str = "referral_reward_alloc_p2";
 
 /// Total max number of tx fee subsidies
-pub const TX_FEE_SUBSIDY_TOTAL_KEY: &str = "tx_fee_subsidy_total";
+pub const TX_FEE_SUBSIDY_ALLOCATION_KEY: &str = "tx_fee_subsidy_total";
 
 /// Max subsided transactions per user
 pub const TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY: &str = "tx_fee_subsidy_max_txs_per_user";
@@ -121,7 +121,7 @@ impl Actor for GenesisConfigService {
             .unwrap()
             .set_default(TX_FEE_SUBSIDY_MAX_AMOUNT, 1000)
             .unwrap()
-            .set_default(TX_FEE_SUBSIDY_TOTAL_KEY, 250 * (10 ^ 6))
+            .set_default(TX_FEE_SUBSIDY_ALLOCATION_KEY, 250 * (10 ^ 6))
             .unwrap()
             .set_default(TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY, 10)
             .unwrap()
