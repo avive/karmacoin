@@ -2,15 +2,15 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use anyhow::Result;
-use bytes::Bytes;
-use prost::Message;
-use base::karma_coin::karma_coin_api::{GetBlockchainDataRequest, GetBlockchainDataResponse};
-use base::karma_coin::karma_coin_core_types::BlockchainStats;
-use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
-use xactor::*;
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::db_config_service::{BLOCKCHAIN_DATA_COL_FAMILY, CHAIN_AGG_DATA_KEY};
+use anyhow::Result;
+use base::karma_coin::karma_coin_api::{GetBlockchainDataRequest, GetBlockchainDataResponse};
+use base::karma_coin::karma_coin_core_types::BlockchainStats;
+use bytes::Bytes;
+use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
+use prost::Message;
+use xactor::*;
 
 #[message(result = "Result<GetBlockchainDataResponse>")]
 pub(crate) struct GetStats(pub(crate) GetBlockchainDataRequest);
@@ -24,9 +24,7 @@ impl Handler<GetStats> for BlockChainService {
         _msg: GetStats,
     ) -> Result<GetBlockchainDataResponse> {
         let stats = get_stats().await?;
-        Ok(GetBlockchainDataResponse {
-            stats: Some(stats),
-        })
+        Ok(GetBlockchainDataResponse { stats: Some(stats) })
     }
 }
 
@@ -34,8 +32,10 @@ impl Handler<GetStats> for BlockChainService {
 pub(crate) async fn get_stats() -> Result<BlockchainStats> {
     if let Some(data) = DatabaseService::read(ReadItem {
         key: Bytes::from(CHAIN_AGG_DATA_KEY.as_bytes()),
-        cf: BLOCKCHAIN_DATA_COL_FAMILY
-    }).await? {
+        cf: BLOCKCHAIN_DATA_COL_FAMILY,
+    })
+    .await?
+    {
         let stats = BlockchainStats::decode(data.0.as_ref())?;
         Ok(stats)
     } else {
@@ -44,17 +44,16 @@ pub(crate) async fn get_stats() -> Result<BlockchainStats> {
 }
 
 /// Helper function to write stats to the db
-pub(crate) async fn write_stats(stats:BlockchainStats) -> Result<()> {
+pub(crate) async fn write_stats(stats: BlockchainStats) -> Result<()> {
     let mut buf = Vec::with_capacity(stats.encoded_len());
     stats.encode(&mut buf)?;
-    DatabaseService::write(
-        WriteItem {
-            data: DataItem {
-                key: Bytes::from(CHAIN_AGG_DATA_KEY.as_bytes()),
-                value: Bytes::from(buf)
-            },
-            cf: BLOCKCHAIN_DATA_COL_FAMILY,
-            ttl: 0,
-        }).await
+    DatabaseService::write(WriteItem {
+        data: DataItem {
+            key: Bytes::from(CHAIN_AGG_DATA_KEY.as_bytes()),
+            value: Bytes::from(buf),
+        },
+        cf: BLOCKCHAIN_DATA_COL_FAMILY,
+        ttl: 0,
+    })
+    .await
 }
-

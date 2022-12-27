@@ -5,6 +5,6 @@
 /// A node is a wrapper over server which is designed
 /// to be launched as a system stand-alone executable
 #[tokio::main]
-async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     server_app::start().await
 }

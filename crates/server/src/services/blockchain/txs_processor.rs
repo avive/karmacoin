@@ -2,21 +2,26 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use std::collections::HashMap;
-use anyhow::Result;
-use bytes::Bytes;
-use prost::Message;
-use base::karma_coin::karma_coin_core_types::*;
-use base::karma_coin::karma_coin_core_types::TransactionType::NewUserV1;
-use db::db_service::{DatabaseService, ReadItem};
 use crate::services::blockchain::blockchain_service::BlockChainService;
-use crate::services::blockchain::mem_pool_service::{GetTransactions, MemPoolService, RemoveOldTransactions, RemoveOnChainTransactions, RemoveTransactionByHash, RemoveTransactionsByHashes};
-use crate::services::blockchain::{new_user_tx_processor, payment_tx_processor, update_tx_processor};
-use crate::services::blockchain::stats::{get_stats};
+use crate::services::blockchain::mem_pool_service::{
+    GetTransactions, MemPoolService, RemoveOldTransactions, RemoveOnChainTransactions,
+    RemoveTransactionByHash, RemoveTransactionsByHashes,
+};
+use crate::services::blockchain::stats::get_stats;
+use crate::services::blockchain::{
+    new_user_tx_processor, payment_tx_processor, update_tx_processor,
+};
 use crate::services::db_config_service::USERS_COL_FAMILY;
+use anyhow::Result;
+use base::karma_coin::karma_coin_core_types::TransactionType::NewUserV1;
+use base::karma_coin::karma_coin_core_types::*;
+use bytes::Bytes;
+use db::db_service::{DatabaseService, ReadItem};
+use prost::Message;
+use std::collections::HashMap;
 
-use xactor::*;
 use crate::services::blockchain::tokenomics::Tokenomics;
+use xactor::*;
 
 #[message(result = "Result<Option<Block>>")]
 pub(crate) struct ProcessTransactions;
@@ -29,7 +34,6 @@ impl Handler<ProcessTransactions> for BlockChainService {
         _ctx: &mut Context<Self>,
         _msg: ProcessTransactions,
     ) -> Result<Option<Block>> {
-
         let mem_pool = MemPoolService::from_registry().await?;
 
         // remove from pool all transactions that are already on chain
@@ -45,14 +49,16 @@ impl Handler<ProcessTransactions> for BlockChainService {
 
         // get current blockchain stats and tokenomics
         let stats = get_stats().await?;
-        let tokenomics = Tokenomics { stats: stats.clone() };
+        let tokenomics = Tokenomics {
+            stats: stats.clone(),
+        };
         let height = stats.tip_height + 1;
         let mut tx_hashes: Vec<Vec<u8>> = vec![];
 
         // the block event for the new block
-        let mut block_event = BlockEvent::new(height+1);
+        let mut block_event = BlockEvent::new(height + 1);
 
-        // new signups txs indexed by mobile number - used for referral reward calcs
+        // new signups txs indexed by mobile number - used for referral reward calculations
         let mut sign_ups: HashMap<Vec<u8>, SignedTransaction> = HashMap::new();
 
         for (tx_hash, tx) in transactions_map.iter() {
@@ -73,8 +79,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                     block_event.add_transaction_event(tx_event.clone());
                     // update new signups map - used for referrals and payments
                     sign_ups.insert(res.mobile_number.as_bytes().to_vec(), tx.clone());
-
-                },
+                }
                 Err(e) => {
                     error!("Failed to process new user transaction: {:?}", e);
                     tx_event.result = ExecutionResult::Invalid as i32;
@@ -83,7 +88,9 @@ impl Handler<ProcessTransactions> for BlockChainService {
             }
 
             // remove the processed tx from the pool
-            mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
+            mem_pool
+                .call(RemoveTransactionByHash(tx_hash.to_vec()))
+                .await??;
 
             // emit the tx event
             BlockChainService::emit_tx_event(tx_event).await?;
@@ -97,16 +104,19 @@ impl Handler<ProcessTransactions> for BlockChainService {
             // Get tx issuer user from chain and reject tx if it doesn't exist
             let mut user = match DatabaseService::read(ReadItem {
                 key: Bytes::from(tx.signer.as_ref().unwrap().data.clone()),
-                cf: USERS_COL_FAMILY
-            }).await? {
-                Some(data) => {
-                   User::decode(data.0.as_ref())?
-                },
+                cf: USERS_COL_FAMILY,
+            })
+            .await?
+            {
+                Some(data) => User::decode(data.0.as_ref())?,
                 None => {
                     info!("Tx signer user not found on chain - removing tx from mempool");
-                    mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
+                    mem_pool
+                        .call(RemoveTransactionByHash(tx_hash.to_vec()))
+                        .await??;
                     tx_event.result = ExecutionResult::Invalid as i32;
-                    tx_event.error_message = "Tx signer user not found on chain - discarding tx".to_string();
+                    tx_event.error_message =
+                        "Tx signer user not found on chain - discarding tx".to_string();
 
                     BlockChainService::emit_tx_event(tx_event.clone()).await?;
                     continue;
@@ -116,16 +126,23 @@ impl Handler<ProcessTransactions> for BlockChainService {
             match tx_type {
                 TransactionType::PaymentV1 => {
                     if let Some(mut payee) = payment_tx_processor::get_payee_user(tx).await? {
-                        match payment_tx_processor::process_transaction(tx, &mut user,
-                                                                        &mut payee, &mut sign_ups, &tokenomics, &mut tx_event).await {
+                        match payment_tx_processor::process_transaction(
+                            tx,
+                            &mut user,
+                            &mut payee,
+                            &mut sign_ups,
+                            &tokenomics,
+                            &mut tx_event,
+                        )
+                        .await
+                        {
                             Ok(_) => {
-
                                 info!("payment transaction processed: {:?}", tx_event);
                                 tx_hashes.push(tx_hash.to_vec());
                                 block_event.payments_count += 1;
                                 block_event.add_fee(tx_event.transaction.as_ref().unwrap().fee);
                                 block_event.add_transaction_event(tx_event.clone());
-                            },
+                            }
                             Err(e) => {
                                 info!("payment transaction failed: {:?}", e);
                                 tx_event.result = ExecutionResult::Invalid as i32;
@@ -134,21 +151,21 @@ impl Handler<ProcessTransactions> for BlockChainService {
                         }
 
                         BlockChainService::emit_tx_event(tx_event).await?;
-                    }
-                    else {
+                    } else {
                         info!("Payee user not found on chain - keeping this tx in the mem pool for later processing...");
                         continue;
                     }
-                },
+                }
                 TransactionType::UpdateUserV1 => {
-                    match update_tx_processor::process_transaction(tx, &tokenomics, &mut tx_event).await {
+                    match update_tx_processor::process_transaction(tx, &tokenomics, &mut tx_event)
+                        .await
+                    {
                         Ok(_) => {
                             info!("update user transaction processed: {:?}", tx_event);
                             tx_hashes.push(tx_hash.to_vec());
                             block_event.add_fee(tx_event.transaction.as_ref().unwrap().fee);
                             block_event.add_transaction_event(tx_event.clone());
-
-                        },
+                        }
                         Err(e) => {
                             error!("Failed to process update user transaction: {:?}", e);
                             tx_event.result = ExecutionResult::Invalid as i32;
@@ -156,7 +173,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                         }
                     }
                     BlockChainService::emit_tx_event(tx_event).await?;
-                },
+                }
                 _ => {
                     // ignore other transaction types
                 }
@@ -169,15 +186,20 @@ impl Handler<ProcessTransactions> for BlockChainService {
         }
 
         // create the block
-        let block = BlockChainService::create_block(&tx_hashes,
-                                                    stats,
-                                                    &tokenomics,
-                                                    block_event,
-                                                    height + 1,
-                                                    self.id_key_pair.as_ref().unwrap()).await?;
+        let block = BlockChainService::create_block(
+            &tx_hashes,
+            stats,
+            &tokenomics,
+            block_event,
+            height + 1,
+            self.id_key_pair.as_ref().unwrap(),
+        )
+        .await?;
 
         // remove processed txs from the mem pool
-        mem_pool.call(RemoveTransactionsByHashes(tx_hashes)).await??;
+        mem_pool
+            .call(RemoveTransactionsByHashes(tx_hashes))
+            .await??;
 
         // remove old txs from the mem pool
         mem_pool.call(RemoveOldTransactions).await??;

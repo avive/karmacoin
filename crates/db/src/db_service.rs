@@ -16,7 +16,6 @@ use rocksdb::{ColumnFamilyDescriptor, Options};
 use std::{env, fs};
 use xactor::*;
 
-
 // todo: use DbValue instead of all (Bytes, u64) tuples used below
 /// DbValue is binary data and ttl stored in the db by key.
 pub struct DbValue {

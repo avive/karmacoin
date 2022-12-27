@@ -4,20 +4,19 @@
 
 use crate::karma_coin::karma_coin_core_types::{VerifyNumberResponse, VerifyNumberResult};
 use anyhow::{anyhow, Result};
-use ed25519_dalek::{Keypair, Signer, Verifier};
 use chrono::prelude::*;
+use ed25519_dalek::{Keypair, Signer, Verifier};
 
 impl VerifyNumberResponse {
-
     // we can't implement default here due to prost::message required derivation
     fn new() -> Self {
         VerifyNumberResponse {
             timestamp: Utc::now().timestamp_nanos() as u64,
             result: 0,
-            nickname : "".into(),
+            nickname: "".into(),
             account_id: None,
             mobile_number: None,
-            signature: None
+            signature: None,
         }
     }
 }
@@ -33,10 +32,7 @@ impl From<VerifyNumberResult> for VerifyNumberResponse {
 }
 
 impl VerifyNumberResponse {
-    pub fn sign(
-        &mut self,
-        key_pair: &Keypair,
-    ) -> Result<()> {
+    pub fn sign(&mut self, key_pair: &Keypair) -> Result<()> {
         use prost::Message;
         let mut buf = Vec::with_capacity(self.encoded_len());
         self.encode(&mut buf)?;
@@ -65,10 +61,18 @@ impl VerifyNumberResponse {
         if cloned.encode(&mut buf).is_err() {
             return Err(anyhow!("failed to encode source data to binary data"));
         };
-        let account_id = self.account_id.as_ref().ok_or(anyhow!("missing account id"))?;
-        let signature_data = self.signature.as_ref().ok_or(anyhow!("missing signature"))?;
+        let account_id = self
+            .account_id
+            .as_ref()
+            .ok_or(anyhow!("missing account id"))?;
+        let signature_data = self
+            .signature
+            .as_ref()
+            .ok_or(anyhow!("missing signature"))?;
         let signature = ed25519_dalek::Signature::from_bytes(&signature_data.signature)?;
         let signer_pub_key = ed25519_dalek::PublicKey::from_bytes(account_id.data.as_slice())?;
-        signer_pub_key.verify(&buf, &signature).map_err(|_| anyhow!("failed to verify signature"))
+        signer_pub_key
+            .verify(&buf, &signature)
+            .map_err(|_| anyhow!("failed to verify signature"))
     }
 }

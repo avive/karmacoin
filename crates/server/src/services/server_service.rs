@@ -2,19 +2,19 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use anyhow::Result;
 use crate::services::api::api_service::ApiService;
 use crate::services::db_config_service::DbConfigService;
-use base::karma_coin::karma_coin_api::api_service_server::ApiServiceServer;
 use crate::services::verifier::verifier_service::VerifierService;
+use anyhow::Result;
+use base::genesis_config_service::GenesisConfigService;
+use base::karma_coin::karma_coin_api::api_service_server::ApiServiceServer;
 use base::karma_coin::karma_coin_verifier::phone_numbers_verifier_service_server::PhoneNumbersVerifierServiceServer;
 use base::server_config_service::{
-    ServerConfigService, GRPC_SERVER_HOST_CONFIG_KEY,
-    GRPC_SERVER_HOST_PORT_CONFIG_KEY, SERVER_NAME_CONFIG_KEY,
+    ServerConfigService, GRPC_SERVER_HOST_CONFIG_KEY, GRPC_SERVER_HOST_PORT_CONFIG_KEY,
+    SERVER_NAME_CONFIG_KEY,
 };
 use db::db_service::{DatabaseService, Destroy};
 use tonic::transport::Server;
-use base::genesis_config_service::GenesisConfigService;
 use xactor::*;
 
 /// ServerService is a full node p2p network server
@@ -62,7 +62,6 @@ pub struct Startup {}
 #[async_trait::async_trait]
 impl Handler<Startup> for ServerService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, _msg: Startup) -> Result<()> {
-
         info!("configuring KarmaCoin server...");
 
         let server_name = ServerConfigService::get(SERVER_NAME_CONFIG_KEY.into())
@@ -74,8 +73,7 @@ impl Handler<Startup> for ServerService {
         let port = ServerConfigService::get_u64(GRPC_SERVER_HOST_PORT_CONFIG_KEY.into())
             .await?
             .unwrap() as u32;
-        
-        
+
         self.start_grpc_server(port, host, server_name).await?;
 
         info!("GRPC server started");
@@ -98,7 +96,8 @@ impl ServerService {
             .set_serving::<ApiServiceServer<ApiService>>()
             .await;
 
-        let (mut verifier_health_reporter, verifier_health_service) = tonic_health::server::health_reporter();
+        let (mut verifier_health_reporter, verifier_health_service) =
+            tonic_health::server::health_reporter();
         verifier_health_reporter
             .set_serving::<PhoneNumbersVerifierServiceServer<VerifierService>>()
             .await;

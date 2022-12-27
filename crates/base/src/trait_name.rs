@@ -8,7 +8,7 @@ impl TraitName {
     pub fn new(char_trait: CharTrait, name: &str) -> Self {
         TraitName {
             char_trait: char_trait as i32,
-            name: name.to_string()
+            name: name.to_string(),
         }
     }
 }

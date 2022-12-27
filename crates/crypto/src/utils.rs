@@ -2,7 +2,6 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-
 use anyhow::{anyhow, Result};
 use curve25519_dalek::edwards::CompressedEdwardsY;
 use ed25519_dalek::PUBLIC_KEY_LENGTH;

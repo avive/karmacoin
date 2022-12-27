@@ -2,9 +2,9 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use crate::karma_coin::karma_coin_verifier::{RegisterNumberResponse, RegisterNumberResult};
 use anyhow::Result;
 use ed25519_dalek::{Keypair, Signer};
-use crate::karma_coin::karma_coin_verifier::{RegisterNumberResponse, RegisterNumberResult};
 
 impl RegisterNumberResponse {
     // we can't implement default here due to prost::message required derivation
@@ -12,7 +12,7 @@ impl RegisterNumberResponse {
         RegisterNumberResponse {
             result: 0,
             code: 0,
-            signature: None
+            signature: None,
         }
     }
 }
@@ -26,10 +26,7 @@ impl From<RegisterNumberResult> for RegisterNumberResponse {
 }
 
 impl RegisterNumberResponse {
-    pub fn sign(
-        &mut self,
-        key_pair: &Keypair,
-    ) -> Result<()> {
+    pub fn sign(&mut self, key_pair: &Keypair) -> Result<()> {
         use prost::Message;
         let mut buf = Vec::with_capacity(self.encoded_len());
         self.encode(&mut buf)?;

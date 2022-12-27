@@ -2,21 +2,22 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use db::db_service::{DatabaseService, DataItem, WriteItem};
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
+use db::db_service::{DataItem, DatabaseService, WriteItem};
 // use config::Config;
 
+use crate::services::db_config_service::{
+    DbConfigService, BLOCKCHAIN_DATA_COL_FAMILY, DB_SUPPORTED_TRAITS_KEY,
+};
 use base::karma_coin::karma_coin_core_types::CharTrait::{Helpful, Kind, Smart};
 use base::karma_coin::karma_coin_core_types::{TraitName, Traits};
-use crate::services::db_config_service::{DB_SUPPORTED_TRAITS_KEY, DbConfigService, BLOCKCHAIN_DATA_COL_FAMILY};
 
 //const GENESIS_FILE_NAME: &str = "genesis_config.toml";
 
 impl DbConfigService {
     /// Config genesis static persistent data
     pub(crate) async fn config_genesis() -> Result<()> {
-
         info!("running genesis config...");
 
         let traits = Traits {
@@ -26,7 +27,7 @@ impl DbConfigService {
                 TraitName::new(Kind, "Kind"),
                 TraitName::new(Helpful, "Helpful"),
                 TraitName::new(Smart, "Smart"),
-            ]
+            ],
         };
 
         use prost::Message;
@@ -38,11 +39,14 @@ impl DbConfigService {
         // store default char traits
         // todo: move this to genesis config
         DatabaseService::write(WriteItem {
-            data: DataItem { key: Bytes::from(DB_SUPPORTED_TRAITS_KEY.as_bytes()),
-                value: Bytes::from(buf) },
+            data: DataItem {
+                key: Bytes::from(DB_SUPPORTED_TRAITS_KEY.as_bytes()),
+                value: Bytes::from(buf),
+            },
             cf: BLOCKCHAIN_DATA_COL_FAMILY,
-            ttl: 0
-        }).await?;
+            ttl: 0,
+        })
+        .await?;
 
         // todo: load config from file and store in memory
 

@@ -4,9 +4,9 @@
 
 pub const TESTS_COL_FAMILY: &str = "tests_cf"; // col family for db tests
 
-
 use crate::server_config_service::{
-    DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY, GRPC_SERVER_HOST_PORT_CONFIG_KEY, GRPC_SERVER_HOST_CONFIG_KEY
+    DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY, GRPC_SERVER_HOST_CONFIG_KEY,
+    GRPC_SERVER_HOST_PORT_CONFIG_KEY,
 };
 use anyhow::{anyhow, Result};
 use config::{Config, Environment};
@@ -18,7 +18,7 @@ pub const CLIENT_NAME_CONFIG_KEY: &str = "client_name";
 #[derive(Debug, Clone, Default)]
 pub struct ClientConfigService {
     config: Config,
-    config_file: Option<String>
+    config_file: Option<String>,
 }
 
 #[async_trait::async_trait]

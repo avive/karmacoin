@@ -26,7 +26,7 @@ impl KeyPair {
             public_key: Some(PublicKey {
                 key: pair.public.as_bytes().to_vec(),
             }),
-            scheme: 0
+            scheme: 0,
         }
     }
 }

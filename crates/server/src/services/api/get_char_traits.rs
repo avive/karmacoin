@@ -2,18 +2,18 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use crate::services::api::api_service::ApiService;
+use crate::services::db_config_service::{BLOCKCHAIN_DATA_COL_FAMILY, DB_SUPPORTED_TRAITS_KEY};
 use anyhow::Result;
+use base::karma_coin::karma_coin_api::{GetCharTraitsRequest, GetCharTraitsResponse};
+use base::karma_coin::karma_coin_core_types::Traits;
 use bytes::Bytes;
 use db::db_service::{DatabaseService, ReadItem};
-use xactor::*;
-use crate::services::db_config_service::{DB_SUPPORTED_TRAITS_KEY, BLOCKCHAIN_DATA_COL_FAMILY};
-use base::karma_coin::karma_coin_api::{GetCharTraitsRequest, GetCharTraitsResponse};
-use base::karma_coin::karma_coin_core_types::{Traits};
-use crate::services::api::api_service::ApiService;
 use prost::Message;
+use xactor::*;
 
 #[message(result = "Result<GetCharTraitsResponse>")]
-pub(crate) struct GetCharTraits(pub (crate) GetCharTraitsRequest);
+pub(crate) struct GetCharTraits(pub(crate) GetCharTraitsRequest);
 
 #[async_trait::async_trait]
 impl Handler<GetCharTraits> for ApiService {
@@ -22,22 +22,22 @@ impl Handler<GetCharTraits> for ApiService {
         _ctx: &mut Context<Self>,
         _msg: GetCharTraits,
     ) -> Result<GetCharTraitsResponse> {
-
         // read traits from db
         match DatabaseService::read(ReadItem {
             key: Bytes::from(DB_SUPPORTED_TRAITS_KEY.as_bytes()),
             cf: BLOCKCHAIN_DATA_COL_FAMILY,
-        }).await? {
+        })
+        .await?
+        {
             Some(data) => {
-
                 let traits = Traits::decode(data.0.as_ref())?;
                 Ok(GetCharTraitsResponse {
-                    trait_names: traits.named_traits
+                    trait_names: traits.named_traits,
                 })
-            },
+            }
             None => Ok(GetCharTraitsResponse {
-                trait_names: vec![]
-                 })
+                trait_names: vec![],
+            }),
         }
     }
 }

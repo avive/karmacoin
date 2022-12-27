@@ -9,7 +9,7 @@ extern crate clap;
 extern crate db;
 
 use base::logging_service::{InitLogger, LoggingService};
-use base::server_config_service::{SERVER_NAME_CONFIG_KEY, ServerConfigService, SetConfigFile};
+use base::server_config_service::{ServerConfigService, SetConfigFile, SERVER_NAME_CONFIG_KEY};
 use server::server_service::{ServerService, Startup};
 use tokio::signal;
 

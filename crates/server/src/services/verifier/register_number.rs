@@ -2,18 +2,22 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use crate::services::db_config_service::{
+    MOBILE_NUMBERS_COL_FAMILY, VERIFICATION_CODES_COL_FAMILY,
+};
+use crate::services::verifier::verifier_service::VerifierService;
 use anyhow::{anyhow, Result};
+use base::karma_coin::karma_coin_verifier::{
+    RegisterNumberRequest, RegisterNumberResponse, RegisterNumberResult::*,
+};
 use byteorder::{ByteOrder, LittleEndian};
 use bytes::Bytes;
-use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, RegisterNumberResponse, RegisterNumberResult::*};
-use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
+use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use xactor::*;
-use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, VERIFICATION_CODES_COL_FAMILY};
-use crate::services::verifier::verifier_service::VerifierService;
 
+use base::hex_utils::short_hex_string;
 use rand::prelude::*;
 use rand_chacha::ChaCha20Rng;
-use base::hex_utils::short_hex_string;
 
 #[message(result = "Result<RegisterNumberResponse>")]
 pub(crate) struct RegisterNumber(pub RegisterNumberRequest);
@@ -26,20 +30,25 @@ impl Handler<RegisterNumber> for VerifierService {
         _ctx: &mut Context<Self>,
         msg: RegisterNumber,
     ) -> Result<RegisterNumberResponse> {
-
         let req = msg.0;
 
         req.verify_signature()?;
 
-        let account_id = req.account_id.ok_or_else(|| anyhow!("missing account id"))?;
-        let phone_number = req.mobile_number.ok_or_else(|| anyhow!("missing mobile phone number"))?;
+        let account_id = req
+            .account_id
+            .ok_or_else(|| anyhow!("missing account id"))?;
+        let phone_number = req
+            .mobile_number
+            .ok_or_else(|| anyhow!("missing mobile phone number"))?;
         let verifier_key_pair = self.id_key_pair.as_ref().unwrap().to_ed2559_kaypair();
 
         // check if number is already registered to another user
         if let Some(user_data) = DatabaseService::read(ReadItem {
             key: Bytes::from(phone_number.number.as_bytes().to_vec()),
-            cf: MOBILE_NUMBERS_COL_FAMILY
-        }).await? {
+            cf: MOBILE_NUMBERS_COL_FAMILY,
+        })
+        .await?
+        {
             // number already registered for a user account
 
             // compare account ids
@@ -51,7 +60,7 @@ impl Handler<RegisterNumber> for VerifierService {
                 let mut resp = RegisterNumberResponse::from(NumberAccountExists);
                 resp.sign(&verifier_key_pair)?;
                 Ok(resp)
-            }
+            };
         }
 
         // todo: send new verification code via sms to user
@@ -61,20 +70,26 @@ impl Handler<RegisterNumber> for VerifierService {
         let mut buf = [0; 4];
         LittleEndian::write_u32(&mut buf, code as u32);
 
-        info!("Sent verification code {:?}, to accountID: {:?}", code, short_hex_string(&account_id.data));
+        info!(
+            "Sent verification code {:?}, to accountID: {:?}",
+            code,
+            short_hex_string(&account_id.data)
+        );
 
         // store verificationCode -> accountNumber with ttl of 24 hours in
 
         DatabaseService::write(WriteItem {
             data: DataItem {
                 key: Bytes::from(buf.to_vec()),
-                value: Bytes::from(account_id.data.to_vec()) },
+                value: Bytes::from(account_id.data.to_vec()),
+            },
             cf: VERIFICATION_CODES_COL_FAMILY,
             ttl: 60 * 60 * 24, // 24 hours ttl
-        }).await?;
+        })
+        .await?;
 
         let mut resp = RegisterNumberResponse::from(CodeSent);
-        resp.code =code;
+        resp.code = code;
         resp.sign(&verifier_key_pair)?;
         Ok(resp)
     }
@@ -82,18 +97,19 @@ impl Handler<RegisterNumber> for VerifierService {
 
 #[cfg(test)]
 mod tests {
+    use crate::services::db_config_service::DbConfigService;
+    use crate::services::verifier::register_number::RegisterNumber;
+    use crate::services::verifier::verifier_service::VerifierService;
     use base::karma_coin::karma_coin_core_types::{AccountId, KeyPair, MobileNumber};
+    use base::karma_coin::karma_coin_verifier::{
+        RegisterNumberRequest, RegisterNumberResponse, RegisterNumberResult::*,
+    };
     use base::test_helpers::enable_logger;
     use db::db_service::DatabaseService;
     use xactor::Service;
-    use crate::services::db_config_service::DbConfigService;
-    use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, RegisterNumberResponse, RegisterNumberResult::*};
-    use crate::services::verifier::register_number::RegisterNumber;
-    use crate::services::verifier::verifier_service::VerifierService;
 
     #[tokio::test(flavor = "multi_thread")]
     async fn register_number_test() {
-
         // init logging
         enable_logger();
 
@@ -106,7 +122,9 @@ mod tests {
         let client_ed_key_pair = client_key_pair.to_ed2559_kaypair();
 
         let mut register_number_request = RegisterNumberRequest::new();
-        register_number_request.mobile_number = Some(MobileNumber { number: "972549805380".to_string() });
+        register_number_request.mobile_number = Some(MobileNumber {
+            number: "972549805380".to_string(),
+        });
         let account_id = client_ed_key_pair.public.to_bytes().to_vec();
         register_number_request.account_id = Some(AccountId { data: account_id });
         register_number_request.sign(&client_ed_key_pair).unwrap();
@@ -114,7 +132,7 @@ mod tests {
         let verifier = VerifierService::from_registry().await.unwrap();
 
         let req = RegisterNumber(register_number_request);
-        let resp : RegisterNumberResponse = verifier.call(req).await.unwrap().unwrap();
+        let resp: RegisterNumberResponse = verifier.call(req).await.unwrap().unwrap();
         assert_eq!(resp.result, CodeSent as i32);
 
         // drop the db

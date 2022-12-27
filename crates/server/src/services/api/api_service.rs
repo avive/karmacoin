@@ -2,19 +2,19 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use anyhow::Result;
-use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
-use tonic::{Request, Response, Status};
-use base::karma_coin::karma_coin_api::*;
-use xactor::*;
 use crate::services::api::get_char_traits::GetCharTraits;
 use crate::services::api::get_user_by_account_id::GetUserInfoByAccountId;
 use crate::services::api::get_user_by_nick::GetUserInfoByNick;
 use crate::services::api::get_user_by_number::GetUserInfoByNumber;
-use crate::services::blockchain::txs_processor::ProcessTransactions;
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::mem_pool_service::{AddTransaction, MemPoolService};
 use crate::services::blockchain::stats::GetStats;
+use crate::services::blockchain::txs_processor::ProcessTransactions;
+use anyhow::Result;
+use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
+use base::karma_coin::karma_coin_api::*;
+use tonic::{Request, Response, Status};
+use xactor::*;
 
 /// ApiService is a system service that provides access to provider server persisted data as well as an interface to admin the provider's server. It provides a GRPC admin service defined in ServerAdminService. This service is designed to be used by provider admin clients.
 #[derive(Debug, Clone)]
@@ -37,20 +37,22 @@ impl Actor for ApiService {
 
 impl Service for ApiService {}
 
-
 /// ApiService implements the ApiServiceTrait trait which defines the grpc rpc methods it provides for
 /// clients over the network. All returned data is canonical blockchain data according to the state
 /// of the backing blockchain noode.
 #[tonic::async_trait]
 impl ApiServiceTrait for ApiService {
-
     /// Returns user info by nickname
-    async fn get_user_info_by_nick(&self, request: Request<GetUserInfoByNickRequest>) -> Result<Response<GetUserInfoByNickResponse>, Status> {
-
-        let service = ApiService::from_registry().await
+    async fn get_user_info_by_nick(
+        &self,
+        request: Request<GetUserInfoByNickRequest>,
+    ) -> Result<Response<GetUserInfoByNickResponse>, Status> {
+        let service = ApiService::from_registry()
+            .await
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?;
 
-        let res = service.call(GetUserInfoByNick(request.into_inner()))
+        let res = service
+            .call(GetUserInfoByNick(request.into_inner()))
             .await
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?
             .map_err(|_| Status::internal("internal error"))?;
@@ -63,11 +65,12 @@ impl ApiServiceTrait for ApiService {
         &self,
         request: Request<GetUserInfoByNumberRequest>,
     ) -> std::result::Result<Response<GetUserInfoByNumberResponse>, Status> {
-
-        let service = ApiService::from_registry().await
+        let service = ApiService::from_registry()
+            .await
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?;
 
-        let res = service.call(GetUserInfoByNumber(request.into_inner()))
+        let res = service
+            .call(GetUserInfoByNumber(request.into_inner()))
             .await
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?
             .map_err(|_| Status::internal("internal error"))?;
@@ -80,11 +83,12 @@ impl ApiServiceTrait for ApiService {
         &self,
         request: Request<GetUserInfoByAccountRequest>,
     ) -> Result<Response<GetUserInfoByAccountResponse>, Status> {
-
-        let service = ApiService::from_registry().await
+        let service = ApiService::from_registry()
+            .await
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?;
 
-        let res = service.call(GetUserInfoByAccountId(request.into_inner()))
+        let res = service
+            .call(GetUserInfoByAccountId(request.into_inner()))
             .await
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?
             .map_err(|_| Status::internal("internal error"))?;
@@ -105,34 +109,36 @@ impl ApiServiceTrait for ApiService {
         &self,
         request: Request<GetCharTraitsRequest>,
     ) -> Result<Response<GetCharTraitsResponse>, Status> {
-
-        let service = ApiService::from_registry().await
+        let service = ApiService::from_registry()
+            .await
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?;
 
-        let res = service.call(GetCharTraits(request.into_inner()))
+        let res = service
+            .call(GetCharTraits(request.into_inner()))
             .await
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?
             .map_err(|_| Status::internal("internal error"))?;
 
         Ok(Response::new(res))
-
     }
 
     /// Get current blockchain data
-    async fn get_blockchain_data(&self, request: Request<GetBlockchainDataRequest>) -> Result<Response<GetBlockchainDataResponse>, Status> {
-
+    async fn get_blockchain_data(
+        &self,
+        request: Request<GetBlockchainDataRequest>,
+    ) -> Result<Response<GetBlockchainDataResponse>, Status> {
         // create a block with the transaction
-        let service = BlockChainService::from_registry().await
+        let service = BlockChainService::from_registry()
+            .await
             .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
 
-        let resp = service.call(
-            GetStats(request.into_inner()))
+        let resp = service
+            .call(GetStats(request.into_inner()))
             .await
             .map_err(|e| Status::internal(format!("failed to call blockchain api: {:?}", e)))?
             .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
 
         Ok(Response::new(resp))
-
     }
 
     /// Returns genesis readonly data
@@ -144,34 +150,41 @@ impl ApiServiceTrait for ApiService {
     }
 
     /// Submit a transaction for processing to the mem pool
-    async fn submit_transaction(&self,request: Request<SubmitTransactionRequest>) -> Result<Response<SubmitTransactionResponse>, Status> {
+    async fn submit_transaction(
+        &self,
+        request: Request<SubmitTransactionRequest>,
+    ) -> Result<Response<SubmitTransactionResponse>, Status> {
+        let tx = request
+            .into_inner()
+            .transaction
+            .ok_or(Status::invalid_argument("transaction is required"))?;
 
-        let tx = request.into_inner().transaction.ok_or(
-            Status::invalid_argument("transaction is required")
-        )?;
-
-        let mem_pool = MemPoolService::from_registry().await
+        let mem_pool = MemPoolService::from_registry()
+            .await
             .map_err(|e| Status::internal(format!("failed to get mempool: {:?}", e)))?;
 
-        mem_pool.call(AddTransaction(tx)).await
+        mem_pool
+            .call(AddTransaction(tx))
+            .await
             .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?
             .map_err(|e| Status::internal(format!("failed to process transaction: {:?}", e)))?;
 
         // s tart transaction processing to process all transactions in the mem pool
         // in production this can be done on a timer every few seconds
         // here we just trigger block production when a new transaction is submitted
-        let service = BlockChainService::from_registry().await
+        let service = BlockChainService::from_registry()
+            .await
             .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
 
-        service.call(
-            ProcessTransactions{})
+        service
+            .call(ProcessTransactions {})
             .await
             .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?
             .map_err(|e| Status::internal(format!("failed to call blockchain api: {:?}", e)))?;
 
         Ok(Response::new(SubmitTransactionResponse {
-            submit_transaction_result: SubmitTransactionResult::Submitted as i32}))
-
+            submit_transaction_result: SubmitTransactionResult::Submitted as i32,
+        }))
     }
 
     /// Returns all transactions to, and or from and account

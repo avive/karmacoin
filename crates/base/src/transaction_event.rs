@@ -2,8 +2,10 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use crate::karma_coin::karma_coin_core_types::{
+    ExecutionInfo, ExecutionResult, FeeType, SignedTransaction, TransactionEvent,
+};
 use chrono::Utc;
-use crate::karma_coin::karma_coin_core_types::{ExecutionResult, ExecutionInfo, FeeType, SignedTransaction, TransactionEvent};
 
 impl TransactionEvent {
     pub fn new(height: u64, tx: &SignedTransaction, transaction_hash: &[u8]) -> Self {
@@ -18,8 +20,7 @@ impl TransactionEvent {
             signup_reward: 0,
             result: ExecutionResult::Executed as i32,
             info: ExecutionInfo::Unknown as i32,
-            fee: 0
+            fee: 0,
         }
     }
 }
-

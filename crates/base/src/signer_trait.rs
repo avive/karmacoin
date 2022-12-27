@@ -7,7 +7,6 @@ use ed25519_dalek::ed25519::signature::SignerMut;
 use ed25519_dalek::{Keypair, Verifier};
 
 trait Signer {
-
     /// return the data of the message that is signed by this type
     fn get_sign_message(&self) -> Vec<u8>;
 

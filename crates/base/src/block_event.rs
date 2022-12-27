@@ -18,7 +18,6 @@ impl BlockEvent {
             transactions_events: vec![],
             reward: 0,
             referral_rewards_count: 0,
-
         }
     }
 
@@ -46,4 +45,3 @@ impl BlockEvent {
         self.transactions_events.push(event);
     }
 }
-

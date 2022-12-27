@@ -6,10 +6,10 @@ extern crate custom_error;
 extern crate env_logger;
 extern crate hex;
 
-use std::fmt;
-use std::fmt::Formatter;
 use anyhow::Result;
 use hex::FromHexError;
+use std::fmt;
+use std::fmt::Formatter;
 // hex formatting utils
 
 /// helper function to format bytes as 0x1234..5678. Data must be at least 4 bytes long

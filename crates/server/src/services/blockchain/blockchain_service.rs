@@ -13,7 +13,7 @@ use xactor::*;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct BlockChainService {
     /// block producer id pair
-    pub(crate) id_key_pair : Option<KeyPair>
+    pub(crate) id_key_pair: Option<KeyPair>,
 }
 
 #[async_trait::async_trait]
@@ -22,7 +22,12 @@ impl Actor for BlockChainService {
         info!("BlockChainService started");
 
         // block producer id key pair
-        self.id_key_pair  = Some(ServerConfigService::from_registry().await?.call(GetBlockProducerIdKeyPair).await??);
+        self.id_key_pair = Some(
+            ServerConfigService::from_registry()
+                .await?
+                .call(GetBlockProducerIdKeyPair)
+                .await??,
+        );
 
         // todo: set block producer unique name
 

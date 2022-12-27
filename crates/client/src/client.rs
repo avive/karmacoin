@@ -2,12 +2,13 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use crate::services::grpc_service::ClientGrpcService;
 use anyhow::Result;
 use base::client_config_service::ClientConfigService;
-use base::hex_utils::short_hex_string;
-use base::server_config_service::{DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY};
 use base::client_config_service::TESTS_COL_FAMILY;
+use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_client::client_api_server::ClientApiServer;
+use base::server_config_service::{DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY};
 use db::db_service::{Configure, DatabaseService};
 use ed25519_dalek::Keypair;
 use rand_core::OsRng;
@@ -15,7 +16,6 @@ use rocksdb::{ColumnFamilyDescriptor, Options};
 use tonic::transport::Server;
 use x25519_dalek::StaticSecret;
 use xactor::*;
-use crate::services::grpc_service::ClientGrpcService;
 
 pub const SNP_PROTOCOL_VERSION: &str = "0.1.0";
 
@@ -29,7 +29,6 @@ pub struct Client {
     pub(crate) _client_id: Keypair,
     /// for now we assume only 1 pre-key for the client and we don't create new ones yet
     pub(crate) _pre_key: StaticSecret,
-
     // A name server client used to communicate with a name service
     // pub(crate) blockchain_service_client: Option<BlockchainServiceClient<Channel>>,
 }

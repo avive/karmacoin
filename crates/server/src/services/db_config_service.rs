@@ -2,12 +2,12 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use rocksdb::{ColumnFamilyDescriptor, Options};
-use base::server_config_service::{DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY, ServerConfigService};
-use db::db_service::{DatabaseService, ReadItem};
-use xactor::*;
 use anyhow::Result;
+use base::server_config_service::{ServerConfigService, DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY};
 use bytes::Bytes;
+use db::db_service::{DatabaseService, ReadItem};
+use rocksdb::{ColumnFamilyDescriptor, Options};
+use xactor::*;
 
 //////
 // db data modeling - column families and their stored data
@@ -29,7 +29,6 @@ pub const VERIFICATION_CODES_COL_FAMILY: &str = "verification_codes_cf";
 // Nicks are reserved by new users when they verify their phone so they can claim the nicks
 // in up to 24 hours from verification via the CreateUser transaction
 pub const RESERVED_NICKS_COL_FAMILY: &str = "reserved_nicks_cf";
-
 
 /////
 //// Blockchain-based data - indexing on-chain data and its blocks
@@ -54,7 +53,6 @@ pub const _TOKENOMICS_DATA_KEY: &str = "tokenomics_data_key";
 /// Transactions processing events
 /// key: tx_hash, value: zero or more tx events emitted by tx processing
 pub const TRANSACTIONS_EVENTS_COL_FAMILY: &str = "txs_events_cf";
-
 
 /// Block's transactions processing events
 /// key: block height, value: zero or more events emitted by txs in the block
@@ -103,8 +101,7 @@ pub const TXS_POOL_COL_FAMILY: &str = "txs_pool_cf";
 pub const TESTS_COL_FAMILY: &str = "tests_cf"; // col family for db tests
 
 #[derive(Debug, Clone)]
-pub(crate) struct DbConfigService {
-}
+pub(crate) struct DbConfigService {}
 
 impl Default for DbConfigService {
     fn default() -> Self {
@@ -116,7 +113,6 @@ impl Default for DbConfigService {
 #[async_trait::async_trait]
 impl Actor for DbConfigService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-
         info!("Configuring db...");
 
         let db_name = ServerConfigService::get(DB_NAME_CONFIG_KEY.into())
@@ -145,15 +141,19 @@ impl Actor for DbConfigService {
                 ColumnFamilyDescriptor::new(TXS_POOL_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TRANSACTIONS_COL_FAMILY, Options::default()),
             ],
-        }).await?;
+        })
+        .await?;
 
         // check if db was initialized with static net-specific data
         // including genesis config
         let init_key = Bytes::from(DB_INITIALIZED_KEY.as_bytes());
         if DatabaseService::read(ReadItem {
             key: init_key.clone(),
-            cf: BLOCKCHAIN_DATA_COL_FAMILY
-        }).await?.is_none() {
+            cf: BLOCKCHAIN_DATA_COL_FAMILY,
+        })
+        .await?
+        .is_none()
+        {
             DbConfigService::config_genesis().await?;
         }
 
