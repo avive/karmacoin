@@ -129,7 +129,7 @@ enum TransactionType {
 }
 
 // Update user info
-message UpdateUserV1 {
+message UpdateUserTransactionV1 {
 
     // new requested nickname
     string nickname = 1;
@@ -213,25 +213,9 @@ message SignedTransactionWithStatus {
     TransactionStatus status = 2; // transaction status
 }
 
-// events - emitted by runtime, all stored by archive nodes only
-// full nodes have only recent events
-enum SignupMethod {
-    SIGN_UP_METHOD_REFERRED = 0; // user was referred by another user
-    SIGN_UP_METHOD_SIGNUP = 1; // user wasn't referred - signed up
-}
-
 enum FeeType {
     FEE_TYPE_MINT = 0; // fee provided by the protocol
     FEE_TYPE_USER = 1; // fee provided by the transaction signer
-}
-
-message NewUserEvent {
-    uint64 timestamp = 1;
-    AccountId signer = 2;
-    SignupMethod sign_up_method = 3;
-    uint64 referred_reward = 4; // for invites - inviter gets a reward - protocol constant
-    uint64 signup_reward = 5;
-    PhoneVerifier verifier = 6;
 }
 
 // Transaction added to ledger
@@ -241,10 +225,12 @@ message TransactionEvent {
     SignedTransaction transaction = 3;
     bytes transaction_hash = 4;
     ExecutionResult result = 5;
-    string error_message = 6;
-    FeeType fee_type = 7;
-    uint64 signup_reward = 8;
-    uint64 referral_reward = 9;
+    ExecutionInfo info = 6;
+    string error_message = 7;
+    FeeType fee_type = 8;
+    uint64 signup_reward = 9;
+    uint64 referral_reward = 10;
+    uint64 fee = 11;
 }
 
 // A collection of events for a transaction
@@ -313,5 +299,17 @@ message BlockEvent {
 
 enum ExecutionResult {
     EXECUTION_RESULT_EXECUTED = 0;
-    EXECUTION_RESULT_INVALID = 1;
+    EXECUTION_RESULT_INVALID = 1; // invalid syntax
 }
+
+enum ExecutionInfo {
+    EXECUTION_INFO_UNKNOWN = 0;
+    EXECUTION_INFO_NICKNAME_UPDATED = 1;
+    EXECUTION_INFO_NICKNAME_NOT_AVAILABLE = 2;
+    EXECUTION_INFO_NICKNAME_INVALID = 3;
+    EXECUTION_INFO_NUMBER_UPDATED = 4;
+    EXECUTION_INFO_ACCOUNT_CREATED = 5;
+    EXECUTION_INFO_PAYMENT_CONFIRMED = 6;
+    EXECUTION_INFO_INVALID_DATA = 7;
+}
+

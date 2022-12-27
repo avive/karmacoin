@@ -22,6 +22,8 @@ impl VerifyNumberResponse {
     }
 }
 
+// todo: add validate function
+
 impl From<VerifyNumberResult> for VerifyNumberResponse {
     fn from(result: VerifyNumberResult) -> Self {
         let mut resp = VerifyNumberResponse::new();

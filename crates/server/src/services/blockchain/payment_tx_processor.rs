@@ -54,7 +54,6 @@ pub(crate) async fn process_transaction(
 
     transaction.validate(payer.nonce).await?;
 
-
     let payment_tx: PaymentTransactionV1 = transaction.get_payment_transaction_v1()?;
     payment_tx.verify_syntax()?;
 
@@ -139,6 +138,7 @@ pub(crate) async fn process_transaction(
 
     event.referral_reward = referral_reward;
     event.fee_type = fee_type as i32;
+    event.fee = transaction.fee;
     event.result = ExecutionResult::Executed as i32;
 
     Ok(())

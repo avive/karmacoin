@@ -3,7 +3,7 @@
 //
 
 use chrono::Utc;
-use crate::karma_coin::karma_coin_core_types::{ExecutionResult, FeeType, SignedTransaction, TransactionEvent};
+use crate::karma_coin::karma_coin_core_types::{ExecutionResult, ExecutionInfo, FeeType, SignedTransaction, TransactionEvent};
 
 impl TransactionEvent {
     pub fn new(height: u64, tx: &SignedTransaction, transaction_hash: &[u8]) -> Self {
@@ -12,11 +12,13 @@ impl TransactionEvent {
             height,
             transaction: Some(tx.clone()),
             transaction_hash: transaction_hash.to_vec(),
-            result: ExecutionResult::Executed as i32,
             error_message: "".to_string(),
             fee_type: FeeType::Mint as i32,
             referral_reward: 0,
             signup_reward: 0,
+            result: ExecutionResult::Executed as i32,
+            info: ExecutionInfo::Unknown as i32,
+            fee: 0
         }
     }
 }

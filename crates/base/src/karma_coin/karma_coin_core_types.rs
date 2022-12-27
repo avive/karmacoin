@@ -153,7 +153,7 @@ pub struct TraitScore {
 }
 /// Update user info
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct UpdateUserV1 {
+pub struct UpdateUserTransactionV1 {
     /// new requested nickname
     #[prost(string, tag = "1")]
     pub nickname: ::prost::alloc::string::String,
@@ -251,22 +251,6 @@ pub struct SignedTransactionWithStatus {
     #[prost(enumeration = "TransactionStatus", tag = "2")]
     pub status: i32,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct NewUserEvent {
-    #[prost(uint64, tag = "1")]
-    pub timestamp: u64,
-    #[prost(message, optional, tag = "2")]
-    pub signer: ::core::option::Option<AccountId>,
-    #[prost(enumeration = "SignupMethod", tag = "3")]
-    pub sign_up_method: i32,
-    /// for invites - inviter gets a reward - protocol constant
-    #[prost(uint64, tag = "4")]
-    pub referred_reward: u64,
-    #[prost(uint64, tag = "5")]
-    pub signup_reward: u64,
-    #[prost(message, optional, tag = "6")]
-    pub verifier: ::core::option::Option<PhoneVerifier>,
-}
 /// Transaction added to ledger
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct TransactionEvent {
@@ -281,14 +265,18 @@ pub struct TransactionEvent {
     pub transaction_hash: ::prost::alloc::vec::Vec<u8>,
     #[prost(enumeration = "ExecutionResult", tag = "5")]
     pub result: i32,
-    #[prost(string, tag = "6")]
+    #[prost(enumeration = "ExecutionInfo", tag = "6")]
+    pub info: i32,
+    #[prost(string, tag = "7")]
     pub error_message: ::prost::alloc::string::String,
-    #[prost(enumeration = "FeeType", tag = "7")]
+    #[prost(enumeration = "FeeType", tag = "8")]
     pub fee_type: i32,
-    #[prost(uint64, tag = "8")]
-    pub signup_reward: u64,
     #[prost(uint64, tag = "9")]
+    pub signup_reward: u64,
+    #[prost(uint64, tag = "10")]
     pub referral_reward: u64,
+    #[prost(uint64, tag = "11")]
+    pub fee: u64,
 }
 /// A collection of events for a transaction
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
@@ -410,16 +398,6 @@ pub enum TransactionStatus {
     Rejected = 2,
     OnChain = 3,
 }
-/// events - emitted by runtime, all stored by archive nodes only
-/// full nodes have only recent events
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
-#[repr(i32)]
-pub enum SignupMethod {
-    /// user was referred by another user
-    SignUpMethodReferred = 0,
-    /// user wasn't referred - signed up
-    SignUpMethodSignup = 1,
-}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum FeeType {
@@ -432,5 +410,18 @@ pub enum FeeType {
 #[repr(i32)]
 pub enum ExecutionResult {
     Executed = 0,
+    /// invalid syntax
     Invalid = 1,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum ExecutionInfo {
+    Unknown = 0,
+    NicknameUpdated = 1,
+    NicknameNotAvailable = 2,
+    NicknameInvalid = 3,
+    NumberUpdated = 4,
+    AccountCreated = 5,
+    PaymentConfirmed = 6,
+    InvalidData = 7,
 }

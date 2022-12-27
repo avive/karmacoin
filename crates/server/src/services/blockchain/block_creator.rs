@@ -178,30 +178,30 @@ impl BlockChainService {
         stats.tip_height += 1;
         stats.transactions_count += block.transactions_hashes.len() as u64;
         stats.users_count += block_event.signups_count;
-        stats.fees_amount += block_event.fees_amount;
 
         stats.payments_transactions_count +=  block_event.payments_count;
-        //stats.pa += block_event.payments_count.as_ref().unwrap().value;
         stats.signup_rewards_amount += block_event.signup_rewards_amount;
         stats.signup_rewards_count += block_event.signups_count;
-
         stats.referral_rewards_amount += block_event.referral_rewards_amount;
         stats.referral_rewards_count += block_event.referral_rewards_count;
 
-        // todo: update tokenomics data
 
-        /*
-        let mut sub_count = 0;
-        let mut minted_amount = 0;
+        stats.fees_amount += block_event.fees_amount;
+
+        stats.minted_amount +=
+            block_event.reward +
+            block_event.referral_rewards_amount +
+            block_event.signup_rewards_amount;
 
         for tx_event in block_event.transactions_events.iter() {
-            // todo: update subsidies count stats based on the the tx events in the block events (fee type)
-
-        }*/
-
+            if tx_event.fee_type == FeeType::Mint as i32 {
+                stats.fee_subs_count += 1;
+                stats.fee_subs_amount += tx_event.fee;
+                stats.minted_amount += tx_event.fee;
+            }
+        }
 
         write_stats(stats).await
-
 
     }
 }

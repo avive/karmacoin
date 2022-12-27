@@ -23,3 +23,4 @@ pub mod blockchain_stats;
 pub mod signer_trait;
 pub mod payment_transaction;
 pub mod transaction_event;
+pub mod update_user_transaction;

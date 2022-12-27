@@ -8,7 +8,7 @@ use chrono::{Duration, Utc};
 use ed25519_dalek::Verifier;
 use prost::Message;
 use crate::genesis_config_service::{GenesisConfigService, NET_ID_KEY};
-use crate::karma_coin::karma_coin_core_types::{NewUserTransactionV1, PaymentTransactionV1, SignedTransaction, TransactionType, UpdateUserV1};
+use crate::karma_coin::karma_coin_core_types::{NewUserTransactionV1, PaymentTransactionV1, SignedTransaction, TransactionType, UpdateUserTransactionV1};
 
 impl SignedTransaction {
 
@@ -115,12 +115,12 @@ impl SignedTransaction {
         Ok(PaymentTransactionV1::decode(data.transaction_data.as_ref())?)
     }
 
-    pub fn get_update_user_transaction_v1(&self) -> Result<UpdateUserV1> {
+    pub fn get_update_user_transaction_v1(&self) -> Result<UpdateUserTransactionV1> {
         let data = self.transaction_data.as_ref().ok_or_else(|| anyhow!("missing tx data"))?;
         if data.transaction_type != TransactionType::UpdateUserV1 as i32 {
             return Err(anyhow!("unexpected transaction type"))
         }
 
-        Ok(UpdateUserV1::decode(data.transaction_data.as_ref())?)
+        Ok(UpdateUserTransactionV1::decode(data.transaction_data.as_ref())?)
     }
 }
