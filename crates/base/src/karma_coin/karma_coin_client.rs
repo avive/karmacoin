@@ -36,11 +36,11 @@ pub struct SendCoinRequest {
     #[prost(message, optional, tag = "1")]
     pub mobile_number: ::core::option::Option<super::core_types::MobileNumber>,
     /// amount to send
-    #[prost(message, optional, tag = "2")]
-    pub amount: ::core::option::Option<super::core_types::Amount>,
+    #[prost(uint64, tag = "2")]
+    pub amount: u64,
     /// transaction fee
-    #[prost(message, optional, tag = "3")]
-    pub fee: ::core::option::Option<super::core_types::Amount>,
+    #[prost(uint64, tag = "3")]
+    pub fee: u64,
     /// char trait to appreciate
     #[prost(enumeration = "super::core_types::CharTrait", tag = "4")]
     pub char_trait: i32,

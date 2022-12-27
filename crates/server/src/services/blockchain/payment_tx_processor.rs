@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
 use prost::Message;
-use base::karma_coin::karma_coin_core_types::{CoinType, FeeType, PaymentTransactionV1, SignedTransaction, User};
+use base::karma_coin::karma_coin_core_types::{FeeType, PaymentTransactionV1, SignedTransaction, User};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use crate::services::blockchain::tokenomics::Tokenomics;
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY};
@@ -58,23 +58,20 @@ pub(crate) async fn process_transaction(
 
     transaction.validate(payer.nonce).await?;
 
-    let tx_fee = transaction.fee.as_ref().unwrap().value;
+
     let payment_tx: PaymentTransactionV1 = transaction.get_payment_transaction_v1()?;
     payment_tx.verify_syntax()?;
 
     let mobile_number = payment_tx.to.unwrap().number;
-    let payment = payment_tx.amount.unwrap();
+    let payment = payment_tx.amount;
 
-    // check that payer has sufficient balance to pay
-    let coin_type = CoinType::from_i32(payment.coin_type).ok_or_else(|| anyhow!("invalid coin type"))?;
-
-    let apply_subsidy = tokenomics.should_subsidise_transaction_fee(0, tx_fee).await?;
+    let apply_subsidy = tokenomics.should_subsidise_transaction_fee(0, transaction.fee).await?;
 
     // actual fee amount to be paid by the user. 0 if fee is subsidised by the protocol
     let user_tx_fee = if apply_subsidy {
         0
     } else {
-        tx_fee
+        transaction.fee
     };
 
     let fee_type = if apply_subsidy {
@@ -83,18 +80,15 @@ pub(crate) async fn process_transaction(
         FeeType::User
     };
 
-    if payer.get_balance(coin_type).value < (payment.value + user_tx_fee) {
+    if payer.balance < payment + user_tx_fee {
         return Err(anyhow!("payer has insufficient balance to pay"))
     }
 
     // update payee balance to reflect payment and tx fee (when applicable)
-    let mut balance = payee.get_balance(coin_type);
-    balance.value += payment.value;
-    payee.update_balance(&balance);
+    payee.balance += payment;
 
     // update payer balance to reflect payment
-    let mut payer_balance = payer.get_balance(coin_type);
-    payer_balance.value -= payment.value + user_tx_fee;
+    payer.balance -= payment + user_tx_fee;
 
     let referral_reward = tokenomics.get_referral_reward_amount().await?;
 
@@ -107,10 +101,8 @@ pub(crate) async fn process_transaction(
         // this is a new user referral payment tx - payer should get the referral fee!
         let _sign_up_tx = sign_ups.get(mobile_number.as_bytes()).unwrap();
         // todo: award signer with the referral reward if applicable
-        payer_balance.value += referral_reward;
+        payer.balance += referral_reward;
     };
-
-    payer.update_balance(&payer_balance);
 
     // index the transaction in the db by hash
     let mut tx_data = Vec::with_capacity(transaction.encoded_len());

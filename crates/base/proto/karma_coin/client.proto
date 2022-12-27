@@ -45,10 +45,10 @@ message SendCoinRequest {
   core_types.MobileNumber mobile_number = 1;
 
   // amount to send
-  core_types.Amount amount = 2;
+  uint64 amount = 2;
 
   // transaction fee
-  core_types.Amount fee = 3;
+  uint64 fee = 3;
 
   // char trait to appreciate
   core_types.CharTrait char_trait = 4;

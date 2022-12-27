@@ -5,7 +5,7 @@
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
 
-use base::karma_coin::karma_coin_core_types::{Amount, Balance, CoinType, FeeType, SignedTransaction};
+use base::karma_coin::karma_coin_core_types::{FeeType, SignedTransaction};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY};
 use prost::Message;
@@ -27,7 +27,7 @@ pub(crate) async fn process_transaction(transaction: &SignedTransaction, tokenom
     // validate tx syntax, fields, signature, net_id before processing it
     transaction.validate(0).await?;
 
-    let tx_fee = transaction.fee.as_ref().unwrap().value;
+    let tx_fee = transaction.fee;
     let new_user_tx = transaction.get_new_user_transaction_v1()?;
     let mut user = new_user_tx.user.ok_or_else(|| anyhow!("missing user data in tx"))?;
     let verification_evidence = new_user_tx.verify_number_response.ok_or_else(|| anyhow!("missing verifier data"))?;
@@ -83,15 +83,7 @@ pub(crate) async fn process_transaction(transaction: &SignedTransaction, tokenom
     }
 
     user.nonce = 1;
-    user.balances = vec![Balance {
-        free: Some(Amount {
-            value: signup_reward_amount - user_tx_fee,
-            coin_type: CoinType::Core as i32,
-        }),
-        reserved: None,
-        misc_frozen: None,
-        fee_frozen: None,
-    }];
+    user.balance += signup_reward_amount - user_tx_fee;
 
     // todo: figure out personality trait for joiner - brave? ahead of the curve?
     user.trait_scores = vec![];

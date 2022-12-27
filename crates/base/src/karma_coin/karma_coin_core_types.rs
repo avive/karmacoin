@@ -8,24 +8,16 @@ pub struct AccountId {
     #[prost(bytes = "vec", tag = "1")]
     pub data: ::prost::alloc::vec::Vec<u8>,
 }
-/// A non-negative coin amount
-#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
-pub struct Amount {
-    #[prost(uint64, tag = "1")]
-    pub value: u64,
-    #[prost(enumeration = "CoinType", tag = "2")]
-    pub coin_type: i32,
-}
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct Balance {
-    #[prost(message, optional, tag = "1")]
-    pub free: ::core::option::Option<Amount>,
-    #[prost(message, optional, tag = "2")]
-    pub reserved: ::core::option::Option<Amount>,
-    #[prost(message, optional, tag = "3")]
-    pub misc_frozen: ::core::option::Option<Amount>,
-    #[prost(message, optional, tag = "4")]
-    pub fee_frozen: ::core::option::Option<Amount>,
+    #[prost(uint64, tag = "1")]
+    pub free: u64,
+    #[prost(uint64, tag = "2")]
+    pub reserved: u64,
+    #[prost(uint64, tag = "3")]
+    pub misc_frozen: u64,
+    #[prost(uint64, tag = "4")]
+    pub fee_frozen: u64,
 }
 /// An public encryption key
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
@@ -83,8 +75,8 @@ pub struct User {
     /// verified current number
     #[prost(message, optional, tag = "4")]
     pub mobile_number: ::core::option::Option<MobileNumber>,
-    #[prost(message, repeated, tag = "5")]
-    pub balances: ::prost::alloc::vec::Vec<Balance>,
+    #[prost(uint64, tag = "5")]
+    pub balance: u64,
     #[prost(message, repeated, tag = "6")]
     pub trait_scores: ::prost::alloc::vec::Vec<TraitScore>,
     /// one-time enc pre-keys for e2e messaging
@@ -123,17 +115,20 @@ pub struct Block {
     #[prost(bytes = "vec", repeated, tag = "4")]
     pub transactions_hashes: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
     /// total fees paid in this block
-    #[prost(message, optional, tag = "5")]
-    pub fees: ::core::option::Option<Amount>,
+    #[prost(uint64, tag = "5")]
+    pub fees: u64,
     /// digest of block in consensus at the previous height
     #[prost(bytes = "vec", tag = "6")]
     pub prev_block_digest: ::prost::alloc::vec::Vec<u8>,
     #[prost(message, optional, tag = "7")]
     pub signature: ::core::option::Option<Signature>,
-    #[prost(message, optional, tag = "8")]
-    pub reward: ::core::option::Option<Amount>,
+    #[prost(uint64, tag = "8")]
+    pub reward: u64,
+    /// total coins minted in this block (rewards + tx fee subsidies)
+    #[prost(uint64, tag = "9")]
+    pub minted: u64,
     /// block digest includes hash of all above data
-    #[prost(bytes = "vec", tag = "9")]
+    #[prost(bytes = "vec", tag = "10")]
     pub digest: ::prost::alloc::vec::Vec<u8>,
 }
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
@@ -176,8 +171,8 @@ pub struct PaymentTransactionV1 {
     #[prost(message, optional, tag = "1")]
     pub to: ::core::option::Option<MobileNumber>,
     /// amount in tokens to transfer
-    #[prost(message, optional, tag = "2")]
-    pub amount: ::core::option::Option<Amount>,
+    #[prost(uint64, tag = "2")]
+    pub amount: u64,
     /// char trait set by sender. e.g. smart
     #[prost(enumeration = "CharTrait", tag = "3")]
     pub char_trait: i32,
@@ -230,8 +225,8 @@ pub struct SignedTransaction {
     #[prost(uint64, tag = "3")]
     pub nonce: u64,
     /// network fee provided by sender
-    #[prost(message, optional, tag = "4")]
-    pub fee: ::core::option::Option<Amount>,
+    #[prost(uint64, tag = "4")]
+    pub fee: u64,
     /// binary transaction data
     #[prost(message, optional, tag = "5")]
     pub transaction_data: ::core::option::Option<TransactionData>,
@@ -265,10 +260,10 @@ pub struct NewUserEvent {
     #[prost(enumeration = "SignupMethod", tag = "3")]
     pub sign_up_method: i32,
     /// for invites - inviter gets a reward - protocol constant
-    #[prost(message, optional, tag = "4")]
-    pub referred_reward: ::core::option::Option<Amount>,
-    #[prost(message, optional, tag = "5")]
-    pub signup_reward: ::core::option::Option<Amount>,
+    #[prost(uint64, tag = "4")]
+    pub referred_reward: u64,
+    #[prost(uint64, tag = "5")]
+    pub signup_reward: u64,
     #[prost(message, optional, tag = "6")]
     pub verifier: ::core::option::Option<PhoneVerifier>,
 }
@@ -361,25 +356,16 @@ pub struct BlockEvent {
     pub signups_count: u64,
     #[prost(uint64, tag = "6")]
     pub payments_count: u64,
-    #[prost(message, optional, tag = "7")]
-    pub fees_amount: ::core::option::Option<Amount>,
-    #[prost(message, optional, tag = "8")]
-    pub signup_rewards_amount: ::core::option::Option<Amount>,
-    #[prost(message, optional, tag = "9")]
-    pub referral_rewards_amount: ::core::option::Option<Amount>,
+    #[prost(uint64, tag = "7")]
+    pub fees_amount: u64,
+    #[prost(uint64, tag = "8")]
+    pub signup_rewards_amount: u64,
+    #[prost(uint64, tag = "9")]
+    pub referral_rewards_amount: u64,
     #[prost(uint64, tag = "10")]
     pub referral_rewards_count: u64,
-    #[prost(message, optional, tag = "11")]
-    pub reward: ::core::option::Option<Amount>,
-}
-/// Supported built-in coin types
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
-#[repr(i32)]
-pub enum CoinType {
-    /// $KCents
-    Core = 0,
-    /// $KCStableCents
-    Stable = 1,
+    #[prost(uint64, tag = "11")]
+    pub reward: u64,
 }
 /// Supported signature schemes
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]

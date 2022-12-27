@@ -2,7 +2,7 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use crate::karma_coin::karma_coin_core_types::{Amount, BlockEvent, CoinType, TransactionEvent};
+use crate::karma_coin::karma_coin_core_types::{BlockEvent, TransactionEvent};
 
 impl BlockEvent {
     pub fn new(height: u64) -> Self {
@@ -12,38 +12,26 @@ impl BlockEvent {
             block_hash: vec![],
             signups_count: 0,
             payments_count: 0,
-            fees_amount: Some(Amount {
-                value: 0,
-                coin_type: CoinType::Core as i32
-            }),
-            signup_rewards_amount: Some(Amount {
-                value: 0,
-                coin_type: CoinType::Core as i32
-            }),
-            referral_rewards_amount: Some(Amount {
-                value: 0,
-                coin_type: CoinType::Core as i32
-            }),
+            fees_amount: 0,
+            signup_rewards_amount: 0,
+            referral_rewards_amount: 0,
             transactions_events: vec![],
-           reward: Some(Amount {
-                value: 0,
-                coin_type: CoinType::Core as i32
-            }),
+            reward: 0,
             referral_rewards_count: 0,
 
         }
     }
 
     pub fn add_signup_reward(&mut self, value: u64) {
-        self.signup_rewards_amount.as_mut().unwrap().value += value;
+        self.signup_rewards_amount += value;
     }
 
     pub fn add_referral_reward(&mut self, value: u64) {
-        self.referral_rewards_amount.as_mut().unwrap().value += value;
+        self.referral_rewards_amount += value;
     }
 
     pub fn add_fee(&mut self, value: u64) {
-        self.fees_amount.as_mut().unwrap().value += value;
+        self.fees_amount += value;
     }
 
     pub fn inc_total_payments(&mut self) {

@@ -7,7 +7,6 @@ use bytes::Bytes;
 use chrono::Utc;
 use prost::Message;
 use base::karma_coin::karma_coin_core_types::*;
-use base::karma_coin::karma_coin_core_types::CoinType::Core;
 use base::server_config_service::{BLOCK_PRODUCER_USER_NAME, ServerConfigService};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use db::types::IntDbKey;
@@ -58,7 +57,7 @@ impl BlockChainService {
                     nonce: 0,
                     user_name,
                     mobile_number: None, // block producer account starts w/o a verified mobile number
-                    balances: vec![],
+                    balance: 0,
                     trait_scores: vec![],
                     pre_keys: vec![],
                 }
@@ -87,8 +86,9 @@ impl BlockChainService {
             author: Some(block_producer.account_id.as_ref().unwrap().clone()),
             height,
             transactions_hashes: transactions_hashes.to_vec(),
-            fees: Some(block_event.fees_amount.as_ref().unwrap().clone()),
-            reward: None,
+            fees: block_event.fees_amount,
+            reward: 0,
+            minted: 0,
             signature: None,
             prev_block_digest: vec![],
             digest: vec![],
@@ -111,10 +111,8 @@ impl BlockChainService {
 
         // set block reward
 
-        block.reward = Some(Amount {
-            value: tokenomics.get_block_reward_amount(height).await?,
-            coin_type: Core as i32,
-        });
+        block.reward = tokenomics.get_block_reward_amount(height).await?;
+
 
         // sign the block
         block.sign(&key_pair.to_ed2559_kaypair())?;
@@ -154,9 +152,8 @@ impl BlockChainService {
 
         // Update block producer balance with block reward and with fees and persist
 
-        let mut balance = block_producer.get_balance(Core);
-        balance.value += block_event.fees_amount.as_ref().unwrap().value;
-        block_producer.update_balance(&balance);
+        block_producer.balance += block_event.fees_amount;
+
         let mut buf = Vec::with_capacity(block_producer.encoded_len());
         block_producer.encode(&mut buf)?;
         DatabaseService::write(WriteItem {
@@ -181,25 +178,26 @@ impl BlockChainService {
         stats.tip_height += 1;
         stats.transactions_count += block.transactions_hashes.len() as u64;
         stats.users_count += block_event.signups_count;
-        stats.fees_amount += block_event.fees_amount.as_ref().unwrap().value;
+        stats.fees_amount += block_event.fees_amount;
 
         stats.payments_transactions_count +=  block_event.payments_count;
         //stats.pa += block_event.payments_count.as_ref().unwrap().value;
-        stats.signup_rewards_amount += block_event.signup_rewards_amount.as_ref().unwrap().value;
+        stats.signup_rewards_amount += block_event.signup_rewards_amount;
         stats.signup_rewards_count += block_event.signups_count;
 
-        stats.referral_rewards_amount += block_event.referral_rewards_amount.as_ref().unwrap().value;
+        stats.referral_rewards_amount += block_event.referral_rewards_amount;
         stats.referral_rewards_count += block_event.referral_rewards_count;
 
         // todo: update tokenomics data
 
-        let _mut sub_count = 0;
+        /*
+        let mut sub_count = 0;
         let mut minted_amount = 0;
 
         for tx_event in block_event.transactions_events.iter() {
             // todo: update subsidies count stats based on the the tx events in the block events (fee type)
 
-        }
+        }*/
 
 
         write_stats(stats).await

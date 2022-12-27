@@ -14,30 +14,16 @@ message AccountId {
     bytes data = 1;
 }
 
-
-// A non-negative coin amount
-message Amount {
-    uint64 value = 1;
-    CoinType coin_type = 2;
-}
-
-// Supported built-in coin types
-enum CoinType {
-    COIN_TYPE_CORE = 0;   // $KCents
-    COIN_TYPE_STABLE = 1; // $KCStableCents
-    // other coin types can be added in future versions of the protocol
-}
-
 // Supported signature schemes
 enum KeyScheme {
     KEY_SCHEME_ED25519 = 0;
 }
 
 message Balance {
-    Amount free = 1;
-    Amount reserved = 2;
-    Amount misc_frozen = 3;
-    Amount fee_frozen = 4;
+    uint64 free = 1;
+    uint64 reserved = 2;
+    uint64 misc_frozen = 3;
+    uint64 fee_frozen = 4;
 }
 
 // An public encryption key
@@ -77,7 +63,7 @@ message User {
     uint64 nonce = 2;
     string user_name = 3; // unique across the system
     MobileNumber mobile_number = 4; // verified current number
-    repeated Balance balances = 5;
+    uint64 balance = 5;
     repeated TraitScore trait_scores = 6;
     repeated PreKey pre_keys = 7; // one-time enc pre-keys for e2e messaging
 }
@@ -103,11 +89,12 @@ message Block {
     AccountId author = 2;
     uint64 height = 3;
     repeated bytes transactions_hashes = 4; // of the signed transactions in this block
-    Amount fees = 5; // total fees paid in this block
+    uint64 fees = 5; // total fees paid in this block
     bytes prev_block_digest = 6; // digest of block in consensus at the previous height
     core_types.Signature signature = 7;
-    Amount reward = 8;
-    bytes digest = 9; // block digest includes hash of all above data
+    uint64 reward = 8;
+    uint64 minted= 9; // total coins minted in this block (rewards + tx fee subsidies)
+    bytes digest = 10; // block digest includes hash of all above data
 
 }
 
@@ -157,7 +144,7 @@ message UpdateUserV1 {
 // Basic payment transaction with optional character appreciation
 message PaymentTransactionV1 {
     MobileNumber to = 1; // dest is always a mobile number (of a user or a non-user)
-    Amount amount = 2; // amount in tokens to transfer
+    uint64 amount = 2; // amount in tokens to transfer
     CharTrait char_trait = 3; // char trait set by sender. e.g. smart
 }
 
@@ -210,7 +197,7 @@ message SignedTransaction {
     AccountId signer = 1; // account this tx is signed by
     uint64 timestamp = 2; // time transaction was signed
     uint64 nonce = 3; // tx nonce
-    Amount fee = 4; // network fee provided by sender
+    uint64 fee = 4; // network fee provided by sender
     TransactionData transaction_Data = 5; // binary transaction data
     uint32 network_id = 6; // network id to avoid confusion with testnets
     Signature signature = 7; // signer signature on all of the above data
@@ -242,8 +229,8 @@ message NewUserEvent {
     uint64 timestamp = 1;
     AccountId signer = 2;
     SignupMethod sign_up_method = 3;
-    Amount referred_reward = 4; // for invites - inviter gets a reward - protocol constant
-    Amount signup_reward = 5;
+    uint64 referred_reward = 4; // for invites - inviter gets a reward - protocol constant
+    uint64 signup_reward = 5;
     PhoneVerifier verifier = 6;
 }
 
@@ -315,11 +302,11 @@ message BlockEvent {
     repeated TransactionEvent transactions_events = 4;
     uint64 signups_count = 5;
     uint64 payments_count = 6;
-    Amount fees_amount = 7;
-    Amount signup_rewards_amount = 8;
-    Amount referral_rewards_amount = 9;
+    uint64 fees_amount = 7;
+    uint64 signup_rewards_amount = 8;
+    uint64 referral_rewards_amount = 9;
     uint64 referral_rewards_count = 10;
-    Amount reward = 11;
+    uint64 reward = 11;
 }
 
 
