@@ -43,7 +43,8 @@ pub(crate) async fn get_payee_user(tx: &SignedTransaction) -> Result<Option<User
 }
 
 pub(crate) struct PaymentProcessingResult {
-    pub(crate) fee_type: FeeType
+    pub(crate) fee_type: FeeType,
+    pub(crate) referral_reward: u64
 }
 
 /// Process a payment transaction - update ledger state, emit tx event
@@ -95,6 +96,8 @@ pub(crate) async fn process_transaction(
     let mut payer_balance = payer.get_balance(coin_type);
     payer_balance.value -= payment.value + user_tx_fee;
 
+    let referral_reward = tokenomics.get_referral_reward_amount().await?;
+
     // apply new user referral reward to the payer if applicable
     if sign_ups.contains_key(mobile_number.as_bytes()) {
 
@@ -104,7 +107,6 @@ pub(crate) async fn process_transaction(
         // this is a new user referral payment tx - payer should get the referral fee!
         let _sign_up_tx = sign_ups.get(mobile_number.as_bytes()).unwrap();
         // todo: award signer with the referral reward if applicable
-        let referral_reward = tokenomics.get_referral_reward_amount().await?;
         payer_balance.value += referral_reward;
     };
 
@@ -148,6 +150,7 @@ pub(crate) async fn process_transaction(
     }).await?;
 
     Ok(PaymentProcessingResult {
-        fee_type
+        fee_type,
+        referral_reward
     })
 }

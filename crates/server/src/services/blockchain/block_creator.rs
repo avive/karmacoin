@@ -177,11 +177,12 @@ impl BlockChainService {
     /// Update blockchain stats with new block data and store in db
     async fn update_blockchain_stats(mut stats: BlockchainStats, block_event: &BlockEvent, block: &Block) -> Result<()> {
 
+        stats.last_block_time = block.time;
         stats.tip_height += 1;
+        stats.transactions_count += block.transactions_hashes.len() as u64;
         stats.users_count += block_event.signups_count;
         stats.fees_amount += block_event.fees_amount.as_ref().unwrap().value;
-        stats.transactions_count += block.transactions_hashes.len() as u64;
-        stats.last_block_time = block.time;
+
         stats.payments_transactions_count +=  block_event.payments_count;
         //stats.pa += block_event.payments_count.as_ref().unwrap().value;
         stats.signup_rewards_amount += block_event.signup_rewards_amount.as_ref().unwrap().value;
@@ -192,7 +193,8 @@ impl BlockChainService {
 
         // todo: update tokenomics data
 
-        let mut sub_count = 0;
+        let _mut sub_count = 0;
+        let mut minted_amount = 0;
 
         for tx_event in block_event.transactions_events.iter() {
             // todo: update subsidies count stats based on the the tx events in the block events (fee type)

@@ -68,7 +68,7 @@ message GetGenesisDataResponse {
   uint32 network_id = 1; // from genesis
   string api_version = 2; // the provided API semantic version
   uint64 genesis_time = 3; // from genesis
-  string name = 4; // from genesis
+  string network_name = 4; // from genesis
 }
 
 message GetBlockchainDataRequest {

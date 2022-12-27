@@ -15,6 +15,8 @@ impl TransactionEvent {
             result: ExecutionResult::Executed as i32,
             error_message: "".to_string(),
             fee_type: FeeType::Mint as i32,
+            referral_reward: 0,
+            signup_reward: 0,
         }
     }
 }

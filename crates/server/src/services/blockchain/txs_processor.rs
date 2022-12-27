@@ -68,6 +68,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                 Ok(res) => {
                     info!("new user transaction processed: {:?}", tx_event);
                     tx_event.fee_type = res.fee_type as i32;
+                    tx_event.signup_reward = res.signup_reward;
                     tx_hashes.push(tx_hash.to_vec());
                     block_event.signups_count += 1;
                     block_event.add_fee(tx_event.transaction.as_ref().unwrap().fee.as_ref().unwrap().value);
@@ -121,6 +122,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                             Ok(res) => {
                                 tx_event.result = ExecutionResult::Executed as i32;
                                 tx_event.fee_type = res.fee_type as i32;
+                                tx_event.referral_reward = res.referral_reward;
 
                                 info!("payment transaction processed: {:?}", tx_event);
                                 tx_hashes.push(tx_hash.to_vec());

@@ -13,7 +13,8 @@ use crate::services::blockchain::tokenomics::Tokenomics;
 
 pub(crate) struct NewUserProcessingResult {
     pub(crate) mobile_number: String,
-    pub(crate) fee_type: FeeType
+    pub(crate) fee_type: FeeType,
+    pub(crate) signup_reward: u64,
 }
 
 /// Process a new user transaction - update ledger state, emit tx event
@@ -140,5 +141,6 @@ pub(crate) async fn process_transaction(transaction: &SignedTransaction, tokenom
     Ok(NewUserProcessingResult{
         mobile_number: user_mobile_number.number.clone(),
         fee_type,
+        signup_reward: signup_reward_amount
     })
 }

@@ -67,7 +67,7 @@ pub struct GetGenesisDataResponse {
     pub genesis_time: u64,
     /// from genesis
     #[prost(string, tag = "4")]
-    pub name: ::prost::alloc::string::String,
+    pub network_name: ::prost::alloc::string::String,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetBlockchainDataRequest {}

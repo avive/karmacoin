@@ -290,6 +290,10 @@ pub struct TransactionEvent {
     pub error_message: ::prost::alloc::string::String,
     #[prost(enumeration = "FeeType", tag = "7")]
     pub fee_type: i32,
+    #[prost(uint64, tag = "8")]
+    pub signup_reward: u64,
+    #[prost(uint64, tag = "9")]
+    pub referral_reward: u64,
 }
 /// A collection of events for a transaction
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]

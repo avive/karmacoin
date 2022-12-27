@@ -256,6 +256,8 @@ message TransactionEvent {
     ExecutionResult result = 5;
     string error_message = 6;
     FeeType fee_type = 7;
+    uint64 signup_reward = 8;
+    uint64 referral_reward = 9;
 }
 
 // A collection of events for a transaction
