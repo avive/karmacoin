@@ -12,10 +12,54 @@ use prost::Message;
 use base::karma_coin::karma_coin_core_types::ExecutionInfo::{InvalidData, NicknameInvalid, NicknameNotAvailable};
 use crate::services::blockchain::tokenomics::Tokenomics;
 
+/// Helper function - update user's nickname
+async fn update_nickname(user: &mut User, nickname: String, event: &mut TransactionEvent) -> Result<()> {
+    let nick_name_key = Bytes::from(nickname.as_bytes().to_vec());
+    let account_id = user.account_id.as_ref().unwrap();
+    // verify that the requested nickname not registered to another user
 
+    if (DatabaseService::read(ReadItem {
+        key: nick_name_key.clone(),
+        cf: RESERVED_NICKS_COL_FAMILY
+    }).await?).is_some() {
+        event.info = NicknameNotAvailable as i32;
+        return Ok(());
+    }
+
+    if (DatabaseService::read(ReadItem {
+        key: nick_name_key.clone(),
+        cf: NICKS_COL_FAMILY
+    }).await?).is_some() {
+        event.info = NicknameNotAvailable as i32;
+        return Ok(());
+    }
+
+    // update user's nickname
+    user.user_name = nickname.clone();
+    let mut buf = Vec::with_capacity(user.encoded_len());
+    user.encode(&mut buf)?;
+    DatabaseService::write(WriteItem {
+        data: DataItem {
+            key: Bytes::from(account_id.data.clone()),
+            value: Bytes::from(buf),
+        },
+        cf: USERS_COL_FAMILY,
+        ttl: 0,
+    }).await?;
+
+    // update nickname index
+    DatabaseService::write(WriteItem {
+        data: DataItem {
+            key: nick_name_key,
+            value: Bytes::from(account_id.data.to_vec())
+        },
+        cf: NICKS_COL_FAMILY,
+        ttl: 0,
+    }).await
+}
 
 /// Process a user update transaction
-pub(crate) async fn _process_transaction(transaction: &SignedTransaction, tokenomics: &Tokenomics, event: &mut TransactionEvent) -> Result<()> {
+pub(crate) async fn process_transaction(transaction: &SignedTransaction, tokenomics: &Tokenomics, event: &mut TransactionEvent) -> Result<()> {
     let account_id = transaction.signer.as_ref().ok_or_else(|| anyhow!("missing account id in tx"))?;
     let tx_hash = transaction.get_hash()?;
 
@@ -81,49 +125,7 @@ pub(crate) async fn _process_transaction(transaction: &SignedTransaction, tokeno
     // handle nickname update request...
 
     if user.user_name != requested_nickname {
-
-        // verify that the requested nickname not registered to another user
-        let nick_name_key = Bytes::from(requested_nickname.as_bytes().to_vec());
-
-        if (DatabaseService::read(ReadItem {
-            key: nick_name_key.clone(),
-            cf: RESERVED_NICKS_COL_FAMILY
-        }).await?).is_some() {
-            event.info = NicknameNotAvailable as i32;
-            return Ok(());
-        }
-
-        if (DatabaseService::read(ReadItem {
-            key: nick_name_key.clone(),
-            cf: NICKS_COL_FAMILY
-        }).await?).is_some() {
-            event.info = NicknameNotAvailable as i32;
-            return Ok(());
-        }
-
-        // update user's nickname
-        user.user_name = requested_nickname.clone();
-        let mut buf = Vec::with_capacity(user.encoded_len());
-        user.encode(&mut buf)?;
-        DatabaseService::write(WriteItem {
-            data: DataItem {
-                key: Bytes::from(account_id.data.clone()),
-                value: Bytes::from(buf),
-            },
-            cf: USERS_COL_FAMILY,
-            ttl: 0,
-        }).await?;
-
-        // update nickname index
-        DatabaseService::write(WriteItem {
-            data: DataItem {
-                key: Bytes::from(
-                    requested_nickname.as_bytes().to_vec()),
-                value: Bytes::from(account_id.data.to_vec())
-            },
-            cf: NICKS_COL_FAMILY,
-            ttl: 0,
-        }).await?;
+        update_nickname(&mut user, requested_nickname, event).await?;
     }
 
     // handle mobile number update, if requested
@@ -177,7 +179,6 @@ pub(crate) async fn _process_transaction(transaction: &SignedTransaction, tokeno
         cf: MOBILE_NUMBERS_COL_FAMILY,
         ttl: 0,
     }).await?;
-
 
     let mut tx_data = Vec::with_capacity(transaction.encoded_len());
     transaction.encode(&mut tx_data)?;

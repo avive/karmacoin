@@ -11,7 +11,7 @@ use base::karma_coin::karma_coin_core_types::TransactionType::NewUserV1;
 use db::db_service::{DatabaseService, ReadItem};
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::mem_pool_service::{GetTransactions, MemPoolService, RemoveOldTransactions, RemoveOnChainTransactions, RemoveTransactionByHash, RemoveTransactionsByHashes};
-use crate::services::blockchain::{new_user_tx_processor, payment_tx_processor};
+use crate::services::blockchain::{new_user_tx_processor, payment_tx_processor, update_tx_processor};
 use crate::services::blockchain::stats::{get_stats};
 use crate::services::db_config_service::USERS_COL_FAMILY;
 
@@ -141,7 +141,21 @@ impl Handler<ProcessTransactions> for BlockChainService {
                     }
                 },
                 TransactionType::UpdateUserV1 => {
-                    todo!("process update user transaction");
+                    match update_tx_processor::process_transaction(tx, &tokenomics, &mut tx_event).await {
+                        Ok(_) => {
+                            info!("update user transaction processed: {:?}", tx_event);
+                            tx_hashes.push(tx_hash.to_vec());
+                            block_event.add_fee(tx_event.transaction.as_ref().unwrap().fee);
+                            block_event.add_transaction_event(tx_event.clone());
+
+                        },
+                        Err(e) => {
+                            error!("Failed to process update user transaction: {:?}", e);
+                            tx_event.result = ExecutionResult::Invalid as i32;
+                            tx_event.error_message = e.to_string();
+                        }
+                    }
+                    BlockChainService::emit_tx_event(tx_event).await?;
                 },
                 _ => {
                     // ignore other transaction types
