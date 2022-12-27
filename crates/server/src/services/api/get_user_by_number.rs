@@ -48,6 +48,7 @@ impl Handler<GetUserInfoByNumber> for ApiService {
                     None => Ok(GetUserInfoByNumberResponse { user: None }),
                 }
             }
+
             None => Ok(GetUserInfoByNumberResponse { user: None }),
         }
     }

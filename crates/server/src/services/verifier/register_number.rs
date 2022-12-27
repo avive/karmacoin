@@ -49,14 +49,13 @@ impl Handler<RegisterNumber> for VerifierService {
         })
         .await?
         {
-            // number already registered for a user account
-
-            // compare account ids
             return if user_data.0 == account_id.data {
+                // number already registered for this account
                 let mut resp = RegisterNumberResponse::from(NumberAlreadyRegistered);
                 resp.sign(&verifier_key_pair)?;
                 Ok(resp)
             } else {
+                // number already registered for another account
                 let mut resp = RegisterNumberResponse::from(NumberAccountExists);
                 resp.sign(&verifier_key_pair)?;
                 Ok(resp)

@@ -140,6 +140,5 @@ service ApiService {
 
   // Get execution events for one or more blocks
   rpc GetBlockchainEvents(GetBlockchainEventsRequest) returns (GetBlockchainEventsResponse) {
-
   }
 }

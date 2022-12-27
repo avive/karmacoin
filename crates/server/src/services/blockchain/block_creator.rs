@@ -6,7 +6,7 @@ use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::stats::write_stats;
 use crate::services::blockchain::tokenomics::Tokenomics;
 use crate::services::db_config_service::{
-    BLOCKS_COL_FAMILY, BLOCK_EVENTS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, USERS_COL_FAMILY,
+    BLOCKS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, USERS_COL_FAMILY,
 };
 use anyhow::Result;
 use base::karma_coin::karma_coin_core_types::*;
@@ -120,7 +120,6 @@ impl BlockChainService {
         };
 
         // set block reward
-
         block.reward = tokenomics.get_block_reward_amount(height).await?;
 
         // sign the block
@@ -146,22 +145,11 @@ impl BlockChainService {
 
         // Update and persist block event
         block_event.block_hash = block.digest.clone();
-
-        let mut buf = Vec::with_capacity(block_event.encoded_len());
-        block_event.encode(&mut buf)?;
-        DatabaseService::write(WriteItem {
-            data: DataItem {
-                key: IntDbKey::from(height).0,
-                value: Bytes::from(buf),
-            },
-            cf: BLOCK_EVENTS_COL_FAMILY,
-            ttl: 0,
-        })
-        .await?;
+        BlockChainService::emit_block_event(&block_event).await?;
 
         // Update block producer balance with block reward and with fees and persist
 
-        block_producer.balance += block_event.fees_amount;
+        block_producer.balance += block_event.fees_amount + block.reward;
 
         let mut buf = Vec::with_capacity(block_producer.encoded_len());
         block_producer.encode(&mut buf)?;
