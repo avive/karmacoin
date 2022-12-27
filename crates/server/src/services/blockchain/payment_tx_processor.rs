@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
 use prost::Message;
-use base::karma_coin::karma_coin_core_types::{FeeType, PaymentTransactionV1, SignedTransaction, User};
+use base::karma_coin::karma_coin_core_types::{ExecutionResult, FeeType, PaymentTransactionV1, SignedTransaction, TransactionEvent, User};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use crate::services::blockchain::tokenomics::Tokenomics;
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY};
@@ -42,11 +42,6 @@ pub(crate) async fn get_payee_user(tx: &SignedTransaction) -> Result<Option<User
 
 }
 
-pub(crate) struct PaymentProcessingResult {
-    pub(crate) fee_type: FeeType,
-    pub(crate) referral_reward: u64
-}
-
 /// Process a payment transaction - update ledger state, emit tx event
 /// This is a helper method for the block creator and is used as part of block creation flow
 pub(crate) async fn process_transaction(
@@ -54,7 +49,8 @@ pub(crate) async fn process_transaction(
     payer: &mut User,
     payee: &mut User,
     sign_ups: &mut HashMap<Vec<u8>, SignedTransaction>,
-    tokenomics: &Tokenomics) -> Result<PaymentProcessingResult> {
+    tokenomics: &Tokenomics,
+    event: &mut TransactionEvent) -> Result<()> {
 
     transaction.validate(payer.nonce).await?;
 
@@ -141,8 +137,9 @@ pub(crate) async fn process_transaction(
         ttl: 0,
     }).await?;
 
-    Ok(PaymentProcessingResult {
-        fee_type,
-        referral_reward
-    })
+    event.referral_reward = referral_reward;
+    event.fee_type = fee_type as i32;
+    event.result = ExecutionResult::Executed as i32;
+
+    Ok(())
 }

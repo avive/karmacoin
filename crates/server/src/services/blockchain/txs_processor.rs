@@ -64,11 +64,9 @@ impl Handler<ProcessTransactions> for BlockChainService {
             // the transaction event for the new user transaction
             let mut tx_event = TransactionEvent::new(height, tx, tx_hash);
 
-            match new_user_tx_processor::process_transaction(tx, &tokenomics).await {
+            match new_user_tx_processor::process_transaction(tx, &tokenomics, &mut tx_event).await {
                 Ok(res) => {
                     info!("new user transaction processed: {:?}", tx_event);
-                    tx_event.fee_type = res.fee_type as i32;
-                    tx_event.signup_reward = res.signup_reward;
                     tx_hashes.push(tx_hash.to_vec());
                     block_event.signups_count += 1;
                     block_event.add_fee(tx_event.transaction.as_ref().unwrap().fee);
@@ -94,7 +92,6 @@ impl Handler<ProcessTransactions> for BlockChainService {
         // process other transactions types
         for (tx_hash, tx) in mem_pool.call(GetTransactions).await??.iter() {
             let tx_type = tx.get_tx_type()?;
-
             let mut tx_event = TransactionEvent::new(height, tx, tx_hash);
 
             // Get tx issuer user from chain and reject tx if it doesn't exist
@@ -110,6 +107,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                     mem_pool.call(RemoveTransactionByHash(tx_hash.to_vec())).await??;
                     tx_event.result = ExecutionResult::Invalid as i32;
                     tx_event.error_message = "Tx signer user not found on chain - discarding tx".to_string();
+
                     BlockChainService::emit_tx_event(tx_event.clone()).await?;
                     continue;
                 }
@@ -118,11 +116,9 @@ impl Handler<ProcessTransactions> for BlockChainService {
             match tx_type {
                 TransactionType::PaymentV1 => {
                     if let Some(mut payee) = payment_tx_processor::get_payee_user(tx).await? {
-                        match payment_tx_processor::process_transaction(tx, &mut user, &mut payee, &mut     sign_ups, &tokenomics).await {
-                            Ok(res) => {
-                                tx_event.result = ExecutionResult::Executed as i32;
-                                tx_event.fee_type = res.fee_type as i32;
-                                tx_event.referral_reward = res.referral_reward;
+                        match payment_tx_processor::process_transaction(tx, &mut user,
+                                                                        &mut payee, &mut sign_ups, &tokenomics, &mut tx_event).await {
+                            Ok(_) => {
 
                                 info!("payment transaction processed: {:?}", tx_event);
                                 tx_hashes.push(tx_hash.to_vec());

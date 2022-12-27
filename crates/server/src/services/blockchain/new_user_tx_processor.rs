@@ -5,21 +5,19 @@
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
 
-use base::karma_coin::karma_coin_core_types::{FeeType, SignedTransaction};
+use base::karma_coin::karma_coin_core_types::{ExecutionResult, FeeType, SignedTransaction, TransactionEvent};
 use db::db_service::{DatabaseService, DataItem, ReadItem, WriteItem};
 use crate::services::db_config_service::{MOBILE_NUMBERS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY};
 use prost::Message;
 use crate::services::blockchain::tokenomics::Tokenomics;
 
 pub(crate) struct NewUserProcessingResult {
-    pub(crate) mobile_number: String,
-    pub(crate) fee_type: FeeType,
-    pub(crate) signup_reward: u64,
+    pub(crate) mobile_number: String
 }
 
 /// Process a new user transaction - update ledger state, emit tx event
 /// This method will not add the tx to a block and is used as part of block creation flow
-pub(crate) async fn process_transaction(transaction: &SignedTransaction, tokenomics: &Tokenomics) -> Result<NewUserProcessingResult> {
+pub(crate) async fn process_transaction(transaction: &SignedTransaction, tokenomics: &Tokenomics, event: &mut TransactionEvent) -> Result<NewUserProcessingResult> {
 
     let account_id = transaction.signer.as_ref().ok_or_else(|| anyhow!("missing account id in tx"))?;
     let tx_hash = transaction.get_hash()?;
@@ -130,9 +128,11 @@ pub(crate) async fn process_transaction(transaction: &SignedTransaction, tokenom
         ttl: 0,
     }).await?;
 
+    event.fee_type = fee_type as i32;
+    event.signup_reward = signup_reward_amount;
+    event.result = ExecutionResult::Executed as i32;
+
     Ok(NewUserProcessingResult{
         mobile_number: user_mobile_number.number.clone(),
-        fee_type,
-        signup_reward: signup_reward_amount
     })
 }
