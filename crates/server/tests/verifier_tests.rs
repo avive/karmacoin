@@ -69,7 +69,7 @@ async fn register_number_happy_flow_test() {
 
     // user's requested nickname
     v_request.nickname = "avive".into();
-    v_request.sign(&client_ed_key_pair).unwrap();
+    v_request.signature = Some(v_request.sign(&client_ed_key_pair).unwrap());
 
     let resp1 = verifier_service.verify_number(v_request).await.unwrap();
 
@@ -131,7 +131,9 @@ async fn register_number_no_code_test() {
     register_number_request.account_id = Some(AccountId {
         data: account_id.clone(),
     });
-    register_number_request.sign(&client_ed_key_pair).unwrap();
+
+    register_number_request.signature =
+        Some(register_number_request.sign(&client_ed_key_pair).unwrap());
 
     let mut verifier_service = PhoneNumbersVerifierServiceClient::connect("http://[::1]:9888")
         .await
@@ -150,7 +152,7 @@ async fn register_number_no_code_test() {
     });
     v_request.account_id = Some(AccountId { data: account_id });
     v_request.nickname = "avive".into();
-    v_request.sign(&client_ed_key_pair).unwrap();
+    v_request.signature = Some(v_request.sign(&client_ed_key_pair).unwrap());
 
     let resp1 = verifier_service.verify_number(v_request).await.unwrap();
 
@@ -181,7 +183,8 @@ async fn register_number_wrong_code_test() {
     register_number_request.account_id = Some(AccountId {
         data: account_id.clone(),
     });
-    register_number_request.sign(&client_ed_key_pair).unwrap();
+    register_number_request.signature =
+        Some(register_number_request.sign(&client_ed_key_pair).unwrap());
 
     let mut verifier_service = PhoneNumbersVerifierServiceClient::connect("http://[::1]:9888")
         .await
@@ -208,7 +211,7 @@ async fn register_number_wrong_code_test() {
 
     // user's requested nickname
     v_request.nickname = "avive".into();
-    v_request.sign(&client_ed_key_pair).unwrap();
+    v_request.signature = Some(v_request.sign(&client_ed_key_pair).unwrap());
 
     let resp1 = verifier_service.verify_number(v_request).await.unwrap();
 
@@ -239,7 +242,8 @@ async fn verifier_nickname_taken_test() {
     register_number_request.account_id = Some(AccountId {
         data: account_id.clone(),
     });
-    register_number_request.sign(&client_ed_key_pair).unwrap();
+    register_number_request.signature =
+        Some(register_number_request.sign(&client_ed_key_pair).unwrap());
 
     let mut verifier_service = PhoneNumbersVerifierServiceClient::connect("http://[::1]:9888")
         .await
@@ -266,7 +270,7 @@ async fn verifier_nickname_taken_test() {
 
     // user's requested nickname
     v_request.nickname = "avive".into();
-    v_request.sign(&client_ed_key_pair).unwrap();
+    v_request.signature = Some(v_request.sign(&client_ed_key_pair).unwrap());
 
     let resp1 = verifier_service.verify_number(v_request).await.unwrap();
 
@@ -285,7 +289,9 @@ async fn verifier_nickname_taken_test() {
     register_number_request1.account_id = Some(AccountId {
         data: account1_id.clone(),
     });
-    register_number_request1.sign(&client1_ed_key_pair).unwrap();
+    register_number_request1.signature =
+        Some(register_number_request1.sign(&client1_ed_key_pair).unwrap());
+
     let resp = verifier_service
         .register_number(register_number_request1)
         .await
@@ -306,7 +312,7 @@ async fn verifier_nickname_taken_test() {
 
     // request nickname already reserved by another registration
     v_request1.nickname = "avive".into();
-    v_request1.sign(&client1_ed_key_pair).unwrap();
+    v_request1.signature = Some(v_request1.sign(&client1_ed_key_pair).unwrap());
     let resp1 = verifier_service.verify_number(v_request1).await.unwrap();
     let v_resp = resp1.into_inner();
     assert_eq!(v_resp.result, VerifyNumberResult::NicknameTaken as i32);

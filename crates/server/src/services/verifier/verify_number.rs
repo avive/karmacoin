@@ -125,8 +125,8 @@ impl Handler<Verify> for VerifierService {
             .await?)
                 .is_some()
             {
-                let resp = VerifyNumberResponse::from(NicknameTaken);
-                resp.sign(&verifier_key_pair)?;
+                let mut resp = VerifyNumberResponse::from(NicknameTaken);
+                resp.signature = Some(resp.sign(&verifier_key_pair)?);
                 return Ok(resp);
             }
 
