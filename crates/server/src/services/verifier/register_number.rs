@@ -112,6 +112,7 @@ mod tests {
     use base::karma_coin::karma_coin_verifier::{
         RegisterNumberRequest, RegisterNumberResponse, RegisterNumberResult::*,
     };
+    use base::signed_trait::SignedTrait;
     use base::test_helpers::enable_logger;
     use db::db_service::DatabaseService;
     use xactor::Service;
@@ -135,7 +136,8 @@ mod tests {
         });
         let account_id = client_ed_key_pair.public.to_bytes().to_vec();
         register_number_request.account_id = Some(AccountId { data: account_id });
-        register_number_request.sign(&client_ed_key_pair).unwrap();
+        register_number_request.signature =
+            Some(register_number_request.sign(&client_ed_key_pair).unwrap());
 
         let verifier = VerifierService::from_registry().await.unwrap();
 

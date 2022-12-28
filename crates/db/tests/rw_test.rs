@@ -7,11 +7,11 @@ extern crate log;
 
 use db::db_service::{DataItem, DatabaseService, Destroy, ReadItem, WriteItem};
 
+use base::client_config_service::TESTS_COL_FAMILY;
 use base::test_helpers::enable_logger;
 use bytes::Bytes;
 use db::db_service;
 use rocksdb::{ColumnFamilyDescriptor, Options};
-use base::client_config_service::TESTS_COL_FAMILY;
 use xactor::*;
 
 #[tokio::test]
@@ -112,5 +112,8 @@ async fn test_read_write_string_keys() {
     let data = res.expect("expected data from db").unwrap();
     assert_eq!(data.0, value2, "expected to get stored value");
 
-    addr.call(Destroy).await.expect("failed to delete the db");
+    addr.call(Destroy)
+        .await
+        .expect("failed to delete the db")
+        .expect("");
 }

@@ -3,10 +3,42 @@
 //
 
 use crate::karma_coin::karma_coin_core_types::Block;
+use crate::signed_trait::SignedTrait;
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
-use ed25519_dalek::{Keypair, Signer, Verifier};
+use ed25519_dalek::{PublicKey, Signature};
 use prost::Message;
+
+impl SignedTrait for Block {
+    fn get_sign_message(&self) -> Result<Vec<u8>> {
+        let mut cloned = self.clone();
+        cloned.signature = None;
+        let mut buf = Vec::with_capacity(cloned.encoded_len());
+        cloned.encode(&mut buf)?;
+        Ok(buf.to_vec())
+    }
+
+    fn get_signature(&self) -> Result<Signature> {
+        Ok(Signature::from_bytes(
+            &self
+                .signature
+                .as_ref()
+                .ok_or_else(|| anyhow!("no signature found"))?
+                .signature
+                .clone(),
+        )?)
+    }
+
+    fn get_public_key(&self) -> Result<PublicKey> {
+        Ok(PublicKey::from_bytes(
+            self.author
+                .as_ref()
+                .ok_or_else(|| anyhow!("missing key data"))?
+                .data
+                .as_slice(),
+        )?)
+    }
+}
 
 impl Block {
     /// Returns the transaction canonical hash
@@ -15,43 +47,5 @@ impl Block {
         self.encode(&mut buf)?;
         let hash = orion::hash::digest(&buf).map_err(|e| anyhow!("failed to hash data: {}", e))?;
         Ok(Bytes::from(hash.as_ref().to_vec()))
-    }
-
-    /// Verify the signer's signature
-    pub fn verify_signature(&self) -> Result<()> {
-        let mut cloned = self.clone();
-        cloned.signature = None;
-
-        let mut buf = Vec::with_capacity(cloned.encoded_len());
-        if cloned.encode(&mut buf).is_err() {
-            return Err(anyhow!("invalid binary tx data"));
-        };
-
-        let signer = self
-            .author
-            .as_ref()
-            .ok_or_else(|| anyhow!("missing account id"))?;
-        let signature_data = self
-            .signature
-            .as_ref()
-            .ok_or_else(|| anyhow!("missing signature"))?;
-        let signature = ed25519_dalek::Signature::from_bytes(&signature_data.signature)?;
-        let signer_pub_key = ed25519_dalek::PublicKey::from_bytes(signer.data.as_slice())?;
-        signer_pub_key
-            .verify(&buf, &signature)
-            .map_err(|_| anyhow!("invalid signature"))
-    }
-
-    pub fn sign(&mut self, key_pair: &Keypair) -> Result<()> {
-        let mut buf = Vec::with_capacity(self.encoded_len());
-        self.encode(&mut buf)?;
-
-        use crate::karma_coin::karma_coin_core_types::Signature;
-        self.signature = Some(Signature {
-            scheme: 0,
-            signature: key_pair.sign(&buf).as_ref().to_vec(),
-        });
-
-        Ok(())
     }
 }

@@ -12,6 +12,7 @@ use base::karma_coin::karma_coin_core_types::{
 use base::karma_coin::karma_coin_verifier::phone_numbers_verifier_service_client::PhoneNumbersVerifierServiceClient;
 use base::karma_coin::karma_coin_verifier::RegisterNumberResult::CodeSent;
 use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, VerifyNumberRequest};
+use base::signed_trait::SignedTrait;
 use base::test_helpers::enable_logger;
 use db::db_service::DatabaseService;
 use server::server_service::{ServerService, Startup};
@@ -39,7 +40,9 @@ async fn register_number_happy_flow_test() {
     register_number_request.account_id = Some(AccountId {
         data: account_id.clone(),
     });
-    register_number_request.sign(&client_ed_key_pair).unwrap();
+
+    register_number_request.signature =
+        Some(register_number_request.sign(&client_ed_key_pair).unwrap());
 
     let mut verifier_service = PhoneNumbersVerifierServiceClient::connect("http://[::1]:9888")
         .await

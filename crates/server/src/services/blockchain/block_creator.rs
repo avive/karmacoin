@@ -10,6 +10,7 @@ use crate::services::db_config_service::{
 use anyhow::Result;
 use base::karma_coin::karma_coin_core_types::*;
 use base::server_config_service::{ServerConfigService, BLOCK_PRODUCER_USER_NAME};
+use base::signed_trait::SignedTrait;
 use bytes::Bytes;
 use chrono::Utc;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
@@ -122,7 +123,7 @@ impl BlockChainService {
         block.reward = tokenomics.get_block_reward_amount(height).await?;
 
         // sign the block
-        block.sign(&key_pair.to_ed2559_kaypair())?;
+        block.signature = Some(block.sign(&key_pair.to_ed2559_kaypair())?);
 
         // compute block hash (including the signature) and set it
         block.digest = block.get_hash()?.to_vec();
