@@ -16,6 +16,8 @@ use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use xactor::*;
 
 use base::hex_utils::short_hex_string;
+use base::karma_coin::karma_coin_core_types::AccountId;
+use base::signed_trait::SignedTrait;
 use rand::prelude::*;
 use rand_chacha::ChaCha20Rng;
 
@@ -52,12 +54,19 @@ impl Handler<RegisterNumber> for VerifierService {
             return if user_data.0 == account_id.data {
                 // number already registered for this account
                 let mut resp = RegisterNumberResponse::from(NumberAlreadyRegistered);
-                resp.sign(&verifier_key_pair)?;
+                resp.account_id = Some(AccountId {
+                    data: verifier_key_pair.public.as_bytes().to_vec(),
+                });
+
+                resp.signature = Some(resp.sign(&verifier_key_pair)?);
                 Ok(resp)
             } else {
                 // number already registered for another account
                 let mut resp = RegisterNumberResponse::from(NumberAccountExists);
-                resp.sign(&verifier_key_pair)?;
+                resp.account_id = Some(AccountId {
+                    data: verifier_key_pair.public.as_bytes().to_vec(),
+                });
+                resp.signature = Some(resp.sign(&verifier_key_pair)?);
                 Ok(resp)
             };
         }
@@ -89,7 +98,7 @@ impl Handler<RegisterNumber> for VerifierService {
 
         let mut resp = RegisterNumberResponse::from(CodeSent);
         resp.code = code;
-        resp.sign(&verifier_key_pair)?;
+        resp.signature = Some(resp.sign(&verifier_key_pair)?);
         Ok(resp)
     }
 }

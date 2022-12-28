@@ -5,9 +5,7 @@
 syntax = "proto3";
 package karma_coin.core_types;
 
-//////////////////
 // Basic KarmaCoin data types
-/////////////////
 
 // Derived from a public key
 message AccountId {

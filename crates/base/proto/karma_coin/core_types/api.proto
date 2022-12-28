@@ -7,6 +7,45 @@ package karma_coin.api;
 
 import "karma_coin/core_types/types.proto";
 
+// Unified public API provided by blockchain nodes and verifiers
+service ApiService {
+  // check if a nickname is available
+  rpc GetUserInfoByNick(GetUserInfoByNickRequest) returns (GetUserInfoByNickResponse);
+
+  // Returns on-chain user info by phone number if user exists
+  rpc GetUserInfoByNumber(GetUserInfoByNumberRequest) returns (GetUserInfoByNumberResponse);
+
+  // Returns on-chain user info by account id if user exists
+  rpc GetUserInfoByAccount(GetUserInfoByAccountRequest) returns (GetUserInfoByAccountResponse);
+
+  // Returns the identity of all phone verifiers registered on chain
+  rpc GetPhoneVerifiers(GetPhoneVerifiersRequest) returns (GetPhoneVerifiersResponse);
+
+  // Returns all char traits on-chain
+  rpc GetCharTraits(GetCharTraitsRequest) returns (GetCharTraitsResponse);
+
+  // Returns the current blockchain state
+  rpc GetBlockchainData(GetBlockchainDataRequest) returns (GetBlockchainDataResponse);
+
+  // Returns the current blockchain state
+  rpc GetGenesisData(GetGenesisDataRequest) returns (GetGenesisDataResponse);
+
+  // Submit a signed transaction to the blockchain
+  rpc SubmitTransaction(SubmitTransactionRequest) returns (SubmitTransactionResponse);
+
+  // Get all transactions between two account, included transactions in the pool and not yet on-chain
+  // Results include txs current status
+  rpc GetTransactions(GetTransactionsRequest) returns (GetTransactionsResponse);
+
+  // Get transaction data by its digest hash. Transaction may be in pool or on-chain
+  rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse);
+
+  // Get execution events for one or more blocks
+  rpc GetBlockchainEvents(GetBlockchainEventsRequest) returns (GetBlockchainEventsResponse) {
+  }
+}
+
+
 message GetUserInfoByNickRequest {
   string nickname = 1;
 }
@@ -129,40 +168,3 @@ message GetBlockchainEventsResponse {
 
 }
 
-// Unified public API provided by blockchain nodes and verifiers
-service ApiService {
-  // check if a nickname is available
-  rpc GetUserInfoByNick(GetUserInfoByNickRequest) returns (GetUserInfoByNickResponse);
-
-  // Returns on-chain user info by phone number if user exists
-  rpc GetUserInfoByNumber(GetUserInfoByNumberRequest) returns (GetUserInfoByNumberResponse);
-
-  // Returns on-chain user info by account id if user exists
-  rpc GetUserInfoByAccount(GetUserInfoByAccountRequest) returns (GetUserInfoByAccountResponse);
-
-  // Returns the identity of all phone verifiers registered on chain
-  rpc GetPhoneVerifiers(GetPhoneVerifiersRequest) returns (GetPhoneVerifiersResponse);
-
-  // Returns all char traits on-chain
-  rpc GetCharTraits(GetCharTraitsRequest) returns (GetCharTraitsResponse);
-
-  // Returns the current blockchain state
-  rpc GetBlockchainData(GetBlockchainDataRequest) returns (GetBlockchainDataResponse);
-
-  // Returns the current blockchain state
-  rpc GetGenesisData(GetGenesisDataRequest) returns (GetGenesisDataResponse);
-
-  // Submit a signed transaction to the blockchain
-  rpc SubmitTransaction(SubmitTransactionRequest) returns (SubmitTransactionResponse);
-
-  // Get all transactions between two account, included transactions in the pool and not yet on-chain
-  // Results include txs current status
-  rpc GetTransactions(GetTransactionsRequest) returns (GetTransactionsResponse);
-
-  // Get transaction data by its digest hash. Transaction may be in pool or on-chain
-  rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse);
-
-  // Get execution events for one or more blocks
-  rpc GetBlockchainEvents(GetBlockchainEventsRequest) returns (GetBlockchainEventsResponse) {
-  }
-}

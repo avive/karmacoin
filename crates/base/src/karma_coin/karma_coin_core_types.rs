@@ -1,6 +1,4 @@
-//////////////////
 // Basic KarmaCoin data types
-/////////////////
 
 /// Derived from a public key
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]

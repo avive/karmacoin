@@ -6,7 +6,16 @@ syntax = "proto3";
 package karma_coin.verifier;
 import "karma_coin/core_types/types.proto";
 
-// VeriferInfo is used to return the network the id and dialup info of active verifiers
+// mobile phone numbers verifier api service
+service PhoneNumbersVerifierService {
+  // Request to register a phone number. Will trigger an SMS to that number
+  rpc RegisterNumber(RegisterNumberRequest) returns (RegisterNumberResponse);
+
+  // Request to verify a number by providing code sent via sms from verifier
+  rpc VerifyNumber(VerifyNumberRequest) returns (core_types.VerifyNumberResponse);
+}
+
+// Verifer Info is used to return the network the id and dialup info of active verifiers
 message VerifierInfo {
   string name = 1;
   core_types.AccountId account_id = 2;
@@ -32,14 +41,17 @@ enum RegisterNumberResult {
 }
 
 message RegisterNumberResponse {
-  RegisterNumberResult result = 1;
+
+  core_types.AccountId account_id = 1;
+
+  RegisterNumberResult result = 2;
 
   // auth code received via sms
   // Warning: for testing ONLY for testing purposes.
   // In production code this is empty string and client must get code the from sms/text message.
-  int32 code = 2;
+  int32 code = 3;
 
-  core_types.Signature signature = 3;
+  core_types.Signature signature = 4;
 }
 
 message VerifyNumberRequest {
@@ -48,13 +60,4 @@ message VerifyNumberRequest {
   int32 code = 3; // auth code received via sms
   string nickname = 4;
   core_types.Signature signature = 5;
-}
-
-// mobile phone numbers verifier api service
-service PhoneNumbersVerifierService {
-  // Request to register a phone number. Will trigger an SMS to that number
-  rpc RegisterNumber(RegisterNumberRequest) returns (RegisterNumberResponse);
-
-  // Request to verify a number by providing code sent via sms from verifier
-  rpc VerifyNumber(VerifyNumberRequest) returns (core_types.VerifyNumberResponse);
 }

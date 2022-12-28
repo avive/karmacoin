@@ -45,11 +45,6 @@ pub const DB_INITIALIZED_KEY: &str = "db_initialized_key";
 /// value: chain aggregated data - number of blocks, number of transactions, etc.
 pub const CHAIN_AGG_DATA_KEY: &str = "chain_agg_data_key";
 
-/// Key for storing the chains tokenomics data. This data is used to evaluate rewards and
-/// transaction fees subsidies. Value is a protobuf encoded Tokenomics object
-/// value: tokenomics object.
-pub const _TOKENOMICS_DATA_KEY: &str = "tokenomics_data_key";
-
 /// Transactions processing events
 /// key: tx_hash, value: zero or more tx events emitted by tx processing
 pub const TRANSACTIONS_EVENTS_COL_FAMILY: &str = "txs_events_cf";
@@ -84,6 +79,8 @@ pub const MOBILE_NUMBERS_COL_FAMILY: &str = "mobile_number_cf";
 /// Signed transactions indexed by their hash. Data: SignTransaction
 /// This is on-chain data
 pub const TRANSACTIONS_COL_FAMILY: &str = "txs_cf";
+
+// todo: add column family for transactions indexes - by signer and by payee for payment txs
 
 /// Blocks keyed by block number - the blockchain. index: block height. value: Block
 /// This is the actual blockchain

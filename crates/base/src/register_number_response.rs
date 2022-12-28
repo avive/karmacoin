@@ -3,8 +3,38 @@
 //
 
 use crate::karma_coin::karma_coin_verifier::{RegisterNumberResponse, RegisterNumberResult};
-use anyhow::Result;
-use ed25519_dalek::{Keypair, Signer};
+use crate::signed_trait::SignedTrait;
+use anyhow::{anyhow, Result};
+use prost::Message;
+
+impl SignedTrait for RegisterNumberResponse {
+    fn get_sign_message(&self) -> Result<Vec<u8>> {
+        let mut buf = Vec::with_capacity(self.encoded_len());
+        self.encode(&mut buf)?;
+        Ok(buf.to_vec())
+    }
+
+    fn get_signature(&self) -> Result<ed25519_dalek::Signature> {
+        Ok(ed25519_dalek::Signature::from_bytes(
+            &self
+                .signature
+                .as_ref()
+                .ok_or_else(|| anyhow!("no signature found"))?
+                .signature
+                .clone(),
+        )?)
+    }
+
+    fn get_public_key(&self) -> Result<ed25519_dalek::PublicKey> {
+        Ok(ed25519_dalek::PublicKey::from_bytes(
+            &self
+                .account_id
+                .as_ref()
+                .ok_or_else(|| anyhow!("no public found"))?
+                .data,
+        )?)
+    }
+}
 
 impl RegisterNumberResponse {
     // we can't implement default here due to prost::message required derivation
@@ -13,6 +43,7 @@ impl RegisterNumberResponse {
             result: 0,
             code: 0,
             signature: None,
+            account_id: None,
         }
     }
 }
@@ -22,21 +53,5 @@ impl From<RegisterNumberResult> for RegisterNumberResponse {
         let mut resp = RegisterNumberResponse::new();
         resp.result = result as i32;
         resp
-    }
-}
-
-impl RegisterNumberResponse {
-    pub fn sign(&mut self, key_pair: &Keypair) -> Result<()> {
-        use prost::Message;
-        let mut buf = Vec::with_capacity(self.encoded_len());
-        self.encode(&mut buf)?;
-
-        use crate::karma_coin::karma_coin_core_types::Signature;
-        self.signature = Some(Signature {
-            scheme: 0,
-            signature: key_pair.sign(&buf).as_ref().to_vec(),
-        });
-
-        Ok(())
     }
 }

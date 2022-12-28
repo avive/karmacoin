@@ -1,4 +1,4 @@
-/// VeriferInfo is used to return the network the id and dialup info of active verifiers
+/// Verifer Info is used to return the network the id and dialup info of active verifiers
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct VerifierInfo {
     #[prost(string, tag = "1")]
@@ -31,14 +31,16 @@ pub struct RegisterNumberRequest {
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct RegisterNumberResponse {
-    #[prost(enumeration = "RegisterNumberResult", tag = "1")]
+    #[prost(message, optional, tag = "1")]
+    pub account_id: ::core::option::Option<super::core_types::AccountId>,
+    #[prost(enumeration = "RegisterNumberResult", tag = "2")]
     pub result: i32,
     /// auth code received via sms
     /// Warning: for testing ONLY for testing purposes.
     /// In production code this is empty string and client must get code the from sms/text message.
-    #[prost(int32, tag = "2")]
+    #[prost(int32, tag = "3")]
     pub code: i32,
-    #[prost(message, optional, tag = "3")]
+    #[prost(message, optional, tag = "4")]
     pub signature: ::core::option::Option<super::core_types::Signature>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]

@@ -10,6 +10,7 @@ use crate::services::verifier::verifier_service::VerifierService;
 use anyhow::{anyhow, Result};
 use base::karma_coin::karma_coin_core_types::{User, VerifyNumberResponse, VerifyNumberResult::*};
 use base::karma_coin::karma_coin_verifier::VerifyNumberRequest;
+use base::signed_trait::SignedTrait;
 use byteorder::{ByteOrder, LittleEndian};
 use bytes::Bytes;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};

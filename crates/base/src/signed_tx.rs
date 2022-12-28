@@ -7,11 +7,43 @@ use crate::karma_coin::karma_coin_core_types::{
     NewUserTransactionV1, PaymentTransactionV1, SignedTransaction, TransactionType,
     UpdateUserTransactionV1,
 };
+use crate::signed_trait::SignedTrait;
 use anyhow::{anyhow, Result};
 use bytes::Bytes;
 use chrono::{Duration, Utc};
-use ed25519_dalek::Verifier;
+use ed25519_dalek::{PublicKey, Signature};
 use prost::Message;
+
+impl SignedTrait for SignedTransaction {
+    fn get_sign_message(&self) -> Result<Vec<u8>> {
+        let mut cloned = self.clone();
+        cloned.signature = None;
+        let mut buf = Vec::with_capacity(cloned.encoded_len());
+        cloned.encode(&mut buf)?;
+        Ok(buf.to_vec())
+    }
+
+    fn get_signature(&self) -> Result<Signature> {
+        Ok(Signature::from_bytes(
+            &self
+                .signature
+                .as_ref()
+                .ok_or_else(|| anyhow!("no signature found"))?
+                .signature
+                .clone(),
+        )?)
+    }
+
+    fn get_public_key(&self) -> Result<PublicKey> {
+        Ok(PublicKey::from_bytes(
+            self.signer
+                .as_ref()
+                .ok_or_else(|| anyhow!("missing key data"))?
+                .data
+                .as_slice(),
+        )?)
+    }
+}
 
 impl SignedTransaction {
     /// Returns the transaction canonical hash
@@ -79,31 +111,6 @@ impl SignedTransaction {
             return Err(anyhow!("invalid timestamp - too far from now"));
         }
         Ok(())
-    }
-
-    /// Verify the signer's signature
-    pub fn verify_signature(&self) -> Result<()> {
-        let mut cloned = self.clone();
-        cloned.signature = None;
-
-        let mut buf = Vec::with_capacity(cloned.encoded_len());
-        if cloned.encode(&mut buf).is_err() {
-            return Err(anyhow!("invalid binary tx data"));
-        };
-
-        let signer = self
-            .signer
-            .as_ref()
-            .ok_or_else(|| anyhow!("missing account id"))?;
-        let signature_data = self
-            .signature
-            .as_ref()
-            .ok_or_else(|| anyhow!("missing signature"))?;
-        let signature = ed25519_dalek::Signature::from_bytes(&signature_data.signature)?;
-        let signer_pub_key = ed25519_dalek::PublicKey::from_bytes(signer.data.as_slice())?;
-        signer_pub_key
-            .verify(&buf, &signature)
-            .map_err(|_| anyhow!("invalid signature"))
     }
 
     /// Returns the transaction type
