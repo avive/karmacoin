@@ -24,7 +24,8 @@ pub trait SignedTrait {
             .map_err(|_| anyhow!("failed to verify signature"))
     }
 
-    /// Sign the message of this type
+    /// Sign the message of this type. Note that signature will not set on the type
+    /// and this needs to be explicitly done by the caller
     fn sign(&self, key_pair: &Keypair) -> Result<Signature> {
         let data = self.get_sign_message()?;
 

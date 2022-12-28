@@ -16,6 +16,7 @@ use base::karma_coin::karma_coin_core_types::ExecutionInfo::{
 use base::karma_coin::karma_coin_core_types::{
     ExecutionResult, FeeType, SignedTransaction, TransactionEvent, User,
 };
+use base::signed_trait::SignedTrait;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use prost::Message;
 

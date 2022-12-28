@@ -12,6 +12,7 @@ use crate::services::db_config_service::{
 use base::karma_coin::karma_coin_core_types::{
     ExecutionResult, FeeType, SignedTransaction, TransactionEvent,
 };
+use base::signed_trait::SignedTrait;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use prost::Message;
 

@@ -53,7 +53,7 @@ impl Handler<Verify> for VerifierService {
 
         if auth_data.is_none() {
             let mut resp = VerifyNumberResponse::from(InvalidCode);
-            resp.sign(&verifier_key_pair)?;
+            resp.signature = Some(resp.sign(&verifier_key_pair)?);
             return Ok(resp);
         }
 
@@ -62,7 +62,7 @@ impl Handler<Verify> for VerifierService {
         if account_id.data != sent_account_id {
             // code was sent to a different account
             let mut resp = VerifyNumberResponse::from(InvalidCode);
-            resp.sign(&verifier_key_pair)?;
+            resp.signature = Some(resp.sign(&verifier_key_pair)?);
             return Ok(resp);
         }
 
@@ -80,7 +80,7 @@ impl Handler<Verify> for VerifierService {
             .is_some()
         {
             let mut resp = VerifyNumberResponse::from(NumberAlreadyRegisteredOtherAccount);
-            resp.sign(&verifier_key_pair)?;
+            resp.signature = Some(resp.sign(&verifier_key_pair)?);
             return Ok(resp);
         }
 
@@ -97,7 +97,7 @@ impl Handler<Verify> for VerifierService {
 
             if user.user_name != nickname {
                 let mut resp = VerifyNumberResponse::from(NicknameTaken);
-                resp.sign(&verifier_key_pair)?;
+                resp.signature = Some(resp.sign(&verifier_key_pair)?);
                 return Ok(resp);
             }
         } else {
@@ -113,7 +113,7 @@ impl Handler<Verify> for VerifierService {
                 .is_some()
             {
                 let mut resp = VerifyNumberResponse::from(NicknameTaken);
-                resp.sign(&verifier_key_pair)?;
+                resp.signature = Some(resp.sign(&verifier_key_pair)?);
                 return Ok(resp);
             }
 
@@ -125,7 +125,7 @@ impl Handler<Verify> for VerifierService {
             .await?)
                 .is_some()
             {
-                let mut resp = VerifyNumberResponse::from(NicknameTaken);
+                let resp = VerifyNumberResponse::from(NicknameTaken);
                 resp.sign(&verifier_key_pair)?;
                 return Ok(resp);
             }
@@ -149,7 +149,7 @@ impl Handler<Verify> for VerifierService {
         resp.account_id = Some(account_id);
         resp.nickname = nickname;
         resp.mobile_number = Some(phone_number);
-        resp.sign(&self.id_key_pair.as_ref().unwrap().to_ed2559_kaypair())?;
+        resp.signature = Some(resp.sign(&self.id_key_pair.as_ref().unwrap().to_ed2559_kaypair())?);
         Ok(resp)
     }
 }
