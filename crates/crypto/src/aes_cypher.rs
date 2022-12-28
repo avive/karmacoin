@@ -2,7 +2,6 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-
 use aes::Aes256;
 use anyhow::Result;
 use block_modes::block_padding::Pkcs7;

@@ -123,7 +123,7 @@ impl BlockChainService {
         block.reward = tokenomics.get_block_reward_amount(height).await?;
 
         // sign the block
-        block.signature = Some(block.sign(&key_pair.to_ed2559_kaypair())?);
+        block.signature = Some(block.sign(&key_pair.to_ed2559_keypair())?);
 
         // compute block hash (including the signature) and set it
         block.digest = block.get_hash()?.to_vec();

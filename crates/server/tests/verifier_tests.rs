@@ -30,7 +30,7 @@ async fn register_number_happy_flow_test() {
     server.call(Startup {}).await.unwrap().unwrap();
 
     let client_key_pair = KeyPair::new();
-    let client_ed_key_pair = client_key_pair.to_ed2559_kaypair();
+    let client_ed_key_pair = client_key_pair.to_ed2559_keypair();
 
     let mut register_number_request = RegisterNumberRequest::new();
     register_number_request.mobile_number = Some(MobileNumber {
@@ -90,7 +90,7 @@ async fn register_number_bad_signature_test() {
     server.call(Startup {}).await.unwrap().unwrap();
 
     let client_key_pair = KeyPair::new();
-    let client_ed_key_pair = client_key_pair.to_ed2559_kaypair();
+    let client_ed_key_pair = client_key_pair.to_ed2559_keypair();
 
     let mut register_number_request = RegisterNumberRequest::new();
     register_number_request.mobile_number = Some(MobileNumber {
@@ -121,7 +121,7 @@ async fn register_number_no_code_test() {
     server.call(Startup {}).await.unwrap().unwrap();
 
     let client_key_pair = KeyPair::new();
-    let client_ed_key_pair = client_key_pair.to_ed2559_kaypair();
+    let client_ed_key_pair = client_key_pair.to_ed2559_keypair();
 
     let mut register_number_request = RegisterNumberRequest::new();
     register_number_request.mobile_number = Some(MobileNumber {
@@ -171,7 +171,7 @@ async fn register_number_wrong_code_test() {
     server.call(Startup {}).await.unwrap().unwrap();
 
     let client_key_pair = KeyPair::new();
-    let client_ed_key_pair = client_key_pair.to_ed2559_kaypair();
+    let client_ed_key_pair = client_key_pair.to_ed2559_keypair();
 
     let mut register_number_request = RegisterNumberRequest::new();
     register_number_request.mobile_number = Some(MobileNumber {
@@ -229,7 +229,7 @@ async fn verifier_nickname_taken_test() {
     server.call(Startup {}).await.unwrap().unwrap();
 
     let client_key_pair = KeyPair::new();
-    let client_ed_key_pair = client_key_pair.to_ed2559_kaypair();
+    let client_ed_key_pair = client_key_pair.to_ed2559_keypair();
 
     let mut register_number_request = RegisterNumberRequest::new();
     register_number_request.mobile_number = Some(MobileNumber {
@@ -276,7 +276,7 @@ async fn verifier_nickname_taken_test() {
     // now try to create a user with the same nickname
 
     let client1_key_pair = KeyPair::new();
-    let client1_ed_key_pair = client1_key_pair.to_ed2559_kaypair();
+    let client1_ed_key_pair = client1_key_pair.to_ed2559_keypair();
     let account1_id = client1_ed_key_pair.public.to_bytes().to_vec();
     let mut register_number_request1 = RegisterNumberRequest::new();
     register_number_request1.mobile_number = Some(MobileNumber {

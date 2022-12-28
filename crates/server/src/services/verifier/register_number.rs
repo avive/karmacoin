@@ -42,7 +42,7 @@ impl Handler<RegisterNumber> for VerifierService {
         let phone_number = req
             .mobile_number
             .ok_or_else(|| anyhow!("missing mobile phone number"))?;
-        let verifier_key_pair = self.id_key_pair.as_ref().unwrap().to_ed2559_kaypair();
+        let verifier_key_pair = self.id_key_pair.as_ref().unwrap().to_ed2559_keypair();
 
         // check if number is already registered to another user
         if let Some(user_data) = DatabaseService::read(ReadItem {
@@ -128,7 +128,7 @@ mod tests {
         // do the test here...
 
         let client_key_pair = KeyPair::new();
-        let client_ed_key_pair = client_key_pair.to_ed2559_kaypair();
+        let client_ed_key_pair = client_key_pair.to_ed2559_keypair();
 
         let mut register_number_request = RegisterNumberRequest::new();
         register_number_request.mobile_number = Some(MobileNumber {

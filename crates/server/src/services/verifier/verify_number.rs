@@ -38,7 +38,7 @@ impl Handler<Verify> for VerifierService {
             .id_key_pair
             .as_ref()
             .ok_or(anyhow!("missing key pair"))?
-            .to_ed2559_kaypair();
+            .to_ed2559_keypair();
         let account_id = req.account_id.ok_or(anyhow!("missing account id"))?;
 
         // db key based on auth code
@@ -149,7 +149,7 @@ impl Handler<Verify> for VerifierService {
         resp.account_id = Some(account_id);
         resp.nickname = nickname;
         resp.mobile_number = Some(phone_number);
-        resp.signature = Some(resp.sign(&self.id_key_pair.as_ref().unwrap().to_ed2559_kaypair())?);
+        resp.signature = Some(resp.sign(&self.id_key_pair.as_ref().unwrap().to_ed2559_keypair())?);
         Ok(resp)
     }
 }
