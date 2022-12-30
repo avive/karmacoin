@@ -8,7 +8,7 @@ use crate::services::verifier::verifier_service::VerifierService;
 use anyhow::Result;
 use base::genesis_config_service::GenesisConfigService;
 use base::karma_coin::karma_coin_api::api_service_server::ApiServiceServer;
-use base::karma_coin::karma_coin_verifier::phone_numbers_verifier_service_server::PhoneNumbersVerifierServiceServer;
+use base::karma_coin::karma_coin_verifier::verifier_service_server::VerifierServiceServer;
 use base::server_config_service::{
     ServerConfigService, GRPC_SERVER_HOST_CONFIG_KEY, GRPC_SERVER_HOST_PORT_CONFIG_KEY,
     SERVER_NAME_CONFIG_KEY,
@@ -26,11 +26,11 @@ pub struct ServerService {}
 impl Actor for ServerService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
         // start the config services to config db, blockchain and the server
-        DbConfigService::from_registry().await.unwrap();
-        GenesisConfigService::from_registry().await.unwrap();
-        ServerConfigService::from_registry().await.unwrap();
+        DbConfigService::from_registry().await?;
+        GenesisConfigService::from_registry().await?;
+        ServerConfigService::from_registry().await?;
 
-        info!("ServerService started");
+        info!("started");
         Ok(())
     }
 }
@@ -39,7 +39,7 @@ impl Service for ServerService {}
 
 //////////////////////////
 
-/// Close the db and delete it (for testing purposes)
+/// Close the db and delete it - used in tests
 #[message(result = "Result<()>")]
 pub struct DestroyDb;
 
@@ -83,6 +83,7 @@ impl Handler<Startup> for ServerService {
 }
 
 impl ServerService {
+    /// Starts the server's grpc services
     async fn start_grpc_server(&self, port: u32, host: String, peer_name: String) -> Result<()> {
         // setup grpc server and services
         let grpc_server_addr = format!("{}:{}", host, port).parse().unwrap();
@@ -99,16 +100,14 @@ impl ServerService {
         let (mut verifier_health_reporter, verifier_health_service) =
             tonic_health::server::health_reporter();
         verifier_health_reporter
-            .set_serving::<PhoneNumbersVerifierServiceServer<VerifierService>>()
+            .set_serving::<VerifierServiceServer<VerifierService>>()
             .await;
 
         spawn(async move {
             // all services that should be started must be added below
             let res = Server::builder()
                 .add_service(ApiServiceServer::new(ApiService::default()))
-                .add_service(PhoneNumbersVerifierServiceServer::new(
-                    VerifierService::default(),
-                ))
+                .add_service(VerifierServiceServer::new(VerifierService::default()))
                 .add_service(api_health_service)
                 .add_service(verifier_health_service)
                 .serve(grpc_server_addr)

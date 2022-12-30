@@ -9,8 +9,10 @@ use prost::Message;
 
 impl SignedTrait for VerifyNumberRequest {
     fn get_sign_message(&self) -> Result<Vec<u8>> {
-        let mut buf = Vec::with_capacity(self.encoded_len());
-        self.encode(&mut buf)?;
+        let mut cloned = self.clone();
+        cloned.signature = None;
+        let mut buf = Vec::with_capacity(cloned.encoded_len());
+        cloned.encode(&mut buf)?;
         Ok(buf.to_vec())
     }
 

@@ -2,7 +2,9 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+extern crate core;
 extern crate serde;
+
 pub mod block;
 pub mod block_event;
 pub mod blockchain_stats;

@@ -30,7 +30,7 @@ impl Default for ApiService {
 #[async_trait::async_trait]
 impl Actor for ApiService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        info!("ApiService started");
+        info!("Api Service started");
         Ok(())
     }
 }

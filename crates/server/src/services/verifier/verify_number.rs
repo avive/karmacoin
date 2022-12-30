@@ -34,11 +34,7 @@ impl Handler<Verify> for VerifierService {
         // verify request signature
         req.verify_signature()?;
 
-        let verifier_key_pair = self
-            .id_key_pair
-            .as_ref()
-            .ok_or(anyhow!("missing key pair"))?
-            .to_ed2559_keypair();
+        let verifier_key_pair = self.get_key_pair().await?.to_ed2559_keypair();
         let account_id = req.account_id.ok_or(anyhow!("missing account id"))?;
 
         // db key based on auth code
@@ -149,7 +145,7 @@ impl Handler<Verify> for VerifierService {
         resp.account_id = Some(account_id);
         resp.nickname = nickname;
         resp.mobile_number = Some(phone_number);
-        resp.signature = Some(resp.sign(&self.id_key_pair.as_ref().unwrap().to_ed2559_keypair())?);
+        resp.signature = Some(resp.sign(&self.get_key_pair().await?.to_ed2559_keypair())?);
         Ok(resp)
     }
 }

@@ -10,9 +10,9 @@ To learn more about KarmaCoin visit https://karmaco.in
 ```cargo build```
 
 ## Testing
-!Use [cargo-nextest](https://nexte.st/) test runner.
+Use [cargo-nextest](https://nexte.st/) test runner.
 
-```cargo nextest run```
+```cargo nextest run --test-threads 1```
 
 ---
 
@@ -42,7 +42,6 @@ let t = Utc::now().timestamp_nanos() as u64
 - `db` - Adds ttl capabilities to rocksdb data stoe.
 - `server` - Server implementation.
 - `server-app` - Simple console server app.
-- `playground` - Simple interaction scenerios tests.
 
 ---
 

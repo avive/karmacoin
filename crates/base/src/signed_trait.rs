@@ -21,7 +21,7 @@ pub trait SignedTrait {
     fn verify_signature(&self) -> Result<()> {
         self.get_public_key()?
             .verify(&self.get_sign_message()?, &self.get_signature()?)
-            .map_err(|_| anyhow!("failed to verify signature"))
+            .map_err(|_| anyhow!("invalid signature"))
     }
 
     /// Sign the message of this type. Note that signature will not set on the type

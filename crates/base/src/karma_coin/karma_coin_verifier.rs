@@ -67,15 +67,15 @@ pub enum RegisterNumberResult {
     CodeSent = 4,
 }
 #[doc = r" Generated client implementations."]
-pub mod phone_numbers_verifier_service_client {
+pub mod verifier_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
     #[doc = " mobile phone numbers verifier api service"]
     #[derive(Debug, Clone)]
-    pub struct PhoneNumbersVerifierServiceClient<T> {
+    pub struct VerifierServiceClient<T> {
         inner: tonic::client::Grpc<T>,
     }
-    impl PhoneNumbersVerifierServiceClient<tonic::transport::Channel> {
+    impl VerifierServiceClient<tonic::transport::Channel> {
         #[doc = r" Attempt to create a new client by connecting to a given endpoint."]
         pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
         where
@@ -86,7 +86,7 @@ pub mod phone_numbers_verifier_service_client {
             Ok(Self::new(conn))
         }
     }
-    impl<T> PhoneNumbersVerifierServiceClient<T>
+    impl<T> VerifierServiceClient<T>
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::ResponseBody: Body + Send + Sync + 'static,
@@ -100,7 +100,7 @@ pub mod phone_numbers_verifier_service_client {
         pub fn with_interceptor<F>(
             inner: T,
             interceptor: F,
-        ) -> PhoneNumbersVerifierServiceClient<InterceptedService<T, F>>
+        ) -> VerifierServiceClient<InterceptedService<T, F>>
         where
             F: FnMut(tonic::Request<()>) -> Result<tonic::Request<()>, tonic::Status>,
             T: tonic::codegen::Service<
@@ -112,7 +112,7 @@ pub mod phone_numbers_verifier_service_client {
             <T as tonic::codegen::Service<http::Request<tonic::body::BoxBody>>>::Error:
                 Into<StdError> + Send + Sync,
         {
-            PhoneNumbersVerifierServiceClient::new(InterceptedService::new(inner, interceptor))
+            VerifierServiceClient::new(InterceptedService::new(inner, interceptor))
         }
         #[doc = r" Compress requests with `gzip`."]
         #[doc = r""]
@@ -140,7 +140,7 @@ pub mod phone_numbers_verifier_service_client {
             })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/karma_coin.verifier.PhoneNumbersVerifierService/RegisterNumber",
+                "/karma_coin.verifier.VerifierService/RegisterNumber",
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
@@ -158,19 +158,19 @@ pub mod phone_numbers_verifier_service_client {
             })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/karma_coin.verifier.PhoneNumbersVerifierService/VerifyNumber",
+                "/karma_coin.verifier.VerifierService/VerifyNumber",
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
     }
 }
 #[doc = r" Generated server implementations."]
-pub mod phone_numbers_verifier_service_server {
+pub mod verifier_service_server {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
-    #[doc = "Generated trait containing gRPC methods that should be implemented for use with PhoneNumbersVerifierServiceServer."]
+    #[doc = "Generated trait containing gRPC methods that should be implemented for use with VerifierServiceServer."]
     #[async_trait]
-    pub trait PhoneNumbersVerifierService: Send + Sync + 'static {
+    pub trait VerifierService: Send + Sync + 'static {
         #[doc = " Request to register a phone number. Will trigger an SMS to that number"]
         async fn register_number(
             &self,
@@ -184,13 +184,13 @@ pub mod phone_numbers_verifier_service_server {
     }
     #[doc = " mobile phone numbers verifier api service"]
     #[derive(Debug)]
-    pub struct PhoneNumbersVerifierServiceServer<T: PhoneNumbersVerifierService> {
+    pub struct VerifierServiceServer<T: VerifierService> {
         inner: _Inner<T>,
         accept_compression_encodings: EnabledCompressionEncodings,
         send_compression_encodings: EnabledCompressionEncodings,
     }
     struct _Inner<T>(Arc<T>);
-    impl<T: PhoneNumbersVerifierService> PhoneNumbersVerifierServiceServer<T> {
+    impl<T: VerifierService> VerifierServiceServer<T> {
         pub fn new(inner: T) -> Self {
             let inner = Arc::new(inner);
             let inner = _Inner(inner);
@@ -217,9 +217,9 @@ pub mod phone_numbers_verifier_service_server {
             self
         }
     }
-    impl<T, B> tonic::codegen::Service<http::Request<B>> for PhoneNumbersVerifierServiceServer<T>
+    impl<T, B> tonic::codegen::Service<http::Request<B>> for VerifierServiceServer<T>
     where
-        T: PhoneNumbersVerifierService,
+        T: VerifierService,
         B: Body + Send + Sync + 'static,
         B::Error: Into<StdError> + Send + 'static,
     {
@@ -232,10 +232,10 @@ pub mod phone_numbers_verifier_service_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/karma_coin.verifier.PhoneNumbersVerifierService/RegisterNumber" => {
+                "/karma_coin.verifier.VerifierService/RegisterNumber" => {
                     #[allow(non_camel_case_types)]
-                    struct RegisterNumberSvc<T: PhoneNumbersVerifierService>(pub Arc<T>);
-                    impl<T: PhoneNumbersVerifierService>
+                    struct RegisterNumberSvc<T: VerifierService>(pub Arc<T>);
+                    impl<T: VerifierService>
                         tonic::server::UnaryService<super::RegisterNumberRequest>
                         for RegisterNumberSvc<T>
                     {
@@ -266,11 +266,10 @@ pub mod phone_numbers_verifier_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/karma_coin.verifier.PhoneNumbersVerifierService/VerifyNumber" => {
+                "/karma_coin.verifier.VerifierService/VerifyNumber" => {
                     #[allow(non_camel_case_types)]
-                    struct VerifyNumberSvc<T: PhoneNumbersVerifierService>(pub Arc<T>);
-                    impl<T: PhoneNumbersVerifierService>
-                        tonic::server::UnaryService<super::VerifyNumberRequest>
+                    struct VerifyNumberSvc<T: VerifierService>(pub Arc<T>);
+                    impl<T: VerifierService> tonic::server::UnaryService<super::VerifyNumberRequest>
                         for VerifyNumberSvc<T>
                     {
                         type Response = super::super::core_types::VerifyNumberResponse;
@@ -311,7 +310,7 @@ pub mod phone_numbers_verifier_service_server {
             }
         }
     }
-    impl<T: PhoneNumbersVerifierService> Clone for PhoneNumbersVerifierServiceServer<T> {
+    impl<T: VerifierService> Clone for VerifierServiceServer<T> {
         fn clone(&self) -> Self {
             let inner = self.inner.clone();
             Self {
@@ -321,7 +320,7 @@ pub mod phone_numbers_verifier_service_server {
             }
         }
     }
-    impl<T: PhoneNumbersVerifierService> Clone for _Inner<T> {
+    impl<T: VerifierService> Clone for _Inner<T> {
         fn clone(&self) -> Self {
             Self(self.0.clone())
         }
@@ -331,9 +330,7 @@ pub mod phone_numbers_verifier_service_server {
             write!(f, "{:?}", self.0)
         }
     }
-    impl<T: PhoneNumbersVerifierService> tonic::transport::NamedService
-        for PhoneNumbersVerifierServiceServer<T>
-    {
-        const NAME: &'static str = "karma_coin.verifier.PhoneNumbersVerifierService";
+    impl<T: VerifierService> tonic::transport::NamedService for VerifierServiceServer<T> {
+        const NAME: &'static str = "karma_coin.verifier.VerifierService";
     }
 }

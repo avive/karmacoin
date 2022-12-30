@@ -7,7 +7,7 @@ package karma_coin.verifier;
 import "karma_coin/core_types/types.proto";
 
 // mobile phone numbers verifier api service
-service PhoneNumbersVerifierService {
+service VerifierService {
   // Request to register a phone number. Will trigger an SMS to that number
   rpc RegisterNumber(RegisterNumberRequest) returns (RegisterNumberResponse);
 

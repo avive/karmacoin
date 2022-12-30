@@ -32,8 +32,13 @@ impl Handler<RegisterNumber> for VerifierService {
         _ctx: &mut Context<Self>,
         msg: RegisterNumber,
     ) -> Result<RegisterNumberResponse> {
-        let req = msg.0;
+        let verifier_key_pair = self.get_key_pair().await?.to_ed2559_keypair();
+        info!(
+            "Verifier account id: {:?}",
+            short_hex_string(&verifier_key_pair.public.to_bytes())
+        );
 
+        let req = msg.0;
         req.verify_signature()?;
 
         let account_id = req
@@ -42,7 +47,6 @@ impl Handler<RegisterNumber> for VerifierService {
         let phone_number = req
             .mobile_number
             .ok_or_else(|| anyhow!("missing mobile phone number"))?;
-        let verifier_key_pair = self.id_key_pair.as_ref().unwrap().to_ed2559_keypair();
 
         // check if number is already registered to another user
         if let Some(user_data) = DatabaseService::read(ReadItem {
@@ -98,7 +102,7 @@ impl Handler<RegisterNumber> for VerifierService {
 
         let mut resp = RegisterNumberResponse::from(CodeSent);
         resp.code = code;
-        resp.signature = Some(resp.sign(&verifier_key_pair)?);
+        // resp.signature = Some(resp.sign(&verifier_key_pair)?);
         Ok(resp)
     }
 }

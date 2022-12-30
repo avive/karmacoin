@@ -50,8 +50,6 @@ pub struct ServerConfigService {
 #[async_trait::async_trait]
 impl Actor for ServerConfigService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        info!("server ConfigService started");
-
         let config = Config::builder()
             .set_default(DROP_DB_CONFIG_KEY, DEFAULT_DROP_DB_ON_EXIT)
             .unwrap()
@@ -79,6 +77,17 @@ impl Actor for ServerConfigService {
             .unwrap()
             .set_default(BLOCK_PRODUCER_USER_NAME, "a block producer")
             .unwrap()
+            /*
+            .set_default(
+                VERIFIER_ID_PRIVATE_KEY,
+                "67c31f3fb18572e97a851f757fc64fc1d0f8ed77c36abdd210f93711eb14f062",
+            )
+            .unwrap()
+            .set_default(
+                VERIFIER_ID_PUBLIC_KEY,
+                "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd",
+            )
+            .unwrap()*/
             .add_source(
                 Environment::with_prefix("KARMACOIN")
                     .try_parsing(true)
@@ -99,6 +108,8 @@ impl Actor for ServerConfigService {
         // todo: if id private key not set then generate random keypair and store private key
         self.config = config;
 
+        info!("service started");
+
         Ok(())
     }
 }
@@ -107,7 +118,7 @@ impl Service for ServerConfigService {}
 
 impl Default for ServerConfigService {
     fn default() -> Self {
-        info!("Configuring server...");
+        info!("Service created");
         ServerConfigService {
             config: Config::default(),
             config_file: None,
@@ -118,8 +129,11 @@ impl Default for ServerConfigService {
 // helpers
 impl ServerConfigService {
     pub async fn get(key: String) -> Result<Option<String>> {
+        info!("Get config value for key: {}", key);
         let config = ServerConfigService::from_registry().await?;
+        info!("got service");
         let res = config.call(GetValue(key)).await?;
+        info!("got value for key: {:?}", res);
         Ok(res)
     }
 
@@ -165,15 +179,12 @@ impl Handler<GetBlockProducerIdKeyPair> for ServerConfigService {
         _ctx: &mut Context<Self>,
         _msg: GetBlockProducerIdKeyPair,
     ) -> Result<KeyPair> {
-        match ServerConfigService::get(BLOCK_PRODUCER_ID_PRIVATE_KEY.into()).await? {
-            Some(key) => {
-                // key is a hex string in config
-                let private_key_data = hex_from_string(key).unwrap();
-
-                match ServerConfigService::get(BLOCK_PRODUCER_ID_PUBLIC_KEY.into()).await? {
-                    Some(pub_key) => {
-                        let pub_key_data = hex_from_string(pub_key).unwrap();
-                        info!("loaded blockchain producer id key pair from config");
+        match self.config.get_string(BLOCK_PRODUCER_ID_PRIVATE_KEY.into()) {
+            Ok(data) => {
+                let private_key_data = hex_from_string(data).unwrap();
+                match self.config.get_string(BLOCK_PRODUCER_ID_PUBLIC_KEY.into()) {
+                    Ok(pub_data) => {
+                        let pub_key_data = hex_from_string(pub_data).unwrap();
                         Ok(KeyPair {
                             private_key: Some(PrivateKey {
                                 key: private_key_data,
@@ -182,17 +193,14 @@ impl Handler<GetBlockProducerIdKeyPair> for ServerConfigService {
                             scheme: 0,
                         })
                     }
-                    None => {
-                        panic!("invalid config file: missing block producer id public key");
+                    Err(_) => {
+                        panic!("invalid config file: missing block producer public key when private key is provided");
                     }
                 }
             }
-            None => {
-                // no private key in config - generate new one
-                info!("generated a new random block producer id key pair");
+            Err(_) => {
+                info!("no block producer private key in config - generating a new random block producer id key pair");
                 Ok(KeyPair::new())
-
-                // todo: store keypair in config so it is obtained on next call (after blockchain service restart for example)
             }
         }
     }
@@ -208,15 +216,12 @@ impl Handler<GetVerifierKeyPair> for ServerConfigService {
         _ctx: &mut Context<Self>,
         _msg: GetVerifierKeyPair,
     ) -> Result<KeyPair> {
-        match ServerConfigService::get(VERIFIER_ID_PRIVATE_KEY.into()).await? {
-            Some(key) => {
-                // key is a hex string in config
-                let private_key_data = hex_from_string(key).unwrap();
-
-                match ServerConfigService::get(VERIFIER_ID_PUBLIC_KEY.into()).await? {
-                    Some(pub_key) => {
-                        let pub_key_data = hex_from_string(pub_key).unwrap();
-                        info!("loaded blockchain verifier id key pair from config");
+        match self.config.get_string(VERIFIER_ID_PRIVATE_KEY.into()) {
+            Ok(data) => {
+                let private_key_data = hex_from_string(data).unwrap();
+                match self.config.get_string(VERIFIER_ID_PUBLIC_KEY.into()) {
+                    Ok(pub_data) => {
+                        let pub_key_data = hex_from_string(pub_data).unwrap();
                         Ok(KeyPair {
                             private_key: Some(PrivateKey {
                                 key: private_key_data,
@@ -225,17 +230,14 @@ impl Handler<GetVerifierKeyPair> for ServerConfigService {
                             scheme: 0,
                         })
                     }
-                    None => {
-                        panic!("invalid config file: missing verifier id public key");
+                    Err(_) => {
+                        panic!("invalid config file: missing verifier id public key when private key is provided");
                     }
                 }
             }
-            None => {
-                // no private key in config - generate new one
-                info!("generated a new random block producer id key pair");
+            Err(_) => {
+                info!("no verifier private key in config - generating a new random verifier id key pair...");
                 Ok(KeyPair::new())
-
-                // todo: store keypair in config so it is obtained on next call
             }
         }
     }
@@ -300,6 +302,7 @@ pub struct GetValue(pub String);
 #[async_trait::async_trait]
 impl Handler<GetValue> for ServerConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: GetValue) -> Option<String> {
+        info!("Getting value for key {:?}", msg.0.as_str());
         match self.config.get_string(&msg.0.as_str()) {
             Ok(res) => Some(res),
             Err(_) => None,

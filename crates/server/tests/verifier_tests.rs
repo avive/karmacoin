@@ -9,7 +9,7 @@ use base::karma_coin::karma_coin_core_types::VerifyNumberResult::{InvalidCode, V
 use base::karma_coin::karma_coin_core_types::{
     AccountId, KeyPair, MobileNumber, VerifyNumberResult,
 };
-use base::karma_coin::karma_coin_verifier::phone_numbers_verifier_service_client::PhoneNumbersVerifierServiceClient;
+use base::karma_coin::karma_coin_verifier::verifier_service_client::VerifierServiceClient;
 use base::karma_coin::karma_coin_verifier::RegisterNumberResult::CodeSent;
 use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, VerifyNumberRequest};
 use base::signed_trait::SignedTrait;
@@ -44,16 +44,18 @@ async fn register_number_happy_flow_test() {
     register_number_request.signature =
         Some(register_number_request.sign(&client_ed_key_pair).unwrap());
 
-    let mut verifier_service = PhoneNumbersVerifierServiceClient::connect("http://[::1]:9888")
+    let mut verifier_service_client = VerifierServiceClient::connect("http://[::1]:9888")
         .await
         .unwrap();
 
-    let resp = verifier_service
+    let resp = verifier_service_client
         .register_number(register_number_request)
         .await
         .unwrap()
         .into_inner();
     assert_eq!(resp.result, CodeSent as i32);
+
+    info!("number registered");
 
     // obtain the verification code from the result as there's no sms service yet
     let code = resp.code;
@@ -71,7 +73,10 @@ async fn register_number_happy_flow_test() {
     v_request.nickname = "avive".into();
     v_request.signature = Some(v_request.sign(&client_ed_key_pair).unwrap());
 
-    let resp1 = verifier_service.verify_number(v_request).await.unwrap();
+    let resp1 = verifier_service_client
+        .verify_number(v_request)
+        .await
+        .unwrap();
 
     let v_resp = resp1.into_inner();
     assert_eq!(v_resp.result, Verified as i32);
@@ -101,7 +106,7 @@ async fn register_number_bad_signature_test() {
         data: account_id.clone(),
     });
 
-    let mut verifier_service = PhoneNumbersVerifierServiceClient::connect("http://[::1]:9888")
+    let mut verifier_service = VerifierServiceClient::connect("http://[::1]:9888")
         .await
         .unwrap();
 
@@ -135,7 +140,7 @@ async fn register_number_no_code_test() {
     register_number_request.signature =
         Some(register_number_request.sign(&client_ed_key_pair).unwrap());
 
-    let mut verifier_service = PhoneNumbersVerifierServiceClient::connect("http://[::1]:9888")
+    let mut verifier_service = VerifierServiceClient::connect("http://[::1]:9888")
         .await
         .unwrap();
 
@@ -186,7 +191,7 @@ async fn register_number_wrong_code_test() {
     register_number_request.signature =
         Some(register_number_request.sign(&client_ed_key_pair).unwrap());
 
-    let mut verifier_service = PhoneNumbersVerifierServiceClient::connect("http://[::1]:9888")
+    let mut verifier_service = VerifierServiceClient::connect("http://[::1]:9888")
         .await
         .unwrap();
 
@@ -245,7 +250,7 @@ async fn verifier_nickname_taken_test() {
     register_number_request.signature =
         Some(register_number_request.sign(&client_ed_key_pair).unwrap());
 
-    let mut verifier_service = PhoneNumbersVerifierServiceClient::connect("http://[::1]:9888")
+    let mut verifier_service = VerifierServiceClient::connect("http://[::1]:9888")
         .await
         .unwrap();
 

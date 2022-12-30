@@ -5,8 +5,9 @@
 use crate::services::verifier::register_number::RegisterNumber;
 use crate::services::verifier::verify_number::Verify;
 use anyhow::Result;
+use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_core_types::{KeyPair, VerifyNumberResponse};
-use base::karma_coin::karma_coin_verifier::phone_numbers_verifier_service_server::PhoneNumbersVerifierService;
+use base::karma_coin::karma_coin_verifier::verifier_service_server::VerifierService as VerifierServiceTrait;
 use base::karma_coin::karma_coin_verifier::{
     RegisterNumberRequest, RegisterNumberResponse, VerifyNumberRequest,
 };
@@ -17,13 +18,13 @@ use xactor::*;
 /// ApiService is a system service that provides access to provider server persisted data as well as an interface to admin the provider's server. It provides a GRPC admin service defined in ServerAdminService. This service is designed to be used by provider admin clients.
 #[derive(Debug, Clone)]
 pub(crate) struct VerifierService {
-    pub(crate) id_key_pair: Option<KeyPair>,
+    key_pair: Option<KeyPair>,
 }
 
 impl Default for VerifierService {
     fn default() -> Self {
-        info!("VerifierService created");
-        VerifierService { id_key_pair: None }
+        info!("Verifier Service created");
+        VerifierService { key_pair: None }
     }
 }
 
@@ -31,27 +32,43 @@ impl Default for VerifierService {
 impl Actor for VerifierService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
         info!("VerifierService started");
-
-        // load id keypair from config
-        self.id_key_pair = Some(
-            ServerConfigService::from_registry()
-                .await?
-                .call(GetVerifierKeyPair)
-                .await??,
-        );
         Ok(())
     }
 }
 
 impl Service for VerifierService {}
 
+impl VerifierService {
+    pub(crate) async fn get_key_pair(&mut self) -> Result<KeyPair> {
+        if let Some(key_pair) = &self.key_pair {
+            info!("returning cached verifier id key-pair");
+            return Ok(key_pair.clone());
+        }
+
+        let key_pair: KeyPair = ServerConfigService::from_registry()
+            .await?
+            .call(GetVerifierKeyPair)
+            .await??;
+
+        info!(
+            "got key-pair from config service. Verifier account id: {:?}",
+            short_hex_string(key_pair.public_key.as_ref().unwrap().key.as_slice())
+        );
+
+        self.key_pair = Some(key_pair.clone());
+        Ok(key_pair)
+    }
+}
+
 #[tonic::async_trait]
-impl PhoneNumbersVerifierService for VerifierService {
+impl VerifierServiceTrait for VerifierService {
     /// User requests to register a mobile phone number
     async fn register_number(
         &self,
         request: Request<RegisterNumberRequest>,
     ) -> std::result::Result<Response<RegisterNumberResponse>, Status> {
+        info!("register number called...");
+
         let service = VerifierService::from_registry()
             .await
             .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;

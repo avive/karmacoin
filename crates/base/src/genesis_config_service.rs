@@ -79,7 +79,7 @@ pub struct GenesisConfigService {
 #[async_trait::async_trait]
 impl Actor for GenesisConfigService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        info!("GenesisConfigService config...");
+        info!("GenesisConfigService starting...");
 
         let builder = Config::builder();
         // Set defaults and merge genesis config file to overwrite
