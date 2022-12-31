@@ -19,8 +19,8 @@ use prost::Message;
 
 /// BlockchainService block creation implementation
 impl BlockChainService {
-    // Returns this block producer on-chain user account.
-    // Attempts to create one if it doesn't exist using config data (account id and nickname)
+    /// Returns this block producer on-chain user account.
+    /// Attempts to create one if it doesn't exist using config data (account id and nickname)
     async fn get_block_producer_user_account(key_pair: &KeyPair) -> Result<User> {
         // Get User from chain and reject tx if user doesn't exist
         let block_producer = match DatabaseService::read(ReadItem {

@@ -19,7 +19,7 @@ pub(crate) struct BlockChainService {
 #[async_trait::async_trait]
 impl Actor for BlockChainService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        info!("BlockChainService started");
+        info!("Started");
 
         // block producer id key pair
         self.id_key_pair = Some(

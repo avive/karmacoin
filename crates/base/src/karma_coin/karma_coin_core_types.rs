@@ -187,18 +187,15 @@ pub struct VerifyNumberResponse {
     #[prost(message, optional, tag = "4")]
     pub mobile_number: ::core::option::Option<MobileNumber>,
     #[prost(string, tag = "5")]
-    pub nickname: ::prost::alloc::string::String,
+    pub user_name: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "6")]
     pub signature: ::core::option::Option<Signature>,
 }
 /// new user transactions submitted by users
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct NewUserTransactionV1 {
-    /// initial user balance
-    #[prost(message, optional, tag = "1")]
-    pub user: ::core::option::Option<User>,
     /// Evidence from a valid verifier about the new user
-    #[prost(message, optional, tag = "2")]
+    #[prost(message, optional, tag = "1")]
     pub verify_number_response: ::core::option::Option<VerifyNumberResponse>,
 }
 /// serialized transaction data

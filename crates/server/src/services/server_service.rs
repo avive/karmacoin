@@ -62,7 +62,7 @@ pub struct Startup {}
 #[async_trait::async_trait]
 impl Handler<Startup> for ServerService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, _msg: Startup) -> Result<()> {
-        info!("configuring KarmaCoin server...");
+        info!("configuring server...");
 
         let server_name = ServerConfigService::get(SERVER_NAME_CONFIG_KEY.into())
             .await?
@@ -76,7 +76,7 @@ impl Handler<Startup> for ServerService {
 
         self.start_grpc_server(port, host, server_name).await?;
 
-        info!("GRPC server started");
+        info!("grpc server started");
 
         Ok(())
     }
@@ -116,7 +116,7 @@ impl ServerService {
             if res.is_err() {
                 info!("grpc server stopped due to: {:?}", res.err().unwrap());
             } else {
-                info!("GRPC server stopped");
+                info!("grpc server stopped");
             }
         });
 

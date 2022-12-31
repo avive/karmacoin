@@ -102,9 +102,10 @@ impl SignedTransaction {
         Ok(())
     }
 
+    /// Verify that tx is not too old
     pub fn verify_timestamp(&self) -> Result<()> {
-        // check timestamp is close to now - within 48 hours
         let now = Utc::now().timestamp_nanos() as u64;
+
         if i64::abs(now as i64 - self.timestamp as i64)
             > Duration::hours(48).num_nanoseconds().unwrap()
         {

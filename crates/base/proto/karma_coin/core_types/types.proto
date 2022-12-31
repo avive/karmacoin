@@ -165,17 +165,14 @@ message VerifyNumberResponse {
     VerifyNumberResult result = 2;
     AccountId account_id = 3;
     MobileNumber mobile_number = 4;
-    string Nickname = 5;
+    string user_name = 5;
     Signature signature = 6;
 }
 
 // new user transactions submitted by users
 message NewUserTransactionV1 {
-    // initial user balance
-    User user = 1;
-
     // Evidence from a valid verifier about the new user
-    VerifyNumberResponse verify_number_response = 2;
+    VerifyNumberResponse verify_number_response = 1;
 }
 
 // serialized transaction data

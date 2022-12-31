@@ -10,7 +10,7 @@ use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{SubmitTransactionRequest, SubmitTransactionResult};
 use base::karma_coin::karma_coin_core_types::TransactionType::UpdateUserV1;
 use base::karma_coin::karma_coin_core_types::VerifyNumberResult::Verified;
-use base::karma_coin::karma_coin_core_types::{AccountId, KeyPair, MobileNumber, User};
+use base::karma_coin::karma_coin_core_types::{AccountId, KeyPair, MobileNumber};
 use base::karma_coin::karma_coin_core_types::{
     NewUserTransactionV1, SignedTransaction, TransactionData,
 };
@@ -91,9 +91,9 @@ async fn new_user_happy_flow_test() {
     let v_resp = resp1.into_inner();
     assert_eq!(v_resp.result, Verified as i32);
 
-    let user = User::new(account_id.clone(), user_name.into(), mobile_number);
-
-    let new_user_tx = NewUserTransactionV1::new(user, v_resp.clone());
+    let new_user_tx = NewUserTransactionV1 {
+        verify_number_response: Some(v_resp.clone()),
+    };
 
     let mut buf = Vec::with_capacity(new_user_tx.encoded_len());
     new_user_tx.encode(&mut buf).unwrap();
@@ -118,9 +118,6 @@ async fn new_user_happy_flow_test() {
 
     signed_tx.signature = Some(signed_tx.sign(&client_ed_key_pair).unwrap());
 
-    // drop the db
-    finalize_test().await;
-
     let mut api_client = ApiServiceClient::connect("http://[::1]:9888")
         .await
         .unwrap();
@@ -137,6 +134,8 @@ async fn new_user_happy_flow_test() {
         resp.submit_transaction_result,
         SubmitTransactionResult::Submitted as i32,
     );
+
+    finalize_test().await;
 }
 
 /// Helper

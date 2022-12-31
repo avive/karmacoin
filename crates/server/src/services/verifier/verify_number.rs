@@ -143,7 +143,7 @@ impl Handler<Verify> for VerifierService {
 
         // signed attestation details - user account id, nickname and verified mobile number
         resp.account_id = Some(account_id);
-        resp.nickname = nickname;
+        resp.user_name = nickname;
         resp.mobile_number = Some(phone_number);
         resp.signature = Some(resp.sign(&self.get_key_pair().await?.to_ed2559_keypair())?);
         Ok(resp)

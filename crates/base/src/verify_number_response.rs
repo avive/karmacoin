@@ -45,7 +45,7 @@ impl VerifyNumberResponse {
         VerifyNumberResponse {
             timestamp: Utc::now().timestamp_nanos() as u64,
             result: 0,
-            nickname: "".into(),
+            user_name: "".into(),
             account_id: None,
             mobile_number: None,
             signature: None,

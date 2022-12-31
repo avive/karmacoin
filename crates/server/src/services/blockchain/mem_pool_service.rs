@@ -27,7 +27,7 @@ pub(crate) struct MemPoolService {
 #[async_trait::async_trait]
 impl Actor for MemPoolService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        // load all transactions from the db
+        // load pool transactions from store...
         if let Some(data) = DatabaseService::read(ReadItem {
             key: Bytes::from(TXS_POOL_KEY.as_bytes()),
             cf: TXS_POOL_COL_FAMILY,
@@ -42,10 +42,7 @@ impl Actor for MemPoolService {
             }
         }
 
-        info!(
-            "MemPoolService started. Pool size: {:?}",
-            self.transactions.len()
-        );
+        info!("started. Pool size: {:?}", self.transactions.len());
 
         Ok(())
     }

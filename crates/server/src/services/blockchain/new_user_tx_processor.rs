@@ -10,7 +10,7 @@ use crate::services::db_config_service::{
     MOBILE_NUMBERS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY,
 };
 use base::karma_coin::karma_coin_core_types::{
-    ExecutionResult, FeeType, SignedTransaction, TransactionEvent,
+    ExecutionResult, FeeType, SignedTransaction, TransactionEvent, User,
 };
 use base::signed_trait::SignedTrait;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
@@ -38,9 +38,7 @@ pub(crate) async fn process_transaction(
 
     let tx_fee = transaction.fee;
     let new_user_tx = transaction.get_new_user_transaction_v1()?;
-    let mut user = new_user_tx
-        .user
-        .ok_or_else(|| anyhow!("missing user data in tx"))?;
+
     let verification_evidence = new_user_tx
         .verify_number_response
         .ok_or_else(|| anyhow!("missing verifier data"))?;
@@ -50,37 +48,32 @@ pub(crate) async fn process_transaction(
     // and genesis config
     verification_evidence.verify_signature()?;
 
-    // validate verification evidence with user provided data
-    let user_mobile_number = user
-        .mobile_number
-        .as_ref()
-        .ok_or_else(|| anyhow!("missing mobile number"))?;
-    let evidence_mobile_number = verification_evidence
+    let mobile_number = verification_evidence
         .mobile_number
         .ok_or_else(|| anyhow!("missing mobile number in verifier data"))?;
-    let user_account_id = user
-        .account_id
-        .as_ref()
-        .ok_or_else(|| anyhow!("missing account id in user data"))?;
+
     let evidence_account_id = verification_evidence
         .account_id
         .ok_or_else(|| anyhow!("missing account id in verifier data"))?;
 
-    if user_account_id.data != evidence_account_id.data {
+    if account_id.data != evidence_account_id.data {
         return Err(anyhow!("account id mismatch"));
     }
 
-    if user.user_name != verification_evidence.nickname {
-        return Err(anyhow!("nickname mismatch"));
-    }
-
-    if user_mobile_number.number != evidence_mobile_number.number {
-        return Err(anyhow!("mobile number mismatch"));
-    }
+    let mut user = User {
+        account_id: Some(account_id.clone()),
+        nonce: 1,
+        user_name: verification_evidence.user_name.clone(),
+        mobile_number: Some(mobile_number.clone()),
+        balance: 0,
+        trait_scores: vec![],
+        pre_keys: vec![],
+    };
 
     let apply_subsidy = tokenomics
         .should_subsidise_transaction_fee(0, tx_fee)
         .await?;
+
     let signup_reward_amount = tokenomics.get_signup_reward_amount().await?;
     let user_tx_fee = if apply_subsidy { 0 } else { tx_fee };
 
@@ -108,7 +101,6 @@ pub(crate) async fn process_transaction(
         return Err(anyhow!("User with provided account id already exists on chain. You can use an update tx to update it"));
     }
 
-    user.nonce = 1;
     user.balance += signup_reward_amount - user_tx_fee;
 
     // todo: figure out personality trait for joiner - brave? ahead of the curve?
@@ -133,7 +125,7 @@ pub(crate) async fn process_transaction(
     // update nickname index
     DatabaseService::write(WriteItem {
         data: DataItem {
-            key: Bytes::from(user.user_name.as_bytes().to_vec()),
+            key: Bytes::from(verification_evidence.user_name.as_bytes().to_vec()),
             value: Bytes::from(account_id.data.to_vec()),
         },
         cf: RESERVED_NICKS_COL_FAMILY,
@@ -144,7 +136,7 @@ pub(crate) async fn process_transaction(
     // update mobile numbers index
     DatabaseService::write(WriteItem {
         data: DataItem {
-            key: Bytes::from(user_mobile_number.number.as_bytes().to_vec()),
+            key: Bytes::from(mobile_number.number.as_bytes().to_vec()),
             value: Bytes::from(account_id.data.to_vec()),
         },
         cf: MOBILE_NUMBERS_COL_FAMILY,
@@ -172,6 +164,6 @@ pub(crate) async fn process_transaction(
     event.result = ExecutionResult::Executed as i32;
 
     Ok(NewUserProcessingResult {
-        mobile_number: user_mobile_number.number.clone(),
+        mobile_number: mobile_number.number.clone(),
     })
 }
