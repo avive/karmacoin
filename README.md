@@ -25,7 +25,10 @@ use chrono::prelude::*;
 let t = Utc::now().timestamp_nanos() as u64
 ```
 
-#### Architecture
+### Xactor Usage 
+Xactor (unlike Actix) gives us nice and clean async syntax for actor messages. However, be aware that calling an actor message from the body of the same actor's message handler, will deadlock. It is easy to spend hours on such bugs. Just factor out impl into an async fn and call it from different message handlers....
+
+### Architecture
 
 - Uses `xactors` (over `tokio` runtime) actors pattern. Async actors that can return responses to messages.
 - Network protocols are defined in `protobufs` language.

@@ -20,7 +20,7 @@ pub const DEFAULT_DROP_DB_ON_EXIT: bool = true;
 
 pub const DB_NAME_CONFIG_KEY: &str = "db_name";
 pub const DROP_DB_CONFIG_KEY: &str = "drop_db_on_exit";
-pub const SERVER_NAME_CONFIG_KEY: &str = "peer_name";
+pub const SERVER_NAME_CONFIG_KEY: &str = "server_name";
 pub const GRPC_SERVER_HOST_CONFIG_KEY: &str = "grpc_host"; //
 pub const GRPC_SERVER_HOST_PORT_CONFIG_KEY: &str = "grpc_admin_port";
 pub const GRPC_ADMIN_PORT_CONFIG_KEY: &str = "grpc_admin_port";
@@ -67,7 +67,7 @@ impl Actor for ServerConfigService {
             .set_default(GRPC_SERVER_HOST_CONFIG_KEY, "[::1]")
             .unwrap()
             // we always want to have a peer name - even a generic one
-            .set_default(SERVER_NAME_CONFIG_KEY, "kc_verifier_1")
+            .set_default(SERVER_NAME_CONFIG_KEY, "Verifier1")
             .unwrap()
             .set_default(DB_NAME_CONFIG_KEY, "karmacoin_db")
             .unwrap()
@@ -75,9 +75,8 @@ impl Actor for ServerConfigService {
             .unwrap()
             .set_default(MEM_POOL_MAX_TX_AGE_HOURS, 168)
             .unwrap()
-            .set_default(BLOCK_PRODUCER_USER_NAME, "a block producer")
+            .set_default(BLOCK_PRODUCER_USER_NAME, "Block producer 1")
             .unwrap()
-            /*
             .set_default(
                 VERIFIER_ID_PRIVATE_KEY,
                 "67c31f3fb18572e97a851f757fc64fc1d0f8ed77c36abdd210f93711eb14f062",
@@ -87,7 +86,17 @@ impl Actor for ServerConfigService {
                 VERIFIER_ID_PUBLIC_KEY,
                 "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd",
             )
-            .unwrap()*/
+            .unwrap()
+            .set_default(
+                BLOCK_PRODUCER_ID_PRIVATE_KEY,
+                "67c31f3fb18572e97a851f757fc64fc1d0f8ed77c36abdd210f93711eb14f062",
+            )
+            .unwrap()
+            .set_default(
+                BLOCK_PRODUCER_ID_PUBLIC_KEY,
+                "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd",
+            )
+            .unwrap()
             .add_source(
                 Environment::with_prefix("KARMACOIN")
                     .try_parsing(true)
