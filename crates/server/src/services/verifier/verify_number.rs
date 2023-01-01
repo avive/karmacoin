@@ -141,11 +141,14 @@ impl Handler<Verify> for VerifierService {
         // create signed Response and return it
         let mut resp = VerifyNumberResponse::from(Verified);
 
+        let key_pair = self.get_key_pair().await?;
+
         // signed attestation details - user account id, nickname and verified mobile number
         resp.account_id = Some(account_id);
+        resp.verifier_account_id = Some(self.get_account_id().await?);
         resp.user_name = nickname;
         resp.mobile_number = Some(phone_number);
-        resp.signature = Some(resp.sign(&self.get_key_pair().await?.to_ed2559_keypair())?);
+        resp.signature = Some(resp.sign(&key_pair.to_ed2559_keypair())?);
         Ok(resp)
     }
 }

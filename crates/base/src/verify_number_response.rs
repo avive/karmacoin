@@ -31,7 +31,7 @@ impl SignedTrait for VerifyNumberResponse {
     fn get_public_key(&self) -> Result<ed25519_dalek::PublicKey> {
         Ok(ed25519_dalek::PublicKey::from_bytes(
             &self
-                .account_id
+                .verifier_account_id
                 .as_ref()
                 .ok_or_else(|| anyhow!("no public found"))?
                 .data,
@@ -47,6 +47,7 @@ impl VerifyNumberResponse {
             result: 0,
             user_name: "".into(),
             account_id: None,
+            verifier_account_id: None,
             mobile_number: None,
             signature: None,
         }

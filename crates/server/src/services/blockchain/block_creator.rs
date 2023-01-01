@@ -104,8 +104,8 @@ impl BlockChainService {
             digest: vec![],
         };
 
-        // Set previous block hash to the hash of the previous block
-        if height > 0 {
+        // Set previous block hash to the hash of the previous block unless genesis block
+        if height != 1 {
             let Some(prev_block_data) = DatabaseService::read(ReadItem {
                 key: IntDbKey::from(height).0,
                 cf: BLOCKS_COL_FAMILY
@@ -116,7 +116,7 @@ impl BlockChainService {
             let prev_block = Block::decode(prev_block_data.0)?;
             block.prev_block_digest = prev_block.digest;
         } else {
-            info!("creating genesis block - no prev one");
+            info!("creating genesis block");
         };
 
         // set block reward

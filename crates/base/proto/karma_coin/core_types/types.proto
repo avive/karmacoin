@@ -161,12 +161,13 @@ enum VerifyNumberResult {
 
 // Created and signed by a verifier
 message VerifyNumberResponse {
-    uint64 timestamp = 1;
-    VerifyNumberResult result = 2;
-    AccountId account_id = 3;
-    MobileNumber mobile_number = 4;
-    string user_name = 5;
-    Signature signature = 6;
+    AccountId verifier_account_id = 1;
+    uint64 timestamp = 2;
+    VerifyNumberResult result = 3;
+    AccountId account_id = 4;
+    MobileNumber mobile_number = 5;
+    string user_name = 6;
+    Signature signature = 7;
 }
 
 // new user transactions submitted by users

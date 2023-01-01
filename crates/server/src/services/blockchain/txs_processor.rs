@@ -13,6 +13,7 @@ use crate::services::blockchain::{
 };
 use crate::services::db_config_service::USERS_COL_FAMILY;
 use anyhow::Result;
+use base::hex_utils::hex_string;
 use base::karma_coin::karma_coin_core_types::TransactionType::NewUserV1;
 use base::karma_coin::karma_coin_core_types::*;
 use bytes::Bytes;
@@ -67,6 +68,8 @@ impl Handler<ProcessTransactions> for BlockChainService {
                 continue;
             }
 
+            info!("processing new user tx: {:?}", hex_string(tx_hash));
+
             // the transaction event for the new user transaction
             let mut tx_event = TransactionEvent::new(height, tx, tx_hash);
 
@@ -116,7 +119,8 @@ impl Handler<ProcessTransactions> for BlockChainService {
                         .await??;
                     tx_event.result = ExecutionResult::Invalid as i32;
                     tx_event.error_message =
-                        "Tx signer user not found on chain - discarding tx".to_string();
+                        "Tx signer user not found on chain - discarding tx from mem pool"
+                            .to_string();
 
                     BlockChainService::emit_tx_event(tx_event.clone()).await?;
                     continue;
@@ -191,7 +195,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
             stats,
             &tokenomics,
             block_event,
-            height + 1,
+            height,
             self.id_key_pair.as_ref().unwrap(),
         )
         .await?;

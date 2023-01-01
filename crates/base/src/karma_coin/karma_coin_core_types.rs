@@ -178,17 +178,19 @@ pub struct PaymentTransactionV1 {
 /// Created and signed by a verifier
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct VerifyNumberResponse {
-    #[prost(uint64, tag = "1")]
+    #[prost(message, optional, tag = "1")]
+    pub verifier_account_id: ::core::option::Option<AccountId>,
+    #[prost(uint64, tag = "2")]
     pub timestamp: u64,
-    #[prost(enumeration = "VerifyNumberResult", tag = "2")]
+    #[prost(enumeration = "VerifyNumberResult", tag = "3")]
     pub result: i32,
-    #[prost(message, optional, tag = "3")]
-    pub account_id: ::core::option::Option<AccountId>,
     #[prost(message, optional, tag = "4")]
+    pub account_id: ::core::option::Option<AccountId>,
+    #[prost(message, optional, tag = "5")]
     pub mobile_number: ::core::option::Option<MobileNumber>,
-    #[prost(string, tag = "5")]
+    #[prost(string, tag = "6")]
     pub user_name: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "6")]
+    #[prost(message, optional, tag = "7")]
     pub signature: ::core::option::Option<Signature>,
 }
 /// new user transactions submitted by users

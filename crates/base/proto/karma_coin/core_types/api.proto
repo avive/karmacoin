@@ -61,6 +61,7 @@ message SubmitTransactionRequest {
 enum SubmitTransactionResult {
   SUBMIT_TRANSACTION_RESULT_INVALID = 0;
   SUBMIT_TRANSACTION_RESULT_SUBMITTED = 1;
+
 }
 
 message SubmitTransactionResponse {

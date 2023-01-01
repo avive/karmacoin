@@ -8,7 +8,7 @@ extern crate log;
 use base::genesis_config_service::{GenesisConfigService, NET_ID_KEY};
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{SubmitTransactionRequest, SubmitTransactionResult};
-use base::karma_coin::karma_coin_core_types::TransactionType::UpdateUserV1;
+use base::karma_coin::karma_coin_core_types::TransactionType::NewUserV1;
 use base::karma_coin::karma_coin_core_types::VerifyNumberResult::Verified;
 use base::karma_coin::karma_coin_core_types::{AccountId, KeyPair, MobileNumber};
 use base::karma_coin::karma_coin_core_types::{
@@ -91,6 +91,12 @@ async fn new_user_happy_flow_test() {
     let v_resp = resp1.into_inner();
     assert_eq!(v_resp.result, Verified as i32);
 
+    v_resp
+        .verify_signature()
+        .expect("invalid evidence signature");
+
+    info!("verify evidence verified");
+
     let new_user_tx = NewUserTransactionV1 {
         verify_number_response: Some(v_resp.clone()),
     };
@@ -106,17 +112,20 @@ async fn new_user_happy_flow_test() {
     let mut signed_tx = SignedTransaction {
         signer: Some(account_id.clone()),
         timestamp: Utc::now().timestamp_nanos() as u64,
-        nonce: 0,
+        nonce: 1,
         fee: 10,
         transaction_data: Some(TransactionData {
             transaction_data: buf,
-            transaction_type: UpdateUserV1 as i32,
+            transaction_type: NewUserV1 as i32,
         }),
         network_id,
         signature: None,
     };
 
     signed_tx.signature = Some(signed_tx.sign(&client_ed_key_pair).unwrap());
+
+    signed_tx.validate(0).await.expect("invalid signature");
+    info!("new user tx signature's valid");
 
     let mut api_client = ApiServiceClient::connect("http://[::1]:9888")
         .await

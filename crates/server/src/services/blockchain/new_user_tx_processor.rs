@@ -31,6 +31,7 @@ pub(crate) async fn process_transaction(
         .signer
         .as_ref()
         .ok_or_else(|| anyhow!("missing account id in tx"))?;
+
     let tx_hash = transaction.get_hash()?;
 
     // validate tx syntax, fields, signature, net_id before processing it

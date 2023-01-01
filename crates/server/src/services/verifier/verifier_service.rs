@@ -4,9 +4,9 @@
 
 use crate::services::verifier::register_number::RegisterNumber;
 use crate::services::verifier::verify_number::Verify;
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use base::hex_utils::short_hex_string;
-use base::karma_coin::karma_coin_core_types::{KeyPair, VerifyNumberResponse};
+use base::karma_coin::karma_coin_core_types::{AccountId, KeyPair, VerifyNumberResponse};
 use base::karma_coin::karma_coin_verifier::verifier_service_server::VerifierService as VerifierServiceTrait;
 use base::karma_coin::karma_coin_verifier::{
     RegisterNumberRequest, RegisterNumberResponse, VerifyNumberRequest,
@@ -39,9 +39,26 @@ impl Actor for VerifierService {
 impl Service for VerifierService {}
 
 impl VerifierService {
+    /// Returns the verifier account id
+    pub(crate) async fn get_account_id(&mut self) -> Result<AccountId> {
+        let key_pair = self.get_key_pair().await?;
+        Ok(AccountId {
+            data: key_pair
+                .public_key
+                .as_ref()
+                .ok_or_else(|| anyhow!("No public key"))?
+                .key
+                .to_vec(),
+        })
+    }
+
+    /// Returns the verifier id key pair
     pub(crate) async fn get_key_pair(&mut self) -> Result<KeyPair> {
         if let Some(key_pair) = &self.key_pair {
-            info!("returning cached verifier id key-pair");
+            info!(
+                "returning cached verifier id key-pair. account id: {:?}",
+                short_hex_string(&key_pair.public_key.as_ref().unwrap().key)
+            );
             return Ok(key_pair.clone());
         }
 

@@ -6,6 +6,7 @@ use crate::services::db_config_service::{
     TRANSACTIONS_COL_FAMILY, TXS_POOL_COL_FAMILY, TXS_POOL_KEY,
 };
 use anyhow::{anyhow, Result};
+use base::hex_utils::hex_string;
 use base::karma_coin::karma_coin_core_types::{MemPool, SignedTransaction};
 use base::server_config_service::{
     ServerConfigService, MEM_POOL_MAX_ITEMS_KEY, MEM_POOL_MAX_TX_AGE_HOURS,
@@ -171,7 +172,10 @@ impl Handler<RemoveTransactionByHash> for MemPoolService {
         _ctx: &mut Context<Self>,
         msg: RemoveTransactionByHash,
     ) -> Result<()> {
+        info!("count before remove: {:?}", self.transactions.len());
+        info!("removing tx by hash: {:?}", hex_string(msg.0.as_slice()));
         self.transactions.remove(msg.0.as_slice());
+        info!("count after remove: {:?}", self.transactions.len());
         self.persist().await
     }
 }
