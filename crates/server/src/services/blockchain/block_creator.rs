@@ -130,6 +130,7 @@ impl BlockChainService {
 
         // insert the block to the db
         let mut buf = Vec::with_capacity(block.encoded_len());
+        info!("binary block size: {}", block.encoded_len());
         block.encode(&mut buf)?;
 
         // Write the block to the db

@@ -146,6 +146,8 @@ pub(crate) async fn process_transaction(
     .await?;
 
     let mut tx_data = Vec::with_capacity(transaction.encoded_len());
+    info!("binary transaction size: {}", transaction.encoded_len());
+
     transaction.encode(&mut tx_data)?;
 
     // index the transaction in the db by hash

@@ -2,8 +2,12 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use crate::hex_utils::short_hex_string;
 use crate::karma_coin::karma_coin_core_types::{BlockEvent, TransactionEvent};
+use std::fmt;
+use std::fmt::{Display, Formatter};
 
+// todo: add update user txs count
 impl BlockEvent {
     pub fn new(height: u64) -> Self {
         Self {
@@ -43,5 +47,29 @@ impl BlockEvent {
 
     pub fn add_transaction_event(&mut self, event: TransactionEvent) {
         self.transactions_events.push(event);
+    }
+}
+
+impl Display for BlockEvent {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(
+            f,
+            "BlockEvent {{time: {}, block_hash: {}, height: {}, transactions: {}, signups_count: {}, \
+            payments_count: {}, fees_amount: {}, \
+            signup_rewards_amount: {}, referral_rewards_amount: {}, reward: {}, \
+            referral_rewards_count: {} }}",
+            self.timestamp,
+            short_hex_string(self.block_hash.as_slice()),
+            self.height,
+            self.transactions_events.len(),
+            self.signups_count,
+            self.payments_count,
+            self.fees_amount,
+            self.signup_rewards_amount,
+            self.referral_rewards_amount,
+            self.reward,
+            self.referral_rewards_count
+        )
     }
 }

@@ -75,7 +75,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
 
             match new_user_tx_processor::process_transaction(tx, &tokenomics, &mut tx_event).await {
                 Ok(res) => {
-                    info!("new user transaction processed: {:?}", tx_event);
+                    info!("new user transaction processed: {}", tx_event);
                     tx_hashes.push(tx_hash.to_vec());
                     block_event.signups_count += 1;
                     block_event.add_fee(tx_event.transaction.as_ref().unwrap().fee);
@@ -141,7 +141,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                         .await
                         {
                             Ok(_) => {
-                                info!("payment transaction processed: {:?}", tx_event);
+                                info!("payment transaction processed: {}", tx_event);
                                 tx_hashes.push(tx_hash.to_vec());
                                 block_event.payments_count += 1;
                                 block_event.add_fee(tx_event.transaction.as_ref().unwrap().fee);
@@ -165,7 +165,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                         .await
                     {
                         Ok(_) => {
-                            info!("update user transaction processed: {:?}", tx_event);
+                            info!("update user transaction processed: {}", tx_event);
                             tx_hashes.push(tx_hash.to_vec());
                             block_event.add_fee(tx_event.transaction.as_ref().unwrap().fee);
                             block_event.add_transaction_event(tx_event.clone());

@@ -41,7 +41,7 @@ impl BlockChainService {
         })
         .await?;
 
-        info!("Tx event emitted: {:?}", event);
+        info!("Tx event emitted: {}", event);
 
         Ok(())
     }

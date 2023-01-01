@@ -2,10 +2,13 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use crate::hex_utils::short_hex_string;
 use crate::karma_coin::karma_coin_core_types::{
     ExecutionInfo, ExecutionResult, FeeType, SignedTransaction, TransactionEvent,
 };
 use chrono::Utc;
+use std::fmt;
+use std::fmt::{Display, Formatter};
 
 impl TransactionEvent {
     pub fn new(height: u64, tx: &SignedTransaction, transaction_hash: &[u8]) -> Self {
@@ -22,5 +25,27 @@ impl TransactionEvent {
             info: ExecutionInfo::Unknown as i32,
             fee: 0,
         }
+    }
+}
+
+impl Display for TransactionEvent {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(
+            f,
+            "TransactionEvent {{ timestamp: {}, height: {}, tx_hash: {}, \
+        error_message: {}, fee_type: {}, referral_reward: {}, signup_reward: {}, result: {}, \
+        info: {}, fee: {} }}",
+            self.timestamp,
+            self.height,
+            short_hex_string(&self.transaction_hash),
+            self.error_message,
+            self.fee_type,
+            self.referral_reward,
+            self.signup_reward,
+            self.result,
+            self.info,
+            self.fee
+        )
     }
 }
