@@ -10,7 +10,7 @@ To learn more about KarmaCoin visit https://karmaco.in
 ```cargo build```
 
 ## Testing
-Use [cargo-nextest](https://nexte.st/) test runner.
+Use [cargo-nextest](https://nexte.st/) runner.
 
 ```cargo nextest run --test-threads 1```
 

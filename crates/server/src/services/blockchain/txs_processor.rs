@@ -53,11 +53,11 @@ impl Handler<ProcessTransactions> for BlockChainService {
         let tokenomics = Tokenomics {
             stats: stats.clone(),
         };
-        let height = stats.tip_height + 1;
+        let block_height = stats.tip_height + 1;
         let mut tx_hashes: Vec<Vec<u8>> = vec![];
 
         // the block event for the new block
-        let mut block_event = BlockEvent::new(height + 1);
+        let mut block_event = BlockEvent::new(block_height);
 
         // new signups txs indexed by mobile number - used for referral reward calculations
         let mut sign_ups: HashMap<Vec<u8>, SignedTransaction> = HashMap::new();
@@ -71,7 +71,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
             info!("processing new user tx: {:?}", hex_string(tx_hash));
 
             // the transaction event for the new user transaction
-            let mut tx_event = TransactionEvent::new(height, tx, tx_hash);
+            let mut tx_event = TransactionEvent::new(block_height, tx, tx_hash);
 
             match new_user_tx_processor::process_transaction(tx, &tokenomics, &mut tx_event).await {
                 Ok(res) => {
@@ -102,7 +102,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
         // process other transactions types
         for (tx_hash, tx) in mem_pool.call(GetTransactions).await??.iter() {
             let tx_type = tx.get_tx_type()?;
-            let mut tx_event = TransactionEvent::new(height, tx, tx_hash);
+            let mut tx_event = TransactionEvent::new(block_height, tx, tx_hash);
 
             // Get tx issuer user from chain and reject tx if it doesn't exist
             let mut user = match DatabaseService::read(ReadItem {
@@ -169,6 +169,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                             tx_hashes.push(tx_hash.to_vec());
                             block_event.add_fee(tx_event.transaction.as_ref().unwrap().fee);
                             block_event.add_transaction_event(tx_event.clone());
+                            block_event.user_updates_count += 1;
                         }
                         Err(e) => {
                             error!("Failed to process update user transaction: {:?}", e);
@@ -195,7 +196,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
             stats,
             &tokenomics,
             block_event,
-            height,
+            block_height,
             self.id_key_pair.as_ref().unwrap(),
         )
         .await?;

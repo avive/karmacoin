@@ -24,6 +24,8 @@ impl BlockChainService {
         stats.transactions_count += block.transactions_hashes.len() as u64;
         stats.users_count += block_event.signups_count;
 
+        stats.update_user_transactions_count += block_event.user_updates_count;
+
         stats.payments_transactions_count += block_event.payments_count;
         stats.signup_rewards_amount += block_event.signup_rewards_amount;
         stats.signup_rewards_count += block_event.signups_count;

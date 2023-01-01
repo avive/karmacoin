@@ -36,6 +36,7 @@ async fn new_user_happy_flow_test() {
     let server = ServerService::from_registry().await.unwrap();
     server.call(Startup {}).await.unwrap().unwrap();
 
+    // Setup client
     let client_key_pair = KeyPair::new();
     let client_ed_key_pair = client_key_pair.to_ed2559_keypair();
     let account_id_bytes = client_ed_key_pair.public.to_bytes().to_vec();
@@ -54,6 +55,10 @@ async fn new_user_happy_flow_test() {
 
     register_number_request.signature =
         Some(register_number_request.sign(&client_ed_key_pair).unwrap());
+
+    register_number_request
+        .verify_signature()
+        .expect("signature should be valid");
 
     let mut verifier_service_client = VerifierServiceClient::connect("http://[::1]:9888")
         .await
@@ -76,12 +81,15 @@ async fn new_user_happy_flow_test() {
     v_request.mobile_number = Some(mobile_number.clone());
     v_request.account_id = Some(account_id.clone());
 
-    // in production this code is obtained from sms message
+    // in production this code is obtained from the sms message sent by verifier
     v_request.code = code;
 
     // user's requested nickname
     v_request.nickname = user_name.into();
     v_request.signature = Some(v_request.sign(&client_ed_key_pair).unwrap());
+    v_request
+        .verify_signature()
+        .expect("signature verification failed");
 
     let resp1 = verifier_service_client
         .verify_number(v_request)
@@ -104,7 +112,7 @@ async fn new_user_happy_flow_test() {
     let mut buf = Vec::with_capacity(new_user_tx.encoded_len());
     new_user_tx.encode(&mut buf).unwrap();
 
-    let network_id = GenesisConfigService::get_u64(NET_ID_KEY.into())
+    let net_id = GenesisConfigService::get_u64(NET_ID_KEY.into())
         .await
         .unwrap()
         .unwrap() as u32;
@@ -118,7 +126,7 @@ async fn new_user_happy_flow_test() {
             transaction_data: buf,
             transaction_type: NewUserV1 as i32,
         }),
-        network_id,
+        net_id,
         signature: None,
     };
 

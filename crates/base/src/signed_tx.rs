@@ -91,11 +91,11 @@ impl SignedTransaction {
             .await?
             .unwrap();
 
-        if self.network_id as u64 != net_id {
+        if self.net_id as u64 != net_id {
             return Err(anyhow!(
                 "Transaction has wrong net id - expected: {}, got: {}",
                 net_id,
-                self.network_id
+                self.net_id
             ));
         }
 

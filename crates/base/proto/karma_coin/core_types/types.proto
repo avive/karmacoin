@@ -195,7 +195,7 @@ message SignedTransaction {
     uint64 nonce = 3; // tx nonce
     uint64 fee = 4; // network fee provided by sender
     TransactionData transaction_Data = 5; // binary transaction data
-    uint32 network_id = 6; // network id to avoid confusion with testnets
+    uint32 net_id = 6; // network id to avoid confusion with testnets
     Signature signature = 7; // signer signature on all of the above data
 }
 
@@ -274,6 +274,9 @@ message BlockchainStats {
     uint64 validator_rewards_count = 15;
     uint64 validator_rewards_amount = 16;
 
+    // total number of payment transactions
+    uint64 update_user_transactions_count = 17;
+
 }
 
 // Block events
@@ -284,11 +287,12 @@ message BlockEvent {
     repeated TransactionEvent transactions_events = 4;
     uint64 signups_count = 5;
     uint64 payments_count = 6;
-    uint64 fees_amount = 7;
-    uint64 signup_rewards_amount = 8;
-    uint64 referral_rewards_amount = 9;
-    uint64 referral_rewards_count = 10;
-    uint64 reward = 11;
+    uint64 user_updates_count = 7;
+    uint64 fees_amount = 8;
+    uint64 signup_rewards_amount = 9;
+    uint64 referral_rewards_amount = 10;
+    uint64 referral_rewards_count = 11;
+    uint64 reward = 12;
 }
 
 

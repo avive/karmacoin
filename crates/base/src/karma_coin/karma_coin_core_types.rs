@@ -229,7 +229,7 @@ pub struct SignedTransaction {
     pub transaction_data: ::core::option::Option<TransactionData>,
     /// network id to avoid confusion with testnets
     #[prost(uint32, tag = "6")]
-    pub network_id: u32,
+    pub net_id: u32,
     /// signer signature on all of the above data
     #[prost(message, optional, tag = "7")]
     pub signature: ::core::option::Option<Signature>,
@@ -325,6 +325,9 @@ pub struct BlockchainStats {
     pub validator_rewards_count: u64,
     #[prost(uint64, tag = "16")]
     pub validator_rewards_amount: u64,
+    /// total number of payment transactions
+    #[prost(uint64, tag = "17")]
+    pub update_user_transactions_count: u64,
 }
 /// Block events
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -342,14 +345,16 @@ pub struct BlockEvent {
     #[prost(uint64, tag = "6")]
     pub payments_count: u64,
     #[prost(uint64, tag = "7")]
-    pub fees_amount: u64,
+    pub user_updates_count: u64,
     #[prost(uint64, tag = "8")]
-    pub signup_rewards_amount: u64,
+    pub fees_amount: u64,
     #[prost(uint64, tag = "9")]
-    pub referral_rewards_amount: u64,
+    pub signup_rewards_amount: u64,
     #[prost(uint64, tag = "10")]
-    pub referral_rewards_count: u64,
+    pub referral_rewards_amount: u64,
     #[prost(uint64, tag = "11")]
+    pub referral_rewards_count: u64,
+    #[prost(uint64, tag = "12")]
     pub reward: u64,
 }
 /// Supported signature schemes

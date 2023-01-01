@@ -11,6 +11,7 @@ impl BlockchainStats {
             tip_height: 0,
             transactions_count: 0,
             payments_transactions_count: 0,
+            update_user_transactions_count: 0,
             users_count: 0,
             fees_amount: 0,
             minted_amount: 0,

@@ -49,6 +49,7 @@ impl Handler<InitLogger> for LoggingService {
                 );
 
                 let now: DateTime<Local> = Local::now();
+
                 let now_disp = format!(
                     "{}.{}.{}:{}",
                     now.hour(),
