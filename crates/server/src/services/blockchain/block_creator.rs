@@ -92,7 +92,7 @@ impl BlockChainService {
         let mut block_producer = Self::get_block_producer_user_account(key_pair).await?;
 
         let mut block = Block {
-            time: Utc::now().timestamp_millis() as u64,
+            time: Utc::now().timestamp_nanos() as u64,
             author: Some(block_producer.account_id.as_ref().unwrap().clone()),
             height,
             transactions_hashes: transactions_hashes.to_vec(),

@@ -67,7 +67,7 @@ impl Handler<RemoveOldTransactions> for MemPoolService {
         let duration = chrono::Duration::hours(max_age as i64).num_milliseconds() as u64;
         let txs = self.transactions.clone();
         for (tx_hash, tx) in txs.iter() {
-            if tx.timestamp < (chrono::Utc::now().timestamp() as u64 - duration) {
+            if tx.timestamp < (chrono::Utc::now().timestamp_nanos() as u64 - duration) {
                 self.transactions.remove(tx_hash);
             }
         }

@@ -67,6 +67,9 @@ pub const TREASURY_ACCOUNT_ID_KEY: &str = "treasury_account_id";
 /// Treasury pre-minted amount in KCents
 pub const TREASURY_PREMINT_COINS_AMOUNT_KEY: &str = "treasury_premint_coins";
 
+/// A set of canonical mobile phone verifiers accounts ids
+pub const VERIFIERS_ACCOUNTS_IDS: &str = "verifiers_accounts_ids";
+
 /// This service handles the kc blockchain genesis configuration
 /// It provides default values for development, and merges in values from
 /// a genesis config file when applicable
@@ -124,6 +127,13 @@ impl Actor for GenesisConfigService {
             .set_default(TX_FEE_SUBSIDY_ALLOCATION_KEY, 250 * (10 ^ 6))
             .unwrap()
             .set_default(TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY, 10)
+            .unwrap()
+            // todo: use an array instead of a comma delimited string
+            .set_default(
+                VERIFIERS_ACCOUNTS_IDS,
+                "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd, \
+                ac3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5c0",
+            )
             .unwrap()
             .add_source(
                 Environment::with_prefix("GENESIS")

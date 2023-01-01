@@ -249,7 +249,7 @@ impl Handler<ReadAllItems> for DatabaseService {
         let db_ref = self.db.as_ref().ok_or_else(|| anyhow!("db is nil"))?;
         let cf = db_ref
             .cf_handle(&msg.cf)
-            .ok_or_else(|| anyhow!("no matching cf"))?;
+            .ok_or_else(|| anyhow!("no matching cf: {:?}", &msg.cf))?;
 
         let mut iter = match msg.from.as_ref() {
             Some(name) => {
@@ -306,7 +306,7 @@ impl Handler<ReadItem> for DatabaseService {
 
         let cf = db_ref
             .cf_handle(msg.cf)
-            .ok_or_else(|| anyhow!("no matching cf"))?;
+            .ok_or_else(|| anyhow!("no matching cf: {:?}", &msg.cf))?;
 
         let data = db_ref
             .get_cf(cf, msg.key.to_vec().as_slice())
@@ -339,7 +339,7 @@ impl Handler<DeleteItem> for DatabaseService {
         let db_ref = self.db.as_ref().ok_or_else(|| anyhow!("db is nil"))?;
         let cf = db_ref
             .cf_handle(msg.cf)
-            .ok_or_else(|| anyhow!("no matching cf: {}", msg.cf))?;
+            .ok_or_else(|| anyhow!("no matching cf: {:?}", msg.cf))?;
 
         db_ref
             .delete_cf(cf, msg.key.to_vec().as_slice())

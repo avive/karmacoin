@@ -137,6 +137,7 @@ impl Actor for DbConfigService {
                 ColumnFamilyDescriptor::new(BLOCKCHAIN_DATA_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TXS_POOL_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TRANSACTIONS_COL_FAMILY, Options::default()),
+                ColumnFamilyDescriptor::new(TRANSACTIONS_EVENTS_COL_FAMILY, Options::default()),
             ],
         })
         .await?;

@@ -105,7 +105,7 @@ async fn new_user_happy_flow_test() {
 
     let mut signed_tx = SignedTransaction {
         signer: Some(account_id.clone()),
-        timestamp: Utc::now().timestamp_millis() as u64,
+        timestamp: Utc::now().timestamp_nanos() as u64,
         nonce: 0,
         fee: 10,
         transaction_data: Some(TransactionData {
@@ -136,6 +136,11 @@ async fn new_user_happy_flow_test() {
     );
 
     finalize_test().await;
+
+    // since a block is produced in dev mode for each new transaction we can now go ahead and verify
+    // that the user account was created on chain
+
+    // todo: add a test to verify that the user account was created on chain
 }
 
 /// Helper
