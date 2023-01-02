@@ -9,6 +9,6 @@ extern crate core;
 extern crate db;
 
 // used by server-app to start the server
+pub use services::blockchain::tokenomics::Tokenomics;
 pub use services::server_service;
-
 mod services;

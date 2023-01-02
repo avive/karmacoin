@@ -58,8 +58,14 @@ pub(crate) async fn process_transaction(
 ) -> Result<()> {
     transaction.validate(payer.nonce).await?;
 
+    info!("Processing payment transaction: {}", transaction);
+    info!("From user: {}", payer);
+    info!("To user: {}", payee);
+
     let payment_tx: PaymentTransactionV1 = transaction.get_payment_transaction_v1()?;
     payment_tx.verify_syntax()?;
+
+    info!("Payment data: {}", payment_tx);
 
     let mobile_number = payment_tx.to.unwrap().number;
     let payment = payment_tx.amount;
@@ -95,8 +101,9 @@ pub(crate) async fn process_transaction(
         sign_ups.remove(mobile_number.as_bytes());
 
         // this is a new user referral payment tx - payer should get the referral fee!
-        let _sign_up_tx = sign_ups.get(mobile_number.as_bytes()).unwrap();
+        //let _sign_up_tx = sign_ups.get(mobile_number.as_bytes()).unwrap();
         // todo: award signer with the referral reward if applicable
+        info!("apply referral reward: {}", referral_reward);
         payer.balance += referral_reward;
     };
 

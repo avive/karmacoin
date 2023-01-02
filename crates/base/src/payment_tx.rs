@@ -4,6 +4,8 @@
 
 use crate::karma_coin::karma_coin_core_types::PaymentTransactionV1;
 use anyhow::{anyhow, Result};
+use std::fmt;
+use std::fmt::{Display, Formatter};
 
 impl PaymentTransactionV1 {
     /// Verify all fields
@@ -17,5 +19,18 @@ impl PaymentTransactionV1 {
         }
 
         Ok(())
+    }
+}
+
+impl Display for PaymentTransactionV1 {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(
+            f,
+            "PaymentTransactionV1 {{ to: {}, amount: {}, char trait: {} }}",
+            self.to.as_ref().unwrap().number,
+            self.amount,
+            self.char_trait
+        )
     }
 }

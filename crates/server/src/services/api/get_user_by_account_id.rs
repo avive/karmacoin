@@ -23,7 +23,7 @@ impl Handler<GetUserInfoByAccountId> for ApiService {
         msg: GetUserInfoByAccountId,
     ) -> Result<GetUserInfoByAccountResponse> {
         if msg.0.account_id.is_none() {
-            return Err(anyhow!("missing phone number from request"));
+            return Err(anyhow!("missing account id from request"));
         };
 
         match DatabaseService::read(ReadItem {

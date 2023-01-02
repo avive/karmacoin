@@ -2,8 +2,11 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use crate::hex_utils::short_hex_string;
 use crate::karma_coin::karma_coin_core_types::{AccountId, MobileNumber, User};
 use anyhow::Result;
+use std::fmt;
+use std::fmt::{Display, Formatter};
 
 impl User {
     /// Verify all fields
@@ -23,5 +26,23 @@ impl User {
             trait_scores: vec![],
             pre_keys: vec![],
         }
+    }
+}
+
+impl Display for User {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(
+            f,
+            "User {{ user_name: {}, mobile_number: {}, account_id: {}, nonce: {}, \
+            balance: {}, trait_scores: {:?}, pre_keys: {:?} }}",
+            self.user_name,
+            self.mobile_number.as_ref().unwrap().number,
+            short_hex_string(self.account_id.as_ref().unwrap().data.as_slice()),
+            self.nonce,
+            self.balance,
+            self.trait_scores,
+            self.pre_keys
+        )
     }
 }

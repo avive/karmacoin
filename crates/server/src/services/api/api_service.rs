@@ -22,7 +22,7 @@ pub(crate) struct ApiService {}
 
 impl Default for ApiService {
     fn default() -> Self {
-        info!("Api Service created");
+        info!("service created");
         ApiService {}
     }
 }
@@ -30,7 +30,7 @@ impl Default for ApiService {
 #[async_trait::async_trait]
 impl Actor for ApiService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        info!("Api Service started");
+        info!("service started");
         Ok(())
     }
 }
@@ -39,7 +39,7 @@ impl Service for ApiService {}
 
 /// ApiService implements the ApiServiceTrait trait which defines the grpc rpc methods it provides for
 /// clients over the network. All returned data is canonical blockchain data according to the state
-/// of the backing blockchain noode.
+/// of the backing blockchain node.
 #[tonic::async_trait]
 impl ApiServiceTrait for ApiService {
     /// Returns user info by nickname
@@ -49,13 +49,13 @@ impl ApiServiceTrait for ApiService {
     ) -> Result<Response<GetUserInfoByNickResponse>, Status> {
         let service = ApiService::from_registry()
             .await
-            .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?;
+            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?;
 
         let res = service
             .call(GetUserInfoByNick(request.into_inner()))
             .await
-            .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?
-            .map_err(|_| Status::internal("internal error"))?;
+            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
 
         Ok(Response::new(res))
     }
@@ -73,7 +73,7 @@ impl ApiServiceTrait for ApiService {
             .call(GetUserInfoByNumber(request.into_inner()))
             .await
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?
-            .map_err(|_| Status::internal("internal error"))?;
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
 
         Ok(Response::new(res))
     }
@@ -85,13 +85,13 @@ impl ApiServiceTrait for ApiService {
     ) -> Result<Response<GetUserInfoByAccountResponse>, Status> {
         let service = ApiService::from_registry()
             .await
-            .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?;
+            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?;
 
         let res = service
             .call(GetUserInfoByAccountId(request.into_inner()))
             .await
-            .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?
-            .map_err(|_| Status::internal("internal error"))?;
+            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
 
         Ok(Response::new(res))
     }
@@ -101,6 +101,8 @@ impl ApiServiceTrait for ApiService {
         &self,
         _request: Request<GetPhoneVerifiersRequest>,
     ) -> Result<Response<GetPhoneVerifiersResponse>, Status> {
+        // todo: grab this from genesis config
+
         todo!()
     }
 
@@ -111,13 +113,13 @@ impl ApiServiceTrait for ApiService {
     ) -> Result<Response<GetCharTraitsResponse>, Status> {
         let service = ApiService::from_registry()
             .await
-            .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?;
+            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?;
 
         let res = service
             .call(GetCharTraits(request.into_inner()))
             .await
-            .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?
-            .map_err(|_| Status::internal("internal error"))?;
+            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
 
         Ok(Response::new(res))
     }
@@ -130,13 +132,13 @@ impl ApiServiceTrait for ApiService {
         // create a block with the transaction
         let service = BlockChainService::from_registry()
             .await
-            .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
 
         let resp = service
             .call(GetStats(request.into_inner()))
             .await
-            .map_err(|e| Status::internal(format!("failed to call blockchain api: {:?}", e)))?
-            .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
+            .map_err(|e| Status::internal(format!("failed to call blockchain api: {}", e)))?
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
 
         Ok(Response::new(resp))
     }
@@ -161,26 +163,26 @@ impl ApiServiceTrait for ApiService {
 
         let mem_pool = MemPoolService::from_registry()
             .await
-            .map_err(|e| Status::internal(format!("failed to get mempool: {:?}", e)))?;
+            .map_err(|e| Status::internal(format!("failed to get mempool: {}", e)))?;
 
         mem_pool
             .call(AddTransaction(tx))
             .await
-            .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?
-            .map_err(|e| Status::internal(format!("failed to process transaction: {:?}", e)))?;
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?
+            .map_err(|e| Status::internal(format!("failed to process transaction: {}", e)))?;
 
         // s tart transaction processing to process all transactions in the mem pool
         // in production this can be done on a timer every few seconds
         // here we just trigger block production when a new transaction is submitted
         let service = BlockChainService::from_registry()
             .await
-            .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
 
         service
             .call(ProcessTransactions {})
             .await
-            .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?
-            .map_err(|e| Status::internal(format!("failed to call blockchain api: {:?}", e)))?;
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?
+            .map_err(|e| Status::internal(format!("failed to call blockchain api: {}", e)))?;
 
         Ok(Response::new(SubmitTransactionResponse {
             submit_transaction_result: SubmitTransactionResult::Submitted as i32,

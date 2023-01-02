@@ -107,7 +107,7 @@ impl BlockChainService {
         // Set previous block hash to the hash of the previous block unless genesis block
         if height != 1 {
             let Some(prev_block_data) = DatabaseService::read(ReadItem {
-                key: IntDbKey::from(height).0,
+                key: IntDbKey::from(height -1).0,
                 cf: BLOCKS_COL_FAMILY
             }).await? else {
                 return Err(anyhow::anyhow!("Failed to read previous block"));

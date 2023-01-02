@@ -3,6 +3,7 @@
 //
 
 use crate::genesis_config_service::{GenesisConfigService, NET_ID_KEY};
+use crate::hex_utils::short_hex_string;
 use crate::karma_coin::karma_coin_core_types::{
     NewUserTransactionV1, PaymentTransactionV1, SignedTransaction, TransactionType,
     UpdateUserTransactionV1,
@@ -13,6 +14,8 @@ use bytes::Bytes;
 use chrono::{Duration, Utc};
 use ed25519_dalek::{PublicKey, Signature};
 use prost::Message;
+use std::fmt;
+use std::fmt::{Display, Formatter};
 
 impl SignedTrait for SignedTransaction {
     fn get_sign_message(&self) -> Result<Vec<u8>> {
@@ -45,6 +48,23 @@ impl SignedTrait for SignedTransaction {
     }
 }
 
+impl Display for SignedTransaction {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(
+            f,
+            "SignedTransaction {{ from: {}, hash: {}, nonce: {}, fee: {}, time: {}, \
+            net_id: {} }}",
+            short_hex_string(&self.signer.as_ref().unwrap().data),
+            short_hex_string(self.get_hash().unwrap().as_ref()),
+            self.nonce,
+            self.fee,
+            self.timestamp,
+            self.net_id
+        )
+    }
+}
+
 impl SignedTransaction {
     /// Returns the transaction canonical hash
     pub fn get_hash(&self) -> Result<Bytes> {
@@ -58,7 +78,11 @@ impl SignedTransaction {
     /// signed before processing it
     pub async fn validate(&self, user_nonce: u64) -> Result<()> {
         if self.nonce != user_nonce + 1 {
-            return Err(anyhow!("Invalid nonce in tx"));
+            return Err(anyhow!(
+                "Invalid nonce in tx. Got: {}, Expected: {}",
+                self.nonce,
+                user_nonce + 1
+            ));
         }
 
         self.verify_syntax().await?;
