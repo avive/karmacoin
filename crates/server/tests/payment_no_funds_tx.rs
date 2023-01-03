@@ -13,7 +13,7 @@ use base::karma_coin::karma_coin_api::{
 };
 use base::karma_coin::karma_coin_core_types::TransactionType::PaymentV1;
 use base::karma_coin::karma_coin_core_types::{
-    AccountId, CharTrait, PaymentTransactionV1, SignedTransaction, TransactionData,
+    AccountId, PaymentTransactionV1, SignedTransaction, TransactionData,
 };
 use base::signed_trait::SignedTrait;
 use chrono::Utc;
@@ -84,7 +84,7 @@ async fn payment_tx_no_funds_test() {
     let payment_tx = PaymentTransactionV1 {
         to: Some(user2_number.clone()),
         amount: payment_amount,
-        char_trait: CharTrait::Kind as i32,
+        char_trait_id: 1,
     };
 
     let mut buf = Vec::with_capacity(payment_tx.encoded_len());
