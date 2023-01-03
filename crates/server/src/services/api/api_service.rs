@@ -13,17 +13,20 @@ use crate::services::blockchain::txs_processor::ProcessTransactions;
 use anyhow::Result;
 use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
 use base::karma_coin::karma_coin_api::*;
+use base::karma_coin::karma_coin_core_types::CharTrait;
 use tonic::{Request, Response, Status};
 use xactor::*;
 
 /// ApiService is a system service that provides access to provider server persisted data as well as an interface to admin the provider's server. It provides a GRPC admin service defined in ServerAdminService. This service is designed to be used by provider admin clients.
 #[derive(Debug, Clone)]
-pub(crate) struct ApiService {}
+pub(crate) struct ApiService {
+    pub(crate) char_traits: Option<Vec<CharTrait>>,
+}
 
 impl Default for ApiService {
     fn default() -> Self {
         info!("service created");
-        ApiService {}
+        ApiService { char_traits: None }
     }
 }
 
@@ -106,7 +109,7 @@ impl ApiServiceTrait for ApiService {
         todo!()
     }
 
-    /// Returns the supported character traits
+    /// Returns the supported character traits for this network
     async fn get_char_traits(
         &self,
         request: Request<GetCharTraitsRequest>,

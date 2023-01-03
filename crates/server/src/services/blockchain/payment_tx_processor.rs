@@ -93,6 +93,11 @@ pub(crate) async fn process_transaction(
     // update payer balance to reflect payment
     payer.balance -= payment + user_tx_fee;
 
+    if payment_tx.char_trait_id != 0 {
+        // payment includes an appreciation for a character trait - update user character trait points
+        payee.inc_trait_score(payment_tx.char_trait_id);
+    }
+
     let referral_reward = tokenomics.get_referral_reward_amount().await?;
 
     // apply new user referral reward to the payer if applicable

@@ -90,17 +90,6 @@ pub struct PhoneVerifier {
     #[prost(string, tag = "2")]
     pub name: ::prost::alloc::string::String,
 }
-// Data that is stored on chain
-
-//
-//message OnChainData {
-//repeated User users = 1;
-//repeated PhoneVerifier sms_verifiers = 2;
-//repeated TraitName traits = 3; // char trait ids supported by the system
-//repeated SignedTransaction transactions = 4; // signed transactions- all for archive, only recent for standard nodes
-//repeated Block blocks = 5; // the blockchain
-//}
-
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Block {
     #[prost(uint64, tag = "1")]
@@ -129,23 +118,17 @@ pub struct Block {
     #[prost(bytes = "vec", tag = "10")]
     pub digest: ::prost::alloc::vec::Vec<u8>,
 }
-#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
-pub struct TraitName {
-    #[prost(enumeration = "CharTrait", tag = "1")]
-    pub char_trait: i32,
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CharTrait {
+    #[prost(uint32, tag = "1")]
+    pub id: u32,
     #[prost(string, tag = "2")]
     pub name: ::prost::alloc::string::String,
 }
-/// A set of traits
-#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
-pub struct Traits {
-    #[prost(message, repeated, tag = "1")]
-    pub named_traits: ::prost::alloc::vec::Vec<TraitName>,
-}
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct TraitScore {
-    #[prost(enumeration = "CharTrait", tag = "1")]
-    pub r#trait: i32,
+    #[prost(uint32, tag = "1")]
+    pub trait_id: u32,
     #[prost(uint32, tag = "2")]
     pub score: u32,
 }
@@ -171,9 +154,9 @@ pub struct PaymentTransactionV1 {
     /// amount in tokens to transfer
     #[prost(uint64, tag = "2")]
     pub amount: u64,
-    /// char trait set by sender. e.g. smart
-    #[prost(enumeration = "CharTrait", tag = "3")]
-    pub char_trait: i32,
+    /// char trait id set by sender. e.g. smart
+    #[prost(uint32, tag = "3")]
+    pub char_trait_id: u32,
 }
 /// Created and signed by a verifier
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -362,14 +345,6 @@ pub struct BlockEvent {
 #[repr(i32)]
 pub enum KeyScheme {
     Ed25519 = 0,
-}
-/// Supported char traits. Enum values are the traits unique id
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
-#[repr(i32)]
-pub enum CharTrait {
-    Kind = 0,
-    Helpful = 1,
-    Smart = 2,
 }
 /// transactions
 

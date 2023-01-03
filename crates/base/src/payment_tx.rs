@@ -27,10 +27,10 @@ impl Display for PaymentTransactionV1 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(
             f,
-            "PaymentTransactionV1 {{ to: {}, amount: {}, char trait: {} }}",
+            "PaymentTransactionV1 {{ to: {}, amount: {}, char trait id: {} }}",
             self.to.as_ref().unwrap().number,
             self.amount,
-            self.char_trait
+            self.char_trait_id
         )
     }
 }

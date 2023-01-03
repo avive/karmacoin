@@ -3,13 +3,10 @@
 //
 
 use crate::services::api::api_service::ApiService;
-use crate::services::db_config_service::{BLOCKCHAIN_DATA_COL_FAMILY, DB_SUPPORTED_TRAITS_KEY};
 use anyhow::Result;
+use base::genesis_config_service::{GenesisConfigService, CHAR_TRAITS_KEY};
 use base::karma_coin::karma_coin_api::{GetCharTraitsRequest, GetCharTraitsResponse};
-use base::karma_coin::karma_coin_core_types::Traits;
-use bytes::Bytes;
-use db::db_service::{DatabaseService, ReadItem};
-use prost::Message;
+use base::karma_coin::karma_coin_core_types::CharTrait;
 use xactor::*;
 
 #[message(result = "Result<GetCharTraitsResponse>")]
@@ -22,22 +19,28 @@ impl Handler<GetCharTraits> for ApiService {
         _ctx: &mut Context<Self>,
         _msg: GetCharTraits,
     ) -> Result<GetCharTraitsResponse> {
-        // read traits from db
-        match DatabaseService::read(ReadItem {
-            key: Bytes::from(DB_SUPPORTED_TRAITS_KEY.as_bytes()),
-            cf: BLOCKCHAIN_DATA_COL_FAMILY,
-        })
-        .await?
-        {
-            Some(data) => {
-                let traits = Traits::decode(data.0.as_ref())?;
-                Ok(GetCharTraitsResponse {
-                    trait_names: traits.named_traits,
-                })
-            }
-            None => Ok(GetCharTraitsResponse {
-                trait_names: vec![],
-            }),
+        if let Some(traits) = self.char_traits.as_ref() {
+            return Ok(GetCharTraitsResponse {
+                char_traits: traits.clone(),
+            });
         }
+
+        let mut traits = vec![];
+        for (id, name) in GenesisConfigService::get_map(CHAR_TRAITS_KEY.into())
+            .await?
+            .unwrap()
+        {
+            traits.push(CharTrait::new(
+                id.parse().unwrap(),
+                name.into_string().unwrap().as_str(),
+            ));
+        }
+
+        // cache results
+        self.char_traits = Some(traits.clone());
+
+        Ok(GetCharTraitsResponse {
+            char_traits: traits,
+        })
     }
 }

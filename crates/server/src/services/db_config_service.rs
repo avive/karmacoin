@@ -4,8 +4,7 @@
 
 use anyhow::Result;
 use base::server_config_service::{ServerConfigService, DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY};
-use bytes::Bytes;
-use db::db_service::{DatabaseService, ReadItem};
+use db::db_service::DatabaseService;
 use rocksdb::{ColumnFamilyDescriptor, Options};
 use xactor::*;
 
@@ -39,9 +38,6 @@ pub const RESERVED_NICKS_COL_FAMILY: &str = "reserved_nicks_cf";
 /// col family for blockchain data. Various settings are accessible via keys.
 pub const BLOCKCHAIN_DATA_COL_FAMILY: &str = "blockchain_data_cf";
 
-/// value: bool indicating if the local db was initialized or needs initiation with static data
-pub const DB_INITIALIZED_KEY: &str = "db_initialized_key";
-
 /// value: chain aggregated data - number of blocks, number of transactions, etc.
 pub const CHAIN_AGG_DATA_KEY: &str = "chain_agg_data_key";
 
@@ -52,10 +48,6 @@ pub const TRANSACTIONS_EVENTS_COL_FAMILY: &str = "txs_events_cf";
 /// Block's transactions processing events
 /// key: block height, value: zero or more events emitted by txs in the block
 pub const BLOCK_EVENTS_COL_FAMILY: &str = "bc_events_cf";
-
-/// Value: a serialized vector of all supported Traits
-/// this data is in consensus on genesis and may only change via a runtime upgrade
-pub const DB_SUPPORTED_TRAITS_KEY: &str = "supported_traits_key";
 
 /// col family for verifiers on-chain data. index: accountId, data: Verifier dial-up info
 /// this data is in consensus on genesis and can only change via a runtime update
@@ -140,22 +132,7 @@ impl Actor for DbConfigService {
                 ColumnFamilyDescriptor::new(TRANSACTIONS_EVENTS_COL_FAMILY, Options::default()),
             ],
         })
-        .await?;
-
-        // check if db was initialized with static net-specific data
-        // including genesis config
-        let init_key = Bytes::from(DB_INITIALIZED_KEY.as_bytes());
-        if DatabaseService::read(ReadItem {
-            key: init_key.clone(),
-            cf: BLOCKCHAIN_DATA_COL_FAMILY,
-        })
-        .await?
-        .is_none()
-        {
-            DbConfigService::config_genesis().await?;
-        }
-
-        Ok(())
+        .await
     }
 }
 

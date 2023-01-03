@@ -3,7 +3,7 @@
 //
 
 use crate::hex_utils::short_hex_string;
-use crate::karma_coin::karma_coin_core_types::{AccountId, MobileNumber, User};
+use crate::karma_coin::karma_coin_core_types::{AccountId, MobileNumber, TraitScore, User};
 use anyhow::Result;
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -25,6 +25,21 @@ impl User {
             balance: 0,
             trait_scores: vec![],
             pre_keys: vec![],
+        }
+    }
+
+    /// Inc the trait score for a given trait
+    pub fn inc_trait_score(&mut self, trait_id: u32) {
+        let mut found = false;
+        for trait_score in self.trait_scores.iter_mut() {
+            if trait_score.trait_id == trait_id {
+                trait_score.score += 1;
+                found = true;
+                break;
+            }
+        }
+        if !found {
+            self.trait_scores.push(TraitScore { trait_id, score: 1 });
         }
     }
 }

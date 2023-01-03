@@ -3,12 +3,18 @@
 //
 
 use anyhow::{anyhow, Result};
-use config::{Config, Environment};
+use map_macro::map;
+
+use config::{Config, Environment, Map, Value};
 use log::*;
+use std::collections::HashMap;
 use xactor::*;
 
 pub const NET_ID_KEY: &str = "net_id";
 pub const DEF_TX_FEE_KEY: &str = "def_tx_fee";
+
+/// Signup reward in KCents in phase 2
+pub const CHAR_TRAITS_KEY: &str = "char_traits_key";
 
 /// Signup reward in KCents in phase 1
 pub const SIGNUP_REWARD_PHASE1_KEY: &str = "signup_reward_p1";
@@ -84,12 +90,22 @@ impl Actor for GenesisConfigService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
         info!("GenesisConfigService starting...");
 
+        // default supported char traits
+        let char_traits: HashMap<String, String> = map! {
+            "0".into() => "None".into(),
+            "1".into() => "Kind".into(),
+            "2".into() => "Smart".into(),
+            "3".into() => "Sexy".into(),
+        };
+
         let builder = Config::builder();
         // Set defaults and merge genesis config file to overwrite
         let config = builder
             .set_default(NET_ID_KEY, 1)
             .unwrap()
             .set_default(DEF_TX_FEE_KEY, 100)
+            .unwrap()
+            .set_default(CHAR_TRAITS_KEY, char_traits)
             .unwrap()
             .set_default(SIGNUP_REWARD_PHASE1_KEY, 10 * (10 ^ 6))
             .unwrap()
@@ -176,6 +192,13 @@ impl GenesisConfigService {
     }
 
     /// helper
+    pub async fn get_map(key: String) -> Result<Option<Map<String, Value>>> {
+        let config = GenesisConfigService::from_registry().await?;
+        let res = config.call(GetMap(key)).await?;
+        Ok(res)
+    }
+
+    /// helper
     pub async fn get_u64(key: String) -> Result<Option<u64>> {
         let config = GenesisConfigService::from_registry().await?;
         let res = config.call(GetU64(key)).await?;
@@ -224,6 +247,23 @@ impl Handler<SetConfigFile> for GenesisConfigService {
         );
 
         Ok(())
+    }
+}
+
+#[message(result = "Option<Map<String, Value>>")]
+pub struct GetMap(pub String);
+
+#[async_trait::async_trait]
+impl Handler<GetMap> for GenesisConfigService {
+    async fn handle(
+        &mut self,
+        _ctx: &mut Context<Self>,
+        msg: GetMap,
+    ) -> Option<Map<String, Value>> {
+        match self.config.get_table(msg.0.as_str()) {
+            Ok(res) => Some(res),
+            Err(_) => None,
+        }
     }
 }
 

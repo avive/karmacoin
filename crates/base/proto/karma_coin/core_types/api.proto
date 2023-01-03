@@ -97,7 +97,7 @@ message GetCharTraitsRequest {
 }
 
 message GetCharTraitsResponse {
-  repeated core_types.TraitName trait_names = 1;
+  repeated core_types.CharTrait char_traits = 1;
 }
 
 

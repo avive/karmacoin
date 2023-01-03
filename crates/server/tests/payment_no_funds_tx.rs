@@ -13,7 +13,7 @@ use base::karma_coin::karma_coin_api::{
 };
 use base::karma_coin::karma_coin_core_types::TransactionType::PaymentV1;
 use base::karma_coin::karma_coin_core_types::{
-    AccountId, PaymentTransactionV1, SignedTransaction, TransactionData,
+    AccountId, CharTrait, PaymentTransactionV1, SignedTransaction, TransactionData,
 };
 use base::signed_trait::SignedTrait;
 use chrono::Utc;
@@ -23,7 +23,7 @@ use xactor::Service;
 
 /// Test payment transaction between 2 users
 #[tokio::test(flavor = "multi_thread")]
-async fn payment_tx_happy_flow() {
+async fn payment_tx_no_funds_test() {
     init_test().await;
 
     // Start the server
@@ -38,22 +38,6 @@ async fn payment_tx_happy_flow() {
         .await
         .unwrap();
 
-    let payment_amount = 100;
-
-    //
-    let char_trait_id = 1;
-
-    let mut api_client = ApiServiceClient::connect("http://[::1]:9888")
-        .await
-        .unwrap();
-
-    // payment from user 1 to user 2
-    let payment_tx = PaymentTransactionV1 {
-        to: Some(user2_number.clone()),
-        amount: payment_amount,
-        char_trait_id,
-    };
-
     let user1_account_id = AccountId {
         data: user1_key_pair.public_key.as_ref().unwrap().key.clone(),
     };
@@ -61,6 +45,10 @@ async fn payment_tx_happy_flow() {
     let user2_account_id = AccountId {
         data: user2_key_pair.public_key.as_ref().unwrap().key.clone(),
     };
+
+    let mut api_client = ApiServiceClient::connect("http://[::1]:9888")
+        .await
+        .unwrap();
 
     let user1 = api_client
         .get_user_info_by_account(GetUserInfoByAccountRequest {
@@ -73,8 +61,9 @@ async fn payment_tx_happy_flow() {
         .unwrap();
 
     let user1_balance_pre = user1.balance;
+    let payment_amount = user1_balance_pre + 1;
+    let tx_fee = 10;
 
-    // get user by account id
     let user2 = api_client
         .get_user_info_by_account(GetUserInfoByAccountRequest {
             account_id: Some(user2_account_id.clone()),
@@ -86,6 +75,17 @@ async fn payment_tx_happy_flow() {
         .unwrap();
 
     let user2_balance_pre = user2.balance;
+
+    let mut api_client = ApiServiceClient::connect("http://[::1]:9888")
+        .await
+        .unwrap();
+
+    // payment from user 1 to user 2
+    let payment_tx = PaymentTransactionV1 {
+        to: Some(user2_number.clone()),
+        amount: payment_amount,
+        char_trait: CharTrait::Kind as i32,
+    };
 
     let mut buf = Vec::with_capacity(payment_tx.encoded_len());
     payment_tx.encode(&mut buf).unwrap();
@@ -99,7 +99,7 @@ async fn payment_tx_happy_flow() {
         signer: Some(user1_account_id.clone()),
         timestamp: Utc::now().timestamp_nanos() as u64,
         nonce: 2,
-        fee: 10,
+        fee: tx_fee,
         transaction_data: Some(TransactionData {
             transaction_data: buf,
             transaction_type: PaymentV1 as i32,
@@ -147,12 +147,9 @@ async fn payment_tx_happy_flow() {
         .user
         .unwrap();
 
-    assert_eq!(user1_balance_pre - payment_amount, user1.balance);
-    assert_eq!(user2_balance_pre + payment_amount, user2.balance);
+    // check no balances were changed (assumed tx_fee subsidy)
+    assert_eq!(user1_balance_pre, user1.balance);
+    assert_eq!(user2_balance_pre, user2.balance);
 
-    // check appreciation stored in user2 account
-    assert_eq!(user2.trait_scores.len(), 1);
-    assert_eq!(user2.trait_scores[0].trait_id, char_trait_id);
-    assert_eq!(user2.trait_scores[0].score, 1);
     finalize_test().await;
 }

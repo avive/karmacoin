@@ -72,16 +72,6 @@ message PhoneVerifier {
     string name = 2;
 }
 
-// Data that is stored on chain
-/*
-message OnChainData {
-    repeated User users = 1;
-    repeated PhoneVerifier sms_verifiers = 2;
-    repeated TraitName traits = 3; // char trait ids supported by the system
-    repeated SignedTransaction transactions = 4; // signed transactions- all for archive, only recent for standard nodes
-    repeated Block blocks = 5; // the blockchain
-}*/
-
 message Block {
     uint64 time = 1;
     AccountId author = 2;
@@ -96,25 +86,13 @@ message Block {
 
 }
 
-// Supported char traits. Enum values are the traits unique id
-enum CharTrait {
-    CHAR_TRAIT_KIND = 0;
-    CHAR_TRAIT_HELPFUL = 1;
-    CHAR_TRAIT_SMART = 2;
-}
-
-message TraitName {
-    CharTrait char_trait = 1;
+message CharTrait {
+    uint32 id = 1;
     string name = 2;
 }
 
-// A set of traits
-message Traits {
-    repeated TraitName named_traits = 1;
-}
-
 message TraitScore {
-    CharTrait trait = 1;
+    uint32 trait_id = 1;
     uint32 score = 2;
 }
 
@@ -143,7 +121,7 @@ message UpdateUserTransactionV1 {
 message PaymentTransactionV1 {
     MobileNumber to = 1; // dest is always a mobile number (of a user or a non-user)
     uint64 amount = 2; // amount in tokens to transfer
-    CharTrait char_trait = 3; // char trait set by sender. e.g. smart
+    uint32 char_trait_id = 3; // char trait id set by sender. e.g. smart
 }
 
 enum VerifyNumberResult {
@@ -294,8 +272,6 @@ message BlockEvent {
     uint64 referral_rewards_count = 11;
     uint64 reward = 12;
 }
-
-
 
 enum ExecutionResult {
     EXECUTION_RESULT_EXECUTED = 0;

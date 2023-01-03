@@ -2,12 +2,12 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use crate::karma_coin::karma_coin_core_types::{CharTrait, TraitName};
+use crate::karma_coin::karma_coin_core_types::CharTrait;
 
-impl TraitName {
-    pub fn new(char_trait: CharTrait, name: &str) -> Self {
-        TraitName {
-            char_trait: char_trait as i32,
+impl CharTrait {
+    pub fn new(id: u32, name: &str) -> Self {
+        CharTrait {
+            id,
             name: name.to_string(),
         }
     }

@@ -42,8 +42,8 @@ pub struct SendCoinRequest {
     #[prost(uint64, tag = "3")]
     pub fee: u64,
     /// char trait to appreciate
-    #[prost(enumeration = "super::core_types::CharTrait", tag = "4")]
-    pub char_trait: i32,
+    #[prost(message, optional, tag = "4")]
+    pub char_trait: ::core::option::Option<super::core_types::CharTrait>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SendCoinResponse {}

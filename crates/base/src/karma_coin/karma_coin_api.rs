@@ -50,7 +50,7 @@ pub struct GetCharTraitsRequest {}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetCharTraitsResponse {
     #[prost(message, repeated, tag = "1")]
-    pub trait_names: ::prost::alloc::vec::Vec<super::core_types::TraitName>,
+    pub char_traits: ::prost::alloc::vec::Vec<super::core_types::CharTrait>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetGenesisDataRequest {}

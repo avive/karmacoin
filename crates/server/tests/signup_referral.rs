@@ -15,7 +15,7 @@ use base::karma_coin::karma_coin_api::{
 };
 use base::karma_coin::karma_coin_core_types::TransactionType::PaymentV1;
 use base::karma_coin::karma_coin_core_types::{
-    AccountId, BlockchainStats, CharTrait, MobileNumber, PaymentTransactionV1, SignedTransaction,
+    AccountId, BlockchainStats, MobileNumber, PaymentTransactionV1, SignedTransaction,
     TransactionData,
 };
 use base::signed_trait::SignedTrait;
@@ -58,7 +58,7 @@ async fn referral_signup_happy_flow_test() {
             number: user2_phone_number.into(),
         }),
         amount: payment_amount,
-        char_trait: CharTrait::Kind as i32,
+        char_trait_id: 1,
     };
 
     let user1_account_id = AccountId {
