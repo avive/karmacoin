@@ -219,9 +219,9 @@ pub struct SignedTransaction {
 }
 /// a collection of signed transactions
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
-pub struct SignedTransactions {
-    #[prost(message, repeated, tag = "1")]
-    pub transactions: ::prost::alloc::vec::Vec<SignedTransaction>,
+pub struct SignedTransactionsHashes {
+    #[prost(bytes = "vec", repeated, tag = "1")]
+    pub hashes: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
 }
 /// Pending transactions are transactions that are not yet on chain
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]

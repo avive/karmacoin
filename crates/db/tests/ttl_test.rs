@@ -6,22 +6,20 @@ extern crate log;
 
 use anyhow::Result;
 
-use db::db_service::{
-    Compact, DataItem, DatabaseService, Destroy, ReadItem, WriteItem
-};
+use db::db_service::{Compact, DataItem, DatabaseService, Destroy, ReadItem, WriteItem};
 
+use base::client_config_service::TESTS_COL_FAMILY;
 use bytes::Bytes;
 use rocksdb::{ColumnFamilyDescriptor, Options};
 use std::time::Duration;
 use tokio::time::sleep;
-use base::client_config_service::TESTS_COL_FAMILY;
 
 use db::db_service;
 use xactor::*;
 
 #[tokio::test(flavor = "multi_thread")]
 async fn test_ttl() {
-    use base::test_helpers::enable_logger;
+    use base::tests_helpers::enable_logger;
     enable_logger();
 
     let addr = DatabaseService::from_registry().await.unwrap();

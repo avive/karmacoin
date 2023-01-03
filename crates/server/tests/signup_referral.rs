@@ -52,13 +52,15 @@ async fn referral_signup_happy_flow_test() {
         .await
         .unwrap();
 
+    let char_trait_id = 1;
+
     // Appreciation from user 1 to person 2 with phone number (not yet user 2)
     let payment_tx = PaymentTransactionV1 {
         to: Some(MobileNumber {
             number: user2_phone_number.into(),
         }),
         amount: payment_amount,
-        char_trait_id: 1,
+        char_trait_id,
     };
 
     let user1_account_id = AccountId {
@@ -138,7 +140,7 @@ async fn referral_signup_happy_flow_test() {
         .unwrap();
 
     // get user 2 by account id
-    let _user2 = api_client
+    let user2 = api_client
         .get_user_info_by_account(GetUserInfoByAccountRequest {
             account_id: Some(user2_account_id.clone()),
         })
@@ -164,6 +166,11 @@ async fn referral_signup_happy_flow_test() {
     assert_eq!(user1.trait_scores.len(), 1);
     assert_eq!(user1.trait_scores[0].trait_id, KARMA_COIN_OG_CHAR_TRAIT);
     assert_eq!(user1.trait_scores[0].score, 1);
+
+    // check appreciation stored in user2 account
+    assert_eq!(user2.trait_scores.len(), 1);
+    assert_eq!(user2.trait_scores[0].trait_id, char_trait_id);
+    assert_eq!(user2.trait_scores[0].score, 1);
 
     finalize_test().await;
 }

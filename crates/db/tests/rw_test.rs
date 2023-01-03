@@ -8,7 +8,7 @@ extern crate log;
 use db::db_service::{DataItem, DatabaseService, Destroy, ReadItem, WriteItem};
 
 use base::client_config_service::TESTS_COL_FAMILY;
-use base::test_helpers::enable_logger;
+use base::tests_helpers::enable_logger;
 use bytes::Bytes;
 use db::db_service;
 use rocksdb::{ColumnFamilyDescriptor, Options};

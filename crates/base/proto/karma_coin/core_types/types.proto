@@ -178,8 +178,8 @@ message SignedTransaction {
 }
 
 // a collection of signed transactions
-message SignedTransactions {
-    repeated SignedTransaction transactions = 1;
+message SignedTransactionsHashes {
+    repeated bytes hashes = 1;
 }
 
 // Pending transactions are transactions that are not yet on chain

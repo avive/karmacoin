@@ -94,7 +94,7 @@ pub fn create_address(key: &[u8]) -> Vec<u8> {
 mod tests {
     use super::*;
     use crate::utils::{create_address, create_key_pair};
-    use base::test_helpers::enable_logger;
+    use base::tests_helpers::enable_logger;
 
     #[test]
     fn test_utils() {

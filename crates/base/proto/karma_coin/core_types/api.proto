@@ -34,13 +34,14 @@ service ApiService {
   rpc SubmitTransaction(SubmitTransactionRequest) returns (SubmitTransactionResponse);
 
   // Get all transactions between two account, included transactions in the pool and not yet on-chain
-  // Results include txs current status
+  // Results include txs current status and all events omitted for each transaction
   rpc GetTransactions(GetTransactionsRequest) returns (GetTransactionsResponse);
 
   // Get transaction data by its digest hash. Transaction may be in pool or on-chain
+  // Returns all events associated with the transaction
   rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse);
 
-  // Get execution events for one or more blocks
+  // Get block event for a block
   rpc GetBlockchainEvents(GetBlockchainEventsRequest) returns (GetBlockchainEventsResponse) {
   }
 }
@@ -61,7 +62,6 @@ message SubmitTransactionRequest {
 enum SubmitTransactionResult {
   SUBMIT_TRANSACTION_RESULT_INVALID = 0;
   SUBMIT_TRANSACTION_RESULT_SUBMITTED = 1;
-
 }
 
 message SubmitTransactionResponse {
@@ -144,20 +144,21 @@ message GetBlockchainDataResponse {
 }
 
 message GetTransactionsRequest {
-  core_types.AccountId account_from = 1;
-  core_types.AccountId account_to = 2;
+  core_types.AccountId account_id = 1;
 }
 
 message GetTransactionsResponse {
   repeated core_types.SignedTransactionWithStatus transactions = 1;
+  core_types.TransactionEvents tx_events = 2;
 }
 
 message GetTransactionRequest {
-  bytes digest = 1;
+  bytes tx_hash = 1;
 }
 
 message GetTransactionResponse {
   core_types.SignedTransactionWithStatus transaction = 1;
+  core_types.TransactionEvents tx_events = 2;
 }
 
 message GetBlockchainEventsRequest {
@@ -166,6 +167,6 @@ message GetBlockchainEventsRequest {
 }
 
 message GetBlockchainEventsResponse {
-
+  core_types.BlockEvent block_event = 1;
 }
 

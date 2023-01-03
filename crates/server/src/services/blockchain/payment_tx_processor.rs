@@ -2,6 +2,7 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::tokenomics::Tokenomics;
 use crate::services::db_config_service::{
     MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY,
@@ -47,123 +48,139 @@ pub(crate) async fn get_payee_user(tx: &SignedTransaction) -> Result<Option<User
     Ok(Some(User::decode(payee_user_data.unwrap().0.as_ref())?))
 }
 
-/// Process a payment transaction - update ledger state, emit tx event
-/// This is a helper method for the block creator and is used as part of block creation flow
-pub(crate) async fn process_transaction(
-    transaction: &SignedTransaction,
-    payer: &mut User,
-    payee: &mut User,
-    sign_ups: &mut HashMap<Vec<u8>, SignedTransaction>,
-    tokenomics: &Tokenomics,
-    event: &mut TransactionEvent,
-) -> Result<()> {
-    transaction.validate(payer.nonce).await?;
+impl BlockChainService {
+    /// Process a payment transaction - update ledger state, emit tx event
+    /// This is a helper method for the block creator and is used as part of block creation flow
+    pub(crate) async fn process_payment_transaction(
+        &mut self,
+        transaction: &SignedTransaction,
+        payer: &mut User,
+        payee: &mut User,
+        sign_ups: &mut HashMap<Vec<u8>, SignedTransaction>,
+        tokenomics: &Tokenomics,
+        event: &mut TransactionEvent,
+    ) -> Result<()> {
+        transaction.validate(payer.nonce).await?;
 
-    info!("Processing payment transaction: {}", transaction);
-    info!("From user: {}", payer);
-    info!("To user: {}", payee);
+        info!("Processing payment transaction: {}", transaction);
+        info!("From user: {}", payer);
+        info!("To user: {}", payee);
 
-    let payment_tx: PaymentTransactionV1 = transaction.get_payment_transaction_v1()?;
-    payment_tx.verify_syntax()?;
+        let payment_tx: PaymentTransactionV1 = transaction.get_payment_transaction_v1()?;
+        payment_tx.verify_syntax()?;
 
-    info!("Payment data: {}", payment_tx);
+        info!("Payment data: {}", payment_tx);
 
-    let mobile_number = payment_tx.to.unwrap().number;
-    let payment = payment_tx.amount;
+        let mobile_number = payment_tx.to.unwrap().number;
+        let payment = payment_tx.amount;
 
-    let apply_subsidy = tokenomics
-        .should_subsidise_transaction_fee(0, transaction.fee)
+        let apply_subsidy = tokenomics
+            .should_subsidise_transaction_fee(0, transaction.fee)
+            .await?;
+
+        // actual fee amount to be paid by the user. 0 if fee is subsidised by the protocol
+        let user_tx_fee = if apply_subsidy { 0 } else { transaction.fee };
+
+        let fee_type = if apply_subsidy {
+            FeeType::Mint
+        } else {
+            FeeType::User
+        };
+
+        if payer.balance < payment + user_tx_fee {
+            // we reject the transaction and don't mint tx fee subsidy in this case
+            // to avoid spamming the network with txs with insufficient funds
+            return Err(anyhow!("payer has insufficient balance to pay"));
+        }
+
+        // update payee balance to reflect payment and tx fee (when applicable)
+        payee.balance += payment;
+
+        // update payer balance to reflect payment
+        payer.balance -= payment + user_tx_fee;
+
+        if payment_tx.char_trait_id != 0 {
+            // payment includes an appreciation for a character trait - update user character trait points
+            payee.inc_trait_score(payment_tx.char_trait_id);
+        }
+
+        let referral_reward = tokenomics.get_referral_reward_amount().await?;
+
+        // apply new user referral reward to the payer if applicable
+        if sign_ups.contains_key(mobile_number.as_bytes()) {
+            // remove from signups map to prevent double referral rewards for for the same new user
+            sign_ups.remove(mobile_number.as_bytes());
+
+            // this is a new user referral payment tx - payer should get the referral fee!
+            //let _sign_up_tx = sign_ups.get(mobile_number.as_bytes()).unwrap();
+            // todo: award signer with the referral reward if applicable
+            info!("apply referral reward: {}", referral_reward);
+            payer.balance += referral_reward;
+
+            // Give payer karma points for helping to grow the network
+            payer.inc_trait_score(KARMA_COIN_OG_CHAR_TRAIT);
+        };
+
+        // index the transaction in the db by hash
+        let mut tx_data = Vec::with_capacity(transaction.encoded_len());
+        info!("binary transaction size: {}", transaction.encoded_len());
+
+        transaction.encode(&mut tx_data)?;
+        let tx_hash = transaction.get_hash()?;
+        DatabaseService::write(WriteItem {
+            data: DataItem {
+                key: tx_hash.clone(),
+                value: Bytes::from(tx_data),
+            },
+            cf: TRANSACTIONS_COL_FAMILY,
+            ttl: 0,
+        })
         .await?;
 
-    // actual fee amount to be paid by the user. 0 if fee is subsidised by the protocol
-    let user_tx_fee = if apply_subsidy { 0 } else { transaction.fee };
+        // index the transaction in the db for both payer and payee
+        self.index_transaction_by_account_id(
+            transaction,
+            Bytes::from(payer.account_id.as_ref().unwrap().data.to_vec()),
+        )
+        .await?;
 
-    let fee_type = if apply_subsidy {
-        FeeType::Mint
-    } else {
-        FeeType::User
-    };
+        self.index_transaction_by_account_id(
+            transaction,
+            Bytes::from(payee.account_id.as_ref().unwrap().data.to_vec()),
+        )
+        .await?;
 
-    if payer.balance < payment + user_tx_fee {
-        // we reject the transaction and don't mint tx fee subsidy in this case
-        // to avoid spamming the network with txs with insufficient funds
-        return Err(anyhow!("payer has insufficient balance to pay"));
+        // Update payer balance on chain
+        let mut buf = Vec::with_capacity(payer.encoded_len());
+        payer.encode(&mut buf)?;
+        DatabaseService::write(WriteItem {
+            data: DataItem {
+                key: Bytes::from(payer.account_id.as_ref().unwrap().data.to_vec()),
+                value: Bytes::from(buf),
+            },
+            cf: USERS_COL_FAMILY,
+            ttl: 0,
+        })
+        .await?;
+
+        // Update payee on chain
+        let mut buf = Vec::with_capacity(payee.encoded_len());
+        payee.encode(&mut buf)?;
+        DatabaseService::write(WriteItem {
+            data: DataItem {
+                key: Bytes::from(payee.account_id.as_ref().unwrap().data.to_vec()),
+                value: Bytes::from(buf),
+            },
+            cf: USERS_COL_FAMILY,
+            ttl: 0,
+        })
+        .await?;
+
+        event.referral_reward = referral_reward;
+        event.fee_type = fee_type as i32;
+        event.fee = transaction.fee;
+        event.result = ExecutionResult::Executed as i32;
+
+        Ok(())
     }
-
-    // update payee balance to reflect payment and tx fee (when applicable)
-    payee.balance += payment;
-
-    // update payer balance to reflect payment
-    payer.balance -= payment + user_tx_fee;
-
-    if payment_tx.char_trait_id != 0 {
-        // payment includes an appreciation for a character trait - update user character trait points
-        payee.inc_trait_score(payment_tx.char_trait_id);
-    }
-
-    let referral_reward = tokenomics.get_referral_reward_amount().await?;
-
-    // apply new user referral reward to the payer if applicable
-    if sign_ups.contains_key(mobile_number.as_bytes()) {
-        // remove from signups map to prevent double referral rewards for for the same new user
-        sign_ups.remove(mobile_number.as_bytes());
-
-        // this is a new user referral payment tx - payer should get the referral fee!
-        //let _sign_up_tx = sign_ups.get(mobile_number.as_bytes()).unwrap();
-        // todo: award signer with the referral reward if applicable
-        info!("apply referral reward: {}", referral_reward);
-        payer.balance += referral_reward;
-
-        // Give payer karma points for helping to grow the network
-        payer.inc_trait_score(KARMA_COIN_OG_CHAR_TRAIT);
-    };
-
-    // index the transaction in the db by hash
-    let mut tx_data = Vec::with_capacity(transaction.encoded_len());
-    info!("binary transaction size: {}", transaction.encoded_len());
-
-    transaction.encode(&mut tx_data)?;
-    let tx_hash = transaction.get_hash()?;
-    DatabaseService::write(WriteItem {
-        data: DataItem {
-            key: tx_hash.clone(),
-            value: Bytes::from(tx_data),
-        },
-        cf: TRANSACTIONS_COL_FAMILY,
-        ttl: 0,
-    })
-    .await?;
-
-    // Update payer balance on chain
-    let mut buf = Vec::with_capacity(payer.encoded_len());
-    payer.encode(&mut buf)?;
-    DatabaseService::write(WriteItem {
-        data: DataItem {
-            key: Bytes::from(payer.account_id.as_ref().unwrap().data.to_vec()),
-            value: Bytes::from(buf),
-        },
-        cf: USERS_COL_FAMILY,
-        ttl: 0,
-    })
-    .await?;
-
-    // Update payee on chain
-    let mut buf = Vec::with_capacity(payee.encoded_len());
-    payee.encode(&mut buf)?;
-    DatabaseService::write(WriteItem {
-        data: DataItem {
-            key: Bytes::from(payee.account_id.as_ref().unwrap().data.to_vec()),
-            value: Bytes::from(buf),
-        },
-        cf: USERS_COL_FAMILY,
-        ttl: 0,
-    })
-    .await?;
-
-    event.referral_reward = referral_reward;
-    event.fee_type = fee_type as i32;
-    event.fee = transaction.fee;
-    event.result = ExecutionResult::Executed as i32;
-
-    Ok(())
 }

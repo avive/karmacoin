@@ -13,4 +13,5 @@ pub(crate) mod stats;
 pub(crate) mod tokenomics;
 pub(crate) mod tx_event_emitter;
 pub(crate) mod txs_processor;
+pub(crate) mod txs_store;
 pub(crate) mod update_tx_processor;

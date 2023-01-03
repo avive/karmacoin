@@ -16,7 +16,7 @@ use base::karma_coin::karma_coin_verifier::verifier_service_client::VerifierServ
 use base::karma_coin::karma_coin_verifier::RegisterNumberResult::CodeSent;
 use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, VerifyNumberRequest};
 use base::signed_trait::SignedTrait;
-use base::test_helpers::enable_logger;
+use base::tests_helpers::enable_logger;
 use chrono::Utc;
 use db::db_service::DatabaseService;
 use log::info;

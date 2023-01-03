@@ -117,7 +117,7 @@ mod tests {
         RegisterNumberRequest, RegisterNumberResponse, RegisterNumberResult::*,
     };
     use base::signed_trait::SignedTrait;
-    use base::test_helpers::enable_logger;
+    use base::tests_helpers::enable_logger;
     use db::db_service::DatabaseService;
     use xactor::Service;
 

@@ -10,7 +10,10 @@ use log::*;
 use std::collections::HashMap;
 use xactor::*;
 
+// Blockchain network id
 pub const NET_ID_KEY: &str = "net_id";
+
+// Default tx fee amount
 pub const DEF_TX_FEE_KEY: &str = "def_tx_fee";
 
 /// Signup reward in KCents in phase 2
@@ -76,8 +79,8 @@ pub const TREASURY_PREMINT_COINS_AMOUNT_KEY: &str = "treasury_premint_coins";
 /// A set of canonical mobile phone verifiers accounts ids
 pub const VERIFIERS_ACCOUNTS_IDS: &str = "verifiers_accounts_ids";
 
-/// This must be constant across all genesis configs
-pub const KARMA_COIN_OG_CHAR_TRAIT: u32 = 4;
+/// This must be true across all traits defined in genesis configs
+pub const KARMA_COIN_OG_CHAR_TRAIT: u32 = 1;
 
 /// This service handles the kc blockchain genesis configuration
 /// It provides default values for development, and merges in values from
@@ -91,15 +94,16 @@ pub struct GenesisConfigService {
 #[async_trait::async_trait]
 impl Actor for GenesisConfigService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        info!("GenesisConfigService starting...");
+        info!("starting...");
 
         // default supported char traits
         let char_traits: HashMap<String, String> = map! {
             "0".into() => "None".into(),
-            "1".into() => "Kind".into(),
-            "2".into() => "Smart".into(),
-            "3".into() => "Sexy".into(),
-            "4".into() => "KarmaCoin OG".into(),
+            // note that this must remain constant in all genesis configs:
+            "1".into() => "KarmaCoin OG".into(),
+            "2".into() => "Kind".into(),
+            "3".into() => "Smart".into(),
+            "4".into() => "Sexy".into(),
         };
 
         let builder = Config::builder();
@@ -245,7 +249,7 @@ impl Handler<SetConfigFile> for GenesisConfigService {
 
         self.config_file = Some(msg.config_file.clone());
 
-        debug!(
+        info!(
             "Merging content of config file {:?}",
             msg.config_file.as_str()
         );

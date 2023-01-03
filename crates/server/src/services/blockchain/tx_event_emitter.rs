@@ -7,28 +7,16 @@ use crate::services::db_config_service::TRANSACTIONS_EVENTS_COL_FAMILY;
 use anyhow::Result;
 use base::karma_coin::karma_coin_core_types::*;
 use bytes::Bytes;
-use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
+use db::db_service::{DataItem, DatabaseService, WriteItem};
 use prost::Message;
 
 impl BlockChainService {
     /// emit a transaction processing event
-    pub(crate) async fn emit_tx_event(event: TransactionEvent) -> Result<()> {
+    pub(crate) async fn emit_tx_event(&self, event: TransactionEvent) -> Result<()> {
         let key = event.transaction_hash.clone();
-        let mut transaction_events = TransactionEvents { events: vec![] };
-
-        // load any previous tx events for this transaction from store
-        if let Some(data) = DatabaseService::read(ReadItem {
-            key: Bytes::from(key.clone()),
-            cf: TRANSACTIONS_EVENTS_COL_FAMILY,
-        })
-        .await?
-        {
-            let events_data = TransactionEvents::decode(data.0.as_ref())?;
-            transaction_events.events = events_data.events;
-        }
+        let mut transaction_events = self.get_tx_events(Bytes::from(key.clone())).await?;
 
         transaction_events.events.push(event.clone());
-
         let mut buf = Vec::with_capacity(transaction_events.encoded_len());
         transaction_events.encode(&mut buf)?;
         DatabaseService::write(WriteItem {

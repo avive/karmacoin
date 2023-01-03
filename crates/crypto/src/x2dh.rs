@@ -106,7 +106,7 @@ pub fn execute_bob(input: &ProtocolInputBob) -> ProtocolOutputBob {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use base::test_helpers::enable_logger;
+    use base::tests_helpers::enable_logger;
 
     #[test]
     fn test_x2dh_protocol() {

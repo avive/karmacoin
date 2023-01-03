@@ -149,7 +149,7 @@ impl BlockChainService {
         BlockChainService::emit_block_event(&block_event).await?;
 
         // Update block producer balance with block reward and with fees and persist
-        
+
         block_producer.balance += block_event.fees_amount + block.reward;
 
         let mut buf = Vec::with_capacity(block_producer.encoded_len());

@@ -10,10 +10,14 @@ use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::mem_pool_service::{AddTransaction, MemPoolService};
 use crate::services::blockchain::stats::GetStats;
 use crate::services::blockchain::txs_processor::ProcessTransactions;
+use crate::services::blockchain::txs_store::{
+    GetTransactionByHash, GetTransactionEvents, GetTransactionsByAccountId,
+};
 use anyhow::Result;
 use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
 use base::karma_coin::karma_coin_api::*;
 use base::karma_coin::karma_coin_core_types::CharTrait;
+use bytes::Bytes;
 use tonic::{Request, Response, Status};
 use xactor::*;
 
@@ -162,7 +166,7 @@ impl ApiServiceTrait for ApiService {
         let tx = request
             .into_inner()
             .transaction
-            .ok_or(Status::invalid_argument("transaction is required"))?;
+            .ok_or_else(|| Status::invalid_argument("transaction is required"))?;
 
         let mem_pool = MemPoolService::from_registry()
             .await
@@ -195,17 +199,67 @@ impl ApiServiceTrait for ApiService {
     /// Returns all transactions to, and or from an account
     async fn get_transactions(
         &self,
-        _request: Request<GetTransactionsRequest>,
+        request: Request<GetTransactionsRequest>,
     ) -> Result<Response<GetTransactionsResponse>, Status> {
-        todo!()
+        let account_id = request
+            .into_inner()
+            .account_id
+            .ok_or_else(|| Status::invalid_argument("account id is required"))?;
+
+        let service = BlockChainService::from_registry()
+            .await
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
+
+        let txs = service
+            .call(GetTransactionsByAccountId {
+                account_id: Bytes::from(account_id.data),
+            })
+            .await
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?
+            .map_err(|e| Status::internal(format!("failed to call blockchain api: {}", e)))?;
+
+        // todo get all events for each transaction
+
+        Ok(Response::new(GetTransactionsResponse {
+            transactions: txs,
+            tx_events: None,
+        }))
     }
 
-    /// Get a signed transaction by its hash
+    /// Return transaction by its hash as well as stats (rejected, on-chain, mempool) and
+    /// all known transaction events related to the transaction
     async fn get_transaction(
         &self,
-        _request: Request<GetTransactionRequest>,
+        request: Request<GetTransactionRequest>,
     ) -> Result<Response<GetTransactionResponse>, Status> {
-        todo!()
+        let service = BlockChainService::from_registry()
+            .await
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
+
+        let tx_hash = Bytes::from(request.into_inner().tx_hash);
+
+        let tx = service
+            .call(GetTransactionByHash {
+                hash: tx_hash.clone(),
+            })
+            .await
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?
+            .map_err(|e| Status::internal(format!("failed to call blockchain api: {}", e)))?;
+
+        let tx_events = service
+            .call(GetTransactionEvents {
+                tx_hash: tx_hash.clone(),
+            })
+            .await
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?
+            .map_err(|e| Status::internal(format!("failed to call blockchain api: {}", e)))?;
+
+        // todo: return events for this transaction
+
+        Ok(Response::new(GetTransactionResponse {
+            transaction: tx,
+            tx_events: Some(tx_events),
+        }))
     }
 
     /// Returns blockchain events from a block height to a block height inclusive

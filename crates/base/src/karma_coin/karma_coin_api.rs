@@ -108,24 +108,26 @@ pub struct GetBlockchainDataResponse {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetTransactionsRequest {
     #[prost(message, optional, tag = "1")]
-    pub account_from: ::core::option::Option<super::core_types::AccountId>,
-    #[prost(message, optional, tag = "2")]
-    pub account_to: ::core::option::Option<super::core_types::AccountId>,
+    pub account_id: ::core::option::Option<super::core_types::AccountId>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetTransactionsResponse {
     #[prost(message, repeated, tag = "1")]
     pub transactions: ::prost::alloc::vec::Vec<super::core_types::SignedTransactionWithStatus>,
+    #[prost(message, optional, tag = "2")]
+    pub tx_events: ::core::option::Option<super::core_types::TransactionEvents>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetTransactionRequest {
     #[prost(bytes = "vec", tag = "1")]
-    pub digest: ::prost::alloc::vec::Vec<u8>,
+    pub tx_hash: ::prost::alloc::vec::Vec<u8>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetTransactionResponse {
     #[prost(message, optional, tag = "1")]
     pub transaction: ::core::option::Option<super::core_types::SignedTransactionWithStatus>,
+    #[prost(message, optional, tag = "2")]
+    pub tx_events: ::core::option::Option<super::core_types::TransactionEvents>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetBlockchainEventsRequest {
@@ -135,7 +137,10 @@ pub struct GetBlockchainEventsRequest {
     pub to_block_number: u64,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetBlockchainEventsResponse {}
+pub struct GetBlockchainEventsResponse {
+    #[prost(message, optional, tag = "1")]
+    pub block_event: ::core::option::Option<super::core_types::BlockEvent>,
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum SubmitTransactionResult {
@@ -338,7 +343,7 @@ pub mod api_service_client {
             self.inner.unary(request.into_request(), path, codec).await
         }
         #[doc = " Get all transactions between two account, included transactions in the pool and not yet on-chain"]
-        #[doc = " Results include txs current status"]
+        #[doc = " Results include txs current status and all events omitted for each transaction"]
         pub async fn get_transactions(
             &mut self,
             request: impl tonic::IntoRequest<super::GetTransactionsRequest>,
@@ -355,6 +360,7 @@ pub mod api_service_client {
             self.inner.unary(request.into_request(), path, codec).await
         }
         #[doc = " Get transaction data by its digest hash. Transaction may be in pool or on-chain"]
+        #[doc = " Returns all events associated with the transaction"]
         pub async fn get_transaction(
             &mut self,
             request: impl tonic::IntoRequest<super::GetTransactionRequest>,
@@ -370,7 +376,7 @@ pub mod api_service_client {
                 http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetTransaction");
             self.inner.unary(request.into_request(), path, codec).await
         }
-        #[doc = " Get execution events for one or more blocks"]
+        #[doc = " Get block event for a block"]
         pub async fn get_blockchain_events(
             &mut self,
             request: impl tonic::IntoRequest<super::GetBlockchainEventsRequest>,
@@ -437,17 +443,18 @@ pub mod api_service_server {
             request: tonic::Request<super::SubmitTransactionRequest>,
         ) -> Result<tonic::Response<super::SubmitTransactionResponse>, tonic::Status>;
         #[doc = " Get all transactions between two account, included transactions in the pool and not yet on-chain"]
-        #[doc = " Results include txs current status"]
+        #[doc = " Results include txs current status and all events omitted for each transaction"]
         async fn get_transactions(
             &self,
             request: tonic::Request<super::GetTransactionsRequest>,
         ) -> Result<tonic::Response<super::GetTransactionsResponse>, tonic::Status>;
         #[doc = " Get transaction data by its digest hash. Transaction may be in pool or on-chain"]
+        #[doc = " Returns all events associated with the transaction"]
         async fn get_transaction(
             &self,
             request: tonic::Request<super::GetTransactionRequest>,
         ) -> Result<tonic::Response<super::GetTransactionResponse>, tonic::Status>;
-        #[doc = " Get execution events for one or more blocks"]
+        #[doc = " Get block event for a block"]
         async fn get_blockchain_events(
             &self,
             request: tonic::Request<super::GetBlockchainEventsRequest>,

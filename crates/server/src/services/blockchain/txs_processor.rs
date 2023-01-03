@@ -7,10 +7,8 @@ use crate::services::blockchain::mem_pool_service::{
     GetTransactions, MemPoolService, RemoveOldTransactions, RemoveOnChainTransactions,
     RemoveTransactionByHash, RemoveTransactionsByHashes,
 };
+use crate::services::blockchain::payment_tx_processor;
 use crate::services::blockchain::stats::get_stats;
-use crate::services::blockchain::{
-    new_user_tx_processor, payment_tx_processor, update_tx_processor,
-};
 use crate::services::db_config_service::USERS_COL_FAMILY;
 use anyhow::Result;
 use base::hex_utils::hex_string;
@@ -73,7 +71,10 @@ impl Handler<ProcessTransactions> for BlockChainService {
             // the transaction event for the new user transaction
             let mut tx_event = TransactionEvent::new(block_height, tx, tx_hash);
 
-            match new_user_tx_processor::process_transaction(tx, &tokenomics, &mut tx_event).await {
+            match self
+                .process_new_user_transaction(tx, &tokenomics, &mut tx_event)
+                .await
+            {
                 Ok(res) => {
                     info!("new user transaction processed: {}", tx_event);
                     tx_hashes.push(tx_hash.to_vec());
@@ -97,7 +98,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                 .await??;
 
             // emit the tx event
-            BlockChainService::emit_tx_event(tx_event).await?;
+            self.emit_tx_event(tx_event).await?;
         }
 
         // process other transactions types
@@ -123,7 +124,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                         "Tx signer user not found on chain - discarding tx from mem pool"
                             .to_string();
 
-                    BlockChainService::emit_tx_event(tx_event.clone()).await?;
+                    self.emit_tx_event(tx_event.clone()).await?;
                     continue;
                 }
             };
@@ -131,15 +132,16 @@ impl Handler<ProcessTransactions> for BlockChainService {
             match tx_type {
                 TransactionType::PaymentV1 => {
                     if let Some(mut payee) = payment_tx_processor::get_payee_user(tx).await? {
-                        match payment_tx_processor::process_transaction(
-                            tx,
-                            &mut user,
-                            &mut payee,
-                            &mut sign_ups,
-                            &tokenomics,
-                            &mut tx_event,
-                        )
-                        .await
+                        match self
+                            .process_payment_transaction(
+                                tx,
+                                &mut user,
+                                &mut payee,
+                                &mut sign_ups,
+                                &tokenomics,
+                                &mut tx_event,
+                            )
+                            .await
                         {
                             Ok(_) => {
                                 info!("payment transaction processed: {}", tx_event);
@@ -160,14 +162,15 @@ impl Handler<ProcessTransactions> for BlockChainService {
                             }
                         }
 
-                        BlockChainService::emit_tx_event(tx_event).await?;
+                        self.emit_tx_event(tx_event).await?;
                     } else {
                         info!("Payee user not found on chain - keeping this tx in the mem pool for later processing...");
                         continue;
                     }
                 }
                 TransactionType::UpdateUserV1 => {
-                    match update_tx_processor::process_transaction(tx, &tokenomics, &mut tx_event)
+                    match self
+                        .process_update_transaction(tx, &tokenomics, &mut tx_event)
                         .await
                     {
                         Ok(_) => {
@@ -183,7 +186,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                             tx_event.error_message = e.to_string();
                         }
                     }
-                    BlockChainService::emit_tx_event(tx_event).await?;
+                    self.emit_tx_event(tx_event).await?;
                 }
                 _ => {
                     // ignore any other transaction types

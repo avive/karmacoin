@@ -22,7 +22,7 @@ pub mod register_number_response;
 pub mod server_config_service;
 pub mod signed_trait;
 pub mod signed_tx;
-pub mod test_helpers;
+pub mod tests_helpers;
 pub mod transaction_event;
 pub mod update_user_tx;
 pub mod user;
