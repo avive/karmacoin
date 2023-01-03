@@ -72,6 +72,9 @@ pub const MOBILE_NUMBERS_COL_FAMILY: &str = "mobile_number_cf";
 /// This is on-chain data
 pub const TRANSACTIONS_COL_FAMILY: &str = "txs_cf";
 
+/// Signed transactions indexed by account ids. Data: TransactionHash
+pub const TRANSACTIONS_HASHES_BY_ACCOUNT_IDX_COL_FAMILY: &str = "txs_hashes_by_account_idx_cf";
+
 // todo: add column family for transactions indexes - by signer and by payee for payment txs
 
 /// Blocks keyed by block number - the blockchain. index: block height. value: Block
@@ -130,6 +133,10 @@ impl Actor for DbConfigService {
                 ColumnFamilyDescriptor::new(TXS_POOL_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TRANSACTIONS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TRANSACTIONS_EVENTS_COL_FAMILY, Options::default()),
+                ColumnFamilyDescriptor::new(
+                    TRANSACTIONS_HASHES_BY_ACCOUNT_IDX_COL_FAMILY,
+                    Options::default(),
+                ),
             ],
         })
         .await

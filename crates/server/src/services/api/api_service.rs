@@ -174,7 +174,7 @@ impl ApiServiceTrait for ApiService {
             .map_err(|e| Status::internal(format!("internal error: {}", e)))?
             .map_err(|e| Status::internal(format!("failed to process transaction: {}", e)))?;
 
-        // s tart transaction processing to process all transactions in the mem pool
+        // start transaction processing to process all transactions in the mem pool
         // in production this can be done on a timer every few seconds
         // here we just trigger block production when a new transaction is submitted
         let service = BlockChainService::from_registry()
@@ -192,7 +192,7 @@ impl ApiServiceTrait for ApiService {
         }))
     }
 
-    /// Returns all transactions to, and or from and account
+    /// Returns all transactions to, and or from an account
     async fn get_transactions(
         &self,
         _request: Request<GetTransactionsRequest>,
@@ -208,7 +208,7 @@ impl ApiServiceTrait for ApiService {
         todo!()
     }
 
-    /// Returns all transactions processing events from a block height to a block height
+    /// Returns blockchain events from a block height to a block height inclusive
     async fn get_blockchain_events(
         &self,
         _request: Request<GetBlockchainEventsRequest>,

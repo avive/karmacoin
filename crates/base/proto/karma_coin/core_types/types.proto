@@ -177,6 +177,11 @@ message SignedTransaction {
     Signature signature = 7; // signer signature on all of the above data
 }
 
+// a collection of signed transactions
+message SignedTransactions {
+    repeated SignedTransaction transactions = 1;
+}
+
 // Pending transactions are transactions that are not yet on chain
 message MemPool {
     repeated SignedTransaction transactions = 1;

@@ -161,6 +161,8 @@ pub(crate) async fn process_transaction(
     })
     .await?;
 
+    // todo: add tx hash to account's transactions index
+
     event.fee_type = fee_type as i32;
     event.fee = tx_fee;
     event.signup_reward = signup_reward_amount;

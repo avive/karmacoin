@@ -20,26 +20,75 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build_server(true)
         .out_dir("src/karma_coin")
         .format(true)
-        .type_attribute("TransactionData", "#[derive(serde::Serialize, serde::Deserialize)]")
-        .type_attribute("SignedTransaction", "#[derive(serde::Serialize, serde::Deserialize)]")
-        .type_attribute("TransactionEvent", "#[derive(serde::Serialize, serde::Deserialize)]")
-        .type_attribute("TransactionEvents", "#[derive(serde::Serialize, serde::Deserialize)]")
-        .type_attribute("TransactionResult", "#[derive(serde::Serialize, serde::Deserialize)]")
-        .type_attribute("BlockEvents", "#[derive(serde::Serialize, serde::Deserialize)]")
-        .type_attribute("TokenomicsData", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .type_attribute(
+            "TransactionData",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
+        .type_attribute(
+            "SignedTransaction",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
+        .type_attribute(
+            "SignedTransactions",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
+        .type_attribute(
+            "TransactionEvent",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
+        .type_attribute(
+            "TransactionEvents",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
+        .type_attribute(
+            "TransactionResult",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
+        .type_attribute(
+            "BlockEvents",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
+        .type_attribute(
+            "TokenomicsData",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
         .type_attribute("MemPool", "#[derive(serde::Serialize, serde::Deserialize)]")
-        .type_attribute("BlockchainStats", "#[derive(serde::Serialize, serde::Deserialize)]")
-        .type_attribute("TraitName", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .type_attribute(
+            "BlockchainStats",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
+        .type_attribute(
+            "TraitName",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
         .type_attribute("Traits", "#[derive(serde::Serialize, serde::Deserialize)]")
-        .type_attribute("VerifierInfo", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .type_attribute(
+            "VerifierInfo",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
         .type_attribute("Amount", "#[derive(serde::Serialize, serde::Deserialize)]")
-        .type_attribute("Signature", "#[derive(serde::Serialize, serde::Deserialize)]")
-        .type_attribute("PublicKey", "#[derive(serde::Serialize, serde::Deserialize)]")
-        .type_attribute("MobileNumber", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .type_attribute(
+            "Signature",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
+        .type_attribute(
+            "PublicKey",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
+        .type_attribute(
+            "MobileNumber",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
         .type_attribute("Balance", "#[derive(serde::Serialize, serde::Deserialize)]")
-        .type_attribute("TraitScore", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .type_attribute(
+            "TraitScore",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
         .type_attribute("PreKey", "#[derive(serde::Serialize, serde::Deserialize)]")
-        .type_attribute("AccountId", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .type_attribute(
+            "AccountId",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
         .type_attribute("User", "#[derive(serde::Serialize, serde::Deserialize)]")
         .compile(
             &[
@@ -47,7 +96,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "proto/karma_coin/core_types/verifier.proto",
                 "proto/karma_coin/core_types/api.proto",
                 "proto/karma_coin/client.proto",
-
             ],
             &["proto"],
         )

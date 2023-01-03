@@ -217,6 +217,12 @@ pub struct SignedTransaction {
     #[prost(message, optional, tag = "7")]
     pub signature: ::core::option::Option<Signature>,
 }
+/// a collection of signed transactions
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
+pub struct SignedTransactions {
+    #[prost(message, repeated, tag = "1")]
+    pub transactions: ::prost::alloc::vec::Vec<SignedTransaction>,
+}
 /// Pending transactions are transactions that are not yet on chain
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct MemPool {
