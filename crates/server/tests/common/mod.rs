@@ -2,8 +2,6 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-extern crate log;
-
 use base::genesis_config_service::{GenesisConfigService, NET_ID_KEY};
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{
@@ -23,10 +21,12 @@ use base::signed_trait::SignedTrait;
 use base::test_helpers::enable_logger;
 use chrono::Utc;
 use db::db_service::DatabaseService;
+use log::info;
 use prost::Message;
 use xactor::*;
 
 // helper function to create a new user
+#[allow(dead_code)]
 pub async fn create_user(user_name: String, number: String) -> Result<(KeyPair, MobileNumber)> {
     let user_key_pair = KeyPair::new();
     let user_ed_key_pair = user_key_pair.to_ed2559_keypair();
@@ -197,11 +197,13 @@ pub async fn create_user(user_name: String, number: String) -> Result<(KeyPair, 
 }
 
 /// Helper
+#[allow(dead_code)]
 pub async fn init_test() {
     enable_logger();
 }
 
 /// Helper
+#[allow(dead_code)]
 pub async fn finalize_test() {
     spawn(async {
         // stop the db so it has a chance to destroy itself if it is configured to destroy storage on stop...

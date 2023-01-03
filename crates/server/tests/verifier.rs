@@ -2,8 +2,11 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-#[macro_use]
 extern crate log;
+
+#[path = "common/mod.rs"]
+mod common;
+use common::{finalize_test, init_test};
 
 use base::karma_coin::karma_coin_core_types::{
     AccountId, KeyPair, MobileNumber, VerifyNumberResult,
@@ -12,12 +15,13 @@ use base::karma_coin::karma_coin_verifier::verifier_service_client::VerifierServ
 use base::karma_coin::karma_coin_verifier::RegisterNumberResult::CodeSent;
 use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, VerifyNumberRequest};
 use base::signed_trait::SignedTrait;
-use base::test_helpers::enable_logger;
-use db::db_service::DatabaseService;
 use server::server_service::{ServerService, Startup};
 use xactor::*;
 
-mod register_number_tests;
+mod register_number;
+mod register_number_bad_sig;
+mod register_number_no_code;
+mod register_number_wrong_code;
 
 /// Test attempt to register with a taken nickname
 #[tokio::test(flavor = "multi_thread")]
@@ -116,21 +120,4 @@ async fn verifier_nickname_taken_test() {
 
     // drop the db
     finalize_test().await;
-}
-
-/// Helper
-async fn init_test() {
-    enable_logger();
-}
-
-/// Helper
-async fn finalize_test() {
-    spawn(async {
-        // stop the db so it has a chance to destroy itself if it is configured to destroy storage on stop...
-        let mut db_service = DatabaseService::from_registry().await.unwrap();
-        let _ = db_service.stop(None);
-        info!("resources cleanup completed");
-    })
-    .await
-    .unwrap();
 }

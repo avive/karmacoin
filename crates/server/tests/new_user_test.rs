@@ -1,8 +1,11 @@
-use crate::helpers::{create_user, finalize_test, init_test};
-use server::server_service::{ServerService, Startup};
-use xactor::Service;
+#[path = "common/mod.rs"]
+mod common;
+
+use common::{create_user, finalize_test, init_test};
 
 /// tests in this file should be run sequentially and not in parallel
+use server::server_service::{ServerService, Startup};
+use xactor::Service;
 
 /// Test complete user signup flow
 #[tokio::test(flavor = "multi_thread")]
