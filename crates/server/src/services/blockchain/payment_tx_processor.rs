@@ -7,6 +7,7 @@ use crate::services::db_config_service::{
     MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY,
 };
 use anyhow::{anyhow, Result};
+use base::genesis_config_service::KARMA_COIN_OG_CHAR_TRAIT;
 use base::karma_coin::karma_coin_core_types::{
     ExecutionResult, FeeType, PaymentTransactionV1, SignedTransaction, TransactionEvent, User,
 };
@@ -84,6 +85,8 @@ pub(crate) async fn process_transaction(
     };
 
     if payer.balance < payment + user_tx_fee {
+        // we reject the transaction and don't mint tx fee subsidy in this case
+        // to avoid spamming the network with txs with insufficient funds
         return Err(anyhow!("payer has insufficient balance to pay"));
     }
 
@@ -110,6 +113,9 @@ pub(crate) async fn process_transaction(
         // todo: award signer with the referral reward if applicable
         info!("apply referral reward: {}", referral_reward);
         payer.balance += referral_reward;
+
+        // Give payer karma points for helping to grow the network
+        payer.inc_trait_score(KARMA_COIN_OG_CHAR_TRAIT);
     };
 
     // index the transaction in the db by hash

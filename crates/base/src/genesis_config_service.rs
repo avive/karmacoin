@@ -76,6 +76,9 @@ pub const TREASURY_PREMINT_COINS_AMOUNT_KEY: &str = "treasury_premint_coins";
 /// A set of canonical mobile phone verifiers accounts ids
 pub const VERIFIERS_ACCOUNTS_IDS: &str = "verifiers_accounts_ids";
 
+/// This must be constant across all genesis configs
+pub const KARMA_COIN_OG_CHAR_TRAIT: u32 = 4;
+
 /// This service handles the kc blockchain genesis configuration
 /// It provides default values for development, and merges in values from
 /// a genesis config file when applicable
@@ -96,6 +99,7 @@ impl Actor for GenesisConfigService {
             "1".into() => "Kind".into(),
             "2".into() => "Smart".into(),
             "3".into() => "Sexy".into(),
+            "4".into() => "KarmaCoin OG".into(),
         };
 
         let builder = Config::builder();
