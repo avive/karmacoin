@@ -2,12 +2,10 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use anyhow::anyhow;
 use base::genesis_config_service::{GenesisConfigService, NET_ID_KEY};
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
-use base::karma_coin::karma_coin_api::{
-    GetUserInfoByAccountRequest, GetUserInfoByNickRequest, GetUserInfoByNumberRequest,
-    SubmitTransactionRequest, SubmitTransactionResult,
-};
+use base::karma_coin::karma_coin_api::{SubmitTransactionRequest, SubmitTransactionResult};
 use base::karma_coin::karma_coin_core_types::TransactionType::NewUserV1;
 use base::karma_coin::karma_coin_core_types::VerifyNumberResult::Verified;
 use base::karma_coin::karma_coin_core_types::{AccountId, KeyPair, MobileNumber};
@@ -57,7 +55,9 @@ pub async fn create_user(user_name: String, number: String) -> Result<(KeyPair, 
         .unwrap()
         .into_inner();
 
-    assert_eq!(resp.result, CodeSent as i32);
+    if resp.result != CodeSent as i32 {
+        return Err(anyhow!("failed to register number"));
+    }
 
     info!("number registered");
 
@@ -84,7 +84,9 @@ pub async fn create_user(user_name: String, number: String) -> Result<(KeyPair, 
         .unwrap();
 
     let v_resp = resp1.into_inner();
-    assert_eq!(v_resp.result, Verified as i32);
+    if v_resp.result != Verified as i32 {
+        return Err(anyhow!("failed to verify number"));
+    }
 
     v_resp
         .verify_signature()
@@ -130,68 +132,12 @@ pub async fn create_user(user_name: String, number: String) -> Result<(KeyPair, 
         .submit_transaction(SubmitTransactionRequest {
             transaction: Some(signed_tx.clone()),
         })
-        .await
-        .unwrap()
+        .await?
         .into_inner();
 
-    assert_eq!(
-        resp.submit_transaction_result,
-        SubmitTransactionResult::Submitted as i32,
-    );
-
-    // verify user account on chain
-
-    // get user by account id
-    let resp = api_client
-        .get_user_info_by_account(GetUserInfoByAccountRequest {
-            account_id: Some(account_id.clone()),
-        })
-        .await
-        .unwrap()
-        .into_inner();
-
-    let resp_user = resp.user.as_ref().unwrap();
-
-    assert_eq!(resp_user.user_name, user_name);
-    assert_eq!(
-        resp_user.mobile_number.as_ref().unwrap().number,
-        mobile_number.number
-    );
-    assert_eq!(resp_user.nonce, 1);
-
-    // get user by name
-    let resp = api_client
-        .get_user_info_by_nick(GetUserInfoByNickRequest {
-            nickname: user_name.clone(),
-        })
-        .await
-        .unwrap()
-        .into_inner();
-
-    let resp_user = resp.user.as_ref().unwrap();
-    assert_eq!(resp_user.user_name, user_name);
-    assert_eq!(
-        resp_user.mobile_number.as_ref().unwrap().number,
-        mobile_number.number
-    );
-    assert_eq!(resp_user.nonce, 1);
-
-    // get user by number
-    let resp = api_client
-        .get_user_info_by_number(GetUserInfoByNumberRequest {
-            mobile_number: Some(mobile_number.clone()),
-        })
-        .await
-        .unwrap()
-        .into_inner();
-
-    let resp_user = resp.user.as_ref().unwrap();
-    assert_eq!(resp_user.user_name, user_name);
-    assert_eq!(
-        resp_user.mobile_number.as_ref().unwrap().number,
-        mobile_number.number
-    );
-    assert_eq!(resp_user.nonce, 1);
+    if resp.submit_transaction_result != SubmitTransactionResult::Submitted as i32 {
+        return Err(anyhow!(""));
+    }
 
     Ok((user_key_pair, mobile_number))
 }

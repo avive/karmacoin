@@ -1,4 +1,7 @@
-/// tests in this file should be run sequentially and not in parallel
+// Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
+// This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
+//
+
 extern crate log;
 
 #[path = "common/mod.rs"]

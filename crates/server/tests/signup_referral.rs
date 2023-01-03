@@ -22,7 +22,7 @@ use base::signed_trait::SignedTrait;
 use chrono::Utc;
 use prost::Message;
 
-mod new_user_test;
+mod new_user;
 mod payment_tx;
 
 use server::server_service::{ServerService, Startup};

@@ -6,6 +6,7 @@ extern crate log;
 
 #[path = "common/mod.rs"]
 mod common;
+
 use common::{finalize_test, init_test};
 
 use base::karma_coin::karma_coin_core_types::{
@@ -17,11 +18,6 @@ use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, VerifyNumberR
 use base::signed_trait::SignedTrait;
 use server::server_service::{ServerService, Startup};
 use xactor::*;
-
-mod register_number;
-mod register_number_bad_sig;
-mod register_number_no_code;
-mod register_number_wrong_code;
 
 /// Test attempt to register with a taken nickname
 #[tokio::test(flavor = "multi_thread")]
