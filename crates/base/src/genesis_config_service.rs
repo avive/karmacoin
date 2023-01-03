@@ -106,6 +106,12 @@ impl Actor for GenesisConfigService {
             "4".into() => "Sexy".into(),
         };
 
+        // Canonical verifiers account ids
+        let verifiers_accounts_ids: Vec<String> = vec![
+            "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd".into(),
+            "f0d0c0b0a090807060504030201000f0e0d0c0b0a090807060504030201000f".into(),
+        ];
+
         let builder = Config::builder();
         // Set defaults and merge genesis config file to overwrite
         let config = builder
@@ -152,12 +158,7 @@ impl Actor for GenesisConfigService {
             .unwrap()
             .set_default(TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY, 10)
             .unwrap()
-            // todo: use an array instead of a comma delimited string
-            .set_default(
-                VERIFIERS_ACCOUNTS_IDS,
-                "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd, \
-                ac3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5c0",
-            )
+            .set_default(VERIFIERS_ACCOUNTS_IDS, verifiers_accounts_ids)
             .unwrap()
             .add_source(
                 Environment::with_prefix("GENESIS")
@@ -192,21 +193,24 @@ impl GenesisConfigService {
         Ok(res)
     }
 
-    /// helper
     pub async fn get_bool(key: String) -> Result<Option<bool>> {
         let config = GenesisConfigService::from_registry().await?;
         let res = config.call(GetBool(key)).await?;
         Ok(res)
     }
 
-    /// helper
     pub async fn get_map(key: String) -> Result<Option<Map<String, Value>>> {
         let config = GenesisConfigService::from_registry().await?;
         let res = config.call(GetMap(key)).await?;
         Ok(res)
     }
 
-    /// helper
+    pub async fn get_array(key: String) -> Result<Option<Vec<Value>>> {
+        let config = GenesisConfigService::from_registry().await?;
+        let res = config.call(GetArray(key)).await?;
+        Ok(res)
+    }
+
     pub async fn get_u64(key: String) -> Result<Option<u64>> {
         let config = GenesisConfigService::from_registry().await?;
         let res = config.call(GetU64(key)).await?;
@@ -218,13 +222,11 @@ impl GenesisConfigService {
         config.call(SetValue { key, value }).await?
     }
 
-    /// helper
     pub async fn set_bool(key: String, value: bool) -> Result<()> {
         let config = GenesisConfigService::from_registry().await?;
         config.call(SetBool { key, value }).await?
     }
 
-    /// helper
     pub async fn set_u64(key: String, value: u64) -> Result<()> {
         let config = GenesisConfigService::from_registry().await?;
         config.call(SetU64 { key, value }).await?
@@ -269,6 +271,19 @@ impl Handler<GetMap> for GenesisConfigService {
         msg: GetMap,
     ) -> Option<Map<String, Value>> {
         match self.config.get_table(msg.0.as_str()) {
+            Ok(res) => Some(res),
+            Err(_) => None,
+        }
+    }
+}
+
+#[message(result = "Option<Vec<Value>>")]
+pub struct GetArray(pub String);
+
+#[async_trait::async_trait]
+impl Handler<GetArray> for GenesisConfigService {
+    async fn handle(&mut self, _ctx: &mut Context<Self>, msg: GetArray) -> Option<Vec<Value>> {
+        match self.config.get_array(msg.0.as_str()) {
             Ok(res) => Some(res),
             Err(_) => None,
         }
