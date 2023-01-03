@@ -6,13 +6,13 @@ use crate::services::api::get_char_traits::GetCharTraits;
 use crate::services::api::get_user_by_account_id::GetUserInfoByAccountId;
 use crate::services::api::get_user_by_nick::GetUserInfoByNick;
 use crate::services::api::get_user_by_number::GetUserInfoByNumber;
+use crate::services::blockchain::block_event::GetBlocksEvents;
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::mem_pool_service::{AddTransaction, MemPoolService};
 use crate::services::blockchain::stats::GetStats;
+use crate::services::blockchain::tx_event::GetTransactionEvents;
 use crate::services::blockchain::txs_processor::ProcessTransactions;
-use crate::services::blockchain::txs_store::{
-    GetTransactionByHash, GetTransactionEvents, GetTransactionsByAccountId,
-};
+use crate::services::blockchain::txs_store::{GetTransactionByHash, GetTransactionsByAccountId};
 use anyhow::Result;
 use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
 use base::karma_coin::karma_coin_api::*;
@@ -254,8 +254,6 @@ impl ApiServiceTrait for ApiService {
             .map_err(|e| Status::internal(format!("internal error: {}", e)))?
             .map_err(|e| Status::internal(format!("failed to call blockchain api: {}", e)))?;
 
-        // todo: return events for this transaction
-
         Ok(Response::new(GetTransactionResponse {
             transaction: tx,
             tx_events: Some(tx_events),
@@ -265,8 +263,31 @@ impl ApiServiceTrait for ApiService {
     /// Returns blockchain events from a block height to a block height inclusive
     async fn get_blockchain_events(
         &self,
-        _request: Request<GetBlockchainEventsRequest>,
+        request: Request<GetBlockchainEventsRequest>,
     ) -> Result<Response<GetBlockchainEventsResponse>, Status> {
-        todo!()
+        let service = BlockChainService::from_registry()
+            .await
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
+
+        let req = request.into_inner();
+
+        if req.from_block_height > req.to_block_height {
+            return Err(Status::invalid_argument(
+                "from block height must be less than or equal to to block height",
+            ));
+        }
+
+        let res = service
+            .call(GetBlocksEvents {
+                from_height: req.from_block_height,
+                to_height: req.to_block_height,
+            })
+            .await
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?
+            .map_err(|e| Status::internal(format!("failed to call blockchain api: {}", e)))?;
+
+        Ok(Response::new(GetBlockchainEventsResponse {
+            block_events: res,
+        }))
     }
 }

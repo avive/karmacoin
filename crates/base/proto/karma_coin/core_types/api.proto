@@ -162,11 +162,11 @@ message GetTransactionResponse {
 }
 
 message GetBlockchainEventsRequest {
-  uint64 from_block_number = 1;
-  uint64 to_block_number = 2;
+  uint64 from_block_height = 1;
+  uint64 to_block_height = 2;
 }
 
 message GetBlockchainEventsResponse {
-  core_types.BlockEvent block_event = 1;
+  repeated core_types.BlockEvent block_events = 1;
 }
 

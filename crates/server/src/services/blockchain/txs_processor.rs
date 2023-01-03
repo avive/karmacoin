@@ -200,15 +200,16 @@ impl Handler<ProcessTransactions> for BlockChainService {
         }
 
         // create the block
-        let block = BlockChainService::create_block(
-            &tx_hashes,
-            stats,
-            &tokenomics,
-            block_event,
-            block_height,
-            self.id_key_pair.as_ref().unwrap(),
-        )
-        .await?;
+        let block = self
+            .create_block(
+                &tx_hashes,
+                stats,
+                &tokenomics,
+                block_event,
+                block_height,
+                self.id_key_pair.as_ref().unwrap(),
+            )
+            .await?;
 
         // remove processed txs from the mem pool
         mem_pool

@@ -21,7 +21,7 @@ use prost::Message;
 impl BlockChainService {
     /// Returns this block producer on-chain user account.
     /// Attempts to create one if it doesn't exist using config data (account id and nickname)
-    async fn get_block_producer_user_account(key_pair: &KeyPair) -> Result<User> {
+    async fn get_block_producer_user_account(&self, key_pair: &KeyPair) -> Result<User> {
         // Get User from chain and reject tx if user doesn't exist
         let block_producer = match DatabaseService::read(ReadItem {
             key: Bytes::from(key_pair.public_key.as_ref().unwrap().key.clone()),
@@ -82,6 +82,7 @@ impl BlockChainService {
     /// Create a block with the provided txs hashes at a given height
     /// Internal help method
     pub(crate) async fn create_block(
+        &self,
         transactions_hashes: &[Vec<u8>],
         stats: BlockchainStats,
         tokenomics: &Tokenomics,
@@ -89,7 +90,7 @@ impl BlockChainService {
         height: u64,
         key_pair: &KeyPair,
     ) -> Result<Block> {
-        let mut block_producer = Self::get_block_producer_user_account(key_pair).await?;
+        let mut block_producer = self.get_block_producer_user_account(key_pair).await?;
 
         let mut block = Block {
             time: Utc::now().timestamp_nanos() as u64,
@@ -146,7 +147,7 @@ impl BlockChainService {
 
         // Update and persist block event
         block_event.block_hash = block.digest.clone();
-        BlockChainService::emit_block_event(&block_event).await?;
+        self.emit_block_event(&block_event).await?;
 
         // Update block producer balance with block reward and with fees and persist
 

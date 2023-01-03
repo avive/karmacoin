@@ -132,14 +132,14 @@ pub struct GetTransactionResponse {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetBlockchainEventsRequest {
     #[prost(uint64, tag = "1")]
-    pub from_block_number: u64,
+    pub from_block_height: u64,
     #[prost(uint64, tag = "2")]
-    pub to_block_number: u64,
+    pub to_block_height: u64,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetBlockchainEventsResponse {
-    #[prost(message, optional, tag = "1")]
-    pub block_event: ::core::option::Option<super::core_types::BlockEvent>,
+    #[prost(message, repeated, tag = "1")]
+    pub block_events: ::prost::alloc::vec::Vec<super::core_types::BlockEvent>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]

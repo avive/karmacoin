@@ -4,8 +4,7 @@
 
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::db_config_service::{
-    TRANSACTIONS_COL_FAMILY, TRANSACTIONS_EVENTS_COL_FAMILY,
-    TRANSACTIONS_HASHES_BY_ACCOUNT_IDX_COL_FAMILY,
+    TRANSACTIONS_COL_FAMILY, TRANSACTIONS_HASHES_BY_ACCOUNT_IDX_COL_FAMILY,
 };
 use anyhow::Result;
 use base::karma_coin::karma_coin_core_types::TransactionStatus::OnChain;
@@ -14,23 +13,6 @@ use bytes::Bytes;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use prost::Message;
 use xactor::*;
-
-#[message(result = "Result<TransactionEvents>")]
-pub(crate) struct GetTransactionEvents {
-    pub(crate) tx_hash: Bytes,
-}
-
-/// Request to complete verification and sign up
-#[async_trait::async_trait]
-impl Handler<GetTransactionEvents> for BlockChainService {
-    async fn handle(
-        &mut self,
-        _ctx: &mut Context<Self>,
-        msg: GetTransactionEvents,
-    ) -> Result<TransactionEvents> {
-        self.get_tx_events(msg.tx_hash).await
-    }
-}
 
 #[message(result = "Result<Vec<SignedTransactionWithStatus>>")]
 pub(crate) struct GetTransactionsByAccountId {
@@ -67,20 +49,6 @@ impl Handler<GetTransactionByHash> for BlockChainService {
 }
 
 impl BlockChainService {
-    /// Get all translation events for a given transaction hash
-    pub(crate) async fn get_tx_events(&self, tx_hash: Bytes) -> Result<TransactionEvents> {
-        if let Some(data) = DatabaseService::read(ReadItem {
-            key: tx_hash,
-            cf: TRANSACTIONS_EVENTS_COL_FAMILY,
-        })
-        .await?
-        {
-            Ok(TransactionEvents::decode(data.0.as_ref())?)
-        } else {
-            Ok(TransactionEvents::default())
-        }
-    }
-
     pub(crate) async fn get_transaction_by_hash(
         &self,
         hash: Bytes,

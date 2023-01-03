@@ -3,7 +3,7 @@
 //
 
 pub(crate) mod block_creator;
-pub(crate) mod block_event_emitter;
+pub(crate) mod block_event;
 /// Blockchain module provides low-level blockchain functionality such as creating blocks and processing transactions
 pub(crate) mod blockchain_service;
 pub(crate) mod mem_pool_service;
@@ -11,7 +11,7 @@ pub(crate) mod new_user_tx_processor;
 pub(crate) mod payment_tx_processor;
 pub(crate) mod stats;
 pub(crate) mod tokenomics;
-pub(crate) mod tx_event_emitter;
+pub(crate) mod tx_event;
 pub(crate) mod txs_processor;
 pub(crate) mod txs_store;
 pub(crate) mod update_tx_processor;
