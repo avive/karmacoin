@@ -107,9 +107,12 @@ async fn new_user_happy_flow_test() {
         .unwrap()
         .into_inner();
 
-    assert_eq!(resp.transactions.len(), 1);
+    assert_eq!(resp.transactions.len(), 1, "expected 1 transaction");
     let tx = &resp.transactions[0];
     assert_eq!(tx.status, OnChain as i32);
+
+    assert!(resp.tx_events.is_some(), "expected tx events");
+    assert_eq!(resp.tx_events.unwrap().events.len(), 1, "expected 1 event");
 
     finalize_test().await;
 }

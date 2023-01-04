@@ -6,7 +6,7 @@ use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::db_config_service::{
     TRANSACTIONS_COL_FAMILY, TRANSACTIONS_HASHES_BY_ACCOUNT_IDX_COL_FAMILY,
 };
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use base::karma_coin::karma_coin_core_types::TransactionStatus::OnChain;
 use base::karma_coin::karma_coin_core_types::*;
 use bytes::Bytes;
@@ -14,12 +14,28 @@ use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use prost::Message;
 use xactor::*;
 
+#[message(result = "Result<(Vec<SignedTransactionWithStatus>, TransactionEvents)>")]
+pub(crate) struct GetTransactionsAndEventsByAccountId {
+    pub(crate) account_id: Bytes,
+}
+
+#[async_trait::async_trait]
+impl Handler<GetTransactionsAndEventsByAccountId> for BlockChainService {
+    async fn handle(
+        &mut self,
+        _ctx: &mut Context<Self>,
+        msg: GetTransactionsAndEventsByAccountId,
+    ) -> Result<(Vec<SignedTransactionWithStatus>, TransactionEvents)> {
+        self.get_transactions_and_events_by_account_id(msg.account_id)
+            .await
+    }
+}
+
 #[message(result = "Result<Vec<SignedTransactionWithStatus>>")]
 pub(crate) struct GetTransactionsByAccountId {
     pub(crate) account_id: Bytes,
 }
 
-/// Request to complete verification and sign up
 #[async_trait::async_trait]
 impl Handler<GetTransactionsByAccountId> for BlockChainService {
     async fn handle(
@@ -67,6 +83,28 @@ impl BlockChainService {
         } else {
             Ok(None)
         }
+    }
+
+    pub(crate) async fn get_transactions_and_events_by_account_id(
+        &self,
+        account_id: Bytes,
+    ) -> Result<(Vec<SignedTransactionWithStatus>, TransactionEvents)> {
+        let txs = self.get_transactions_by_account_id(account_id).await?;
+        let mut tx_events = TransactionEvents { events: vec![] };
+        for tx_data in txs.iter() {
+            let tx = tx_data
+                .transaction
+                .as_ref()
+                .ok_or_else(|| anyhow!("missing transaction in transaction with status"))?;
+
+            let tx_hash = tx.get_hash()?;
+            let events_data = self.get_tx_events(tx_hash).await?;
+            for event in events_data.events {
+                tx_events.events.push(event);
+            }
+        }
+
+        Ok((txs, tx_events))
     }
 
     /// Get transactions by account id

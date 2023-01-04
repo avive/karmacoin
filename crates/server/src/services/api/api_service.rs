@@ -12,7 +12,9 @@ use crate::services::blockchain::mem_pool_service::{AddTransaction, MemPoolServi
 use crate::services::blockchain::stats::GetStats;
 use crate::services::blockchain::tx_event::GetTransactionEvents;
 use crate::services::blockchain::txs_processor::ProcessTransactions;
-use crate::services::blockchain::txs_store::{GetTransactionByHash, GetTransactionsByAccountId};
+use crate::services::blockchain::txs_store::{
+    GetTransactionByHash, GetTransactionsAndEventsByAccountId,
+};
 use anyhow::Result;
 use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
 use base::karma_coin::karma_coin_api::*;
@@ -210,19 +212,17 @@ impl ApiServiceTrait for ApiService {
             .await
             .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
 
-        let txs = service
-            .call(GetTransactionsByAccountId {
+        let (txs, events) = service
+            .call(GetTransactionsAndEventsByAccountId {
                 account_id: Bytes::from(account_id.data),
             })
             .await
             .map_err(|e| Status::internal(format!("internal error: {}", e)))?
             .map_err(|e| Status::internal(format!("failed to call blockchain api: {}", e)))?;
 
-        // todo get all events for each transaction
-
         Ok(Response::new(GetTransactionsResponse {
             transactions: txs,
-            tx_events: None,
+            tx_events: Some(events),
         }))
     }
 
