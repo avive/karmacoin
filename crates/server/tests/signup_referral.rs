@@ -11,8 +11,10 @@ use common::{create_user, finalize_test, init_test};
 use base::genesis_config_service::{GenesisConfigService, KARMA_COIN_OG_CHAR_TRAIT, NET_ID_KEY};
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{
-    GetUserInfoByAccountRequest, SubmitTransactionRequest, SubmitTransactionResult,
+    GetTransactionsRequest, GetUserInfoByAccountRequest, SubmitTransactionRequest,
+    SubmitTransactionResult,
 };
+use base::karma_coin::karma_coin_core_types::TransactionStatus::OnChain;
 use base::karma_coin::karma_coin_core_types::TransactionType::PaymentV1;
 use base::karma_coin::karma_coin_core_types::{
     AccountId, BlockchainStats, MobileNumber, PaymentTransactionV1, SignedTransaction,
@@ -171,6 +173,48 @@ async fn referral_signup_happy_flow_test() {
     assert_eq!(user2.trait_scores.len(), 1);
     assert_eq!(user2.trait_scores[0].trait_id, char_trait_id);
     assert_eq!(user2.trait_scores[0].score, 1);
+
+    // verify that the payment transaction is on chain indexed by user 1
+    let resp = api_client
+        .get_transactions(GetTransactionsRequest {
+            account_id: Some(AccountId {
+                data: user1_account_id.data.clone(),
+            }),
+        })
+        .await
+        .unwrap()
+        .into_inner();
+
+    assert_eq!(
+        resp.transactions.len(),
+        2,
+        "user1 should have 2 transactions"
+    );
+
+    // check that the payment transaction is on chain
+    let tx = &resp.transactions[1];
+    assert_eq!(tx.status, OnChain as i32);
+
+    // verify that the payment transaction is on chain indexed by user 2
+    let resp = api_client
+        .get_transactions(GetTransactionsRequest {
+            account_id: Some(AccountId {
+                data: user2_account_id.data.clone(),
+            }),
+        })
+        .await
+        .unwrap()
+        .into_inner();
+
+    assert_eq!(
+        resp.transactions.len(),
+        2,
+        "user2 should have 2 transactions"
+    );
+
+    // check that the payment transaction is on chain
+    let tx = &resp.transactions[1];
+    assert_eq!(tx.status, OnChain as i32);
 
     finalize_test().await;
 }

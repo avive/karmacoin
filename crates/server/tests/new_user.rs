@@ -7,8 +7,10 @@ mod common;
 
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{
-    GetUserInfoByAccountRequest, GetUserInfoByNickRequest, GetUserInfoByNumberRequest,
+    GetTransactionsRequest, GetUserInfoByAccountRequest, GetUserInfoByNickRequest,
+    GetUserInfoByNumberRequest,
 };
+use base::karma_coin::karma_coin_core_types::TransactionStatus::OnChain;
 use base::karma_coin::karma_coin_core_types::{AccountId, MobileNumber};
 use common::{create_user, finalize_test, init_test};
 
@@ -31,7 +33,7 @@ async fn new_user_happy_flow_test() {
         .await
         .unwrap();
 
-    let resp = create_user(user_name.clone().into(), mobile_number.clone().into())
+    let resp = create_user(user_name.into(), mobile_number.into())
         .await
         .unwrap();
 
@@ -93,6 +95,21 @@ async fn new_user_happy_flow_test() {
         mobile_number
     );
     assert_eq!(resp_user.nonce, 1);
+
+    // verify that the new user transaction is on chain
+    let resp = api_client
+        .get_transactions(GetTransactionsRequest {
+            account_id: Some(AccountId {
+                data: account_id.clone(),
+            }),
+        })
+        .await
+        .unwrap()
+        .into_inner();
+
+    assert_eq!(resp.transactions.len(), 1);
+    let tx = &resp.transactions[0];
+    assert_eq!(tx.status, OnChain as i32);
 
     finalize_test().await;
 }
