@@ -6,28 +6,36 @@ use anyhow::{anyhow, Result};
 use map_macro::map;
 
 use crate::karma_coin::karma_coin_api::{GetGenesisDataRequest, GetGenesisDataResponse};
+use crate::karma_coin::karma_coin_core_types::CharTrait;
 use config::{Config, Environment, Map, Value};
 use log::*;
 use std::collections::HashMap;
 use xactor::*;
 
 // Blockchain network id
-pub const NET_ID_KEY: &str = "net_id";
+pub const NET_ID_KEY: &str = "net_id_key";
+pub const NET_NAME_KEY: &str = "net_name_key";
+
+pub const DEVNET_ID: u32 = 1;
+pub const DEVNET_NAME: &str = "devnet";
+
+// consensus genesis time in milliseconds
+pub const GENESIS_TIMESTAMP_MS_KEY: &str = "genesis_timestamp_key";
 
 // Default tx fee amount
-pub const DEF_TX_FEE_KEY: &str = "def_tx_fee";
+pub const DEF_TX_FEE_KEY: &str = "def_tx_fee_key";
 
 /// Signup reward in KCents in phase 2
 pub const CHAR_TRAITS_KEY: &str = "char_traits_key";
 
 /// Signup reward in KCents in phase 1
-pub const SIGNUP_REWARD_PHASE1_KEY: &str = "signup_reward_p1";
+pub const SIGNUP_REWARD_PHASE1_KEY: &str = "signup_reward_p1_key";
 
 /// Max number of rewards for phase 1
-pub const SIGNUP_REWARD_PHASE1_ALLOCATION_KEY: &str = "signup_reward_alloc_p1";
+pub const SIGNUP_REWARD_PHASE1_ALLOCATION_KEY: &str = "signup_reward_alloc_p1_key";
 
 /// Signup reward in KCents in phase 2
-pub const SIGNUP_REWARD_PHASE2_KEY: &str = "signup_reward_p2";
+pub const SIGNUP_REWARD_PHASE2_KEY: &str = "signup_reward_p2_key";
 
 /// Max number of signup rewards for phase 2
 pub const SIGNUP_REWARD_PHASE2_ALLOCATION_KEY: &str = "signup_reward_alloc_p2";
@@ -90,6 +98,7 @@ pub const KARMA_COIN_OG_CHAR_TRAIT: u32 = 1;
 pub struct GenesisConfigService {
     config: Config,
     config_file: Option<String>,
+    pub(crate) char_traits: Option<Vec<CharTrait>>,
 }
 
 #[async_trait::async_trait]
@@ -116,7 +125,11 @@ impl Actor for GenesisConfigService {
         let builder = Config::builder();
         // Set defaults and merge genesis config file to overwrite
         let config = builder
-            .set_default(NET_ID_KEY, 1)
+            .set_default(NET_ID_KEY, DEVNET_ID)
+            .unwrap()
+            .set_default(NET_NAME_KEY, DEVNET_NAME)
+            .unwrap()
+            .set_default(GENESIS_TIMESTAMP_MS_KEY, 1672860236)
             .unwrap()
             .set_default(DEF_TX_FEE_KEY, 100)
             .unwrap()
@@ -188,6 +201,25 @@ impl Service for GenesisConfigService {}
 
 // helpers
 impl GenesisConfigService {
+    /// Returns all supported char traits from genesis data
+    async fn get_char_traits(&mut self) -> Result<Vec<CharTrait>> {
+        if let Some(traits) = self.char_traits.as_ref() {
+            return Ok(traits.clone());
+        }
+
+        let mut traits = vec![];
+        for (id, name) in self.config.get_table(CHAR_TRAITS_KEY).unwrap() {
+            traits.push(CharTrait::new(
+                id.parse().unwrap(),
+                name.into_string().unwrap().as_str(),
+            ));
+        }
+
+        self.char_traits = Some(traits.clone());
+
+        Ok(traits)
+    }
+
     pub async fn get(key: String) -> Result<Option<String>> {
         let config = GenesisConfigService::from_registry().await?;
         let res = config.call(GetValue(key)).await?;
@@ -376,10 +408,13 @@ impl Handler<GetGenesisData> for GenesisConfigService {
         _ctx: &mut Context<Self>,
         _msg: GetGenesisData,
     ) -> Result<GetGenesisDataResponse> {
+        let char_traits = self.get_char_traits().await?;
+
+        // todo: only compute it once and get it from cache after first call
         let genesis_data = GetGenesisDataResponse {
-            net_id: 0,
-            net_name: "".to_string(),
-            genesis_time: 0,
+            net_id: self.config.get_int(NET_ID_KEY).unwrap() as u32,
+            net_name: self.config.get_string(NET_NAME_KEY).unwrap(),
+            genesis_time: self.config.get_int(GENESIS_TIMESTAMP_MS_KEY).unwrap() as u64,
             signup_reward_phase1_alloc: 0,
             signup_reward_phase2_alloc: 0,
             signup_reward_phase1_amount: 0,
@@ -397,7 +432,7 @@ impl Handler<GetGenesisData> for GenesisConfigService {
             karma_reward_amount: 0,
             karma_reward_alloc: 0,
             treasury_premint_amount: 0,
-            char_traits: vec![],
+            char_traits,
             verifiers: vec![],
         };
         Ok(genesis_data)

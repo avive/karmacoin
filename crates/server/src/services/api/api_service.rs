@@ -4,7 +4,6 @@
 
 use crate::services::blockchain::block_event::GetBlocksEvents;
 use crate::services::blockchain::blockchain_service::BlockChainService;
-use crate::services::blockchain::get_genesis_data::GetGenesisData;
 use crate::services::blockchain::get_user_by_account_id::GetUserInfoByAccountId;
 use crate::services::blockchain::get_user_by_nick::GetUserInfoByNick;
 use crate::services::blockchain::get_user_by_number::GetUserInfoByNumber;
@@ -16,6 +15,7 @@ use crate::services::blockchain::txs_store::{
     GetTransactionByHash, GetTransactionsAndEventsByAccountId,
 };
 use anyhow::Result;
+use base::genesis_config_service::{GenesisConfigService, GetGenesisData};
 use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
 use base::karma_coin::karma_coin_api::*;
 use bytes::Bytes;
@@ -109,7 +109,7 @@ impl ApiServiceTrait for ApiService {
         &self,
         request: Request<GetGenesisDataRequest>,
     ) -> Result<Response<GetGenesisDataResponse>, Status> {
-        let service = BlockChainService::from_registry()
+        let service = GenesisConfigService::from_registry()
             .await
             .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
 
