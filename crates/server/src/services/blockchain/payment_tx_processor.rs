@@ -8,7 +8,9 @@ use crate::services::db_config_service::{
     MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY,
 };
 use anyhow::{anyhow, Result};
-use base::genesis_config_service::KARMA_COIN_OG_CHAR_TRAIT;
+use base::genesis_config_service::{
+    KARMA_COIN_AMBASSADOR_CHAR_TRAIT_ID, KARMA_COIN_SPENDER_CHAR_TRAIT_ID,
+};
 use base::karma_coin::karma_coin_core_types::{
     ExecutionResult, FeeType, PaymentTransactionV1, SignedTransaction, TransactionEvent, User,
 };
@@ -118,8 +120,11 @@ impl BlockChainService {
             payer.balance += referral_reward;
 
             // Give payer karma points for helping to grow the network
-            payer.inc_trait_score(KARMA_COIN_OG_CHAR_TRAIT);
+            payer.inc_trait_score(KARMA_COIN_AMBASSADOR_CHAR_TRAIT_ID);
         };
+
+        // Give payer karma points for spending karma coins
+        payer.inc_trait_score(KARMA_COIN_SPENDER_CHAR_TRAIT_ID);
 
         // index the transaction in the db by hash
         let mut tx_data = Vec::with_capacity(transaction.encoded_len());

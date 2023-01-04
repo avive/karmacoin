@@ -107,13 +107,14 @@ message GetGenesisDataResponse {
 
   uint64 karma_reward_amount = 18;
   uint64 karma_reward_alloc = 19;
+  uint64 karma_reward_top_n_users = 20;
 
-  uint64 treasury_premint_amount = 20;
+  uint64 treasury_premint_amount = 21;
+  string treasury_account_id = 22;
+  string treasury_account_name = 23;
 
-  repeated core_types.CharTrait char_traits = 21;
-
-  repeated core_types.PhoneVerifier verifiers = 22;
-
+  repeated core_types.CharTrait char_traits = 24;
+  repeated core_types.PhoneVerifier verifiers = 25;
 
 }
 

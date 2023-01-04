@@ -6,7 +6,7 @@ use anyhow::{anyhow, Result};
 use map_macro::map;
 
 use crate::karma_coin::karma_coin_api::{GetGenesisDataRequest, GetGenesisDataResponse};
-use crate::karma_coin::karma_coin_core_types::CharTrait;
+use crate::karma_coin::karma_coin_core_types::{AccountId, CharTrait, PhoneVerifier};
 use config::{Config, Environment, Map, Value};
 use log::*;
 use std::collections::HashMap;
@@ -82,6 +82,9 @@ pub const KARAM_REWARDS_ALLOCATION_KEY: &str = "karma_rewards_allocation";
 /// Treasury account id
 pub const TREASURY_ACCOUNT_ID_KEY: &str = "treasury_account_id";
 
+/// Treasury account name
+pub const TREASURY_ACCOUNT_NAME_KEY: &str = "treasury";
+
 /// Treasury pre-minted amount in KCents
 pub const TREASURY_PREMINT_COINS_AMOUNT_KEY: &str = "treasury_premint_coins";
 
@@ -89,7 +92,10 @@ pub const TREASURY_PREMINT_COINS_AMOUNT_KEY: &str = "treasury_premint_coins";
 pub const VERIFIERS_ACCOUNTS_IDS: &str = "verifiers_accounts_ids";
 
 /// This must be true across all traits defined in genesis configs
-pub const KARMA_COIN_OG_CHAR_TRAIT: u32 = 1;
+pub const KARMA_COIN_AMBASSADOR_CHAR_TRAIT_ID: u32 = 1;
+
+/// This must be true across all traits defined in genesis configs
+pub const KARMA_COIN_SPENDER_CHAR_TRAIT_ID: u32 = 2;
 
 /// This service handles the kc blockchain genesis configuration
 /// It provides default values for development, and merges in values from
@@ -98,7 +104,7 @@ pub const KARMA_COIN_OG_CHAR_TRAIT: u32 = 1;
 pub struct GenesisConfigService {
     config: Config,
     config_file: Option<String>,
-    pub(crate) char_traits: Option<Vec<CharTrait>>,
+    pub(crate) genesis_data: Option<GetGenesisDataResponse>,
 }
 
 #[async_trait::async_trait]
@@ -110,17 +116,18 @@ impl Actor for GenesisConfigService {
         let char_traits: HashMap<String, String> = map! {
             "0".into() => "None".into(),
             // note that this must remain constant in all genesis configs:
-            "1".into() => "KarmaCoin OG".into(),
-            "2".into() => "Kind".into(),
-            "3".into() => "Smart".into(),
-            "4".into() => "Sexy".into(),
+            "1".into() => "KarmaCoin Ambassador".into(),
+            "2".into() => "KarmaCoin Spender".into(),
+            "3".into() => "Kind".into(),
+            "4".into() => "Smart".into(),
+            "5".into() => "Sexy".into(),
         };
 
-        // Canonical verifiers account ids
-        let verifiers_accounts_ids: Vec<String> = vec![
-            "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd".into(),
-            "f0d0c0b0a090807060504030201000f0e0d0c0b0a090807060504030201000f".into(),
-        ];
+        // default supported verifiers
+        let verifiers: HashMap<String, String> = map! {
+            "verifier1".into() => "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd".into(),
+            "verifier2".into() => "f0d0c0b0a090807060504030201000f0e0d0c0b0a090807060504030201000f".into(),
+        };
 
         let builder = Config::builder();
         // Set defaults and merge genesis config file to overwrite
@@ -172,7 +179,16 @@ impl Actor for GenesisConfigService {
             .unwrap()
             .set_default(TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY, 10)
             .unwrap()
-            .set_default(VERIFIERS_ACCOUNTS_IDS, verifiers_accounts_ids)
+            .set_default(VERIFIERS_ACCOUNTS_IDS, verifiers)
+            .unwrap()
+            .set_default(TREASURY_PREMINT_COINS_AMOUNT_KEY, 5 * (10 ^ 6))
+            .unwrap()
+            .set_default(
+                TREASURY_ACCOUNT_ID_KEY,
+                "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd",
+            )
+            .unwrap()
+            .set_default(TREASURY_ACCOUNT_NAME_KEY, "treasury")
             .unwrap()
             .add_source(
                 Environment::with_prefix("GENESIS")
@@ -202,11 +218,22 @@ impl Service for GenesisConfigService {}
 // helpers
 impl GenesisConfigService {
     /// Returns all supported char traits from genesis data
-    async fn get_char_traits(&mut self) -> Result<Vec<CharTrait>> {
-        if let Some(traits) = self.char_traits.as_ref() {
-            return Ok(traits.clone());
+    async fn get_verifiers(&mut self) -> Result<Vec<PhoneVerifier>> {
+        let mut verifiers = vec![];
+        for (name, account_id) in self.config.get_table(VERIFIERS_ACCOUNTS_IDS).unwrap() {
+            verifiers.push(PhoneVerifier {
+                account_id: Some(AccountId {
+                    data: account_id.into_string()?.as_bytes().to_vec(),
+                }),
+                name,
+            })
         }
 
+        Ok(verifiers)
+    }
+
+    /// Returns all supported char traits from genesis data
+    async fn get_char_traits(&mut self) -> Result<Vec<CharTrait>> {
         let mut traits = vec![];
         for (id, name) in self.config.get_table(CHAR_TRAITS_KEY).unwrap() {
             traits.push(CharTrait::new(
@@ -214,8 +241,6 @@ impl GenesisConfigService {
                 name.into_string().unwrap().as_str(),
             ));
         }
-
-        self.char_traits = Some(traits.clone());
 
         Ok(traits)
     }
@@ -408,33 +433,58 @@ impl Handler<GetGenesisData> for GenesisConfigService {
         _ctx: &mut Context<Self>,
         _msg: GetGenesisData,
     ) -> Result<GetGenesisDataResponse> {
-        let char_traits = self.get_char_traits().await?;
+        if let Some(data) = self.genesis_data.as_ref() {
+            return Ok(data.clone());
+        }
 
         // todo: only compute it once and get it from cache after first call
         let genesis_data = GetGenesisDataResponse {
             net_id: self.config.get_int(NET_ID_KEY).unwrap() as u32,
-            net_name: self.config.get_string(NET_NAME_KEY).unwrap(),
-            genesis_time: self.config.get_int(GENESIS_TIMESTAMP_MS_KEY).unwrap() as u64,
-            signup_reward_phase1_alloc: 0,
-            signup_reward_phase2_alloc: 0,
-            signup_reward_phase1_amount: 0,
-            signup_reward_phase2_amount: 0,
-            signup_reward_phase3_start: 0,
-            referral_reward_phase1_alloc: 0,
-            referral_reward_phase2_alloc: 0,
-            referral_reward_phase1_amount: 0,
-            referral_reward_phase2_amount: 0,
-            tx_fee_subsidy_max_per_user: 0,
-            tx_fee_subsidies_alloc: 0,
-            tx_fee_subsidy_max_amount: 0,
-            block_reward_amount: 0,
-            block_reward_last_block: 0,
-            karma_reward_amount: 0,
-            karma_reward_alloc: 0,
-            treasury_premint_amount: 0,
-            char_traits,
-            verifiers: vec![],
+            net_name: self.config.get_string(NET_NAME_KEY)?,
+            genesis_time: self.config.get_int(GENESIS_TIMESTAMP_MS_KEY)? as u64,
+
+            signup_reward_phase1_alloc: self.config.get_int(SIGNUP_REWARD_PHASE1_ALLOCATION_KEY)?
+                as u64,
+            signup_reward_phase2_alloc: self.config.get_int(SIGNUP_REWARD_PHASE2_ALLOCATION_KEY)?
+                as u64,
+            signup_reward_phase1_amount: self.config.get_int(SIGNUP_REWARD_PHASE1_KEY)? as u64,
+            signup_reward_phase2_amount: self.config.get_int(SIGNUP_REWARD_PHASE2_KEY)? as u64,
+            signup_reward_phase3_start: self.config.get_int(SIGNUP_REWARD_PHASE3_KEY)? as u64,
+
+            referral_reward_phase1_alloc: self
+                .config
+                .get_int(REFERRAL_REWARD_PHASE1_ALLOCATION_KEY)?
+                as u64,
+            referral_reward_phase2_alloc: self
+                .config
+                .get_int(REFERRAL_REWARD_PHASE2_ALLOCATION_KEY)?
+                as u64,
+            referral_reward_phase1_amount: self.config.get_int(REFERRAL_REWARD_PHASE1_KEY)? as u64,
+            referral_reward_phase2_amount: self.config.get_int(REFERRAL_REWARD_PHASE2_KEY)? as u64,
+
+            tx_fee_subsidy_max_per_user: self.config.get_int(TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY)?
+                as u64,
+            tx_fee_subsidies_alloc: self.config.get_int(TX_FEE_SUBSIDY_ALLOCATION_KEY)? as u64,
+            tx_fee_subsidy_max_amount: self.config.get_int(TX_FEE_SUBSIDY_MAX_AMOUNT)? as u64,
+
+            block_reward_amount: self.config.get_int(BLOCK_REWARDS_AMOUNT)? as u64,
+            block_reward_last_block: self.config.get_int(BLOCK_REWARDS_LAST_BLOCK)? as u64,
+
+            karma_reward_amount: self.config.get_int(KARMA_REWARD_AMOUNT)? as u64,
+            karma_reward_alloc: self.config.get_int(KARAM_REWARDS_ALLOCATION_KEY)? as u64,
+            karma_reward_top_n_users: self.config.get_int(KARMA_REWARD_TOP_N_USERS_KEY)? as u64,
+
+            treasury_premint_amount: self.config.get_int(TREASURY_PREMINT_COINS_AMOUNT_KEY)? as u64,
+            treasury_account_id: self.config.get_string(TREASURY_ACCOUNT_ID_KEY)?,
+            treasury_account_name: self.config.get_string(TREASURY_ACCOUNT_NAME_KEY)?,
+
+            char_traits: self.get_char_traits().await?,
+            verifiers: self.get_verifiers().await?,
         };
+
+        // cache genesis data as it is read-only
+        self.genesis_data = Some(genesis_data.clone());
+
         Ok(genesis_data)
     }
 }

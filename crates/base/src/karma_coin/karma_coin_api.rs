@@ -81,10 +81,16 @@ pub struct GetGenesisDataResponse {
     #[prost(uint64, tag = "19")]
     pub karma_reward_alloc: u64,
     #[prost(uint64, tag = "20")]
+    pub karma_reward_top_n_users: u64,
+    #[prost(uint64, tag = "21")]
     pub treasury_premint_amount: u64,
-    #[prost(message, repeated, tag = "21")]
+    #[prost(string, tag = "22")]
+    pub treasury_account_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "23")]
+    pub treasury_account_name: ::prost::alloc::string::String,
+    #[prost(message, repeated, tag = "24")]
     pub char_traits: ::prost::alloc::vec::Vec<super::core_types::CharTrait>,
-    #[prost(message, repeated, tag = "22")]
+    #[prost(message, repeated, tag = "25")]
     pub verifiers: ::prost::alloc::vec::Vec<super::core_types::PhoneVerifier>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
