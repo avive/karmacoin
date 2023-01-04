@@ -6,7 +6,3 @@
 /// KarmaCoin full p2p nodes will provide the API as well as public community providers.
 /// API data includes on-chain users, accounts and transactions data.
 pub(crate) mod api_service;
-mod get_char_traits;
-mod get_user_by_account_id;
-mod get_user_by_nick;
-mod get_user_by_number;

@@ -6,6 +6,10 @@ pub(crate) mod block_creator;
 pub(crate) mod block_event;
 /// Blockchain module provides low-level blockchain functionality such as creating blocks and processing transactions
 pub(crate) mod blockchain_service;
+pub mod get_genesis_data;
+pub mod get_user_by_account_id;
+pub mod get_user_by_nick;
+pub mod get_user_by_number;
 pub(crate) mod mem_pool_service;
 pub(crate) mod new_user_tx_processor;
 pub(crate) mod payment_tx_processor;

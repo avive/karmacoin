@@ -2,7 +2,7 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use crate::services::api::api_service::ApiService;
+use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::db_config_service::USERS_COL_FAMILY;
 use anyhow::{anyhow, Result};
 use base::karma_coin::karma_coin_api::{GetUserInfoByAccountRequest, GetUserInfoByAccountResponse};
@@ -16,7 +16,7 @@ use xactor::*;
 pub(crate) struct GetUserInfoByAccountId(pub(crate) GetUserInfoByAccountRequest);
 
 #[async_trait::async_trait]
-impl Handler<GetUserInfoByAccountId> for ApiService {
+impl Handler<GetUserInfoByAccountId> for BlockChainService {
     async fn handle(
         &mut self,
         _ctx: &mut Context<Self>,

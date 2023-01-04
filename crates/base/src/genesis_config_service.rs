@@ -5,6 +5,7 @@
 use anyhow::{anyhow, Result};
 use map_macro::map;
 
+use crate::karma_coin::karma_coin_api::{GetGenesisDataRequest, GetGenesisDataResponse};
 use config::{Config, Environment, Map, Value};
 use log::*;
 use std::collections::HashMap;
@@ -360,6 +361,46 @@ impl Handler<SetU64> for GenesisConfigService {
             Ok(_) => Ok(()),
             Err(e) => Err(anyhow!("{:?}", e)),
         }
+    }
+}
+
+#[message(result = "Result<GetGenesisDataResponse>")]
+pub struct GetGenesisData {
+    pub request: GetGenesisDataRequest,
+}
+
+#[async_trait::async_trait]
+impl Handler<GetGenesisData> for GenesisConfigService {
+    async fn handle(
+        &mut self,
+        _ctx: &mut Context<Self>,
+        _msg: GetGenesisData,
+    ) -> Result<GetGenesisDataResponse> {
+        let genesis_data = GetGenesisDataResponse {
+            net_id: 0,
+            net_name: "".to_string(),
+            genesis_time: 0,
+            signup_reward_phase1_alloc: 0,
+            signup_reward_phase2_alloc: 0,
+            signup_reward_phase1_amount: 0,
+            signup_reward_phase2_amount: 0,
+            signup_reward_phase3_start: 0,
+            referral_reward_phase1_alloc: 0,
+            referral_reward_phase2_alloc: 0,
+            referral_reward_phase1_amount: 0,
+            referral_reward_phase2_amount: 0,
+            tx_fee_subsidy_max_per_user: 0,
+            tx_fee_subsidies_alloc: 0,
+            tx_fee_subsidy_max_amount: 0,
+            block_reward_amount: 0,
+            block_reward_last_block: 0,
+            karma_reward_amount: 0,
+            karma_reward_alloc: 0,
+            treasury_premint_amount: 0,
+            char_traits: vec![],
+            verifiers: vec![],
+        };
+        Ok(genesis_data)
     }
 }
 

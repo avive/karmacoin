@@ -18,12 +18,6 @@ service ApiService {
   // Returns on-chain user info by account id if user exists
   rpc GetUserInfoByAccount(GetUserInfoByAccountRequest) returns (GetUserInfoByAccountResponse);
 
-  // Returns the identity of all phone verifiers registered on chain
-  rpc GetPhoneVerifiers(GetPhoneVerifiersRequest) returns (GetPhoneVerifiersResponse);
-
-  // Returns all char traits on-chain
-  rpc GetCharTraits(GetCharTraitsRequest) returns (GetCharTraitsResponse);
-
   // Returns the current blockchain state
   rpc GetBlockchainData(GetBlockchainDataRequest) returns (GetBlockchainDataResponse);
 
@@ -84,23 +78,6 @@ message GetUserInfoByAccountResponse {
   core_types.User user = 1;
 }
 
-message GetPhoneVerifiersRequest {
-
-}
-
-message GetPhoneVerifiersResponse {
-  repeated core_types.PhoneVerifier verifiers = 1;
-}
-
-message GetCharTraitsRequest {
-
-}
-
-message GetCharTraitsResponse {
-  repeated core_types.CharTrait char_traits = 1;
-}
-
-
 message GetGenesisDataRequest {
 }
 
@@ -132,6 +109,11 @@ message GetGenesisDataResponse {
   uint64 karma_reward_alloc = 19;
 
   uint64 treasury_premint_amount = 20;
+
+  repeated core_types.CharTrait char_traits = 21;
+
+  repeated core_types.PhoneVerifier verifiers = 22;
+
 
 }
 

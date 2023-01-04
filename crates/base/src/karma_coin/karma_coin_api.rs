@@ -39,20 +39,6 @@ pub struct GetUserInfoByAccountResponse {
     pub user: ::core::option::Option<super::core_types::User>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetPhoneVerifiersRequest {}
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetPhoneVerifiersResponse {
-    #[prost(message, repeated, tag = "1")]
-    pub verifiers: ::prost::alloc::vec::Vec<super::core_types::PhoneVerifier>,
-}
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetCharTraitsRequest {}
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetCharTraitsResponse {
-    #[prost(message, repeated, tag = "1")]
-    pub char_traits: ::prost::alloc::vec::Vec<super::core_types::CharTrait>,
-}
-#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetGenesisDataRequest {}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetGenesisDataResponse {
@@ -96,6 +82,10 @@ pub struct GetGenesisDataResponse {
     pub karma_reward_alloc: u64,
     #[prost(uint64, tag = "20")]
     pub treasury_premint_amount: u64,
+    #[prost(message, repeated, tag = "21")]
+    pub char_traits: ::prost::alloc::vec::Vec<super::core_types::CharTrait>,
+    #[prost(message, repeated, tag = "22")]
+    pub verifiers: ::prost::alloc::vec::Vec<super::core_types::PhoneVerifier>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetBlockchainDataRequest {}
@@ -259,39 +249,6 @@ pub mod api_service_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        #[doc = " Returns the identity of all phone verifiers registered on chain"]
-        pub async fn get_phone_verifiers(
-            &mut self,
-            request: impl tonic::IntoRequest<super::GetPhoneVerifiersRequest>,
-        ) -> Result<tonic::Response<super::GetPhoneVerifiersResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
-            let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static(
-                "/karma_coin.api.ApiService/GetPhoneVerifiers",
-            );
-            self.inner.unary(request.into_request(), path, codec).await
-        }
-        #[doc = " Returns all char traits on-chain"]
-        pub async fn get_char_traits(
-            &mut self,
-            request: impl tonic::IntoRequest<super::GetCharTraitsRequest>,
-        ) -> Result<tonic::Response<super::GetCharTraitsResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
-            let codec = tonic::codec::ProstCodec::default();
-            let path =
-                http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetCharTraits");
-            self.inner.unary(request.into_request(), path, codec).await
-        }
         #[doc = " Returns the current blockchain state"]
         pub async fn get_blockchain_data(
             &mut self,
@@ -417,16 +374,6 @@ pub mod api_service_server {
             &self,
             request: tonic::Request<super::GetUserInfoByAccountRequest>,
         ) -> Result<tonic::Response<super::GetUserInfoByAccountResponse>, tonic::Status>;
-        #[doc = " Returns the identity of all phone verifiers registered on chain"]
-        async fn get_phone_verifiers(
-            &self,
-            request: tonic::Request<super::GetPhoneVerifiersRequest>,
-        ) -> Result<tonic::Response<super::GetPhoneVerifiersResponse>, tonic::Status>;
-        #[doc = " Returns all char traits on-chain"]
-        async fn get_char_traits(
-            &self,
-            request: tonic::Request<super::GetCharTraitsRequest>,
-        ) -> Result<tonic::Response<super::GetCharTraitsResponse>, tonic::Status>;
         #[doc = " Returns the current blockchain state"]
         async fn get_blockchain_data(
             &self,
@@ -603,72 +550,6 @@ pub mod api_service_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = GetUserInfoByAccountSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
-                        let res = grpc.unary(method, req).await;
-                        Ok(res)
-                    };
-                    Box::pin(fut)
-                }
-                "/karma_coin.api.ApiService/GetPhoneVerifiers" => {
-                    #[allow(non_camel_case_types)]
-                    struct GetPhoneVerifiersSvc<T: ApiService>(pub Arc<T>);
-                    impl<T: ApiService> tonic::server::UnaryService<super::GetPhoneVerifiersRequest>
-                        for GetPhoneVerifiersSvc<T>
-                    {
-                        type Response = super::GetPhoneVerifiersResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
-                        fn call(
-                            &mut self,
-                            request: tonic::Request<super::GetPhoneVerifiersRequest>,
-                        ) -> Self::Future {
-                            let inner = self.0.clone();
-                            let fut = async move { (*inner).get_phone_verifiers(request).await };
-                            Box::pin(fut)
-                        }
-                    }
-                    let accept_compression_encodings = self.accept_compression_encodings;
-                    let send_compression_encodings = self.send_compression_encodings;
-                    let inner = self.inner.clone();
-                    let fut = async move {
-                        let inner = inner.0;
-                        let method = GetPhoneVerifiersSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
-                        let res = grpc.unary(method, req).await;
-                        Ok(res)
-                    };
-                    Box::pin(fut)
-                }
-                "/karma_coin.api.ApiService/GetCharTraits" => {
-                    #[allow(non_camel_case_types)]
-                    struct GetCharTraitsSvc<T: ApiService>(pub Arc<T>);
-                    impl<T: ApiService> tonic::server::UnaryService<super::GetCharTraitsRequest>
-                        for GetCharTraitsSvc<T>
-                    {
-                        type Response = super::GetCharTraitsResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
-                        fn call(
-                            &mut self,
-                            request: tonic::Request<super::GetCharTraitsRequest>,
-                        ) -> Self::Future {
-                            let inner = self.0.clone();
-                            let fut = async move { (*inner).get_char_traits(request).await };
-                            Box::pin(fut)
-                        }
-                    }
-                    let accept_compression_encodings = self.accept_compression_encodings;
-                    let send_compression_encodings = self.send_compression_encodings;
-                    let inner = self.inner.clone();
-                    let fut = async move {
-                        let inner = inner.0;
-                        let method = GetCharTraitsSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
                             accept_compression_encodings,

@@ -2,12 +2,12 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use crate::services::api::get_char_traits::GetCharTraits;
-use crate::services::api::get_user_by_account_id::GetUserInfoByAccountId;
-use crate::services::api::get_user_by_nick::GetUserInfoByNick;
-use crate::services::api::get_user_by_number::GetUserInfoByNumber;
 use crate::services::blockchain::block_event::GetBlocksEvents;
 use crate::services::blockchain::blockchain_service::BlockChainService;
+use crate::services::blockchain::get_genesis_data::GetGenesisData;
+use crate::services::blockchain::get_user_by_account_id::GetUserInfoByAccountId;
+use crate::services::blockchain::get_user_by_nick::GetUserInfoByNick;
+use crate::services::blockchain::get_user_by_number::GetUserInfoByNumber;
 use crate::services::blockchain::mem_pool_service::{AddTransaction, MemPoolService};
 use crate::services::blockchain::stats::GetStats;
 use crate::services::blockchain::tx_event::GetTransactionEvents;
@@ -18,33 +18,13 @@ use crate::services::blockchain::txs_store::{
 use anyhow::Result;
 use base::karma_coin::karma_coin_api::api_service_server::ApiService as ApiServiceTrait;
 use base::karma_coin::karma_coin_api::*;
-use base::karma_coin::karma_coin_core_types::CharTrait;
 use bytes::Bytes;
 use tonic::{Request, Response, Status};
 use xactor::*;
 
 /// ApiService is a system service that provides access to provider server persisted data as well as an interface to admin the provider's server. It provides a GRPC admin service defined in ServerAdminService. This service is designed to be used by provider admin clients.
-#[derive(Debug, Clone)]
-pub(crate) struct ApiService {
-    pub(crate) char_traits: Option<Vec<CharTrait>>,
-}
-
-impl Default for ApiService {
-    fn default() -> Self {
-        info!("service created");
-        ApiService { char_traits: None }
-    }
-}
-
-#[async_trait::async_trait]
-impl Actor for ApiService {
-    async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        info!("service started");
-        Ok(())
-    }
-}
-
-impl Service for ApiService {}
+#[derive(Debug, Clone, Default)]
+pub(crate) struct ApiService {}
 
 /// ApiService implements the ApiServiceTrait trait which defines the grpc rpc methods it provides for
 /// clients over the network. All returned data is canonical blockchain data according to the state
@@ -56,7 +36,7 @@ impl ApiServiceTrait for ApiService {
         &self,
         request: Request<GetUserInfoByNickRequest>,
     ) -> Result<Response<GetUserInfoByNickResponse>, Status> {
-        let service = ApiService::from_registry()
+        let service = BlockChainService::from_registry()
             .await
             .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?;
 
@@ -74,7 +54,7 @@ impl ApiServiceTrait for ApiService {
         &self,
         request: Request<GetUserInfoByNumberRequest>,
     ) -> std::result::Result<Response<GetUserInfoByNumberResponse>, Status> {
-        let service = ApiService::from_registry()
+        let service = BlockChainService::from_registry()
             .await
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?;
 
@@ -92,40 +72,12 @@ impl ApiServiceTrait for ApiService {
         &self,
         request: Request<GetUserInfoByAccountRequest>,
     ) -> Result<Response<GetUserInfoByAccountResponse>, Status> {
-        let service = ApiService::from_registry()
+        let service = BlockChainService::from_registry()
             .await
             .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?;
 
         let res = service
             .call(GetUserInfoByAccountId(request.into_inner()))
-            .await
-            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?
-            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
-
-        Ok(Response::new(res))
-    }
-
-    /// Returns supported phone verifiers identity (on-chain data)
-    async fn get_phone_verifiers(
-        &self,
-        _request: Request<GetPhoneVerifiersRequest>,
-    ) -> Result<Response<GetPhoneVerifiersResponse>, Status> {
-        // todo: grab this from genesis config
-
-        todo!()
-    }
-
-    /// Returns the supported character traits for this network
-    async fn get_char_traits(
-        &self,
-        request: Request<GetCharTraitsRequest>,
-    ) -> Result<Response<GetCharTraitsResponse>, Status> {
-        let service = ApiService::from_registry()
-            .await
-            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?;
-
-        let res = service
-            .call(GetCharTraits(request.into_inner()))
             .await
             .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?
             .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
@@ -155,9 +107,21 @@ impl ApiServiceTrait for ApiService {
     /// Returns genesis readonly data
     async fn get_genesis_data(
         &self,
-        _request: Request<GetGenesisDataRequest>,
+        request: Request<GetGenesisDataRequest>,
     ) -> Result<Response<GetGenesisDataResponse>, Status> {
-        todo!()
+        let service = BlockChainService::from_registry()
+            .await
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
+
+        let resp = service
+            .call(GetGenesisData {
+                request: request.into_inner(),
+            })
+            .await
+            .map_err(|e| Status::internal(format!("failed to call blockchain api: {}", e)))?
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
+
+        Ok(Response::new(resp))
     }
 
     /// Submit a transaction for processing to the mem pool

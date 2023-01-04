@@ -3,7 +3,7 @@
 //
 
 use anyhow::Result;
-use base::karma_coin::karma_coin_core_types::KeyPair;
+use base::karma_coin::karma_coin_core_types::{CharTrait, KeyPair};
 use base::server_config_service::{GetBlockProducerIdKeyPair, ServerConfigService};
 use xactor::*;
 
@@ -14,6 +14,7 @@ use xactor::*;
 pub(crate) struct BlockChainService {
     /// block producer id pair
     pub(crate) id_key_pair: Option<KeyPair>,
+    pub(crate) char_traits: Option<Vec<CharTrait>>,
 }
 
 #[async_trait::async_trait]
