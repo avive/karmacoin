@@ -26,7 +26,7 @@ use base::signed_trait::SignedTrait;
 use chrono::Utc;
 use prost::Message;
 
-mod new_user;
+mod new_user_happy_flow;
 mod payment_tx;
 
 use server::server_service::{ServerService, Startup};
