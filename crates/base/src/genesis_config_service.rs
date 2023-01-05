@@ -183,6 +183,7 @@ impl Actor for GenesisConfigService {
             .unwrap()
             .set_default(TREASURY_PREMINT_COINS_AMOUNT_KEY, 5 * (10 ^ 6))
             .unwrap()
+            // todo: replace it with 3 accounts with 3 different keys
             .set_default(
                 TREASURY_ACCOUNT_ID_KEY,
                 "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd",
@@ -437,7 +438,6 @@ impl Handler<GetGenesisData> for GenesisConfigService {
             return Ok(data.clone());
         }
 
-        // todo: only compute it once and get it from cache after first call
         let genesis_data = GetGenesisDataResponse {
             net_id: self.config.get_int(NET_ID_KEY).unwrap() as u32,
             net_name: self.config.get_string(NET_NAME_KEY)?,
