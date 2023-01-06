@@ -11,11 +11,11 @@ use server::server_service::{ServerService, Startup};
 use xactor::Service;
 
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
-use base::karma_coin::karma_coin_api::GetGenesisDataRequest;
+use base::karma_coin::karma_coin_api::GetBlockchainDataRequest;
 use common::{finalize_test, init_test};
 
 #[tokio::test(flavor = "multi_thread")]
-async fn get_genesis_config() {
+async fn get_blockchain_data() {
     init_test().await;
 
     // Start the server
@@ -27,12 +27,12 @@ async fn get_genesis_config() {
         .unwrap();
 
     let resp = api_client
-        .get_genesis_data(GetGenesisDataRequest {})
+        .get_blockchain_data(GetBlockchainDataRequest {})
         .await
         .unwrap()
         .into_inner();
 
-    info!("genesis data: {:?}", resp);
+    info!("blockchain data: {:?}", resp.stats.unwrap());
 
     finalize_test().await;
 }

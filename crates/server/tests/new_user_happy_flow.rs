@@ -7,8 +7,8 @@ mod common;
 
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{
-    GetTransactionsRequest, GetUserInfoByAccountRequest, GetUserInfoByNickRequest,
-    GetUserInfoByNumberRequest,
+    GetBlockchainDataRequest, GetBlockchainEventsRequest, GetBlocksRequest, GetTransactionsRequest,
+    GetUserInfoByAccountRequest, GetUserInfoByNickRequest, GetUserInfoByNumberRequest,
 };
 use base::karma_coin::karma_coin_core_types::TransactionStatus::OnChain;
 use base::karma_coin::karma_coin_core_types::{AccountId, MobileNumber};
@@ -113,6 +113,52 @@ async fn new_user_happy_flow_test() {
 
     assert!(resp.tx_events.is_some(), "expected tx events");
     assert_eq!(resp.tx_events.unwrap().events.len(), 1, "expected 1 event");
+
+    // check data for newly created block
+
+    let chain_stats = api_client
+        .get_blockchain_data(GetBlockchainDataRequest {})
+        .await
+        .unwrap()
+        .into_inner()
+        .stats
+        .unwrap();
+
+    assert_eq!(chain_stats.tip_height, 1);
+    assert_eq!(chain_stats.users_count, 1);
+    assert_eq!(chain_stats.transactions_count, 1);
+    assert_eq!(chain_stats.fee_subs_count, 1);
+
+    // check block event
+
+    let blocks_events = api_client
+        .get_blockchain_events(GetBlockchainEventsRequest {
+            from_block_height: 0,
+            to_block_height: 1,
+        })
+        .await
+        .unwrap()
+        .into_inner()
+        .blocks_events;
+
+    assert_eq!(blocks_events.len(), 1, "expected 1 block event");
+    let event = &blocks_events[0];
+    assert_eq!(event.height, 1);
+
+    let blocks = api_client
+        .get_blocks(GetBlocksRequest {
+            from_block_height: 0,
+            to_block_height: 1,
+        })
+        .await
+        .unwrap()
+        .into_inner()
+        .blocks;
+
+    assert_eq!(blocks.len(), 1, "expected 1 block");
+    let block = &blocks[0];
+    assert_eq!(block.height, 1);
+    assert_eq!(block.digest, event.block_hash);
 
     finalize_test().await;
 }

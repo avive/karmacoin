@@ -29,7 +29,7 @@ impl Handler<GetBlocksEvents> for BlockChainService {
         msg: GetBlocksEvents,
     ) -> Result<Vec<BlockEvent>> {
         let mut res = vec![];
-        for h in msg.from_height..msg.to_height {
+        for h in msg.from_height..=msg.to_height {
             if let Some(event) = self.get_block_event_by_height(h).await? {
                 res.push(event);
             }

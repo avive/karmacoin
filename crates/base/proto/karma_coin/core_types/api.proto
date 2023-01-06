@@ -35,9 +35,14 @@ service ApiService {
   // Returns all events associated with the transaction
   rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse);
 
-  // Get block event for a block
+  // Get blockchain events for a range of heights
   rpc GetBlockchainEvents(GetBlockchainEventsRequest) returns (GetBlockchainEventsResponse) {
   }
+
+  // Get blockchain events for a range of heights
+  rpc GetBlocks(GetBlocksRequest) returns (GetBlocksResponse) {
+  }
+
 }
 
 
@@ -150,6 +155,15 @@ message GetBlockchainEventsRequest {
 }
 
 message GetBlockchainEventsResponse {
-  repeated core_types.BlockEvent block_events = 1;
+  repeated core_types.BlockEvent blocks_events = 1;
+}
+
+message GetBlocksRequest {
+  uint64 from_block_height = 1;
+  uint64 to_block_height = 2;
+}
+
+message GetBlocksResponse {
+  repeated core_types.Block blocks = 1;
 }
 

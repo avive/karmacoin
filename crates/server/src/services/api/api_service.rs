@@ -4,6 +4,7 @@
 
 use crate::services::blockchain::block_event::GetBlocksEvents;
 use crate::services::blockchain::blockchain_service::BlockChainService;
+use crate::services::blockchain::blocks_store::GetBlocks;
 use crate::services::blockchain::get_user_by_account_id::GetUserInfoByAccountId;
 use crate::services::blockchain::get_user_by_nick::GetUserInfoByNick;
 use crate::services::blockchain::get_user_by_number::GetUserInfoByNumber;
@@ -241,7 +242,7 @@ impl ApiServiceTrait for ApiService {
             ));
         }
 
-        let res = service
+        let blocks_events = service
             .call(GetBlocksEvents {
                 from_height: req.from_block_height,
                 to_height: req.to_block_height,
@@ -250,8 +251,34 @@ impl ApiServiceTrait for ApiService {
             .map_err(|e| Status::internal(format!("internal error: {}", e)))?
             .map_err(|e| Status::internal(format!("failed to call blockchain api: {}", e)))?;
 
-        Ok(Response::new(GetBlockchainEventsResponse {
-            block_events: res,
-        }))
+        Ok(Response::new(GetBlockchainEventsResponse { blocks_events }))
+    }
+
+    async fn get_blocks(
+        &self,
+        request: Request<GetBlocksRequest>,
+    ) -> Result<Response<GetBlocksResponse>, Status> {
+        let service = BlockChainService::from_registry()
+            .await
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
+
+        let req = request.into_inner();
+
+        if req.from_block_height > req.to_block_height {
+            return Err(Status::invalid_argument(
+                "from block height must be less than or equal to to block height",
+            ));
+        }
+
+        let blocks = service
+            .call(GetBlocks {
+                from_height: req.from_block_height,
+                to_height: req.to_block_height,
+            })
+            .await
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?
+            .map_err(|e| Status::internal(format!("failed to call blockchain api: {}", e)))?;
+
+        Ok(Response::new(GetBlocksResponse { blocks }))
     }
 }

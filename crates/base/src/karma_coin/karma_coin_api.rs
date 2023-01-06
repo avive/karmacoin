@@ -135,7 +135,19 @@ pub struct GetBlockchainEventsRequest {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetBlockchainEventsResponse {
     #[prost(message, repeated, tag = "1")]
-    pub block_events: ::prost::alloc::vec::Vec<super::core_types::BlockEvent>,
+    pub blocks_events: ::prost::alloc::vec::Vec<super::core_types::BlockEvent>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetBlocksRequest {
+    #[prost(uint64, tag = "1")]
+    pub from_block_height: u64,
+    #[prost(uint64, tag = "2")]
+    pub to_block_height: u64,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetBlocksResponse {
+    #[prost(message, repeated, tag = "1")]
+    pub blocks: ::prost::alloc::vec::Vec<super::core_types::Block>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
@@ -339,7 +351,7 @@ pub mod api_service_client {
                 http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetTransaction");
             self.inner.unary(request.into_request(), path, codec).await
         }
-        #[doc = " Get block event for a block"]
+        #[doc = " Get blockchain events for a range of heights"]
         pub async fn get_blockchain_events(
             &mut self,
             request: impl tonic::IntoRequest<super::GetBlockchainEventsRequest>,
@@ -354,6 +366,21 @@ pub mod api_service_client {
             let path = http::uri::PathAndQuery::from_static(
                 "/karma_coin.api.ApiService/GetBlockchainEvents",
             );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        #[doc = " Get blockchain events for a range of heights"]
+        pub async fn get_blocks(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetBlocksRequest>,
+        ) -> Result<tonic::Response<super::GetBlocksResponse>, tonic::Status> {
+            self.inner.ready().await.map_err(|e| {
+                tonic::Status::new(
+                    tonic::Code::Unknown,
+                    format!("Service was not ready: {}", e.into()),
+                )
+            })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static("/karma_coin.api.ApiService/GetBlocks");
             self.inner.unary(request.into_request(), path, codec).await
         }
     }
@@ -407,11 +434,16 @@ pub mod api_service_server {
             &self,
             request: tonic::Request<super::GetTransactionRequest>,
         ) -> Result<tonic::Response<super::GetTransactionResponse>, tonic::Status>;
-        #[doc = " Get block event for a block"]
+        #[doc = " Get blockchain events for a range of heights"]
         async fn get_blockchain_events(
             &self,
             request: tonic::Request<super::GetBlockchainEventsRequest>,
         ) -> Result<tonic::Response<super::GetBlockchainEventsResponse>, tonic::Status>;
+        #[doc = " Get blockchain events for a range of heights"]
+        async fn get_blocks(
+            &self,
+            request: tonic::Request<super::GetBlocksRequest>,
+        ) -> Result<tonic::Response<super::GetBlocksResponse>, tonic::Status>;
     }
     #[doc = " Unified public API provided by blockchain nodes and verifiers"]
     #[derive(Debug)]
@@ -755,6 +787,37 @@ pub mod api_service_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = GetBlockchainEventsSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
+                            accept_compression_encodings,
+                            send_compression_encodings,
+                        );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/karma_coin.api.ApiService/GetBlocks" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetBlocksSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService> tonic::server::UnaryService<super::GetBlocksRequest> for GetBlocksSvc<T> {
+                        type Response = super::GetBlocksResponse;
+                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetBlocksRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).get_blocks(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetBlocksSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
                             accept_compression_encodings,
