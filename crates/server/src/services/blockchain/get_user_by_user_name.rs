@@ -3,29 +3,31 @@
 //
 
 use crate::services::blockchain::blockchain_service::BlockChainService;
-use crate::services::db_config_service::{NICKS_COL_FAMILY, USERS_COL_FAMILY};
+use crate::services::db_config_service::{USERS_COL_FAMILY, USERS_NAMES_COL_FAMILY};
 use anyhow::Result;
-use base::karma_coin::karma_coin_api::{GetUserInfoByNickRequest, GetUserInfoByNickResponse};
+use base::karma_coin::karma_coin_api::{
+    GetUserInfoByUserNameRequest, GetUserInfoByUserNameResponse,
+};
 use base::karma_coin::karma_coin_core_types::User;
 use bytes::Bytes;
 use db::db_service::{DatabaseService, ReadItem};
 use prost::Message;
 use xactor::*;
 
-#[message(result = "Result<GetUserInfoByNickResponse>")]
-pub(crate) struct GetUserInfoByNick(pub(crate) GetUserInfoByNickRequest);
+#[message(result = "Result<GetUserInfoByUserNameResponse>")]
+pub(crate) struct GetUserInfoByUserName(pub(crate) GetUserInfoByUserNameRequest);
 
 #[async_trait::async_trait]
-impl Handler<GetUserInfoByNick> for BlockChainService {
+impl Handler<GetUserInfoByUserName> for BlockChainService {
     async fn handle(
         &mut self,
         _ctx: &mut Context<Self>,
-        msg: GetUserInfoByNick,
-    ) -> Result<GetUserInfoByNickResponse> {
+        msg: GetUserInfoByUserName,
+    ) -> Result<GetUserInfoByUserNameResponse> {
         // lookup accountId by nickname
         match DatabaseService::read(ReadItem {
-            key: Bytes::from(msg.0.nickname.as_bytes().to_vec()),
-            cf: NICKS_COL_FAMILY,
+            key: Bytes::from(msg.0.user_name.as_bytes().to_vec()),
+            cf: USERS_NAMES_COL_FAMILY,
         })
         .await?
         {
@@ -38,13 +40,13 @@ impl Handler<GetUserInfoByNick> for BlockChainService {
                 .await?
                 {
                     // fetch user by account id from db
-                    Some(user_data) => Ok(GetUserInfoByNickResponse {
+                    Some(user_data) => Ok(GetUserInfoByUserNameResponse {
                         user: Some(User::decode(user_data.0.as_ref())?),
                     }),
-                    None => Ok(GetUserInfoByNickResponse { user: None }),
+                    None => Ok(GetUserInfoByUserNameResponse { user: None }),
                 }
             }
-            None => Ok(GetUserInfoByNickResponse { user: None }),
+            None => Ok(GetUserInfoByUserNameResponse { user: None }),
         }
     }
 }

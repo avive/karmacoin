@@ -13,6 +13,7 @@ use anyhow::{anyhow, Result};
 use bytes::Bytes;
 use chrono::{Duration, Utc};
 use ed25519_dalek::{PublicKey, Signature};
+use orion::hazardous::hash::sha2::sha256::Sha256;
 use prost::Message;
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -67,11 +68,21 @@ impl Display for SignedTransaction {
 
 impl SignedTransaction {
     /// Returns the transaction canonical hash
+    ///
     pub fn get_hash(&self) -> Result<Bytes> {
         let mut buf = Vec::with_capacity(self.encoded_len());
         self.encode(&mut buf)?;
-        let hash = orion::hash::digest(&buf).map_err(|e| anyhow!("failed to hash data: {}", e))?;
-        Ok(Bytes::from(hash.as_ref().to_vec()))
+
+        // todo: refactor it to a canonical hash function for the project
+        let mut hasher = Sha256::new();
+        hasher.update(buf.as_ref())?;
+        let digest = hasher.finalize()?;
+        Ok(Bytes::from(digest.as_ref().to_vec()))
+
+        //orion::hash::digest(&buf).map_err(|e| anyhow!("failed to hash data: {}", e))?;
+
+        //Ok(Bytes::from(hash.as_ref().to_vec()));
+        // unimplemented!("use rust crypto lib blake3 instead of orion");
     }
 
     /// Validate transaction has valid syntax, fields has the correct net id and is preorply

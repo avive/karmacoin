@@ -2,15 +2,12 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use crate::services::verifier::register_number::RegisterNumber;
 use crate::services::verifier::verify_number::Verify;
 use anyhow::{anyhow, Result};
 use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_core_types::{AccountId, KeyPair, VerifyNumberResponse};
 use base::karma_coin::karma_coin_verifier::verifier_service_server::VerifierService as VerifierServiceTrait;
-use base::karma_coin::karma_coin_verifier::{
-    RegisterNumberRequest, RegisterNumberResponse, VerifyNumberRequest,
-};
+use base::karma_coin::karma_coin_verifier::VerifyNumberRequest;
 use base::server_config_service::{GetVerifierKeyPair, ServerConfigService};
 use tonic::{Request, Response, Status};
 use xactor::*;
@@ -79,26 +76,6 @@ impl VerifierService {
 
 #[tonic::async_trait]
 impl VerifierServiceTrait for VerifierService {
-    /// User requests to register a mobile phone number
-    async fn register_number(
-        &self,
-        request: Request<RegisterNumberRequest>,
-    ) -> std::result::Result<Response<RegisterNumberResponse>, Status> {
-        info!("register number called...");
-
-        let service = VerifierService::from_registry()
-            .await
-            .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
-
-        let res = service
-            .call(RegisterNumber(request.into_inner()))
-            .await
-            .map_err(|e| Status::internal(format!("failed to call verifier api: {:?}", e)))?
-            .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
-
-        Ok(Response::new(res))
-    }
-
     /// User requests to verify a number with code received via text message
     async fn verify_number(
         &self,

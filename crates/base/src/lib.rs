@@ -17,8 +17,6 @@ pub mod key_pair;
 pub mod logging_service;
 pub mod new_user_tx;
 pub mod payment_tx;
-pub mod register_number_request;
-pub mod register_number_response;
 pub mod server_config_service;
 pub mod signed_trait;
 pub mod signed_tx;

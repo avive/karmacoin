@@ -8,7 +8,7 @@ use bytes::Bytes;
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::tokenomics::Tokenomics;
 use crate::services::db_config_service::{
-    MOBILE_NUMBERS_COL_FAMILY, NICKS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY,
+    MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY, USERS_NAMES_COL_FAMILY,
 };
 use base::karma_coin::karma_coin_core_types::{
     ExecutionResult, FeeType, SignedTransaction, TransactionEvent, User,
@@ -132,7 +132,7 @@ impl BlockChainService {
                 key: Bytes::from(verification_evidence.user_name.as_bytes().to_vec()),
                 value: Bytes::from(account_id.data.to_vec()),
             },
-            cf: NICKS_COL_FAMILY,
+            cf: USERS_NAMES_COL_FAMILY,
             ttl: 0,
         })
         .await?;

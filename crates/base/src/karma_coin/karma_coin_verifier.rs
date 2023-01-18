@@ -1,4 +1,4 @@
-/// Verifer Info is used to return the network the id and dialup info of active verifiers
+/// Verier Info is used to return the network the id and dialup info of active verifiers
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
 pub struct VerifierInfo {
     #[prost(string, tag = "1")]
@@ -21,29 +21,6 @@ pub struct VerifierInfo {
     pub signature: ::core::option::Option<super::core_types::Signature>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RegisterNumberRequest {
-    #[prost(message, optional, tag = "1")]
-    pub account_id: ::core::option::Option<super::core_types::AccountId>,
-    #[prost(message, optional, tag = "2")]
-    pub mobile_number: ::core::option::Option<super::core_types::MobileNumber>,
-    #[prost(message, optional, tag = "3")]
-    pub signature: ::core::option::Option<super::core_types::Signature>,
-}
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct RegisterNumberResponse {
-    #[prost(message, optional, tag = "1")]
-    pub account_id: ::core::option::Option<super::core_types::AccountId>,
-    #[prost(enumeration = "RegisterNumberResult", tag = "2")]
-    pub result: i32,
-    /// auth code received via sms
-    /// Warning: for testing ONLY for testing purposes.
-    /// In production code this is empty string and client must get code the from sms/text message.
-    #[prost(int32, tag = "3")]
-    pub code: i32,
-    #[prost(message, optional, tag = "4")]
-    pub signature: ::core::option::Option<super::core_types::Signature>,
-}
-#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct VerifyNumberRequest {
     #[prost(message, optional, tag = "1")]
     pub account_id: ::core::option::Option<super::core_types::AccountId>,
@@ -52,19 +29,11 @@ pub struct VerifyNumberRequest {
     /// auth code received via sms
     #[prost(int32, tag = "3")]
     pub code: i32,
+    /// user name requested by user
     #[prost(string, tag = "4")]
-    pub nickname: ::prost::alloc::string::String,
+    pub requested_user_name: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "5")]
     pub signature: ::core::option::Option<super::core_types::Signature>,
-}
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
-#[repr(i32)]
-pub enum RegisterNumberResult {
-    InvalidNumber = 0,
-    InvalidSignature = 1,
-    NumberAlreadyRegistered = 2,
-    NumberAccountExists = 3,
-    CodeSent = 4,
 }
 #[doc = r" Generated client implementations."]
 pub mod verifier_service_client {
@@ -127,24 +96,8 @@ pub mod verifier_service_client {
             self.inner = self.inner.accept_gzip();
             self
         }
-        #[doc = " Request to register a phone number. Will trigger an SMS to that number"]
-        pub async fn register_number(
-            &mut self,
-            request: impl tonic::IntoRequest<super::RegisterNumberRequest>,
-        ) -> Result<tonic::Response<super::RegisterNumberResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
-            let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static(
-                "/karma_coin.verifier.VerifierService/RegisterNumber",
-            );
-            self.inner.unary(request.into_request(), path, codec).await
-        }
         #[doc = " Request to verify a number by providing code sent via sms from verifier"]
+        #[doc = " note that VerifyNumberResponse was lifted to types as it is used in signup transactions"]
         pub async fn verify_number(
             &mut self,
             request: impl tonic::IntoRequest<super::VerifyNumberRequest>,
@@ -171,12 +124,8 @@ pub mod verifier_service_server {
     #[doc = "Generated trait containing gRPC methods that should be implemented for use with VerifierServiceServer."]
     #[async_trait]
     pub trait VerifierService: Send + Sync + 'static {
-        #[doc = " Request to register a phone number. Will trigger an SMS to that number"]
-        async fn register_number(
-            &self,
-            request: tonic::Request<super::RegisterNumberRequest>,
-        ) -> Result<tonic::Response<super::RegisterNumberResponse>, tonic::Status>;
         #[doc = " Request to verify a number by providing code sent via sms from verifier"]
+        #[doc = " note that VerifyNumberResponse was lifted to types as it is used in signup transactions"]
         async fn verify_number(
             &self,
             request: tonic::Request<super::VerifyNumberRequest>,
@@ -232,40 +181,6 @@ pub mod verifier_service_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/karma_coin.verifier.VerifierService/RegisterNumber" => {
-                    #[allow(non_camel_case_types)]
-                    struct RegisterNumberSvc<T: VerifierService>(pub Arc<T>);
-                    impl<T: VerifierService>
-                        tonic::server::UnaryService<super::RegisterNumberRequest>
-                        for RegisterNumberSvc<T>
-                    {
-                        type Response = super::RegisterNumberResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
-                        fn call(
-                            &mut self,
-                            request: tonic::Request<super::RegisterNumberRequest>,
-                        ) -> Self::Future {
-                            let inner = self.0.clone();
-                            let fut = async move { (*inner).register_number(request).await };
-                            Box::pin(fut)
-                        }
-                    }
-                    let accept_compression_encodings = self.accept_compression_encodings;
-                    let send_compression_encodings = self.send_compression_encodings;
-                    let inner = self.inner.clone();
-                    let fut = async move {
-                        let inner = inner.0;
-                        let method = RegisterNumberSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
-                        let res = grpc.unary(method, req).await;
-                        Ok(res)
-                    };
-                    Box::pin(fut)
-                }
                 "/karma_coin.verifier.VerifierService/VerifyNumber" => {
                     #[allow(non_camel_case_types)]
                     struct VerifyNumberSvc<T: VerifierService>(pub Arc<T>);

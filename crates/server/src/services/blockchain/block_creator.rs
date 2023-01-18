@@ -5,7 +5,7 @@
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::tokenomics::Tokenomics;
 use crate::services::db_config_service::{
-    BLOCKS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY, USERS_COL_FAMILY,
+    BLOCKS_COL_FAMILY, USERS_COL_FAMILY, USERS_NAMES_COL_FAMILY,
 };
 use anyhow::Result;
 use base::karma_coin::karma_coin_core_types::*;
@@ -37,10 +37,11 @@ impl BlockChainService {
                     .await?
                     .unwrap();
                 let account_id = key_pair.public_key.as_ref().unwrap().key.clone();
-                // verify the the requested nickname does not belong to a new user over
+                // verify the the requested user-name does not belong to a new user over
+                // todo: figure out block producers name stuff - maybe just use account id?
                 if (DatabaseService::read(ReadItem {
                     key: Bytes::from(user_name.as_bytes().to_vec()),
-                    cf: RESERVED_NICKS_COL_FAMILY,
+                    cf: USERS_NAMES_COL_FAMILY,
                 })
                 .await?)
                     .is_some()
@@ -50,17 +51,6 @@ impl BlockChainService {
                         user_name
                     ));
                 }
-
-                // update nickname index
-                DatabaseService::write(WriteItem {
-                    data: DataItem {
-                        key: Bytes::from(user_name.as_bytes().to_vec()),
-                        value: Bytes::from(account_id.clone()),
-                    },
-                    cf: RESERVED_NICKS_COL_FAMILY,
-                    ttl: 0,
-                })
-                .await?;
 
                 User {
                     account_id: Some(AccountId {

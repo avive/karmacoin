@@ -364,22 +364,24 @@ pub enum TransactionType {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum VerifyNumberResult {
-    NicknameTaken = 0,
-    InvalidCode = 1,
+    Unknown = 0,
+    UserNameTaken = 1,
     InvalidSignature = 2,
     /// number is registered to another account
     NumberAlreadyRegisteredOtherAccount = 3,
-    //// an account with this number already exists
+    /// an account with this number already exists
     NumberAlreadyRegisteredThisAccount = 4,
+    /// Account verified
     Verified = 5,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum TransactionStatus {
     Unknown = 0,
-    Pending = 1,
-    Rejected = 2,
-    OnChain = 3,
+    NotSubmitted = 1,
+    Submitted = 2,
+    Rejected = 3,
+    OnChain = 4,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]

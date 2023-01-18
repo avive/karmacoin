@@ -13,8 +13,7 @@ use base::karma_coin::karma_coin_core_types::{
     NewUserTransactionV1, SignedTransaction, TransactionData,
 };
 use base::karma_coin::karma_coin_verifier::verifier_service_client::VerifierServiceClient;
-use base::karma_coin::karma_coin_verifier::RegisterNumberResult::CodeSent;
-use base::karma_coin::karma_coin_verifier::{RegisterNumberRequest, VerifyNumberRequest};
+use base::karma_coin::karma_coin_verifier::VerifyNumberRequest;
 use base::signed_trait::SignedTrait;
 use base::tests_helpers::enable_logger;
 use chrono::Utc;

@@ -45,7 +45,7 @@ impl VerifyNumberRequest {
             account_id: None,
             mobile_number: None,
             code: 0,
-            nickname: "".into(),
+            requested_user_name: "".into(),
             signature: None,
         }
     }

@@ -10,7 +10,7 @@ import "karma_coin/core_types/types.proto";
 // Unified public API provided by blockchain nodes and verifiers
 service ApiService {
   // check if a nickname is available
-  rpc GetUserInfoByNick(GetUserInfoByNickRequest) returns (GetUserInfoByNickResponse);
+  rpc GetUserInfoByUserName(GetUserInfoByUserNameRequest) returns (GetUserInfoByUserNameResponse);
 
   // Returns on-chain user info by phone number if user exists
   rpc GetUserInfoByNumber(GetUserInfoByNumberRequest) returns (GetUserInfoByNumberResponse);
@@ -45,12 +45,12 @@ service ApiService {
 
 }
 
-
-message GetUserInfoByNickRequest {
-  string nickname = 1;
+// Get user by user name
+message GetUserInfoByUserNameRequest {
+  string user_name = 1;
 }
 
-message GetUserInfoByNickResponse {
+message GetUserInfoByUserNameResponse {
   core_types.User user = 1;
 }
 
@@ -59,7 +59,7 @@ message SubmitTransactionRequest {
 }
 
 enum SubmitTransactionResult {
-  SUBMIT_TRANSACTION_RESULT_INVALID = 0;
+  SUBMIT_TRANSACTION_RESULT_REJECTED = 0;
   SUBMIT_TRANSACTION_RESULT_SUBMITTED = 1;
 }
 

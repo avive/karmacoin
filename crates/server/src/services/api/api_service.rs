@@ -6,8 +6,8 @@ use crate::services::blockchain::block_event::GetBlocksEvents;
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::blocks_store::GetBlocks;
 use crate::services::blockchain::get_user_by_account_id::GetUserInfoByAccountId;
-use crate::services::blockchain::get_user_by_nick::GetUserInfoByNick;
 use crate::services::blockchain::get_user_by_number::GetUserInfoByNumber;
+use crate::services::blockchain::get_user_by_user_name::GetUserInfoByUserName;
 use crate::services::blockchain::mem_pool_service::{AddTransaction, MemPoolService};
 use crate::services::blockchain::stats::GetStats;
 use crate::services::blockchain::tx_event::GetTransactionEvents;
@@ -33,16 +33,16 @@ pub(crate) struct ApiService {}
 #[tonic::async_trait]
 impl ApiServiceTrait for ApiService {
     /// Returns user info by nickname
-    async fn get_user_info_by_nick(
+    async fn get_user_info_by_user_name(
         &self,
-        request: Request<GetUserInfoByNickRequest>,
-    ) -> Result<Response<GetUserInfoByNickResponse>, Status> {
+        request: Request<GetUserInfoByUserNameRequest>,
+    ) -> Result<Response<GetUserInfoByUserNameResponse>, Status> {
         let service = BlockChainService::from_registry()
             .await
             .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?;
 
         let res = service
-            .call(GetUserInfoByNick(request.into_inner()))
+            .call(GetUserInfoByUserName(request.into_inner()))
             .await
             .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?
             .map_err(|e| Status::internal(format!("internal error: {}", e)))?;

@@ -16,19 +16,6 @@ use xactor::*;
 // - Protobuf objects are serialized using prost
 //////
 
-////
-// Verifier local data
-//////////////
-
-// Tracking codes sent to new users before they are users
-// index: verification_code, data: accountId. ttl: 24 hours
-pub const VERIFICATION_CODES_COL_FAMILY: &str = "verification_codes_cf";
-
-// Unique reserved nicks (bin-coded strings). data: accountId. ttl: 24 hours
-// Nicks are reserved by new users when they verify their phone so they can claim the nicks
-// in up to 24 hours from verification via the CreateUser transaction
-pub const RESERVED_NICKS_COL_FAMILY: &str = "reserved_nicks_cf";
-
 /////
 //// Blockchain-based data - indexing on-chain data and its blocks
 /////////////////
@@ -61,7 +48,7 @@ pub const USERS_COL_FAMILY: &str = "users_cf";
 /// A mapping of nicknames to account ids.
 /// This is on-chain data derived from on-chain users accounts data.
 /// key: nickname (utf8 encoded string). value: accountId.
-pub const NICKS_COL_FAMILY: &str = "nicks_cf";
+pub const USERS_NAMES_COL_FAMILY: &str = "user_names_cf";
 
 /// A mapping from mobile phone numbers to registered users.
 /// This is on-chain data derived from on-chain users accounts data.
@@ -120,12 +107,10 @@ impl Actor for DbConfigService {
             drop_on_exit,
             db_name,
             col_descriptors: vec![
-                ColumnFamilyDescriptor::new(RESERVED_NICKS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(VERIFIERS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(USERS_COL_FAMILY, Options::default()),
-                ColumnFamilyDescriptor::new(NICKS_COL_FAMILY, Options::default()),
+                ColumnFamilyDescriptor::new(USERS_NAMES_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(MOBILE_NUMBERS_COL_FAMILY, Options::default()),
-                ColumnFamilyDescriptor::new(VERIFICATION_CODES_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TESTS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(BLOCKS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(BLOCK_EVENTS_COL_FAMILY, Options::default()),

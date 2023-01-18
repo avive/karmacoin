@@ -8,14 +8,12 @@ import "karma_coin/core_types/types.proto";
 
 // mobile phone numbers verifier api service
 service VerifierService {
-  // Request to register a phone number. Will trigger an SMS to that number
-  rpc RegisterNumber(RegisterNumberRequest) returns (RegisterNumberResponse);
-
   // Request to verify a number by providing code sent via sms from verifier
+  // note that VerifyNumberResponse was lifted to types as it is used in signup transactions
   rpc VerifyNumber(VerifyNumberRequest) returns (core_types.VerifyNumberResponse);
 }
 
-// Verifer Info is used to return the network the id and dialup info of active verifiers
+// Verier Info is used to return the network the id and dialup info of active verifiers
 message VerifierInfo {
   string name = 1;
   core_types.AccountId account_id = 2;
@@ -26,38 +24,10 @@ message VerifierInfo {
   core_types.Signature signature = 7;
 }
 
-message RegisterNumberRequest {
-  core_types.AccountId account_id = 1;
-  core_types.MobileNumber mobile_number = 2;
-  core_types.Signature signature = 3;
-}
-
-enum RegisterNumberResult {
-  REGISTER_NUMBER_RESULT_INVALID_NUMBER = 0;
-  REGISTER_NUMBER_RESULT_INVALID_SIGNATURE = 1;
-  REGISTER_NUMBER_RESULT_NUMBER_ALREADY_REGISTERED = 2;
-  REGISTER_NUMBER_RESULT_NUMBER_ACCOUNT_EXISTS = 3;
-  REGISTER_NUMBER_RESULT_CODE_SENT = 4;
-}
-
-message RegisterNumberResponse {
-
-  core_types.AccountId account_id = 1;
-
-  RegisterNumberResult result = 2;
-
-  // auth code received via sms
-  // Warning: for testing ONLY for testing purposes.
-  // In production code this is empty string and client must get code the from sms/text message.
-  int32 code = 3;
-
-  core_types.Signature signature = 4;
-}
-
 message VerifyNumberRequest {
   core_types.AccountId account_id = 1;
   core_types.MobileNumber mobile_number = 2;
   int32 code = 3; // auth code received via sms
-  string nickname = 4;
+  string requested_user_name = 4; // user name requested by user
   core_types.Signature signature = 5;
 }

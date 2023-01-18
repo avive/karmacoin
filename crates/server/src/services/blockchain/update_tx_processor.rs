@@ -8,8 +8,7 @@ use bytes::Bytes;
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::tokenomics::Tokenomics;
 use crate::services::db_config_service::{
-    MOBILE_NUMBERS_COL_FAMILY, NICKS_COL_FAMILY, RESERVED_NICKS_COL_FAMILY,
-    TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY,
+    MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY, USERS_NAMES_COL_FAMILY,
 };
 use base::karma_coin::karma_coin_core_types::ExecutionInfo::{
     InvalidData, NicknameInvalid, NicknameNotAvailable,
@@ -23,7 +22,7 @@ use prost::Message;
 
 impl BlockChainService {
     /// Helper function - update user's nickname
-    async fn update_nickname(
+    async fn update_username(
         &mut self,
         user: &mut User,
         nickname: String,
@@ -31,22 +30,12 @@ impl BlockChainService {
     ) -> Result<()> {
         let nick_name_key = Bytes::from(nickname.as_bytes().to_vec());
         let account_id = user.account_id.as_ref().unwrap();
+
         // verify that the requested nickname not registered to another user
 
         if (DatabaseService::read(ReadItem {
             key: nick_name_key.clone(),
-            cf: RESERVED_NICKS_COL_FAMILY,
-        })
-        .await?)
-            .is_some()
-        {
-            event.info = NicknameNotAvailable as i32;
-            return Ok(());
-        }
-
-        if (DatabaseService::read(ReadItem {
-            key: nick_name_key.clone(),
-            cf: NICKS_COL_FAMILY,
+            cf: USERS_NAMES_COL_FAMILY,
         })
         .await?)
             .is_some()
@@ -75,7 +64,7 @@ impl BlockChainService {
                 key: nick_name_key,
                 value: Bytes::from(account_id.data.to_vec()),
             },
-            cf: NICKS_COL_FAMILY,
+            cf: USERS_NAMES_COL_FAMILY,
             ttl: 0,
         })
         .await
@@ -162,7 +151,7 @@ impl BlockChainService {
         // handle nickname update request...
 
         if user.user_name != requested_nickname {
-            self.update_nickname(&mut user, requested_nickname, event)
+            self.update_username(&mut user, requested_nickname, event)
                 .await?;
         }
 

@@ -1,10 +1,11 @@
+/// Get user by user name
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetUserInfoByNickRequest {
+pub struct GetUserInfoByUserNameRequest {
     #[prost(string, tag = "1")]
-    pub nickname: ::prost::alloc::string::String,
+    pub user_name: ::prost::alloc::string::String,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetUserInfoByNickResponse {
+pub struct GetUserInfoByUserNameResponse {
     #[prost(message, optional, tag = "1")]
     pub user: ::core::option::Option<super::core_types::User>,
 }
@@ -152,7 +153,7 @@ pub struct GetBlocksResponse {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum SubmitTransactionResult {
-    Invalid = 0,
+    Rejected = 0,
     Submitted = 1,
 }
 #[doc = r" Generated client implementations."]
@@ -217,10 +218,10 @@ pub mod api_service_client {
             self
         }
         #[doc = " check if a nickname is available"]
-        pub async fn get_user_info_by_nick(
+        pub async fn get_user_info_by_user_name(
             &mut self,
-            request: impl tonic::IntoRequest<super::GetUserInfoByNickRequest>,
-        ) -> Result<tonic::Response<super::GetUserInfoByNickResponse>, tonic::Status> {
+            request: impl tonic::IntoRequest<super::GetUserInfoByUserNameRequest>,
+        ) -> Result<tonic::Response<super::GetUserInfoByUserNameResponse>, tonic::Status> {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::new(
                     tonic::Code::Unknown,
@@ -229,7 +230,7 @@ pub mod api_service_client {
             })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/karma_coin.api.ApiService/GetUserInfoByNick",
+                "/karma_coin.api.ApiService/GetUserInfoByUserName",
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
@@ -393,10 +394,10 @@ pub mod api_service_server {
     #[async_trait]
     pub trait ApiService: Send + Sync + 'static {
         #[doc = " check if a nickname is available"]
-        async fn get_user_info_by_nick(
+        async fn get_user_info_by_user_name(
             &self,
-            request: tonic::Request<super::GetUserInfoByNickRequest>,
-        ) -> Result<tonic::Response<super::GetUserInfoByNickResponse>, tonic::Status>;
+            request: tonic::Request<super::GetUserInfoByUserNameRequest>,
+        ) -> Result<tonic::Response<super::GetUserInfoByUserNameResponse>, tonic::Status>;
         #[doc = " Returns on-chain user info by phone number if user exists"]
         async fn get_user_info_by_number(
             &self,
@@ -495,20 +496,22 @@ pub mod api_service_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/karma_coin.api.ApiService/GetUserInfoByNick" => {
+                "/karma_coin.api.ApiService/GetUserInfoByUserName" => {
                     #[allow(non_camel_case_types)]
-                    struct GetUserInfoByNickSvc<T: ApiService>(pub Arc<T>);
-                    impl<T: ApiService> tonic::server::UnaryService<super::GetUserInfoByNickRequest>
-                        for GetUserInfoByNickSvc<T>
+                    struct GetUserInfoByUserNameSvc<T: ApiService>(pub Arc<T>);
+                    impl<T: ApiService>
+                        tonic::server::UnaryService<super::GetUserInfoByUserNameRequest>
+                        for GetUserInfoByUserNameSvc<T>
                     {
-                        type Response = super::GetUserInfoByNickResponse;
+                        type Response = super::GetUserInfoByUserNameResponse;
                         type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::GetUserInfoByNickRequest>,
+                            request: tonic::Request<super::GetUserInfoByUserNameRequest>,
                         ) -> Self::Future {
                             let inner = self.0.clone();
-                            let fut = async move { (*inner).get_user_info_by_nick(request).await };
+                            let fut =
+                                async move { (*inner).get_user_info_by_user_name(request).await };
                             Box::pin(fut)
                         }
                     }
@@ -517,7 +520,7 @@ pub mod api_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = GetUserInfoByNickSvc(inner);
+                        let method = GetUserInfoByUserNameSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
                             accept_compression_encodings,

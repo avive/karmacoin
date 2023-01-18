@@ -125,15 +125,17 @@ message PaymentTransactionV1 {
 }
 
 enum VerifyNumberResult {
-    VERIFY_NUMBER_RESULT_NICKNAME_TAKEN = 0;
-    VERIFY_NUMBER_RESULT_INVALID_CODE = 1;
+    VERIFY_NUMBER_RESULT_UNKNOWN = 0;
+    VERIFY_NUMBER_RESULT_USER_NAME_TAKEN = 1;
     VERIFY_NUMBER_RESULT_INVALID_SIGNATURE = 2;
 
     // number is registered to another account
     VERIFY_NUMBER_RESULT_NUMBER_ALREADY_REGISTERED_OTHER_ACCOUNT = 3;
 
-    /// an account with this number already exists
+    // an account with this number already exists
     VERIFY_NUMBER_RESULT_NUMBER_ALREADY_REGISTERED_THIS_ACCOUNT = 4;
+
+    // Account verified
     VERIFY_NUMBER_RESULT_VERIFIED = 5;
 }
 
@@ -162,9 +164,10 @@ message TransactionData {
 
 enum TransactionStatus {
     TRANSACTION_STATUS_UNKNOWN = 0;
-    TRANSACTION_STATUS_PENDING = 1;
-    TRANSACTION_STATUS_REJECTED = 2;
-    TRANSACTION_STATUS_ON_CHAIN = 3;
+    TRANSACTION_STATUS_NOT_SUBMITTED = 1;
+    TRANSACTION_STATUS_SUBMITTED = 2;
+    TRANSACTION_STATUS_REJECTED = 3;
+    TRANSACTION_STATUS_ON_CHAIN = 4;
 }
 
 message SignedTransaction {
