@@ -119,31 +119,17 @@ message UpdateUserTransactionV1 {
 
 // Basic payment transaction with optional character appreciation
 message PaymentTransactionV1 {
-    MobileNumber to = 1; // dest is always a mobile number (of a user or a non-user)
+    MobileNumber to = 1; // dest is always a mobile number (of a user or a non-user) no accountId needed.
     uint64 amount = 2; // amount in tokens to transfer
     uint32 char_trait_id = 3; // char trait id set by sender. e.g. smart
 }
 
-enum VerifyNumberResult {
-    VERIFY_NUMBER_RESULT_UNKNOWN = 0;
-    VERIFY_NUMBER_RESULT_USER_NAME_TAKEN = 1;
-    VERIFY_NUMBER_RESULT_INVALID_SIGNATURE = 2;
 
-    // number is registered to another account
-    VERIFY_NUMBER_RESULT_NUMBER_ALREADY_REGISTERED_OTHER_ACCOUNT = 3;
-
-    // an account with this number already exists
-    VERIFY_NUMBER_RESULT_NUMBER_ALREADY_REGISTERED_THIS_ACCOUNT = 4;
-
-    // Account verified
-    VERIFY_NUMBER_RESULT_VERIFIED = 5;
-}
 
 // Created and signed by a verifier
 message VerifyNumberResponse {
     AccountId verifier_account_id = 1;
     uint64 timestamp = 2;
-    VerifyNumberResult result = 3;
     AccountId account_id = 4;
     MobileNumber mobile_number = 5;
     string user_name = 6;

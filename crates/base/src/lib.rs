@@ -24,5 +24,4 @@ pub mod tests_helpers;
 pub mod transaction_event;
 pub mod update_user_tx;
 pub mod user;
-pub mod verify_number_request;
 pub mod verify_number_response;

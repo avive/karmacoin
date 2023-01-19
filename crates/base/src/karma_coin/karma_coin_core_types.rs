@@ -148,7 +148,7 @@ pub struct UpdateUserTransactionV1 {
 /// Basic payment transaction with optional character appreciation
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PaymentTransactionV1 {
-    /// dest is always a mobile number (of a user or a non-user)
+    /// dest is always a mobile number (of a user or a non-user) no accountId needed.
     #[prost(message, optional, tag = "1")]
     pub to: ::core::option::Option<MobileNumber>,
     /// amount in tokens to transfer
@@ -165,8 +165,6 @@ pub struct VerifyNumberResponse {
     pub verifier_account_id: ::core::option::Option<AccountId>,
     #[prost(uint64, tag = "2")]
     pub timestamp: u64,
-    #[prost(enumeration = "VerifyNumberResult", tag = "3")]
-    pub result: i32,
     #[prost(message, optional, tag = "4")]
     pub account_id: ::core::option::Option<AccountId>,
     #[prost(message, optional, tag = "5")]
@@ -360,19 +358,6 @@ pub enum TransactionType {
     PaymentV1 = 0,
     NewUserV1 = 1,
     UpdateUserV1 = 2,
-}
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
-#[repr(i32)]
-pub enum VerifyNumberResult {
-    Unknown = 0,
-    UserNameTaken = 1,
-    InvalidSignature = 2,
-    /// number is registered to another account
-    NumberAlreadyRegisteredOtherAccount = 3,
-    /// an account with this number already exists
-    NumberAlreadyRegisteredThisAccount = 4,
-    /// Account verified
-    Verified = 5,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
