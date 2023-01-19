@@ -45,12 +45,31 @@ impl BlockChainService {
 
         let verification_evidence = new_user_tx
             .verify_number_response
-            .ok_or_else(|| anyhow!("missing verifier data"))?;
+            .ok_or_else(|| anyhow!("missing verifier data from transaction"))?;
 
         // verify evidence signature
         // todo: verify verifier is valid according to consensus rules
         // and genesis config
         verification_evidence.verify_signature()?;
+
+        let mobile_number = verification_evidence
+            .mobile_number
+            .ok_or_else(|| anyhow!("missing mobile number in verifier data"))?;
+
+        let evidence_account_id = verification_evidence
+            .account_id
+            .ok_or_else(|| anyhow!("missing account id in verifier data"))?;
+
+        if account_id.data != evidence_account_id.data {
+            return Err(anyhow!(
+                "account id must match account id in verification data mismatch"
+            ));
+        }
+
+        info!(
+            "new user transaction for {} - {}",
+            verification_evidence.requested_user_name, mobile_number.number
+        );
 
         // Check user account id is not already on chain
         if (DatabaseService::read(ReadItem {
@@ -72,18 +91,6 @@ impl BlockChainService {
             .is_some()
         {
             return Err(anyhow!("User name already taken - please choose another"));
-        }
-
-        let mobile_number = verification_evidence
-            .mobile_number
-            .ok_or_else(|| anyhow!("missing mobile number in verifier data"))?;
-
-        let evidence_account_id = verification_evidence
-            .account_id
-            .ok_or_else(|| anyhow!("missing account id in verifier data"))?;
-
-        if account_id.data != evidence_account_id.data {
-            return Err(anyhow!("account id mismatch"));
         }
 
         let mut user = User {
@@ -137,7 +144,7 @@ impl BlockChainService {
         })
         .await?;
 
-        // update nickname index
+        // update user name index
         DatabaseService::write(WriteItem {
             data: DataItem {
                 key: Bytes::from(

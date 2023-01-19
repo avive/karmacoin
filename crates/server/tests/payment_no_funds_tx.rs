@@ -30,11 +30,11 @@ async fn payment_tx_no_funds_test() {
     let server = ServerService::from_registry().await.unwrap();
     server.call(Startup {}).await.unwrap().unwrap();
 
-    let (user1_key_pair, _) = create_user("avive".into(), "972549805380".into())
+    let (user1_key_pair, _, _) = create_user("avive".into(), "+972539805381".into())
         .await
         .unwrap();
 
-    let (user2_key_pair, user2_number) = create_user("angel".into(), "972549805381".into())
+    let (user2_key_pair, user2_number, _) = create_user("angel".into(), "+972549805382".into())
         .await
         .unwrap();
 
@@ -46,7 +46,7 @@ async fn payment_tx_no_funds_test() {
         data: user2_key_pair.public_key.as_ref().unwrap().key.clone(),
     };
 
-    let mut api_client = ApiServiceClient::connect("http://[::1]:9888")
+    let mut api_client = ApiServiceClient::connect("http://[::1]:9080")
         .await
         .unwrap();
 
@@ -75,10 +75,6 @@ async fn payment_tx_no_funds_test() {
         .unwrap();
 
     let user2_balance_pre = user2.balance;
-
-    let mut api_client = ApiServiceClient::connect("http://[::1]:9888")
-        .await
-        .unwrap();
 
     // payment from user 1 to user 2
     let payment_tx = PaymentTransactionV1 {

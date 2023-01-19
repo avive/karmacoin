@@ -32,11 +32,11 @@ async fn payment_tx_happy_flow() {
     let server = ServerService::from_registry().await.unwrap();
     server.call(Startup {}).await.unwrap().unwrap();
 
-    let (user1_key_pair, _) = create_user("avive".into(), "972549805380".into())
+    let (user1_key_pair, _, _) = create_user("avive".into(), "+972539805381".into())
         .await
         .unwrap();
 
-    let (user2_key_pair, user2_number) = create_user("angel".into(), "972549805381".into())
+    let (user2_key_pair, user2_number, _) = create_user("angel".into(), "+972549805382".into())
         .await
         .unwrap();
 
@@ -45,7 +45,7 @@ async fn payment_tx_happy_flow() {
     //
     let char_trait_id = 1;
 
-    let mut api_client = ApiServiceClient::connect("http://[::1]:9888")
+    let mut api_client = ApiServiceClient::connect("http://[::1]:9080")
         .await
         .unwrap();
 

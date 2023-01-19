@@ -15,6 +15,7 @@ use base::karma_coin::karma_coin_verifier::verifier_service_client::VerifierServ
 use base::karma_coin::karma_coin_verifier::VerifyNumberRequest;
 use base::signed_trait::SignedTrait;
 use base::tests_helpers::enable_logger;
+use bytes::Bytes;
 use chrono::Utc;
 use db::db_service::DatabaseService;
 use log::info;
@@ -23,7 +24,10 @@ use xactor::*;
 
 // helper function to create a new user
 #[allow(dead_code)]
-pub async fn create_user(user_name: String, number: String) -> Result<(KeyPair, MobileNumber)> {
+pub async fn create_user(
+    user_name: String,
+    number: String,
+) -> Result<(KeyPair, MobileNumber, Bytes)> {
     let user_key_pair = KeyPair::new();
     let user_ed_key_pair = user_key_pair.to_ed2559_keypair();
     let account_id_bytes = user_ed_key_pair.public.to_bytes().to_vec();
@@ -48,10 +52,7 @@ pub async fn create_user(user_name: String, number: String) -> Result<(KeyPair, 
         .verify_signature()
         .expect("signature verification failed");
 
-    let resp1 = verifier_service_client
-        .verify_number(v_request)
-        .await
-        .unwrap();
+    let resp1 = verifier_service_client.verify_number(v_request).await?;
 
     let v_resp = resp1.into_inner();
 
@@ -106,7 +107,9 @@ pub async fn create_user(user_name: String, number: String) -> Result<(KeyPair, 
         return Err(anyhow!("Transaction rejected"));
     }
 
-    Ok((user_key_pair, mobile_number))
+    let tx_hash = signed_tx.get_hash().unwrap();
+
+    Ok((user_key_pair, mobile_number, tx_hash))
 }
 
 /// Helper

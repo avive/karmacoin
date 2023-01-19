@@ -11,7 +11,7 @@ use crate::services::blockchain::payment_tx_processor;
 use crate::services::blockchain::stats::get_stats;
 use crate::services::db_config_service::USERS_COL_FAMILY;
 use anyhow::Result;
-use base::hex_utils::hex_string;
+use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_core_types::TransactionType::NewUserV1;
 use base::karma_coin::karma_coin_core_types::*;
 use bytes::Bytes;
@@ -66,7 +66,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                 continue;
             }
 
-            info!("processing new user tx: {:?}", hex_string(tx_hash));
+            info!("processing new user tx: {:?}", short_hex_string(tx_hash));
 
             // the transaction event for the new user transaction
             let mut tx_event = TransactionEvent::new(block_height, tx, tx_hash);

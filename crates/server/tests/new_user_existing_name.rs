@@ -5,6 +5,9 @@
 #[path = "common/mod.rs"]
 mod common;
 
+use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
+use base::karma_coin::karma_coin_api::GetUserInfoByNumberRequest;
+use base::karma_coin::karma_coin_core_types::MobileNumber;
 use common::{create_user, finalize_test, init_test};
 
 /// tests in this file should be run sequentially and not in parallel
@@ -26,7 +29,33 @@ async fn new_user_existing_user_name() {
 
     create_user("avive".into(), "+972549805382".into())
         .await
-        .expect_err("should fail");
+        .unwrap();
+
+    let mut api_client = ApiServiceClient::connect("http://[::1]:9080")
+        .await
+        .unwrap();
+
+    let response = api_client
+        .get_user_info_by_number(GetUserInfoByNumberRequest {
+            mobile_number: Some(MobileNumber {
+                number: "+972539805381".into(),
+            }),
+        })
+        .await
+        .unwrap();
+
+    assert!(response.into_inner().user.is_some());
+
+    let response = api_client
+        .get_user_info_by_number(GetUserInfoByNumberRequest {
+            mobile_number: Some(MobileNumber {
+                number: "+972549805382".into(),
+            }),
+        })
+        .await
+        .unwrap();
+
+    assert!(response.into_inner().user.is_none());
 
     finalize_test().await;
 }

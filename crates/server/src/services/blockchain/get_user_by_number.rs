@@ -28,13 +28,25 @@ impl Handler<GetUserInfoByNumber> for BlockChainService {
 
         // lookup accountId by phone number
         match DatabaseService::read(ReadItem {
-            key: Bytes::from(msg.0.mobile_number.unwrap().number.as_bytes().to_vec()),
+            key: Bytes::from(
+                msg.0
+                    .mobile_number
+                    .as_ref()
+                    .unwrap()
+                    .number
+                    .as_bytes()
+                    .to_vec(),
+            ),
             cf: MOBILE_NUMBERS_COL_FAMILY,
         })
         .await?
         {
             Some(data) => {
-                // lookup user from db by accountId
+                info!(
+                    "found account id for phone number {} in phone numbers index",
+                    msg.0.mobile_number.as_ref().unwrap().number
+                );
+
                 match DatabaseService::read(ReadItem {
                     key: data.0,
                     cf: USERS_COL_FAMILY,
@@ -42,14 +54,23 @@ impl Handler<GetUserInfoByNumber> for BlockChainService {
                 .await?
                 {
                     // fetch user by account id from db
-                    Some(user_data) => Ok(GetUserInfoByNumberResponse {
-                        user: Some(User::decode(user_data.0.as_ref())?),
-                    }),
-                    None => Ok(GetUserInfoByNumberResponse { user: None }),
+                    Some(user_data) => {
+                        info!("Found user for this number in db");
+                        Ok(GetUserInfoByNumberResponse {
+                            user: Some(User::decode(user_data.0.as_ref())?),
+                        })
+                    }
+                    None => {
+                        info!("No user found for this number in db");
+                        Ok(GetUserInfoByNumberResponse { user: None })
+                    }
                 }
             }
 
-            None => Ok(GetUserInfoByNumberResponse { user: None }),
+            None => {
+                info!("No account id found for this number in phone numbers index");
+                Ok(GetUserInfoByNumberResponse { user: None })
+            }
         }
     }
 }

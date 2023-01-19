@@ -43,16 +43,16 @@ async fn referral_signup_happy_flow_test() {
     server.call(Startup {}).await.unwrap().unwrap();
 
     // create user 1 - inviter
-    let (user1_key_pair, _) = create_user("avive".into(), "972549805380".into())
+    let (user1_key_pair, _, _) = create_user("avive".into(), "+972539805381".into())
         .await
         .unwrap();
 
     let payment_amount = 1;
 
     // invited person mobile phone number
-    let user2_phone_number = "972549805381";
+    let user2_phone_number = "+972549805382";
 
-    let mut api_client = ApiServiceClient::connect("http://[::1]:9888")
+    let mut api_client = ApiServiceClient::connect("http://[::1]:9080")
         .await
         .unwrap();
 
@@ -124,7 +124,7 @@ async fn referral_signup_happy_flow_test() {
     // user 1 signs up
 
     // create user 2 - inviter
-    let (user2_key_pair, _) = create_user("rachel".into(), user2_phone_number.into())
+    let (user2_key_pair, _, _) = create_user("rachel".into(), user2_phone_number.into())
         .await
         .unwrap();
 
