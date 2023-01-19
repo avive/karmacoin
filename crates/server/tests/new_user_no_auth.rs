@@ -11,20 +11,16 @@ use common::{create_user, finalize_test, init_test};
 use server::server_service::{ServerService, Startup};
 use xactor::Service;
 
-// Attempt to create new user with an existing number
+// Attempt to create a user with without a verified phone number
 #[tokio::test(flavor = "multi_thread")]
-async fn new_user_existing_number() {
+async fn new_user_existing_user_name() {
     init_test().await;
 
     // Start the server
     let server = ServerService::from_registry().await.unwrap();
     server.call(Startup {}).await.unwrap().unwrap();
 
-    create_user("avive".into(), "972549805381".into())
-        .await
-        .unwrap();
-
-    create_user("angel".into(), "972549805380".into())
+    create_user("avive".into(), "+972549805383".into())
         .await
         .expect_err("should fail");
 

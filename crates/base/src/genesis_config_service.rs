@@ -125,8 +125,7 @@ impl Actor for GenesisConfigService {
 
         // default supported verifiers
         let verifiers: HashMap<String, String> = map! {
-            "verifier1".into() => "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd".into(),
-            "verifier2".into() => "f0d0c0b0a090807060504030201000f0e0d0c0b0a090807060504030201000f".into(),
+            "verifier1".into() => "a885bf7ac670b0f01a3551740020e115641005a93f59472002bfd1dc665f4a4e".into(),
         };
 
         let builder = Config::builder();

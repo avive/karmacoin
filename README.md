@@ -18,11 +18,11 @@ Use [cargo-nextest](https://nexte.st/) runner.
 
 ## Dev Notes
 
-All timestamps should be in nanosecs using chrono
+All timestamps should be in miliseconds using chrono
 
 ```rust
 use chrono::prelude::*;
-let t = Utc::now().timestamp_nanos() as u64
+let t = Utc::now().timestamp_millis() as u64;
 ```
 
 ### Xactor Usage 

@@ -132,7 +132,7 @@ message VerifyNumberResponse {
     uint64 timestamp = 2;
     AccountId account_id = 3;
     MobileNumber mobile_number = 4;
-    string user_name = 5;
+    string requested_user_name = 5;
     Signature signature = 6;
 }
 

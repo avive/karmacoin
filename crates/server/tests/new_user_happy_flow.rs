@@ -8,7 +8,7 @@ mod common;
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{
     GetBlockchainDataRequest, GetBlockchainEventsRequest, GetBlocksRequest, GetTransactionsRequest,
-    GetUserInfoByAccountRequest, GetUserInfoByNickRequest, GetUserInfoByNumberRequest,
+    GetUserInfoByAccountRequest, GetUserInfoByNumberRequest, GetUserInfoByUserNameRequest,
 };
 use base::karma_coin::karma_coin_core_types::TransactionStatus::OnChain;
 use base::karma_coin::karma_coin_core_types::{AccountId, MobileNumber};
@@ -27,9 +27,9 @@ async fn new_user_happy_flow_test() {
     let server = ServerService::from_registry().await.unwrap();
     server.call(Startup {}).await.unwrap().unwrap();
     let user_name = "avive";
-    let mobile_number = "972549805380";
+    let mobile_number = "+972549805381";
 
-    let mut api_client = ApiServiceClient::connect("http://[::1]:9888")
+    let mut api_client = ApiServiceClient::connect("http://[::1]:9080")
         .await
         .unwrap();
 
@@ -62,8 +62,8 @@ async fn new_user_happy_flow_test() {
 
     // get user by name
     let resp = api_client
-        .get_user_info_by_nick(GetUserInfoByNickRequest {
-            nickname: user_name.into(),
+        .get_user_info_by_user_name(GetUserInfoByUserNameRequest {
+            user_name: user_name.into(),
         })
         .await
         .unwrap()

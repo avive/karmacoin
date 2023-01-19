@@ -22,14 +22,12 @@ pub struct VerifierInfo {
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct VerifyNumberRequest {
-    #[prost(message, optional, tag = "1")]
-    pub account_id: ::core::option::Option<super::core_types::AccountId>,
+    #[prost(uint64, tag = "1")]
+    pub timestamp: u64,
     #[prost(message, optional, tag = "2")]
+    pub account_id: ::core::option::Option<super::core_types::AccountId>,
+    #[prost(message, optional, tag = "3")]
     pub mobile_number: ::core::option::Option<super::core_types::MobileNumber>,
-    /// auth code received via sms
-    #[prost(int32, tag = "3")]
-    pub code: i32,
-    /// user name requested by user
     #[prost(string, tag = "4")]
     pub requested_user_name: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "5")]

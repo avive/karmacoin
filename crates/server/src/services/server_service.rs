@@ -3,14 +3,14 @@
 //
 
 use crate::services::api::api_service::ApiService;
-use crate::services::db_config_service::DbConfigService;
+use crate::services::db_config_service::BlockchainConfigService;
 use anyhow::Result;
-use base::genesis_config_service::GenesisConfigService;
-use base::karma_coin::karma_coin_api::api_service_server::ApiServiceServer;
-use base::server_config_service::{
+use base::blockchain_config_service::{
     ServerConfigService, GRPC_SERVER_HOST_CONFIG_KEY, GRPC_SERVER_HOST_PORT_CONFIG_KEY,
     SERVER_NAME_CONFIG_KEY,
 };
+use base::genesis_config_service::GenesisConfigService;
+use base::karma_coin::karma_coin_api::api_service_server::ApiServiceServer;
 use db::db_service::{DatabaseService, Destroy};
 use tonic::transport::Server;
 use xactor::*;
@@ -24,7 +24,7 @@ pub struct ServerService {}
 impl Actor for ServerService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
         // start the config services to config db, blockchain and the server
-        DbConfigService::from_registry().await?;
+        BlockchainConfigService::from_registry().await?;
         GenesisConfigService::from_registry().await?;
         ServerConfigService::from_registry().await?;
 
@@ -60,7 +60,7 @@ pub struct Startup {}
 #[async_trait::async_trait]
 impl Handler<Startup> for ServerService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, _msg: Startup) -> Result<()> {
-        info!("configuring server...");
+        info!("configuring api server...");
 
         let server_name = ServerConfigService::get(SERVER_NAME_CONFIG_KEY.into())
             .await?
@@ -68,13 +68,14 @@ impl Handler<Startup> for ServerService {
         let host = ServerConfigService::get(GRPC_SERVER_HOST_CONFIG_KEY.into())
             .await?
             .unwrap();
+
         let port = ServerConfigService::get_u64(GRPC_SERVER_HOST_PORT_CONFIG_KEY.into())
             .await?
             .unwrap() as u32;
 
         self.start_grpc_server(port, host, server_name).await?;
 
-        info!("grpc server started");
+        info!("KC blockchain grpc server started");
 
         Ok(())
     }

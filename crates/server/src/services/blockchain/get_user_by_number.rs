@@ -26,7 +26,7 @@ impl Handler<GetUserInfoByNumber> for BlockChainService {
             return Err(anyhow!("missing phone number from request"));
         };
 
-        // lookup accountId by nickname
+        // lookup accountId by phone number
         match DatabaseService::read(ReadItem {
             key: Bytes::from(msg.0.mobile_number.unwrap().number.as_bytes().to_vec()),
             cf: MOBILE_NUMBERS_COL_FAMILY,

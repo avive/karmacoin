@@ -7,7 +7,6 @@ use base::genesis_config_service::{GenesisConfigService, NET_ID_KEY};
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{SubmitTransactionRequest, SubmitTransactionResult};
 use base::karma_coin::karma_coin_core_types::TransactionType::NewUserV1;
-use base::karma_coin::karma_coin_core_types::VerifyNumberResult::Verified;
 use base::karma_coin::karma_coin_core_types::{AccountId, KeyPair, MobileNumber};
 use base::karma_coin::karma_coin_core_types::{
     NewUserTransactionV1, SignedTransaction, TransactionData,
@@ -34,45 +33,17 @@ pub async fn create_user(user_name: String, number: String) -> Result<(KeyPair, 
         data: account_id_bytes.clone(),
     };
 
-    let mut register_number_request = RegisterNumberRequest::new();
-    register_number_request.mobile_number = Some(mobile_number.clone());
-    register_number_request.account_id = Some(account_id.clone());
-    register_number_request.signature =
-        Some(register_number_request.sign(&user_ed_key_pair).unwrap());
-
-    register_number_request
-        .verify_signature()
-        .expect("signature should be valid");
-
-    let mut verifier_service_client = VerifierServiceClient::connect("http://[::1]:9888")
+    let mut verifier_service_client = VerifierServiceClient::connect("http://127.0.0.1:8080")
         .await
         .unwrap();
 
-    let resp = verifier_service_client
-        .register_number(register_number_request)
-        .await
-        .unwrap()
-        .into_inner();
-
-    if resp.result != CodeSent as i32 {
-        return Err(anyhow!("failed to register number"));
-    }
-
-    info!("number registered");
-
-    // obtain the verification code from the result as there's no sms service yet
-    let code = resp.code;
-
     let mut v_request = VerifyNumberRequest::new();
+
     v_request.mobile_number = Some(mobile_number.clone());
     v_request.account_id = Some(account_id.clone());
-
-    // in production this code is obtained from the sms message sent by verifier
-    v_request.code = code;
-
-    // user's requested nickname
-    v_request.nickname = user_name.clone();
+    v_request.requested_user_name = user_name.clone();
     v_request.signature = Some(v_request.sign(&user_ed_key_pair).unwrap());
+
     v_request
         .verify_signature()
         .expect("signature verification failed");
@@ -83,9 +54,6 @@ pub async fn create_user(user_name: String, number: String) -> Result<(KeyPair, 
         .unwrap();
 
     let v_resp = resp1.into_inner();
-    if v_resp.result != Verified as i32 {
-        return Err(anyhow!("failed to verify number"));
-    }
 
     v_resp
         .verify_signature()
@@ -107,7 +75,7 @@ pub async fn create_user(user_name: String, number: String) -> Result<(KeyPair, 
 
     let mut signed_tx = SignedTransaction {
         signer: Some(account_id.clone()),
-        timestamp: Utc::now().timestamp_nanos() as u64,
+        timestamp: Utc::now().timestamp_millis() as u64,
         nonce: 1,
         fee: 10,
         transaction_data: Some(TransactionData {
@@ -123,7 +91,7 @@ pub async fn create_user(user_name: String, number: String) -> Result<(KeyPair, 
     signed_tx.validate(0).await.expect("invalid transaction");
     info!("new user tx signature's valid");
 
-    let mut api_client = ApiServiceClient::connect("http://[::1]:9888")
+    let mut api_client = ApiServiceClient::connect("http://[::1]:9080")
         .await
         .unwrap();
 

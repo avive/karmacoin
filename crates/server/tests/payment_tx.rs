@@ -99,7 +99,7 @@ async fn payment_tx_happy_flow() {
 
     let mut signed_tx = SignedTransaction {
         signer: Some(user1_account_id.clone()),
-        timestamp: Utc::now().timestamp_nanos() as u64,
+        timestamp: Utc::now().timestamp_millis() as u64,
         nonce: 2,
         fee: 10,
         transaction_data: Some(TransactionData {

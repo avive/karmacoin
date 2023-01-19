@@ -52,6 +52,28 @@ impl BlockChainService {
         // and genesis config
         verification_evidence.verify_signature()?;
 
+        // Check user account id is not already on chain
+        if (DatabaseService::read(ReadItem {
+            key: Bytes::from(account_id.data.clone()),
+            cf: USERS_NAMES_COL_FAMILY,
+        })
+        .await?)
+            .is_some()
+        {
+            return Err(anyhow!("User name already taken"));
+        }
+
+        // Check user account id is not already on chain
+        if (DatabaseService::read(ReadItem {
+            key: Bytes::from(verification_evidence.requested_user_name.clone()),
+            cf: USERS_COL_FAMILY,
+        })
+        .await?)
+            .is_some()
+        {
+            return Err(anyhow!("User with provided account id already exists on chain. You can use an update tx to update it"));
+        }
+
         let mobile_number = verification_evidence
             .mobile_number
             .ok_or_else(|| anyhow!("missing mobile number in verifier data"))?;
@@ -67,7 +89,7 @@ impl BlockChainService {
         let mut user = User {
             account_id: Some(account_id.clone()),
             nonce: 1,
-            user_name: verification_evidence.user_name.clone(),
+            user_name: verification_evidence.requested_user_name.clone(),
             mobile_number: Some(mobile_number.clone()),
             balance: 0,
             trait_scores: vec![],
@@ -94,17 +116,6 @@ impl BlockChainService {
             FeeType::User
         };
 
-        // Check user account id is not already on chain
-        if (DatabaseService::read(ReadItem {
-            key: Bytes::from(user.account_id.as_ref().unwrap().data.clone()),
-            cf: USERS_COL_FAMILY,
-        })
-        .await?)
-            .is_some()
-        {
-            return Err(anyhow!("User with provided account id already exists on chain. You can use an update tx to update it"));
-        }
-
         user.balance += signup_reward_amount - user_tx_fee;
 
         // todo: figure out personality trait for joiner - brave? ahead of the curve?
@@ -129,7 +140,12 @@ impl BlockChainService {
         // update nickname index
         DatabaseService::write(WriteItem {
             data: DataItem {
-                key: Bytes::from(verification_evidence.user_name.as_bytes().to_vec()),
+                key: Bytes::from(
+                    verification_evidence
+                        .requested_user_name
+                        .as_bytes()
+                        .to_vec(),
+                ),
                 value: Bytes::from(account_id.data.to_vec()),
             },
             cf: USERS_NAMES_COL_FAMILY,

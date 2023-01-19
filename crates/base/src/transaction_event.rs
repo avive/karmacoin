@@ -13,7 +13,7 @@ use std::fmt::{Display, Formatter};
 impl TransactionEvent {
     pub fn new(height: u64, tx: &SignedTransaction, transaction_hash: &[u8]) -> Self {
         Self {
-            timestamp: Utc::now().timestamp_nanos() as u64,
+            timestamp: Utc::now().timestamp_millis() as u64,
             height,
             transaction: Some(tx.clone()),
             transaction_hash: transaction_hash.to_vec(),

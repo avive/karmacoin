@@ -25,9 +25,9 @@ message VerifierInfo {
 }
 
 message VerifyNumberRequest {
-  core_types.AccountId account_id = 1;
-  core_types.MobileNumber mobile_number = 2;
-  int32 code = 3; // auth code received via sms
-  string requested_user_name = 4; // user name requested by user
+  uint64 timestamp = 1;
+  core_types.AccountId account_id = 2;
+  core_types.MobileNumber mobile_number = 3;
+  string requested_user_name = 4;
   core_types.Signature signature = 5;
 }

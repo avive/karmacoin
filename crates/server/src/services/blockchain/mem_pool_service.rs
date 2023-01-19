@@ -6,11 +6,11 @@ use crate::services::db_config_service::{
     TRANSACTIONS_COL_FAMILY, TXS_POOL_COL_FAMILY, TXS_POOL_KEY,
 };
 use anyhow::{anyhow, Result};
-use base::hex_utils::short_hex_string;
-use base::karma_coin::karma_coin_core_types::{MemPool, SignedTransaction};
-use base::server_config_service::{
+use base::blockchain_config_service::{
     ServerConfigService, MEM_POOL_MAX_ITEMS_KEY, MEM_POOL_MAX_TX_AGE_HOURS,
 };
+use base::hex_utils::short_hex_string;
+use base::karma_coin::karma_coin_core_types::{MemPool, SignedTransaction};
 use base::signed_trait::SignedTrait;
 use bytes::Bytes;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
@@ -68,7 +68,7 @@ impl Handler<RemoveOldTransactions> for MemPoolService {
         let duration = chrono::Duration::hours(max_age as i64).num_milliseconds() as u64;
         let txs = self.transactions.clone();
         for (tx_hash, tx) in txs.iter() {
-            if tx.timestamp < (chrono::Utc::now().timestamp_nanos() as u64 - duration) {
+            if tx.timestamp < (chrono::Utc::now().timestamp_millis() as u64 - duration) {
                 self.transactions.remove(tx_hash);
             }
         }

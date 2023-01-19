@@ -139,11 +139,9 @@ impl SignedTransaction {
 
     /// Verify that tx is not too old
     pub fn verify_timestamp(&self) -> Result<()> {
-        let now = Utc::now().timestamp_nanos() as u64;
+        let now = Utc::now().timestamp_millis() as u64;
 
-        if i64::abs(now as i64 - self.timestamp as i64)
-            > Duration::hours(48).num_nanoseconds().unwrap()
-        {
+        if i64::abs(now as i64 - self.timestamp as i64) > Duration::hours(48).num_milliseconds() {
             return Err(anyhow!("invalid timestamp - too far from now"));
         }
         Ok(())

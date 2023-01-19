@@ -170,7 +170,7 @@ pub struct VerifyNumberResponse {
     #[prost(message, optional, tag = "4")]
     pub mobile_number: ::core::option::Option<MobileNumber>,
     #[prost(string, tag = "5")]
-    pub user_name: ::prost::alloc::string::String,
+    pub requested_user_name: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "6")]
     pub signature: ::core::option::Option<Signature>,
 }

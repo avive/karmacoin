@@ -3,7 +3,9 @@
 //
 
 use anyhow::Result;
-use base::server_config_service::{ServerConfigService, DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY};
+use base::blockchain_config_service::{
+    ServerConfigService, DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY,
+};
 use db::db_service::DatabaseService;
 use rocksdb::{ColumnFamilyDescriptor, Options};
 use xactor::*;
@@ -80,19 +82,19 @@ pub const TXS_POOL_COL_FAMILY: &str = "txs_pool_cf";
 pub const TESTS_COL_FAMILY: &str = "tests_cf"; // col family for db tests
 
 #[derive(Debug, Clone)]
-pub(crate) struct DbConfigService {}
+pub(crate) struct BlockchainConfigService {}
 
-impl Default for DbConfigService {
+impl Default for BlockchainConfigService {
     fn default() -> Self {
         info!("DbConfigService Service started");
-        DbConfigService {}
+        BlockchainConfigService {}
     }
 }
 
 #[async_trait::async_trait]
-impl Actor for DbConfigService {
+impl Actor for BlockchainConfigService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        info!("Configuring db...");
+        info!("configuring blockchain db...");
 
         let db_name = ServerConfigService::get(DB_NAME_CONFIG_KEY.into())
             .await?
@@ -128,4 +130,4 @@ impl Actor for DbConfigService {
     }
 }
 
-impl Service for DbConfigService {}
+impl Service for BlockchainConfigService {}

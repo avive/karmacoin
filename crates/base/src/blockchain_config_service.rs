@@ -22,7 +22,7 @@ pub const DB_NAME_CONFIG_KEY: &str = "db_name";
 pub const DROP_DB_CONFIG_KEY: &str = "drop_db_on_exit";
 pub const SERVER_NAME_CONFIG_KEY: &str = "server_name";
 pub const GRPC_SERVER_HOST_CONFIG_KEY: &str = "grpc_host"; //
-pub const GRPC_SERVER_HOST_PORT_CONFIG_KEY: &str = "grpc_admin_port";
+pub const GRPC_SERVER_HOST_PORT_CONFIG_KEY: &str = "grpc_host_port";
 pub const GRPC_ADMIN_PORT_CONFIG_KEY: &str = "grpc_admin_port";
 pub const START_VERIFIER_SERVICE_CONFIG_KEY: &str = "start_verifier_service";
 pub const START_API_SERVICE_CONFIG_KEY: &str = "start_api_service";
@@ -30,17 +30,14 @@ pub const START_API_SERVICE_CONFIG_KEY: &str = "start_api_service";
 pub const MEM_POOL_MAX_ITEMS_KEY: &str = "mem_pool_max_items_key";
 pub const MEM_POOL_MAX_TX_AGE_HOURS: &str = "mem_pool_max_tx_age_key";
 
-// todo: add verifier name
-pub const VERIFIER_NAME: &str = "KarmaCoinVerifier_v1";
-
 // private identity key (ed25519)
 pub const BLOCK_PRODUCER_ID_PRIVATE_KEY: &str = "block_producer_id_key_private";
 pub const BLOCK_PRODUCER_ID_PUBLIC_KEY: &str = "block_producer_id_key_public";
 pub const BLOCK_PRODUCER_USER_NAME: &str = "block_producer_user_name";
 
-// private identity key (ed25519)
-pub const VERIFIER_ID_PRIVATE_KEY: &str = "id_verifier_key_private";
-pub const VERIFIER_ID_PUBLIC_KEY: &str = "id_verifier_key_public";
+// Verifier service config
+pub const VERIFIER_HOST: &str = "verifier_host_key";
+pub const VERIFIER_PORT: &str = "verifier_port_key";
 
 pub struct ServerConfigService {
     config: Config,
@@ -67,7 +64,7 @@ impl Actor for ServerConfigService {
             .set_default(GRPC_SERVER_HOST_CONFIG_KEY, "[::1]")
             .unwrap()
             // we always want to have a peer name - even a generic one
-            .set_default(SERVER_NAME_CONFIG_KEY, "Verifier1")
+            .set_default(SERVER_NAME_CONFIG_KEY, "KCBlockchain Node API Provider 0.1")
             .unwrap()
             .set_default(DB_NAME_CONFIG_KEY, "karmacoin_db")
             .unwrap()
@@ -78,19 +75,13 @@ impl Actor for ServerConfigService {
             .set_default(BLOCK_PRODUCER_USER_NAME, "Block producer 1")
             .unwrap()
             .set_default(
-                VERIFIER_ID_PRIVATE_KEY,
-                "67c31f3fb18572e97a851f757fc64fc1d0f8ed77c36abdd210f93711eb14f062",
-            )
-            .unwrap()
-            .set_default(
-                VERIFIER_ID_PUBLIC_KEY,
-                "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd",
-            )
-            .unwrap()
-            .set_default(
                 BLOCK_PRODUCER_ID_PRIVATE_KEY,
                 "67c31f3fb18572e97a851f757fc64fc1d0f8ed77c36abdd210f93711eb14f062",
             )
+            .unwrap()
+            .set_default(VERIFIER_HOST, "127.0.0.1")
+            .unwrap()
+            .set_default(VERIFIER_PORT, 8080)
             .unwrap()
             .set_default(
                 BLOCK_PRODUCER_ID_PUBLIC_KEY,
@@ -209,43 +200,6 @@ impl Handler<GetBlockProducerIdKeyPair> for ServerConfigService {
             }
             Err(_) => {
                 info!("no block producer private key in config - generating a new random block producer id key pair");
-                Ok(KeyPair::new())
-            }
-        }
-    }
-}
-
-#[message(result = "Result<KeyPair>")]
-pub struct GetVerifierKeyPair;
-
-#[async_trait::async_trait]
-impl Handler<GetVerifierKeyPair> for ServerConfigService {
-    async fn handle(
-        &mut self,
-        _ctx: &mut Context<Self>,
-        _msg: GetVerifierKeyPair,
-    ) -> Result<KeyPair> {
-        match self.config.get_string(VERIFIER_ID_PRIVATE_KEY.into()) {
-            Ok(data) => {
-                let private_key_data = hex_from_string(data).unwrap();
-                match self.config.get_string(VERIFIER_ID_PUBLIC_KEY.into()) {
-                    Ok(pub_data) => {
-                        let pub_key_data = hex_from_string(pub_data).unwrap();
-                        Ok(KeyPair {
-                            private_key: Some(PrivateKey {
-                                key: private_key_data,
-                            }),
-                            public_key: Some(PublicKey { key: pub_key_data }),
-                            scheme: 0,
-                        })
-                    }
-                    Err(_) => {
-                        panic!("invalid config file: missing verifier id public key when private key is provided");
-                    }
-                }
-            }
-            Err(_) => {
-                info!("no verifier private key in config - generating a new random verifier id key pair...");
                 Ok(KeyPair::new())
             }
         }

@@ -4,11 +4,11 @@
 
 use crate::services::grpc_service::ClientGrpcService;
 use anyhow::Result;
+use base::blockchain_config_service::{DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY};
 use base::client_config_service::ClientConfigService;
 use base::client_config_service::TESTS_COL_FAMILY;
 use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_client::client_api_server::ClientApiServer;
-use base::server_config_service::{DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY};
 use db::db_service::{Configure, DatabaseService};
 use ed25519_dalek::Keypair;
 use rand_core::OsRng;
