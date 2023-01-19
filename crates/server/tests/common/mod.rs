@@ -103,7 +103,7 @@ pub async fn create_user(user_name: String, number: String) -> Result<(KeyPair, 
         .into_inner();
 
     if resp.submit_transaction_result != SubmitTransactionResult::Submitted as i32 {
-        return Err(anyhow!(""));
+        return Err(anyhow!("Transaction rejected"));
     }
 
     Ok((user_key_pair, mobile_number))

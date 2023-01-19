@@ -24,7 +24,7 @@ async fn new_user_existing_user_name() {
         .await
         .unwrap();
 
-    create_user("avive".into(), "+972549805381".into())
+    create_user("avive".into(), "+972549805382".into())
         .await
         .expect_err("should fail");
 

@@ -55,7 +55,7 @@ impl BlockChainService {
         // Check user account id is not already on chain
         if (DatabaseService::read(ReadItem {
             key: Bytes::from(account_id.data.clone()),
-            cf: USERS_NAMES_COL_FAMILY,
+            cf: USERS_COL_FAMILY,
         })
         .await?)
             .is_some()
@@ -63,15 +63,15 @@ impl BlockChainService {
             return Err(anyhow!("User name already taken"));
         }
 
-        // Check user account id is not already on chain
+        // Check requested user name is not already on chain
         if (DatabaseService::read(ReadItem {
             key: Bytes::from(verification_evidence.requested_user_name.clone()),
-            cf: USERS_COL_FAMILY,
+            cf: USERS_NAMES_COL_FAMILY,
         })
         .await?)
             .is_some()
         {
-            return Err(anyhow!("User with provided account id already exists on chain. You can use an update tx to update it"));
+            return Err(anyhow!("User name already taken - please choose another"));
         }
 
         let mobile_number = verification_evidence

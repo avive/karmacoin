@@ -20,11 +20,11 @@ async fn new_user_existing_number() {
     let server = ServerService::from_registry().await.unwrap();
     server.call(Startup {}).await.unwrap().unwrap();
 
-    create_user("avive".into(), "972549805381".into())
+    create_user("avive".into(), "+972549805381".into())
         .await
         .unwrap();
 
-    create_user("angel".into(), "972549805380".into())
+    create_user("angel".into(), "+972549805381".into())
         .await
         .expect_err("should fail");
 
