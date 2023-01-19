@@ -130,10 +130,10 @@ message PaymentTransactionV1 {
 message VerifyNumberResponse {
     AccountId verifier_account_id = 1;
     uint64 timestamp = 2;
-    AccountId account_id = 4;
-    MobileNumber mobile_number = 5;
-    string user_name = 6;
-    Signature signature = 7;
+    AccountId account_id = 3;
+    MobileNumber mobile_number = 4;
+    string user_name = 5;
+    Signature signature = 6;
 }
 
 // new user transactions submitted by users

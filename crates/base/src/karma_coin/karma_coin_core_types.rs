@@ -165,13 +165,13 @@ pub struct VerifyNumberResponse {
     pub verifier_account_id: ::core::option::Option<AccountId>,
     #[prost(uint64, tag = "2")]
     pub timestamp: u64,
-    #[prost(message, optional, tag = "4")]
+    #[prost(message, optional, tag = "3")]
     pub account_id: ::core::option::Option<AccountId>,
-    #[prost(message, optional, tag = "5")]
+    #[prost(message, optional, tag = "4")]
     pub mobile_number: ::core::option::Option<MobileNumber>,
-    #[prost(string, tag = "6")]
+    #[prost(string, tag = "5")]
     pub user_name: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "7")]
+    #[prost(message, optional, tag = "6")]
     pub signature: ::core::option::Option<Signature>,
 }
 /// new user transactions submitted by users
