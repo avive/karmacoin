@@ -394,4 +394,7 @@ pub enum ExecutionInfo {
     AccountCreated = 5,
     PaymentConfirmed = 6,
     InvalidData = 7,
+    AccountAlreadyExists = 8,
+    TxFeeTooLow = 9,
+    InternalNodeError = 10,
 }

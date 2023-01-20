@@ -2,7 +2,7 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use bytes::Bytes;
 
 use crate::services::blockchain::blockchain_service::BlockChainService;
@@ -11,14 +11,21 @@ use crate::services::db_config_service::{
     MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY, USERS_NAMES_COL_FAMILY,
 };
 use base::karma_coin::karma_coin_core_types::{
-    ExecutionResult, FeeType, SignedTransaction, TransactionEvent, User,
+    ExecutionInfo, ExecutionResult, FeeType, SignedTransaction, TransactionEvent, User,
 };
 use base::signed_trait::SignedTrait;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use prost::Message;
 
-pub(crate) struct NewUserProcessingResult {
+#[derive(Debug, Clone)]
+pub(crate) struct NewUserProcessingResponse {
     pub(crate) mobile_number: String,
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct NewUserProcessingError {
+    pub(crate) execution_info: ExecutionInfo,
+    pub(crate) error_message: String,
 }
 
 impl BlockChainService {
@@ -29,41 +36,78 @@ impl BlockChainService {
         transaction: &SignedTransaction,
         tokenomics: &Tokenomics,
         event: &mut TransactionEvent,
-    ) -> Result<NewUserProcessingResult> {
+    ) -> Result<NewUserProcessingResponse, NewUserProcessingError> {
         let account_id = transaction
             .signer
             .as_ref()
-            .ok_or_else(|| anyhow!("missing account id in tx"))?;
+            .ok_or_else(|| NewUserProcessingError {
+                execution_info: ExecutionInfo::InvalidData,
+                error_message: "Missing verification evidence".into(),
+            })?;
 
-        let tx_hash = transaction.get_hash()?;
+        let tx_hash = transaction.get_hash().map_err(|_| NewUserProcessingError {
+            execution_info: ExecutionInfo::InvalidData,
+            error_message: "Missing verification evidence".into(),
+        })?;
 
         // validate tx syntax, fields, signature, net_id before processing it
-        transaction.validate(0).await?;
+        transaction
+            .validate(0)
+            .await
+            .map_err(|_| NewUserProcessingError {
+                execution_info: ExecutionInfo::InvalidData,
+                error_message: "Invalid transaction data".into(),
+            })?;
 
         let tx_fee = transaction.fee;
-        let new_user_tx = transaction.get_new_user_transaction_v1()?;
+        let new_user_tx =
+            transaction
+                .get_new_user_transaction_v1()
+                .map_err(|_| NewUserProcessingError {
+                    execution_info: ExecutionInfo::InvalidData,
+                    error_message: "Invalid new user tx data".into(),
+                })?;
 
-        let verification_evidence = new_user_tx
-            .verify_number_response
-            .ok_or_else(|| anyhow!("missing verifier data from transaction"))?;
+        let verification_evidence =
+            new_user_tx
+                .verify_number_response
+                .ok_or_else(|| NewUserProcessingError {
+                    execution_info: ExecutionInfo::InvalidData,
+                    error_message: "missing verification evidence".into(),
+                })?;
 
         // verify evidence signature
         // todo: verify verifier is valid according to consensus rules
         // and genesis config
-        verification_evidence.verify_signature()?;
+        verification_evidence
+            .verify_signature()
+            .map_err(|_| NewUserProcessingError {
+                execution_info: ExecutionInfo::InvalidData,
+                error_message: "invalid verification signature".into(),
+            })?;
 
-        let mobile_number = verification_evidence
-            .mobile_number
-            .ok_or_else(|| anyhow!("missing mobile number in verifier data"))?;
+        let mobile_number =
+            verification_evidence
+                .mobile_number
+                .ok_or_else(|| NewUserProcessingError {
+                    execution_info: ExecutionInfo::InvalidData,
+                    error_message: "missing mobile number in evidence".into(),
+                })?;
 
-        let evidence_account_id = verification_evidence
-            .account_id
-            .ok_or_else(|| anyhow!("missing account id in verifier data"))?;
+        let evidence_account_id =
+            verification_evidence
+                .account_id
+                .ok_or_else(|| NewUserProcessingError {
+                    execution_info: ExecutionInfo::InvalidData,
+                    error_message: "missing account id in evidence".into(),
+                })?;
 
         if account_id.data != evidence_account_id.data {
-            return Err(anyhow!(
-                "account id must match account id in verification data mismatch"
-            ));
+            return Err(NewUserProcessingError {
+                execution_info: ExecutionInfo::InvalidData,
+                error_message: "account id must match account id in verification data mismatch"
+                    .into(),
+            });
         }
 
         info!(
@@ -76,10 +120,17 @@ impl BlockChainService {
             key: Bytes::from(account_id.data.clone()),
             cf: USERS_COL_FAMILY,
         })
-        .await?)
-            .is_some()
+        .await
+        .map_err(|_| NewUserProcessingError {
+            execution_info: ExecutionInfo::InvalidData,
+            error_message: "internal node error".into(),
+        }))?
+        .is_some()
         {
-            return Err(anyhow!("User name already taken"));
+            return Err(NewUserProcessingError {
+                execution_info: ExecutionInfo::AccountAlreadyExists,
+                error_message: "There is already an account the provided account id".into(),
+            });
         }
 
         // Check requested user name is not already on chain
@@ -87,10 +138,17 @@ impl BlockChainService {
             key: Bytes::from(verification_evidence.requested_user_name.clone()),
             cf: USERS_NAMES_COL_FAMILY,
         })
-        .await?)
-            .is_some()
+        .await
+        .map_err(|_| NewUserProcessingError {
+            execution_info: ExecutionInfo::InvalidData,
+            error_message: "internal node error".into(),
+        }))?
+        .is_some()
         {
-            return Err(anyhow!("User name already taken - please choose another"));
+            return Err(NewUserProcessingError {
+                execution_info: ExecutionInfo::NicknameNotAvailable,
+                error_message: "There is already an account with requested user name".into(),
+            });
         }
 
         let mut user = User {
@@ -105,16 +163,31 @@ impl BlockChainService {
 
         let apply_subsidy = tokenomics
             .should_subsidise_transaction_fee(0, tx_fee)
-            .await?;
+            .await
+            .map_err(|_| NewUserProcessingError {
+                execution_info: ExecutionInfo::InternalNodeError,
+                error_message: "internal node error".into(),
+            })?;
 
-        let signup_reward_amount = tokenomics.get_signup_reward_amount().await?;
+        let signup_reward_amount =
+            tokenomics
+                .get_signup_reward_amount()
+                .await
+                .map_err(|_| NewUserProcessingError {
+                    execution_info: ExecutionInfo::InternalNodeError,
+                    error_message: "internal node error".into(),
+                })?;
+
         let user_tx_fee = if apply_subsidy { 0 } else { tx_fee };
 
         if !apply_subsidy && tx_fee >= signup_reward_amount {
             // invalid tx - tx fee is higher than the block award
-            return Err(anyhow!(
-                "tx fee is greater than signup reward and no tx fee subsidy is applied"
-            ));
+            return Err(NewUserProcessingError {
+                execution_info: ExecutionInfo::TxFeeTooLow,
+                error_message:
+                    "Transaction fee is greater than signup reward and no tx fee subsidy is applied"
+                        .into(),
+            });
         }
 
         let fee_type = if apply_subsidy {
@@ -133,7 +206,11 @@ impl BlockChainService {
         // todo: update existing user if it exists - this will happen for a block producer or a verifier
 
         let mut buf = Vec::with_capacity(user.encoded_len());
-        user.encode(&mut buf)?;
+        user.encode(&mut buf).map_err(|_| NewUserProcessingError {
+            execution_info: ExecutionInfo::InternalNodeError,
+            error_message: "internal node error".into(),
+        })?;
+
         DatabaseService::write(WriteItem {
             data: DataItem {
                 key: Bytes::from(account_id.data.to_vec()),
@@ -142,7 +219,11 @@ impl BlockChainService {
             cf: USERS_COL_FAMILY,
             ttl: 0,
         })
-        .await?;
+        .await
+        .map_err(|_| NewUserProcessingError {
+            execution_info: ExecutionInfo::InternalNodeError,
+            error_message: "internal node error".into(),
+        })?;
 
         // update user name index
         DatabaseService::write(WriteItem {
@@ -158,7 +239,11 @@ impl BlockChainService {
             cf: USERS_NAMES_COL_FAMILY,
             ttl: 0,
         })
-        .await?;
+        .await
+        .map_err(|_| NewUserProcessingError {
+            execution_info: ExecutionInfo::InvalidData,
+            error_message: "internal node error".into(),
+        })?;
 
         // update mobile numbers index
         DatabaseService::write(WriteItem {
@@ -169,12 +254,21 @@ impl BlockChainService {
             cf: MOBILE_NUMBERS_COL_FAMILY,
             ttl: 0,
         })
-        .await?;
+        .await
+        .map_err(|_| NewUserProcessingError {
+            execution_info: ExecutionInfo::InternalNodeError,
+            error_message: "internal node error".into(),
+        })?;
 
         let mut tx_data = Vec::with_capacity(transaction.encoded_len());
         info!("binary transaction size: {}", transaction.encoded_len());
 
-        transaction.encode(&mut tx_data)?;
+        transaction
+            .encode(&mut tx_data)
+            .map_err(|_| NewUserProcessingError {
+                execution_info: ExecutionInfo::InternalNodeError,
+                error_message: "internal node error".into(),
+            })?;
 
         // index the transaction in the db by hash
         DatabaseService::write(WriteItem {
@@ -185,18 +279,26 @@ impl BlockChainService {
             cf: TRANSACTIONS_COL_FAMILY,
             ttl: 0,
         })
-        .await?;
+        .await
+        .map_err(|_| NewUserProcessingError {
+            execution_info: ExecutionInfo::InternalNodeError,
+            error_message: "internal node error".into(),
+        })?;
 
         // index the transaction in the db by signer account id
         self.index_transaction_by_account_id(transaction, Bytes::from(account_id.data.to_vec()))
-            .await?;
+            .await
+            .map_err(|_| NewUserProcessingError {
+                execution_info: ExecutionInfo::InternalNodeError,
+                error_message: "internal node error".into(),
+            })?;
 
         event.fee_type = fee_type as i32;
         event.fee = tx_fee;
         event.signup_reward = signup_reward_amount;
         event.result = ExecutionResult::Executed as i32;
 
-        Ok(NewUserProcessingResult {
+        Ok(NewUserProcessingResponse {
             mobile_number: mobile_number.number.clone(),
         })
     }

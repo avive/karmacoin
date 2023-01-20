@@ -64,7 +64,7 @@ impl Actor for ServerConfigService {
             .set_default(GRPC_SERVER_HOST_CONFIG_KEY, "[::1]")
             .unwrap()
             // we always want to have a peer name - even a generic one
-            .set_default(SERVER_NAME_CONFIG_KEY, "KCBlockchain Node API Provider 0.1")
+            .set_default(SERVER_NAME_CONFIG_KEY, "KCBP0.1")
             .unwrap()
             .set_default(DB_NAME_CONFIG_KEY, "karmacoin_db")
             .unwrap()

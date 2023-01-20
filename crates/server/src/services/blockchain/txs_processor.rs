@@ -88,7 +88,8 @@ impl Handler<ProcessTransactions> for BlockChainService {
                 Err(e) => {
                     error!("Failed to process new user transaction: {:?}", e);
                     tx_event.result = ExecutionResult::Invalid as i32;
-                    tx_event.error_message = e.to_string();
+                    tx_event.info = e.execution_info as i32;
+                    tx_event.error_message = e.error_message;
                 }
             }
 
