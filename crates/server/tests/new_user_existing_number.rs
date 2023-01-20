@@ -5,6 +5,7 @@
 #[path = "common/mod.rs"]
 mod common;
 
+use base::blockchain_config_service::DEFAULT_GRPC_SERVER_PORT;
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{GetUserInfoByNumberRequest, GetUserInfoByUserNameRequest};
 use base::karma_coin::karma_coin_core_types::MobileNumber;
@@ -36,9 +37,10 @@ async fn new_user_existing_number() {
 
     let account_id2 = res2.0.public_key.unwrap().key;
 
-    let mut api_client = ApiServiceClient::connect("http://[::1]:9080")
-        .await
-        .unwrap();
+    let mut api_client =
+        ApiServiceClient::connect(format!("http://[::1]:{}", DEFAULT_GRPC_SERVER_PORT))
+            .await
+            .unwrap();
 
     let response = api_client
         .get_user_info_by_number(GetUserInfoByNumberRequest {

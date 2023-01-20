@@ -8,6 +8,7 @@ extern crate log;
 mod common;
 use common::{create_user, finalize_test, init_test};
 
+use base::blockchain_config_service::DEFAULT_GRPC_SERVER_PORT;
 use base::genesis_config_service::{
     GenesisConfigService, KARMA_COIN_AMBASSADOR_CHAR_TRAIT_ID, NET_ID_KEY,
 };
@@ -52,9 +53,10 @@ async fn referral_signup_happy_flow_test() {
     // invited person mobile phone number
     let user2_phone_number = "+972549805382";
 
-    let mut api_client = ApiServiceClient::connect("http://[::1]:9080")
-        .await
-        .unwrap();
+    let mut api_client =
+        ApiServiceClient::connect(format!("http://[::1]:{}", DEFAULT_GRPC_SERVER_PORT))
+            .await
+            .unwrap();
 
     let char_trait_id = 1;
 

@@ -5,6 +5,7 @@
 #[path = "common/mod.rs"]
 mod common;
 
+use base::blockchain_config_service::DEFAULT_GRPC_SERVER_PORT;
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{
     GetBlockchainDataRequest, GetBlockchainEventsRequest, GetBlocksRequest, GetTransactionsRequest,
@@ -29,9 +30,10 @@ async fn new_user_happy_flow_test() {
     let user_name = "avive";
     let mobile_number = "+972549805381";
 
-    let mut api_client = ApiServiceClient::connect("http://[::1]:9080")
-        .await
-        .unwrap();
+    let mut api_client =
+        ApiServiceClient::connect(format!("http://[::1]:{}", DEFAULT_GRPC_SERVER_PORT))
+            .await
+            .unwrap();
 
     let resp = create_user(user_name.into(), mobile_number.into())
         .await

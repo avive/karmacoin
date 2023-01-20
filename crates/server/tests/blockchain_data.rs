@@ -5,6 +5,7 @@
 #[path = "common/mod.rs"]
 mod common;
 
+use base::blockchain_config_service::DEFAULT_GRPC_SERVER_PORT;
 use log::info;
 /// tests in this file should be run sequentially and not in parallel
 use server::server_service::{ServerService, Startup};
@@ -22,9 +23,10 @@ async fn get_blockchain_data() {
     let server = ServerService::from_registry().await.unwrap();
     server.call(Startup {}).await.unwrap().unwrap();
 
-    let mut api_client = ApiServiceClient::connect("http://[::1]:9888")
-        .await
-        .unwrap();
+    let mut api_client =
+        ApiServiceClient::connect(format!("http://[::1]:{}", DEFAULT_GRPC_SERVER_PORT))
+            .await
+            .unwrap();
 
     let resp = api_client
         .get_blockchain_data(GetBlockchainDataRequest {})

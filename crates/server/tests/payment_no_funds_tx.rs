@@ -6,6 +6,7 @@
 mod common;
 use common::{create_user, finalize_test, init_test};
 
+use base::blockchain_config_service::DEFAULT_GRPC_SERVER_PORT;
 use base::genesis_config_service::{GenesisConfigService, NET_ID_KEY};
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{
@@ -46,9 +47,10 @@ async fn payment_tx_no_funds_test() {
         data: user2_key_pair.public_key.as_ref().unwrap().key.clone(),
     };
 
-    let mut api_client = ApiServiceClient::connect("http://[::1]:9080")
-        .await
-        .unwrap();
+    let mut api_client =
+        ApiServiceClient::connect(format!("http://[::1]:{}", DEFAULT_GRPC_SERVER_PORT))
+            .await
+            .unwrap();
 
     let user1 = api_client
         .get_user_info_by_account(GetUserInfoByAccountRequest {
