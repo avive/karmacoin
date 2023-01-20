@@ -61,7 +61,7 @@ impl Actor for ServerConfigService {
             .unwrap()
             .set_default(GRPC_ADMIN_PORT_CONFIG_KEY, DEFAULT_GRPC_ADMIN_PORT)
             .unwrap()
-            .set_default(GRPC_SERVER_HOST_CONFIG_KEY, "[::1]")
+            .set_default(GRPC_SERVER_HOST_CONFIG_KEY, "[::]")
             .unwrap()
             // we always want to have a peer name - even a generic one
             .set_default(SERVER_NAME_CONFIG_KEY, "KCBP0.1")

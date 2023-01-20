@@ -99,6 +99,9 @@ class ExecutionInfo extends $pb.ProtobufEnum {
   static const ExecutionInfo EXECUTION_INFO_ACCOUNT_CREATED = ExecutionInfo._(5, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'EXECUTION_INFO_ACCOUNT_CREATED');
   static const ExecutionInfo EXECUTION_INFO_PAYMENT_CONFIRMED = ExecutionInfo._(6, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'EXECUTION_INFO_PAYMENT_CONFIRMED');
   static const ExecutionInfo EXECUTION_INFO_INVALID_DATA = ExecutionInfo._(7, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'EXECUTION_INFO_INVALID_DATA');
+  static const ExecutionInfo EXECUTION_INFO_ACCOUNT_ALREADY_EXISTS = ExecutionInfo._(8, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'EXECUTION_INFO_ACCOUNT_ALREADY_EXISTS');
+  static const ExecutionInfo EXECUTION_INFO_TX_FEE_TOO_LOW = ExecutionInfo._(9, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'EXECUTION_INFO_TX_FEE_TOO_LOW');
+  static const ExecutionInfo EXECUTION_INFO_INTERNAL_NODE_ERROR = ExecutionInfo._(10, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'EXECUTION_INFO_INTERNAL_NODE_ERROR');
 
   static const $core.List<ExecutionInfo> values = <ExecutionInfo> [
     EXECUTION_INFO_UNKNOWN,
@@ -109,6 +112,9 @@ class ExecutionInfo extends $pb.ProtobufEnum {
     EXECUTION_INFO_ACCOUNT_CREATED,
     EXECUTION_INFO_PAYMENT_CONFIRMED,
     EXECUTION_INFO_INVALID_DATA,
+    EXECUTION_INFO_ACCOUNT_ALREADY_EXISTS,
+    EXECUTION_INFO_TX_FEE_TOO_LOW,
+    EXECUTION_INFO_INTERNAL_NODE_ERROR,
   ];
 
   static final $core.Map<$core.int, ExecutionInfo> _byValue = $pb.ProtobufEnum.initByValue(values);

@@ -91,16 +91,18 @@ impl ServerService {
             peer_name, grpc_server_addr
         );
 
-        let (mut api_health_reporter, api_health_service) = tonic_health::server::health_reporter();
-        api_health_reporter
-            .set_serving::<ApiServiceServer<ApiService>>()
-            .await;
+        // todo: add back health service support
+        // let (mut api_health_reporter, api_health_service) = tonic_health::server::health_reporter();
+        //api_health_reporter
+        //    .set_serving::<ApiServiceServer<ApiService>>()
+        //    .await;
 
         spawn(async move {
             // all services that should be started must be added below
             let res = Server::builder()
+                .accept_http1(true)
                 .add_service(ApiServiceServer::new(ApiService::default()))
-                .add_service(api_health_service)
+                //.add_service(api_health_service)
                 .serve(grpc_server_addr)
                 .await;
 
