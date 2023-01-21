@@ -3,7 +3,7 @@ name = "crypto"
 version = "0.1.0"
 description = "Karmacoin crypto library"
 authors = ["ae <a@karmaco.in>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 base = { path = "../base" }

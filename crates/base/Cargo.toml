@@ -2,24 +2,25 @@
 name = "base"
 version = "0.1.0"
 authors = ["ae <a@karmaco.in>"]
-edition = "2018"
+edition = "2021"
 
 [build-dependencies]
 serde = { version = "1.0", features = ["derive"] }
-prost-serde = "0.2.0"
-prost-derive = "0.8"
-tonic-build = { version = "=0.5.1", features = ["transport", "rustfmt", "prost", "compression"] }
+prost-serde = "0.3.0"
+prost-derive = "0.11.6"
+tonic-build = { version = "=0.8.4", features = ["prost", "cleanup-markdown"] }
 
 [dependencies.tokio]
 version = "1.8.1"
 features = ["full"]
 
 [dependencies]
-tonic = { version = "=0.5.0", features = ["default", "compression"] }
-tonic-web = "0.1"
-prost = "0.8"
-prost-types = "0.8"
-prost-helper = "0.5"
+tonic = { version = "=0.8.3", features = ["default"] }
+tonic-web = "0.5.0"
+
+prost = "0.11.6"
+prost-types = "0.11.6"
+prost-helper = "0.7.0"
 tokio-stream = "0.1.7"
 xactor = { path = "../xactor", version = "0.7.9", features = ["runtime-tokio"], default-features = false}
 xactor-derive = { path = "../xactor-derive" }

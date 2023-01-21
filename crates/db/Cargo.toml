@@ -2,7 +2,7 @@
 name = "db"
 version = "0.1.0"
 authors = ["ae <a@karmaco.in>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies.tokio]
 version = "1.8.1"

@@ -30,8 +30,9 @@ async fn new_user_happy_flow_test() {
     let user_name = "avive";
     let mobile_number = "+972549805381";
 
+    //We use ipv4 for testing, we could also connect via [::1] or [::]
     let mut api_client =
-        ApiServiceClient::connect(format!("http://[::1]:{}", DEFAULT_GRPC_SERVER_PORT))
+        ApiServiceClient::connect(format!("http://127.0.0.1:{}", DEFAULT_GRPC_SERVER_PORT))
             .await
             .unwrap();
 

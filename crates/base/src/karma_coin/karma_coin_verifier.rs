@@ -1,5 +1,7 @@
 /// Verier Info is used to return the network the id and dialup info of active verifiers
-#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, ::prost::Message)]
+#[derive(serde::Serialize, serde::Deserialize)]
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct VerifierInfo {
     #[prost(string, tag = "1")]
     pub name: ::prost::alloc::string::String,
@@ -20,6 +22,7 @@ pub struct VerifierInfo {
     #[prost(message, optional, tag = "7")]
     pub signature: ::core::option::Option<super::core_types::Signature>,
 }
+#[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct VerifyNumberRequest {
     #[prost(uint64, tag = "1")]
@@ -33,17 +36,18 @@ pub struct VerifyNumberRequest {
     #[prost(message, optional, tag = "5")]
     pub signature: ::core::option::Option<super::core_types::Signature>,
 }
-#[doc = r" Generated client implementations."]
+/// Generated client implementations.
 pub mod verifier_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
-    #[doc = " mobile phone numbers verifier api service"]
+    use tonic::codegen::http::Uri;
+    /// mobile phone numbers verifier api service
     #[derive(Debug, Clone)]
     pub struct VerifierServiceClient<T> {
         inner: tonic::client::Grpc<T>,
     }
     impl VerifierServiceClient<tonic::transport::Channel> {
-        #[doc = r" Attempt to create a new client by connecting to a given endpoint."]
+        /// Attempt to create a new client by connecting to a given endpoint.
         pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
         where
             D: std::convert::TryInto<tonic::transport::Endpoint>,
@@ -56,12 +60,16 @@ pub mod verifier_service_client {
     impl<T> VerifierServiceClient<T>
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
-        T::ResponseBody: Body + Send + Sync + 'static,
         T::Error: Into<StdError>,
+        T::ResponseBody: Body<Data = Bytes> + Send + 'static,
         <T::ResponseBody as Body>::Error: Into<StdError> + Send,
     {
         pub fn new(inner: T) -> Self {
             let inner = tonic::client::Grpc::new(inner);
+            Self { inner }
+        }
+        pub fn with_origin(inner: T, origin: Uri) -> Self {
+            let inner = tonic::client::Grpc::with_origin(inner, origin);
             Self { inner }
         }
         pub fn with_interceptor<F>(
@@ -69,44 +77,53 @@ pub mod verifier_service_client {
             interceptor: F,
         ) -> VerifierServiceClient<InterceptedService<T, F>>
         where
-            F: FnMut(tonic::Request<()>) -> Result<tonic::Request<()>, tonic::Status>,
+            F: tonic::service::Interceptor,
+            T::ResponseBody: Default,
             T: tonic::codegen::Service<
                 http::Request<tonic::body::BoxBody>,
                 Response = http::Response<
                     <T as tonic::client::GrpcService<tonic::body::BoxBody>>::ResponseBody,
                 >,
             >,
-            <T as tonic::codegen::Service<http::Request<tonic::body::BoxBody>>>::Error:
-                Into<StdError> + Send + Sync,
+            <T as tonic::codegen::Service<
+                http::Request<tonic::body::BoxBody>,
+            >>::Error: Into<StdError> + Send + Sync,
         {
             VerifierServiceClient::new(InterceptedService::new(inner, interceptor))
         }
-        #[doc = r" Compress requests with `gzip`."]
-        #[doc = r""]
-        #[doc = r" This requires the server to support it otherwise it might respond with an"]
-        #[doc = r" error."]
-        pub fn send_gzip(mut self) -> Self {
-            self.inner = self.inner.send_gzip();
+        /// Compress requests with the given encoding.
+        ///
+        /// This requires the server to support it otherwise it might respond with an
+        /// error.
+        #[must_use]
+        pub fn send_compressed(mut self, encoding: CompressionEncoding) -> Self {
+            self.inner = self.inner.send_compressed(encoding);
             self
         }
-        #[doc = r" Enable decompressing responses with `gzip`."]
-        pub fn accept_gzip(mut self) -> Self {
-            self.inner = self.inner.accept_gzip();
+        /// Enable decompressing responses.
+        #[must_use]
+        pub fn accept_compressed(mut self, encoding: CompressionEncoding) -> Self {
+            self.inner = self.inner.accept_compressed(encoding);
             self
         }
-        #[doc = " Request to verify a number by providing code sent via sms from verifier"]
-        #[doc = " note that VerifyNumberResponse was lifted to types as it is used in signup transactions"]
+        /// Request to verify a number by providing code sent via sms from verifier
+        /// note that VerifyNumberResponse was lifted to types as it is used in signup transactions
         pub async fn verify_number(
             &mut self,
             request: impl tonic::IntoRequest<super::VerifyNumberRequest>,
-        ) -> Result<tonic::Response<super::super::core_types::VerifyNumberResponse>, tonic::Status>
-        {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
+        ) -> Result<
+            tonic::Response<super::super::core_types::VerifyNumberResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/karma_coin.verifier.VerifierService/VerifyNumber",
@@ -115,21 +132,24 @@ pub mod verifier_service_client {
         }
     }
 }
-#[doc = r" Generated server implementations."]
+/// Generated server implementations.
 pub mod verifier_service_server {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
-    #[doc = "Generated trait containing gRPC methods that should be implemented for use with VerifierServiceServer."]
+    /// Generated trait containing gRPC methods that should be implemented for use with VerifierServiceServer.
     #[async_trait]
     pub trait VerifierService: Send + Sync + 'static {
-        #[doc = " Request to verify a number by providing code sent via sms from verifier"]
-        #[doc = " note that VerifyNumberResponse was lifted to types as it is used in signup transactions"]
+        /// Request to verify a number by providing code sent via sms from verifier
+        /// note that VerifyNumberResponse was lifted to types as it is used in signup transactions
         async fn verify_number(
             &self,
             request: tonic::Request<super::VerifyNumberRequest>,
-        ) -> Result<tonic::Response<super::super::core_types::VerifyNumberResponse>, tonic::Status>;
+        ) -> Result<
+            tonic::Response<super::super::core_types::VerifyNumberResponse>,
+            tonic::Status,
+        >;
     }
-    #[doc = " mobile phone numbers verifier api service"]
+    /// mobile phone numbers verifier api service
     #[derive(Debug)]
     pub struct VerifierServiceServer<T: VerifierService> {
         inner: _Inner<T>,
@@ -139,7 +159,9 @@ pub mod verifier_service_server {
     struct _Inner<T>(Arc<T>);
     impl<T: VerifierService> VerifierServiceServer<T> {
         pub fn new(inner: T) -> Self {
-            let inner = Arc::new(inner);
+            Self::from_arc(Arc::new(inner))
+        }
+        pub fn from_arc(inner: Arc<T>) -> Self {
             let inner = _Inner(inner);
             Self {
                 inner,
@@ -147,33 +169,41 @@ pub mod verifier_service_server {
                 send_compression_encodings: Default::default(),
             }
         }
-        pub fn with_interceptor<F>(inner: T, interceptor: F) -> InterceptedService<Self, F>
+        pub fn with_interceptor<F>(
+            inner: T,
+            interceptor: F,
+        ) -> InterceptedService<Self, F>
         where
-            F: FnMut(tonic::Request<()>) -> Result<tonic::Request<()>, tonic::Status>,
+            F: tonic::service::Interceptor,
         {
             InterceptedService::new(Self::new(inner), interceptor)
         }
-        #[doc = r" Enable decompressing requests with `gzip`."]
-        pub fn accept_gzip(mut self) -> Self {
-            self.accept_compression_encodings.enable_gzip();
+        /// Enable decompressing requests with the given encoding.
+        #[must_use]
+        pub fn accept_compressed(mut self, encoding: CompressionEncoding) -> Self {
+            self.accept_compression_encodings.enable(encoding);
             self
         }
-        #[doc = r" Compress responses with `gzip`, if the client supports it."]
-        pub fn send_gzip(mut self) -> Self {
-            self.send_compression_encodings.enable_gzip();
+        /// Compress responses with the given encoding, if the client supports it.
+        #[must_use]
+        pub fn send_compressed(mut self, encoding: CompressionEncoding) -> Self {
+            self.send_compression_encodings.enable(encoding);
             self
         }
     }
     impl<T, B> tonic::codegen::Service<http::Request<B>> for VerifierServiceServer<T>
     where
         T: VerifierService,
-        B: Body + Send + Sync + 'static,
+        B: Body + Send + 'static,
         B::Error: Into<StdError> + Send + 'static,
     {
         type Response = http::Response<tonic::body::BoxBody>;
-        type Error = Never;
+        type Error = std::convert::Infallible;
         type Future = BoxFuture<Self::Response, Self::Error>;
-        fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        fn poll_ready(
+            &mut self,
+            _cx: &mut Context<'_>,
+        ) -> Poll<Result<(), Self::Error>> {
             Poll::Ready(Ok(()))
         }
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
@@ -182,17 +212,23 @@ pub mod verifier_service_server {
                 "/karma_coin.verifier.VerifierService/VerifyNumber" => {
                     #[allow(non_camel_case_types)]
                     struct VerifyNumberSvc<T: VerifierService>(pub Arc<T>);
-                    impl<T: VerifierService> tonic::server::UnaryService<super::VerifyNumberRequest>
-                        for VerifyNumberSvc<T>
-                    {
+                    impl<
+                        T: VerifierService,
+                    > tonic::server::UnaryService<super::VerifyNumberRequest>
+                    for VerifyNumberSvc<T> {
                         type Response = super::super::core_types::VerifyNumberResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
                         fn call(
                             &mut self,
                             request: tonic::Request<super::VerifyNumberRequest>,
                         ) -> Self::Future {
                             let inner = self.0.clone();
-                            let fut = async move { (*inner).verify_number(request).await };
+                            let fut = async move {
+                                (*inner).verify_number(request).await
+                            };
                             Box::pin(fut)
                         }
                     }
@@ -203,23 +239,28 @@ pub mod verifier_service_server {
                         let inner = inner.0;
                         let method = VerifyNumberSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
                     };
                     Box::pin(fut)
                 }
-                _ => Box::pin(async move {
-                    Ok(http::Response::builder()
-                        .status(200)
-                        .header("grpc-status", "12")
-                        .header("content-type", "application/grpc")
-                        .body(empty_body())
-                        .unwrap())
-                }),
+                _ => {
+                    Box::pin(async move {
+                        Ok(
+                            http::Response::builder()
+                                .status(200)
+                                .header("grpc-status", "12")
+                                .header("content-type", "application/grpc")
+                                .body(empty_body())
+                                .unwrap(),
+                        )
+                    })
+                }
             }
         }
     }
@@ -243,7 +284,7 @@ pub mod verifier_service_server {
             write!(f, "{:?}", self.0)
         }
     }
-    impl<T: VerifierService> tonic::transport::NamedService for VerifierServiceServer<T> {
+    impl<T: VerifierService> tonic::server::NamedService for VerifierServiceServer<T> {
         const NAME: &'static str = "karma_coin.verifier.VerifierService";
     }
 }

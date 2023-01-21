@@ -3,7 +3,7 @@ name = "client-app"
 description = "a basic upsetter network client for testing purposes"
 version = "0.1.0"
 authors = ["a <a@karmaco.in>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies.tokio]
 version = "1.8.1"

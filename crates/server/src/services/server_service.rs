@@ -12,7 +12,11 @@ use base::blockchain_config_service::{
 use base::genesis_config_service::GenesisConfigService;
 use base::karma_coin::karma_coin_api::api_service_server::ApiServiceServer;
 use db::db_service::{DatabaseService, Destroy};
+//use tonic::codegen::http::Method;
 use tonic::transport::Server;
+use tonic_web::GrpcWebLayer;
+use tower_http::cors::CorsLayer;
+//use tower_http::cors::CorsLayer;
 use xactor::*;
 
 /// ServerService is a full node p2p network server
@@ -85,7 +89,7 @@ impl ServerService {
     /// Starts the server's grpc services
     async fn start_grpc_server(&self, port: u32, host: String, peer_name: String) -> Result<()> {
         // setup grpc server and services
-        let grpc_server_addr = format!("{}:{}", host, port).parse().unwrap();
+        let grpc_server_addr = format!("{}:{}", host, port).parse()?;
         info!(
             "starting {} grpc server on: {}",
             peer_name, grpc_server_addr
@@ -97,21 +101,36 @@ impl ServerService {
         //    .set_serving::<ApiServiceServer<ApiService>>()
         //    .await;
 
-        spawn(async move {
-            // all services that should be started must be added below
-            let res = Server::builder()
-                .accept_http1(true)
-                .add_service(ApiServiceServer::new(ApiService::default()))
-                //.add_service(api_health_service)
-                .serve(grpc_server_addr)
-                .await;
+        // spawn(async move {
+        let service = ApiServiceServer::new(ApiService::default());
 
-            if res.is_err() {
-                info!("grpc server stopped due to: {:?}", res.err().unwrap());
-            } else {
-                info!("grpc server stopped");
-            }
-        });
+        let cors = CorsLayer::new()
+            // creds
+            // .allow_credentials(false)
+            // allow any headers
+            .allow_headers(tower_http::cors::Any)
+            // allow `POST` when accessing the resource
+            .allow_methods([http::Method::POST])
+            // allow requests from below origins
+            .allow_origin([
+                "http://localhost:5000".parse().unwrap(),
+                "https://localhost:5001".parse().unwrap(),
+            ]);
+
+        let res = Server::builder()
+            .accept_http1(true)
+            .layer(cors)
+            .layer(GrpcWebLayer::new())
+            .add_service(service)
+            .serve(grpc_server_addr)
+            .await;
+
+        if res.is_err() {
+            info!("grpc server stopped due to: {:?}", res.err().unwrap());
+        } else {
+            info!("grpc server stopped");
+        }
+        //});
 
         Ok(())
     }

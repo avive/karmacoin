@@ -19,7 +19,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     tonic_build::configure()
         .build_server(true)
         .out_dir("src/karma_coin")
-        .format(true)
         .type_attribute(
             "TransactionData",
             "#[derive(serde::Serialize, serde::Deserialize)]",
@@ -102,7 +101,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap_or_else(|e| panic!("Failed to compile protos {:?}", e));
 
     let src = Path::new("src/karma_coin");
-    rename_prost_generated_filenames(&src).unwrap();
+    rename_prost_generated_filenames(src).unwrap();
 
     Ok(())
 }
