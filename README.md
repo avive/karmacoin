@@ -18,7 +18,16 @@ Use [cargo-nextest](https://nexte.st/) runner.
 
 ## Dev Notes
 
-All timestamps should be in miliseconds using chrono
+### Protos for downstream Dart repos
+This repo contains the canonical protobufs definitions for the KarmaCoin APIs. To generate protos for other Karma Coin projects in Dart, run the following commands:
+```bash
+mkdir dart
+protoc -I proto crates/base/proto/karma_coin/core_types/*.proto --dart_out=grpc:dart 
+```
+and copy over the generated files to your Dart project.
+
+### Timestamps
+All timestamps should be in miliseconds using chrono. Use milliseonds in clients when working with timestamps.
 
 ```rust
 use chrono::prelude::*;
@@ -29,7 +38,6 @@ let t = Utc::now().timestamp_millis() as u64;
 Xactor (unlike Actix) gives us nice and clean async syntax for actor messages. However, be aware that calling an actor message from the body of the same actor's message handler, will deadlock. It is easy to spend hours on such bugs. Just factor out impl into an async fn and call it from different message handlers....
 
 ### Architecture
-
 - Uses `xactors` (over `tokio` runtime) actors pattern. Async actors that can return responses to messages.
 - Network protocols are defined in `protobufs` language.
 - Uses `tonic` and `prost` for grpc api services.
@@ -37,18 +45,18 @@ Xactor (unlike Actix) gives us nice and clean async syntax for actor messages. H
 - High-level system components are all `xactor services` - registered in the system and restarted automatically when called after they crash.
 - Store is implemented using `rocksdb`.
 
+### Code Structure
 - `base` - shared types.
 - `crypto` - low-level crypto lib.
 - `client` - Simple client with a grpc api for code reuse in testing servers and client-to-client p2p flows.
 - `client-app` - Simple terminal client app with support to config file, cli flags and logging.
-- `dr` - Implementation of double-ratchet protocol.
 - `db` - Adds ttl capabilities to rocksdb data stoe.
 - `server` - Server implementation.
 - `server-app` - Simple console server app.
 
 ---
 
-Copyright (c) 2022 by the [KarmaCoin Authors](https://github.com/). This work is licensed under the KarmaCoin License v0.1.0.
+Copyright (c) 2022 by the KarmaCoin Authors. This work is licensed under the [KarmaCoin License](https://github.com/karma-coin/.github/blob/main/LICENSE).
 
 
 
