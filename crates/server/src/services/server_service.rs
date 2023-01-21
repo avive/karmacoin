@@ -101,36 +101,36 @@ impl ServerService {
         //    .set_serving::<ApiServiceServer<ApiService>>()
         //    .await;
 
-        // spawn(async move {
-        let service = ApiServiceServer::new(ApiService::default());
+        spawn(async move {
+            let service = ApiServiceServer::new(ApiService::default());
 
-        let cors = CorsLayer::new()
-            // creds
-            // .allow_credentials(false)
-            // allow any headers
-            .allow_headers(tower_http::cors::Any)
-            // allow `POST` when accessing the resource
-            .allow_methods([http::Method::POST])
-            // allow requests from below origins
-            .allow_origin([
-                "http://localhost:5000".parse().unwrap(),
-                "https://localhost:5001".parse().unwrap(),
-            ]);
+            let cors = CorsLayer::new()
+                // creds
+                // .allow_credentials(false)
+                // allow any headers
+                .allow_headers(tower_http::cors::Any)
+                // allow `POST` when accessing the resource
+                .allow_methods([http::Method::POST])
+                // allow requests from below origins
+                .allow_origin([
+                    "http://localhost:5000".parse().unwrap(),
+                    "https://localhost:5001".parse().unwrap(),
+                ]);
 
-        let res = Server::builder()
-            .accept_http1(true)
-            .layer(cors)
-            .layer(GrpcWebLayer::new())
-            .add_service(service)
-            .serve(grpc_server_addr)
-            .await;
+            let res = Server::builder()
+                .accept_http1(true)
+                .layer(cors)
+                .layer(GrpcWebLayer::new())
+                .add_service(service)
+                .serve(grpc_server_addr)
+                .await;
 
-        if res.is_err() {
-            info!("grpc server stopped due to: {:?}", res.err().unwrap());
-        } else {
-            info!("grpc server stopped");
-        }
-        //});
+            if res.is_err() {
+                info!("grpc server stopped due to: {:?}", res.err().unwrap());
+            } else {
+                info!("grpc server stopped");
+            }
+        });
 
         Ok(())
     }
