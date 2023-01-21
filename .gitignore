@@ -18,3 +18,4 @@ Cargo.lock
 .run/
 *.log
 crates/server/karmacoin_db/
+/karmacoin_db/
