@@ -28,11 +28,11 @@ tonic-web = "0.5.0"
 tonic-health = "0.8.0"
 tower-http = { version = "0.3.5", features = ["cors"] }
 http = "0.2.8"
-
 prost = "0.11.6"
 prost-types = "0.11.6"
-config = "0.13.1"
 
+
+config = "0.13.1"
 uint = "0.9.0"
 log = "*"
 env_logger = "*"

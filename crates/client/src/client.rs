@@ -14,6 +14,8 @@ use ed25519_dalek::Keypair;
 use rand_core::OsRng;
 use rocksdb::{ColumnFamilyDescriptor, Options};
 use tonic::transport::Server;
+use tonic_web::GrpcWebLayer;
+use tower_http::cors::CorsLayer;
 use x25519_dalek::StaticSecret;
 use xactor::*;
 
@@ -101,11 +103,15 @@ impl Handler<StartGrpcServer> for Client {
         );
 
         self.client_name = msg.client_name;
-        let client_grpc_service = ClientGrpcService::default();
+        let client_grpc_service = ClientApiServer::new(ClientGrpcService::default());
 
-        tokio::task::spawn(async move {
+        spawn(async move {
+            let cors = CorsLayer::very_permissive();
             let res = Server::builder()
-                .add_service(ClientApiServer::new(client_grpc_service))
+                .accept_http1(true)
+                .layer(cors)
+                .layer(GrpcWebLayer::new())
+                .add_service(client_grpc_service)
                 .serve(grpc_server_addr)
                 .await;
 

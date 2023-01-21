@@ -3,6 +3,7 @@ name = "xactor-playground"
 version = "0.1.0"
 authors = ["ae <a@karmaco.in>"]
 edition = "2021"
+publish = false
 
 [dependencies.tokio]
 version = "1.8.1"

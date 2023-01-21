@@ -31,8 +31,13 @@ impl Kdfer {
         }
 
         let mut res = [0u8; 32];
-        hkdf::sha512::derive_key(SALT.as_bytes(), buf.to_bytes().as_slice(), None, &mut res)
-            .map_err(|e| anyhow!("hkdef derive key crypto failed: {}", e))?;
+        hkdf::sha512::derive_key(
+            SALT.as_bytes(),
+            buf.as_bytes().to_vec().as_slice(),
+            None,
+            &mut res,
+        )
+        .map_err(|e| anyhow!("hkdef derive key crypto failed: {}", e))?;
 
         Ok(res)
     }

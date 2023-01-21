@@ -12,11 +12,9 @@ use base::blockchain_config_service::{
 use base::genesis_config_service::GenesisConfigService;
 use base::karma_coin::karma_coin_api::api_service_server::ApiServiceServer;
 use db::db_service::{DatabaseService, Destroy};
-//use tonic::codegen::http::Method;
 use tonic::transport::Server;
 use tonic_web::GrpcWebLayer;
 use tower_http::cors::CorsLayer;
-//use tower_http::cors::CorsLayer;
 use xactor::*;
 
 /// ServerService is a full node p2p network server
@@ -104,6 +102,10 @@ impl ServerService {
         spawn(async move {
             let service = ApiServiceServer::new(ApiService::default());
 
+            // allow anyone to connect
+            let cors = CorsLayer::very_permissive();
+
+            /*
             let cors = CorsLayer::new()
                 // creds
                 // .allow_credentials(false)
@@ -115,7 +117,7 @@ impl ServerService {
                 .allow_origin([
                     "http://localhost:5000".parse().unwrap(),
                     "https://localhost:5001".parse().unwrap(),
-                ]);
+                ]);*/
 
             let res = Server::builder()
                 .accept_http1(true)
