@@ -24,6 +24,16 @@ const VerifierInfo$json = const {
 
 /// Descriptor for `VerifierInfo`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List verifierInfoDescriptor = $convert.base64Decode('CgxWZXJpZmllckluZm8SEgoEbmFtZRgBIAEoCVIEbmFtZRI/CgphY2NvdW50X2lkGAIgASgLMiAua2FybWFfY29pbi5jb3JlX3R5cGVzLkFjY291bnRJZFIJYWNjb3VudElkEjIKFXZlcmlmaWVyX2VuZHBvaW50X2lwNBgDIAEoCVITdmVyaWZpZXJFbmRwb2ludElwNBIyChV2ZXJpZmllcl9lbmRwb2ludF9pcDYYBCABKAlSE3ZlcmlmaWVyRW5kcG9pbnRJcDYSKAoQYXBpX2VuZHBvaW50X2lwNBgFIAEoCVIOYXBpRW5kcG9pbnRJcDQSKAoQYXBpX2VuZHBvaW50X2lwNhgGIAEoCVIOYXBpRW5kcG9pbnRJcDYSPgoJc2lnbmF0dXJlGAcgASgLMiAua2FybWFfY29pbi5jb3JlX3R5cGVzLlNpZ25hdHVyZVIJc2lnbmF0dXJl');
+@$core.Deprecated('Use verifyNumberResponseDescriptor instead')
+const VerifyNumberResponse$json = const {
+  '1': 'VerifyNumberResponse',
+  '2': const [
+    const {'1': 'user_verification_data', '3': 1, '4': 1, '5': 11, '6': '.karma_coin.core_types.UserVerificationData', '10': 'userVerificationData'},
+  ],
+};
+
+/// Descriptor for `VerifyNumberResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List verifyNumberResponseDescriptor = $convert.base64Decode('ChRWZXJpZnlOdW1iZXJSZXNwb25zZRJhChZ1c2VyX3ZlcmlmaWNhdGlvbl9kYXRhGAEgASgLMisua2FybWFfY29pbi5jb3JlX3R5cGVzLlVzZXJWZXJpZmljYXRpb25EYXRhUhR1c2VyVmVyaWZpY2F0aW9uRGF0YQ==');
 @$core.Deprecated('Use verifyNumberRequestDescriptor instead')
 const VerifyNumberRequest$json = const {
   '1': 'VerifyNumberRequest',

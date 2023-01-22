@@ -1,0 +1,34 @@
+// Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
+// This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
+//
+
+syntax = "proto3";
+package karma_coin.auth;
+import "karma_coin/core_types/types.proto";
+
+
+/// A simple mini auth service for verifying mobile phone numbers and accounts ids associated with them
+/// Implemented in dart using firebase as the backend
+service AuthService {
+  rpc Authenticate(AuthRequest) returns (AuthResponse);
+}
+
+message AuthRequest {
+  core_types.AccountId account_id = 1;
+  string phone_number = 2;
+}
+
+enum AuthResult {
+  // user is found and accountId is associated with the phone number
+  AUTH_RESULT_USER_AUTHENTICATED = 0;
+
+  // user is not found by phone number
+  AUTH_RESULT_USER_NOT_FOUND = 1;
+
+  // user exists but a different account id is associated with the phone number
+  AUTH_RESULT_ACCOUNT_ID_MISMATCH = 2;
+}
+
+message AuthResponse {
+  AuthResult result = 1;
+}

@@ -5,10 +5,6 @@
 #[path = "common/mod.rs"]
 mod common;
 
-use base::blockchain_config_service::DEFAULT_GRPC_SERVER_PORT;
-use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
-use base::karma_coin::karma_coin_api::GetUserInfoByNumberRequest;
-use base::karma_coin::karma_coin_core_types::MobileNumber;
 use common::{create_user, finalize_test, init_test};
 
 /// tests in this file should be run sequentially and not in parallel
@@ -30,34 +26,7 @@ async fn new_user_existing_user_name() {
 
     create_user("avive".into(), "+972549805382".into())
         .await
-        .unwrap();
-
-    let mut api_client =
-        ApiServiceClient::connect(format!("http://[::1]:{}", DEFAULT_GRPC_SERVER_PORT))
-            .await
-            .unwrap();
-
-    let response = api_client
-        .get_user_info_by_number(GetUserInfoByNumberRequest {
-            mobile_number: Some(MobileNumber {
-                number: "+972539805381".into(),
-            }),
-        })
-        .await
-        .unwrap();
-
-    assert!(response.into_inner().user.is_some());
-
-    let response = api_client
-        .get_user_info_by_number(GetUserInfoByNumberRequest {
-            mobile_number: Some(MobileNumber {
-                number: "+972549805382".into(),
-            }),
-        })
-        .await
-        .unwrap();
-
-    assert!(response.into_inner().user.is_none());
+        .expect_err("should fail");
 
     finalize_test().await;
 }

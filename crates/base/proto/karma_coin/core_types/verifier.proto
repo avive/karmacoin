@@ -6,11 +6,12 @@ syntax = "proto3";
 package karma_coin.verifier;
 import "karma_coin/core_types/types.proto";
 
+
 // mobile phone numbers verifier api service
 service VerifierService {
   // Request to verify a number by providing code sent via sms from verifier
   // note that VerifyNumberResponse was lifted to types as it is used in signup transactions
-  rpc VerifyNumber(VerifyNumberRequest) returns (core_types.VerifyNumberResponse);
+  rpc VerifyNumber(VerifyNumberRequest) returns (VerifyNumberResponse);
 }
 
 // Verier Info is used to return the network the id and dialup info of active verifiers
@@ -22,6 +23,10 @@ message VerifierInfo {
   string api_endpoint_ip4 = 5; // ip:port
   string api_endpoint_ip6 = 6; // ip:port
   core_types.Signature signature = 7;
+}
+
+message VerifyNumberResponse {
+  core_types.UserVerificationData user_verification_data = 1;
 }
 
 message VerifyNumberRequest {

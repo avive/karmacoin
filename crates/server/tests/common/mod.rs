@@ -7,7 +7,9 @@ use base::genesis_config_service::{GenesisConfigService, NET_ID_KEY};
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{SubmitTransactionRequest, SubmitTransactionResult};
 use base::karma_coin::karma_coin_core_types::TransactionType::NewUserV1;
-use base::karma_coin::karma_coin_core_types::{AccountId, KeyPair, MobileNumber};
+use base::karma_coin::karma_coin_core_types::{
+    AccountId, KeyPair, MobileNumber, VerificationResult,
+};
 use base::karma_coin::karma_coin_core_types::{
     NewUserTransactionV1, SignedTransaction, TransactionData,
 };
@@ -37,7 +39,7 @@ pub async fn create_user(
         data: account_id_bytes.clone(),
     };
 
-    let mut verifier_service_client = VerifierServiceClient::connect("http://127.0.0.1:8080")
+    let mut verifier_service_client = VerifierServiceClient::connect("http://127.0.0.1:9080")
         .await
         .unwrap();
 
@@ -56,14 +58,17 @@ pub async fn create_user(
 
     let v_resp = resp1.into_inner();
 
-    v_resp
-        .verify_signature()
-        .expect("invalid evidence signature");
+    let data = v_resp.user_verification_data.unwrap();
+
+    data.verify_signature().expect("invalid evidence signature");
+    if data.verification_result != VerificationResult::Verified as i32 {
+        return Err(anyhow!("phone verification failed"));
+    }
 
     info!("verify evidence verified");
 
     let new_user_tx = NewUserTransactionV1 {
-        verify_number_response: Some(v_resp.clone()),
+        verify_number_response: Some(data.clone()),
     };
 
     let mut buf = Vec::with_capacity(new_user_tx.encoded_len());

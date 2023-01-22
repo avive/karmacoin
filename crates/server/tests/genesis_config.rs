@@ -5,7 +5,7 @@
 #[path = "common/mod.rs"]
 mod common;
 
-use base::blockchain_config_service::DEFAULT_GRPC_SERVER_PORT;
+use base::server_config_service::DEFAULT_GRPC_SERVER_PORT;
 use log::info;
 /// tests in this file should be run sequentially and not in parallel
 use server::server_service::{ServerService, Startup};

@@ -4,7 +4,7 @@
 
 pub const TESTS_COL_FAMILY: &str = "tests_cf"; // col family for db tests
 
-use crate::blockchain_config_service::{
+use crate::server_config_service::{
     DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY, GRPC_SERVER_HOST_CONFIG_KEY,
     GRPC_SERVER_HOST_PORT_CONFIG_KEY,
 };

@@ -6,7 +6,6 @@
 mod common;
 use common::{create_user, finalize_test, init_test};
 
-use base::blockchain_config_service::DEFAULT_GRPC_SERVER_PORT;
 use base::genesis_config_service::{GenesisConfigService, NET_ID_KEY};
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{
@@ -18,6 +17,7 @@ use base::karma_coin::karma_coin_core_types::TransactionType::PaymentV1;
 use base::karma_coin::karma_coin_core_types::{
     AccountId, PaymentTransactionV1, SignedTransaction, TransactionData,
 };
+use base::server_config_service::DEFAULT_GRPC_SERVER_PORT;
 use base::signed_trait::SignedTrait;
 use chrono::Utc;
 use prost::Message;

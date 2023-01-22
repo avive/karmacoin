@@ -9,7 +9,7 @@ impl UpdateUserTransactionV1 {
     /// Verify all fields
     pub fn verify_syntax(&self) -> Result<()> {
         if self.nickname.is_empty()
-            && (self.verify_number_response.is_none() || self.mobile_number.is_none())
+            && (self.user_verification_data.is_none() || self.mobile_number.is_none())
         {
             return Err(anyhow!(
                 "expected non-empty requested nickname or verify number response and mobile number"

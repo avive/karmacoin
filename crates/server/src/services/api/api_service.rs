@@ -130,6 +130,7 @@ impl ApiServiceTrait for ApiService {
         &self,
         request: Request<SubmitTransactionRequest>,
     ) -> Result<Response<SubmitTransactionResponse>, Status> {
+        info!("submit transaction...");
         let tx = request
             .into_inner()
             .transaction
@@ -157,6 +158,8 @@ impl ApiServiceTrait for ApiService {
             .await
             .map_err(|e| Status::internal(format!("internal error: {}", e)))?
             .map_err(|e| Status::internal(format!("failed to call blockchain api: {}", e)))?;
+
+        info!("submit transaction returning response");
 
         Ok(Response::new(SubmitTransactionResponse {
             submit_transaction_result: SubmitTransactionResult::Submitted as i32,

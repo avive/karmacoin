@@ -93,6 +93,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             &[
                 "proto/karma_coin/core_types/types.proto",
                 "proto/karma_coin/core_types/verifier.proto",
+                "proto/karma_coin/core_types/auth.proto",
                 "proto/karma_coin/core_types/api.proto",
                 "proto/karma_coin/client.proto",
             ],

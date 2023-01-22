@@ -8,3 +8,4 @@ pub(crate) mod api;
 pub(crate) mod blockchain;
 pub(crate) mod db_config_service;
 pub mod server_service;
+pub(crate) mod verifier;

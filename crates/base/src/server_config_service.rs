@@ -9,9 +9,21 @@ use config::{Config, Environment};
 use log::*;
 use xactor::*;
 
+// Verifier data
+pub const VERIFIER_NAME: &str = "KCV0.1";
+pub const VERIFIER_ID_PRIVATE_KEY: &str = "verifier_id_key_private";
+pub const VERIFIER_ID_PUBLIC_KEY: &str = "verifier_id_key_public";
+pub const START_VERIFIER_SERVICE_CONFIG_KEY: &str = "start_verifier_service";
+
+pub const AUTH_SERVICE_HOST_KEY: &str = "auth_host_key";
+pub const AUTH_SERVICE_PORT_KEY: &str = "auth_port_key";
+pub const AUTH_SERVICE_PROTOCOL_KEY: &str = "auth_protocol_key";
+
 pub const DEFAULT_GRPC_SERVER_PORT: i64 = 9080;
 pub const DEFAULT_GRPC_ADMIN_PORT: i64 = 9888;
 pub const DEFAULT_START_GRPC_SERVER: bool = true;
+
+/// Start the verification service
 pub const DEFAULT_START_VERIFIER_SERVICE: bool = true;
 pub const DEFAULT_START_API_SERVICE: bool = true;
 pub const DEFAULT_DROP_DB_ON_EXIT: bool = true;
@@ -24,7 +36,6 @@ pub const SERVER_NAME_CONFIG_KEY: &str = "server_name";
 pub const GRPC_SERVER_HOST_CONFIG_KEY: &str = "grpc_host"; //
 pub const GRPC_SERVER_HOST_PORT_CONFIG_KEY: &str = "grpc_host_port";
 pub const GRPC_ADMIN_PORT_CONFIG_KEY: &str = "grpc_admin_port";
-pub const START_VERIFIER_SERVICE_CONFIG_KEY: &str = "start_verifier_service";
 pub const START_API_SERVICE_CONFIG_KEY: &str = "start_api_service";
 
 pub const MEM_POOL_MAX_ITEMS_KEY: &str = "mem_pool_max_items_key";
@@ -34,10 +45,6 @@ pub const MEM_POOL_MAX_TX_AGE_HOURS: &str = "mem_pool_max_tx_age_key";
 pub const BLOCK_PRODUCER_ID_PRIVATE_KEY: &str = "block_producer_id_key_private";
 pub const BLOCK_PRODUCER_ID_PUBLIC_KEY: &str = "block_producer_id_key_public";
 pub const BLOCK_PRODUCER_USER_NAME: &str = "block_producer_user_name";
-
-// Verifier service config
-pub const VERIFIER_HOST: &str = "verifier_host_key";
-pub const VERIFIER_PORT: &str = "verifier_port_key";
 
 pub struct ServerConfigService {
     config: Config,
@@ -74,22 +81,38 @@ impl Actor for ServerConfigService {
             .unwrap()
             .set_default(BLOCK_PRODUCER_USER_NAME, "Block producer 1")
             .unwrap()
+            .set_default(BLOCK_PRODUCER_USER_NAME, "Block producer 1")
+            .unwrap()
+            // todo: move this to a config file
             .set_default(
                 BLOCK_PRODUCER_ID_PRIVATE_KEY,
                 "67c31f3fb18572e97a851f757fc64fc1d0f8ed77c36abdd210f93711eb14f062",
             )
-            .unwrap()
-            .set_default(VERIFIER_HOST, "127.0.0.1")
-            .unwrap()
-            .set_default(VERIFIER_PORT, 8080)
             .unwrap()
             .set_default(
                 BLOCK_PRODUCER_ID_PUBLIC_KEY,
                 "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd",
             )
             .unwrap()
+            // dev mode values
+            .set_default(
+                VERIFIER_ID_PRIVATE_KEY,
+                "67c31f3fb18572e97a851f757fc64fc1d0f8ed77c36abdd210f93711eb14f062",
+            )
+            .unwrap()
+            .set_default(
+                VERIFIER_ID_PUBLIC_KEY,
+                "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd",
+            )
+            .unwrap()
+            .set_default(AUTH_SERVICE_PORT_KEY, 8080)
+            .unwrap()
+            .set_default(AUTH_SERVICE_HOST_KEY, "127.0.0.1")
+            .unwrap()
+            .set_default(AUTH_SERVICE_PROTOCOL_KEY, "http")
+            .unwrap()
             .add_source(
-                Environment::with_prefix("KARMACOIN")
+                Environment::with_prefix("KC")
                     .try_parsing(true)
                     .separator("_")
                     .list_separator(" "),
@@ -170,6 +193,43 @@ impl ServerConfigService {
 }
 
 #[message(result = "Result<KeyPair>")]
+pub struct GetVerifierIdKeyPair;
+
+#[async_trait::async_trait]
+impl Handler<GetVerifierIdKeyPair> for ServerConfigService {
+    async fn handle(
+        &mut self,
+        _ctx: &mut Context<Self>,
+        _msg: GetVerifierIdKeyPair,
+    ) -> Result<KeyPair> {
+        match self.config.get_string(VERIFIER_ID_PRIVATE_KEY) {
+            Ok(data) => {
+                let private_key_data = hex_from_string(data).unwrap();
+                match self.config.get_string(VERIFIER_ID_PUBLIC_KEY) {
+                    Ok(pub_data) => {
+                        let pub_key_data = hex_from_string(pub_data).unwrap();
+                        Ok(KeyPair {
+                            private_key: Some(PrivateKey {
+                                key: private_key_data,
+                            }),
+                            public_key: Some(PublicKey { key: pub_key_data }),
+                            scheme: 0,
+                        })
+                    }
+                    Err(_) => {
+                        panic!("invalid config file: missing verifier public key when private key is provided");
+                    }
+                }
+            }
+            Err(_) => {
+                info!("no block producer private key in config - generating a new random verifier id key pair");
+                Ok(KeyPair::new())
+            }
+        }
+    }
+}
+
+#[message(result = "Result<KeyPair>")]
 pub struct GetBlockProducerIdKeyPair;
 
 #[async_trait::async_trait]
@@ -179,10 +239,10 @@ impl Handler<GetBlockProducerIdKeyPair> for ServerConfigService {
         _ctx: &mut Context<Self>,
         _msg: GetBlockProducerIdKeyPair,
     ) -> Result<KeyPair> {
-        match self.config.get_string(BLOCK_PRODUCER_ID_PRIVATE_KEY.into()) {
+        match self.config.get_string(BLOCK_PRODUCER_ID_PRIVATE_KEY) {
             Ok(data) => {
                 let private_key_data = hex_from_string(data).unwrap();
-                match self.config.get_string(BLOCK_PRODUCER_ID_PUBLIC_KEY.into()) {
+                match self.config.get_string(BLOCK_PRODUCER_ID_PUBLIC_KEY) {
                     Ok(pub_data) => {
                         let pub_key_data = hex_from_string(pub_data).unwrap();
                         Ok(KeyPair {
@@ -224,7 +284,7 @@ impl Handler<SetConfigFile> for ServerConfigService {
         // save config file so it can be used if we need to reload config
         self.config_file = Some(msg.config_file.clone());
 
-        debug!(
+        info!(
             "Merging content of config file {:?}",
             msg.config_file.as_str()
         );

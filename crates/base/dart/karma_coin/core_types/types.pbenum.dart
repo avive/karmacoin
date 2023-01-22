@@ -39,6 +39,31 @@ class TransactionType extends $pb.ProtobufEnum {
   const TransactionType._($core.int v, $core.String n) : super(v, n);
 }
 
+class VerificationResult extends $pb.ProtobufEnum {
+  static const VerificationResult VERIFICATION_RESULT_UNSPECIFIED = VerificationResult._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VERIFICATION_RESULT_UNSPECIFIED');
+  static const VerificationResult VERIFICATION_RESULT_USER_NAME_TAKEN = VerificationResult._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VERIFICATION_RESULT_USER_NAME_TAKEN');
+  static const VerificationResult VERIFICATION_RESULT_VERIFIED = VerificationResult._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VERIFICATION_RESULT_VERIFIED');
+  static const VerificationResult VERIFICATION_RESULT_UNVERIFIED = VerificationResult._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VERIFICATION_RESULT_UNVERIFIED');
+  static const VerificationResult VERIFICATION_RESULT_MISSING_DATA = VerificationResult._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VERIFICATION_RESULT_MISSING_DATA');
+  static const VerificationResult VERIFICATION_RESULT_INVALID_SIGNATURE = VerificationResult._(5, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VERIFICATION_RESULT_INVALID_SIGNATURE');
+  static const VerificationResult VERIFICATION_RESULT_ACCOUNT_MISMATCH = VerificationResult._(6, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'VERIFICATION_RESULT_ACCOUNT_MISMATCH');
+
+  static const $core.List<VerificationResult> values = <VerificationResult> [
+    VERIFICATION_RESULT_UNSPECIFIED,
+    VERIFICATION_RESULT_USER_NAME_TAKEN,
+    VERIFICATION_RESULT_VERIFIED,
+    VERIFICATION_RESULT_UNVERIFIED,
+    VERIFICATION_RESULT_MISSING_DATA,
+    VERIFICATION_RESULT_INVALID_SIGNATURE,
+    VERIFICATION_RESULT_ACCOUNT_MISMATCH,
+  ];
+
+  static final $core.Map<$core.int, VerificationResult> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static VerificationResult? valueOf($core.int value) => _byValue[value];
+
+  const VerificationResult._($core.int v, $core.String n) : super(v, n);
+}
+
 class TransactionStatus extends $pb.ProtobufEnum {
   static const TransactionStatus TRANSACTION_STATUS_UNKNOWN = TransactionStatus._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRANSACTION_STATUS_UNKNOWN');
   static const TransactionStatus TRANSACTION_STATUS_NOT_SUBMITTED = TransactionStatus._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRANSACTION_STATUS_NOT_SUBMITTED');

@@ -8,8 +8,8 @@ use crate::services::db_config_service::{
     BLOCKS_COL_FAMILY, USERS_COL_FAMILY, USERS_NAMES_COL_FAMILY,
 };
 use anyhow::Result;
-use base::blockchain_config_service::{ServerConfigService, BLOCK_PRODUCER_USER_NAME};
 use base::karma_coin::karma_coin_core_types::*;
+use base::server_config_service::{ServerConfigService, BLOCK_PRODUCER_USER_NAME};
 use base::signed_trait::SignedTrait;
 use bytes::Bytes;
 use chrono::Utc;

@@ -163,7 +163,7 @@ pub struct UpdateUserTransactionV1 {
     pub mobile_number: ::core::option::Option<MobileNumber>,
     /// verifier attestation regarding the number and the account
     #[prost(message, optional, tag = "3")]
-    pub verify_number_response: ::core::option::Option<VerifyNumberResponse>,
+    pub user_verification_data: ::core::option::Option<UserVerificationData>,
 }
 /// Basic payment transaction with optional character appreciation
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -179,21 +179,23 @@ pub struct PaymentTransactionV1 {
     #[prost(uint32, tag = "3")]
     pub char_trait_id: u32,
 }
-/// Created and signed by a verifier
+/// Created and signed by a verifier to attest that an account owns a mobile number
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct VerifyNumberResponse {
+pub struct UserVerificationData {
     #[prost(message, optional, tag = "1")]
     pub verifier_account_id: ::core::option::Option<AccountId>,
     #[prost(uint64, tag = "2")]
     pub timestamp: u64,
-    #[prost(message, optional, tag = "3")]
-    pub account_id: ::core::option::Option<AccountId>,
+    #[prost(enumeration = "VerificationResult", tag = "3")]
+    pub verification_result: i32,
     #[prost(message, optional, tag = "4")]
+    pub account_id: ::core::option::Option<AccountId>,
+    #[prost(message, optional, tag = "5")]
     pub mobile_number: ::core::option::Option<MobileNumber>,
-    #[prost(string, tag = "5")]
+    #[prost(string, tag = "7")]
     pub requested_user_name: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "6")]
+    #[prost(message, optional, tag = "8")]
     pub signature: ::core::option::Option<Signature>,
 }
 /// new user transactions submitted by users
@@ -202,7 +204,7 @@ pub struct VerifyNumberResponse {
 pub struct NewUserTransactionV1 {
     /// Evidence from a valid verifier about the new user
     #[prost(message, optional, tag = "1")]
-    pub verify_number_response: ::core::option::Option<VerifyNumberResponse>,
+    pub verify_number_response: ::core::option::Option<UserVerificationData>,
 }
 /// serialized transaction data
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -432,6 +434,55 @@ impl TransactionType {
             "TRANSACTION_TYPE_PAYMENT_V1" => Some(Self::PaymentV1),
             "TRANSACTION_TYPE_NEW_USER_V1" => Some(Self::NewUserV1),
             "TRANSACTION_TYPE_UPDATE_USER_V1" => Some(Self::UpdateUserV1),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum VerificationResult {
+    Unspecified = 0,
+    /// there's already a user with the requested user name
+    UserNameTaken = 1,
+    /// user is verified using provided token
+    Verified = 2,
+    /// user is not verifier using provided token
+    Unverified = 3,
+    /// request is missing required data
+    MissingData = 4,
+    /// bad client signature
+    InvalidSignature = 5,
+    /// different account associated with phone number
+    AccountMismatch = 6,
+}
+impl VerificationResult {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            VerificationResult::Unspecified => "VERIFICATION_RESULT_UNSPECIFIED",
+            VerificationResult::UserNameTaken => "VERIFICATION_RESULT_USER_NAME_TAKEN",
+            VerificationResult::Verified => "VERIFICATION_RESULT_VERIFIED",
+            VerificationResult::Unverified => "VERIFICATION_RESULT_UNVERIFIED",
+            VerificationResult::MissingData => "VERIFICATION_RESULT_MISSING_DATA",
+            VerificationResult::InvalidSignature => {
+                "VERIFICATION_RESULT_INVALID_SIGNATURE"
+            }
+            VerificationResult::AccountMismatch => "VERIFICATION_RESULT_ACCOUNT_MISMATCH",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "VERIFICATION_RESULT_UNSPECIFIED" => Some(Self::Unspecified),
+            "VERIFICATION_RESULT_USER_NAME_TAKEN" => Some(Self::UserNameTaken),
+            "VERIFICATION_RESULT_VERIFIED" => Some(Self::Verified),
+            "VERIFICATION_RESULT_UNVERIFIED" => Some(Self::Unverified),
+            "VERIFICATION_RESULT_MISSING_DATA" => Some(Self::MissingData),
+            "VERIFICATION_RESULT_INVALID_SIGNATURE" => Some(Self::InvalidSignature),
+            "VERIFICATION_RESULT_ACCOUNT_MISMATCH" => Some(Self::AccountMismatch),
             _ => None,
         }
     }

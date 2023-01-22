@@ -6,11 +6,11 @@ use crate::services::db_config_service::{
     TRANSACTIONS_COL_FAMILY, TXS_POOL_COL_FAMILY, TXS_POOL_KEY,
 };
 use anyhow::{anyhow, Result};
-use base::blockchain_config_service::{
-    ServerConfigService, MEM_POOL_MAX_ITEMS_KEY, MEM_POOL_MAX_TX_AGE_HOURS,
-};
 use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_core_types::{MemPool, SignedTransaction};
+use base::server_config_service::{
+    ServerConfigService, MEM_POOL_MAX_ITEMS_KEY, MEM_POOL_MAX_TX_AGE_HOURS,
+};
 use base::signed_trait::SignedTrait;
 use bytes::Bytes;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};

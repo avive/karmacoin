@@ -4,13 +4,16 @@
 
 use crate::services::api::api_service::ApiService;
 use crate::services::db_config_service::BlockchainConfigService;
+use crate::services::verifier::verifier_service::VerifierService;
 use anyhow::Result;
-use base::blockchain_config_service::{
+use base::genesis_config_service::GenesisConfigService;
+use base::karma_coin::karma_coin_api::api_service_server::ApiServiceServer;
+use base::karma_coin::karma_coin_verifier::verifier_service_server::VerifierServiceServer;
+use base::server_config_service::START_VERIFIER_SERVICE_CONFIG_KEY;
+use base::server_config_service::{
     ServerConfigService, GRPC_SERVER_HOST_CONFIG_KEY, GRPC_SERVER_HOST_PORT_CONFIG_KEY,
     SERVER_NAME_CONFIG_KEY,
 };
-use base::genesis_config_service::GenesisConfigService;
-use base::karma_coin::karma_coin_api::api_service_server::ApiServiceServer;
 use db::db_service::{DatabaseService, Destroy};
 use tonic::transport::Server;
 use tonic_web::GrpcWebLayer;
@@ -28,8 +31,23 @@ impl Actor for ServerService {
         // start the config services to config db, blockchain and the server
         BlockchainConfigService::from_registry().await?;
         GenesisConfigService::from_registry().await?;
-        ServerConfigService::from_registry().await?;
 
+        //let server_config_server = ServerConfigService::from_registry().await?;
+
+        // if we start a verifier then load private secrets from an external verifier config file
+        if ServerConfigService::get_bool(START_VERIFIER_SERVICE_CONFIG_KEY.into())
+            .await?
+            .unwrap()
+        {
+            /*
+            server_config_server
+                .call(SetConfigFile {
+                    config_file: "./verifier_config.yaml".to_string(),
+                })
+                .await??;*/
+
+            VerifierService::from_registry().await?;
+        }
         info!("started");
         Ok(())
     }
@@ -67,6 +85,7 @@ impl Handler<Startup> for ServerService {
         let server_name = ServerConfigService::get(SERVER_NAME_CONFIG_KEY.into())
             .await?
             .unwrap();
+
         let host = ServerConfigService::get(GRPC_SERVER_HOST_CONFIG_KEY.into())
             .await?
             .unwrap();
@@ -93,17 +112,26 @@ impl ServerService {
             peer_name, grpc_server_addr
         );
 
+        let start_verifier =
+            ServerConfigService::get_bool(START_VERIFIER_SERVICE_CONFIG_KEY.into())
+                .await?
+                .unwrap();
+
         // todo: add back health service for the api service
         // todo: add reflection support for grpc_ci and grpcurl
         spawn(async move {
             // this only return when server is stopped due to error or shutdown
-            let res = Server::builder()
+            let mut router = Server::builder()
                 .accept_http1(true)
                 .layer(CorsLayer::very_permissive())
                 .layer(GrpcWebLayer::new())
-                .add_service(ApiServiceServer::new(ApiService::default()))
-                .serve(grpc_server_addr)
-                .await;
+                .add_service(ApiServiceServer::new(ApiService::default()));
+
+            if start_verifier {
+                router = router.add_service(VerifierServiceServer::new(VerifierService::default()));
+            }
+
+            let res = router.serve(grpc_server_addr).await;
 
             if res.is_err() {
                 info!("grpc server stopped due to error: {:?}", res.err().unwrap());

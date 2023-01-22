@@ -143,7 +143,7 @@ impl BlockChainService {
         update_user_tx.verify_syntax()?;
 
         let requested_nickname = update_user_tx.nickname;
-        if requested_nickname.is_empty() && update_user_tx.verify_number_response == None {
+        if requested_nickname.is_empty() && update_user_tx.user_verification_data == None {
             event.info = NicknameInvalid as i32;
             return Ok(());
         }
@@ -157,11 +157,11 @@ impl BlockChainService {
 
         // handle mobile number update, if requested
 
-        if update_user_tx.verify_number_response.is_none() {
+        if update_user_tx.user_verification_data.is_none() {
             return Ok(());
         }
 
-        let evidence = update_user_tx.verify_number_response.unwrap();
+        let evidence = update_user_tx.user_verification_data.unwrap();
         if evidence.verify_signature().is_err() {
             event.info = InvalidData as i32;
             return Ok(());

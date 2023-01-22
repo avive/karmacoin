@@ -3,9 +3,7 @@
 //
 
 use anyhow::Result;
-use base::blockchain_config_service::{
-    ServerConfigService, DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY,
-};
+use base::server_config_service::{ServerConfigService, DB_NAME_CONFIG_KEY, DROP_DB_CONFIG_KEY};
 use db::db_service::DatabaseService;
 use rocksdb::{ColumnFamilyDescriptor, Options};
 use xactor::*;

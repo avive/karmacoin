@@ -3,8 +3,8 @@
 //
 
 use anyhow::Result;
-use base::blockchain_config_service::{GetBlockProducerIdKeyPair, ServerConfigService};
 use base::karma_coin::karma_coin_core_types::KeyPair;
+use base::server_config_service::{GetBlockProducerIdKeyPair, ServerConfigService};
 use xactor::*;
 
 /// Blockchain service mocks a blockchain node

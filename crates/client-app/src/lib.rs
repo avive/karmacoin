@@ -8,11 +8,9 @@ extern crate base;
 extern crate clap;
 extern crate db;
 
-use base::blockchain_config_service::{
-    GRPC_SERVER_HOST_CONFIG_KEY, GRPC_SERVER_HOST_PORT_CONFIG_KEY,
-};
 use base::client_config_service::{ClientConfigService, SetConfigFile, CLIENT_NAME_CONFIG_KEY};
 use base::logging_service::{InitLogger, LoggingService};
+use base::server_config_service::{GRPC_SERVER_HOST_CONFIG_KEY, GRPC_SERVER_HOST_PORT_CONFIG_KEY};
 use clap::{App, Arg};
 use client::client::{Client, StartGrpcServer};
 use db::db_service::DatabaseService;

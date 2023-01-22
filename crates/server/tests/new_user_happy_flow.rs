@@ -5,7 +5,6 @@
 #[path = "common/mod.rs"]
 mod common;
 
-use base::blockchain_config_service::DEFAULT_GRPC_SERVER_PORT;
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{
     GetBlockchainDataRequest, GetBlockchainEventsRequest, GetBlocksRequest, GetTransactionsRequest,
@@ -13,6 +12,7 @@ use base::karma_coin::karma_coin_api::{
 };
 use base::karma_coin::karma_coin_core_types::TransactionStatus::OnChain;
 use base::karma_coin::karma_coin_core_types::{AccountId, MobileNumber};
+use base::server_config_service::DEFAULT_GRPC_SERVER_PORT;
 use common::{create_user, finalize_test, init_test};
 
 /// tests in this file should be run sequentially and not in parallel

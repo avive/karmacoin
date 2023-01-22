@@ -1,60 +1,61 @@
-/// Verier Info is used to return the network the id and dialup info of active verifiers
-#[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct VerifierInfo {
-    #[prost(string, tag = "1")]
-    pub name: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "2")]
-    pub account_id: ::core::option::Option<super::core_types::AccountId>,
-    /// ip:port
-    #[prost(string, tag = "3")]
-    pub verifier_endpoint_ip4: ::prost::alloc::string::String,
-    /// ip:port
-    #[prost(string, tag = "4")]
-    pub verifier_endpoint_ip6: ::prost::alloc::string::String,
-    /// ip:port
-    #[prost(string, tag = "5")]
-    pub api_endpoint_ip4: ::prost::alloc::string::String,
-    /// ip:port
-    #[prost(string, tag = "6")]
-    pub api_endpoint_ip6: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "7")]
-    pub signature: ::core::option::Option<super::core_types::Signature>,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct VerifyNumberResponse {
+pub struct AuthRequest {
     #[prost(message, optional, tag = "1")]
-    pub user_verification_data: ::core::option::Option<
-        super::core_types::UserVerificationData,
-    >,
+    pub account_id: ::core::option::Option<super::core_types::AccountId>,
+    #[prost(string, tag = "2")]
+    pub phone_number: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct VerifyNumberRequest {
-    #[prost(uint64, tag = "1")]
-    pub timestamp: u64,
-    #[prost(message, optional, tag = "2")]
-    pub account_id: ::core::option::Option<super::core_types::AccountId>,
-    #[prost(message, optional, tag = "3")]
-    pub mobile_number: ::core::option::Option<super::core_types::MobileNumber>,
-    #[prost(string, tag = "4")]
-    pub requested_user_name: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "5")]
-    pub signature: ::core::option::Option<super::core_types::Signature>,
+pub struct AuthResponse {
+    #[prost(enumeration = "AuthResult", tag = "1")]
+    pub result: i32,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum AuthResult {
+    /// user is found and accountId is associated with the phone number
+    UserAuthenticated = 0,
+    /// user is not found by phone number
+    UserNotFound = 1,
+    /// user exists but a different account id is associated with the phone number
+    AccountIdMismatch = 2,
+}
+impl AuthResult {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            AuthResult::UserAuthenticated => "AUTH_RESULT_USER_AUTHENTICATED",
+            AuthResult::UserNotFound => "AUTH_RESULT_USER_NOT_FOUND",
+            AuthResult::AccountIdMismatch => "AUTH_RESULT_ACCOUNT_ID_MISMATCH",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "AUTH_RESULT_USER_AUTHENTICATED" => Some(Self::UserAuthenticated),
+            "AUTH_RESULT_USER_NOT_FOUND" => Some(Self::UserNotFound),
+            "AUTH_RESULT_ACCOUNT_ID_MISMATCH" => Some(Self::AccountIdMismatch),
+            _ => None,
+        }
+    }
 }
 /// Generated client implementations.
-pub mod verifier_service_client {
+pub mod auth_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
     use tonic::codegen::http::Uri;
-    /// mobile phone numbers verifier api service
+    /// / A simple mini auth service for verifying mobile phone numbers and accounts ids associated with them
+    /// / Implemented in dart using firebase as the backend
     #[derive(Debug, Clone)]
-    pub struct VerifierServiceClient<T> {
+    pub struct AuthServiceClient<T> {
         inner: tonic::client::Grpc<T>,
     }
-    impl VerifierServiceClient<tonic::transport::Channel> {
+    impl AuthServiceClient<tonic::transport::Channel> {
         /// Attempt to create a new client by connecting to a given endpoint.
         pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
         where
@@ -65,7 +66,7 @@ pub mod verifier_service_client {
             Ok(Self::new(conn))
         }
     }
-    impl<T> VerifierServiceClient<T>
+    impl<T> AuthServiceClient<T>
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::Error: Into<StdError>,
@@ -83,7 +84,7 @@ pub mod verifier_service_client {
         pub fn with_interceptor<F>(
             inner: T,
             interceptor: F,
-        ) -> VerifierServiceClient<InterceptedService<T, F>>
+        ) -> AuthServiceClient<InterceptedService<T, F>>
         where
             F: tonic::service::Interceptor,
             T::ResponseBody: Default,
@@ -97,7 +98,7 @@ pub mod verifier_service_client {
                 http::Request<tonic::body::BoxBody>,
             >>::Error: Into<StdError> + Send + Sync,
         {
-            VerifierServiceClient::new(InterceptedService::new(inner, interceptor))
+            AuthServiceClient::new(InterceptedService::new(inner, interceptor))
         }
         /// Compress requests with the given encoding.
         ///
@@ -114,12 +115,10 @@ pub mod verifier_service_client {
             self.inner = self.inner.accept_compressed(encoding);
             self
         }
-        /// Request to verify a number by providing code sent via sms from verifier
-        /// note that VerifyNumberResponse was lifted to types as it is used in signup transactions
-        pub async fn verify_number(
+        pub async fn authenticate(
             &mut self,
-            request: impl tonic::IntoRequest<super::VerifyNumberRequest>,
-        ) -> Result<tonic::Response<super::VerifyNumberResponse>, tonic::Status> {
+            request: impl tonic::IntoRequest<super::AuthRequest>,
+        ) -> Result<tonic::Response<super::AuthResponse>, tonic::Status> {
             self.inner
                 .ready()
                 .await
@@ -131,35 +130,34 @@ pub mod verifier_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/karma_coin.verifier.VerifierService/VerifyNumber",
+                "/karma_coin.auth.AuthService/Authenticate",
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
     }
 }
 /// Generated server implementations.
-pub mod verifier_service_server {
+pub mod auth_service_server {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
     use tonic::codegen::*;
-    /// Generated trait containing gRPC methods that should be implemented for use with VerifierServiceServer.
+    /// Generated trait containing gRPC methods that should be implemented for use with AuthServiceServer.
     #[async_trait]
-    pub trait VerifierService: Send + Sync + 'static {
-        /// Request to verify a number by providing code sent via sms from verifier
-        /// note that VerifyNumberResponse was lifted to types as it is used in signup transactions
-        async fn verify_number(
+    pub trait AuthService: Send + Sync + 'static {
+        async fn authenticate(
             &self,
-            request: tonic::Request<super::VerifyNumberRequest>,
-        ) -> Result<tonic::Response<super::VerifyNumberResponse>, tonic::Status>;
+            request: tonic::Request<super::AuthRequest>,
+        ) -> Result<tonic::Response<super::AuthResponse>, tonic::Status>;
     }
-    /// mobile phone numbers verifier api service
+    /// / A simple mini auth service for verifying mobile phone numbers and accounts ids associated with them
+    /// / Implemented in dart using firebase as the backend
     #[derive(Debug)]
-    pub struct VerifierServiceServer<T: VerifierService> {
+    pub struct AuthServiceServer<T: AuthService> {
         inner: _Inner<T>,
         accept_compression_encodings: EnabledCompressionEncodings,
         send_compression_encodings: EnabledCompressionEncodings,
     }
     struct _Inner<T>(Arc<T>);
-    impl<T: VerifierService> VerifierServiceServer<T> {
+    impl<T: AuthService> AuthServiceServer<T> {
         pub fn new(inner: T) -> Self {
             Self::from_arc(Arc::new(inner))
         }
@@ -193,9 +191,9 @@ pub mod verifier_service_server {
             self
         }
     }
-    impl<T, B> tonic::codegen::Service<http::Request<B>> for VerifierServiceServer<T>
+    impl<T, B> tonic::codegen::Service<http::Request<B>> for AuthServiceServer<T>
     where
-        T: VerifierService,
+        T: AuthService,
         B: Body + Send + 'static,
         B::Error: Into<StdError> + Send + 'static,
     {
@@ -211,25 +209,23 @@ pub mod verifier_service_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/karma_coin.verifier.VerifierService/VerifyNumber" => {
+                "/karma_coin.auth.AuthService/Authenticate" => {
                     #[allow(non_camel_case_types)]
-                    struct VerifyNumberSvc<T: VerifierService>(pub Arc<T>);
-                    impl<
-                        T: VerifierService,
-                    > tonic::server::UnaryService<super::VerifyNumberRequest>
-                    for VerifyNumberSvc<T> {
-                        type Response = super::VerifyNumberResponse;
+                    struct AuthenticateSvc<T: AuthService>(pub Arc<T>);
+                    impl<T: AuthService> tonic::server::UnaryService<super::AuthRequest>
+                    for AuthenticateSvc<T> {
+                        type Response = super::AuthResponse;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,
                         >;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::VerifyNumberRequest>,
+                            request: tonic::Request<super::AuthRequest>,
                         ) -> Self::Future {
                             let inner = self.0.clone();
                             let fut = async move {
-                                (*inner).verify_number(request).await
+                                (*inner).authenticate(request).await
                             };
                             Box::pin(fut)
                         }
@@ -239,7 +235,7 @@ pub mod verifier_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = VerifyNumberSvc(inner);
+                        let method = AuthenticateSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
@@ -266,7 +262,7 @@ pub mod verifier_service_server {
             }
         }
     }
-    impl<T: VerifierService> Clone for VerifierServiceServer<T> {
+    impl<T: AuthService> Clone for AuthServiceServer<T> {
         fn clone(&self) -> Self {
             let inner = self.inner.clone();
             Self {
@@ -276,7 +272,7 @@ pub mod verifier_service_server {
             }
         }
     }
-    impl<T: VerifierService> Clone for _Inner<T> {
+    impl<T: AuthService> Clone for _Inner<T> {
         fn clone(&self) -> Self {
             Self(self.0.clone())
         }
@@ -286,7 +282,7 @@ pub mod verifier_service_server {
             write!(f, "{:?}", self.0)
         }
     }
-    impl<T: VerifierService> tonic::server::NamedService for VerifierServiceServer<T> {
-        const NAME: &'static str = "karma_coin.verifier.VerifierService";
+    impl<T: AuthService> tonic::server::NamedService for AuthServiceServer<T> {
+        const NAME: &'static str = "karma_coin.auth.AuthService";
     }
 }
