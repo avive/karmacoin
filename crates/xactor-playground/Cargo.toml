@@ -6,7 +6,7 @@ edition = "2021"
 publish = false
 
 [dependencies.tokio]
-version = "1.8.1"
+version = "1.23.1"
 features = ["full"]
 
 [dependencies]
