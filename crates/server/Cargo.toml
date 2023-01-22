@@ -62,4 +62,4 @@ version = "1"
 features = ["serde"]
 
 [dev-dependencies]
-nix = "0.19.1"
+nix = "0.26.2"
