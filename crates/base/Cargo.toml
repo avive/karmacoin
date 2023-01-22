@@ -11,7 +11,7 @@ prost-derive = "0.11.6"
 tonic-build = { version = "=0.8.4", features = ["prost", "cleanup-markdown"] }
 
 [dependencies.tokio]
-version = "1.8.1"
+version = "1.23.1"
 features = ["full"]
 
 [dependencies]
