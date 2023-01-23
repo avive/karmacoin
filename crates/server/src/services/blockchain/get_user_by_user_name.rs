@@ -24,7 +24,7 @@ impl Handler<GetUserInfoByUserName> for BlockChainService {
         _ctx: &mut Context<Self>,
         msg: GetUserInfoByUserName,
     ) -> Result<GetUserInfoByUserNameResponse> {
-        // lookup accountId by nickname
+        // lookup accountId by user name
         match DatabaseService::read(ReadItem {
             key: Bytes::from(msg.0.user_name.as_bytes().to_vec()),
             cf: USERS_NAMES_COL_FAMILY,
@@ -43,10 +43,16 @@ impl Handler<GetUserInfoByUserName> for BlockChainService {
                     Some(user_data) => Ok(GetUserInfoByUserNameResponse {
                         user: Some(User::decode(user_data.0.as_ref())?),
                     }),
-                    None => Ok(GetUserInfoByUserNameResponse { user: None }),
+                    None => {
+                        info!("no user for {}", msg.0.user_name);
+                        Ok(GetUserInfoByUserNameResponse { user: None })
+                    }
                 }
             }
-            None => Ok(GetUserInfoByUserNameResponse { user: None }),
+            None => {
+                info!("no user for {}", msg.0.user_name);
+                Ok(GetUserInfoByUserNameResponse { user: None })
+            }
         }
     }
 }

@@ -17,17 +17,6 @@ use xactor::*;
 #[message(result = "Result<UserVerificationData>")]
 pub(crate) struct Verify(pub VerifyNumberRequest);
 
-impl VerifierService {
-    /// private helper function to generate a signed user verification data
-    async fn new_data(&mut self, value: VerificationResult) -> Result<UserVerificationData> {
-        let mut data = UserVerificationData::from(value);
-        let verifier_key_pair = self.get_key_pair().await?.to_ed2559_keypair();
-        data.verifier_account_id = Some(self.get_account_id().await?);
-        data.signature = Some(data.sign(&verifier_key_pair)?);
-        Ok(data)
-    }
-}
-
 /// Request to complete verification and sign up
 #[async_trait::async_trait]
 impl Handler<Verify> for VerifierService {
@@ -44,24 +33,28 @@ impl Handler<Verify> for VerifierService {
 
         // verify request signature
         if req.verify_signature().is_err() {
-            return self.new_data(VerificationResult::InvalidSignature).await;
+            return self.gen_result(VerificationResult::InvalidSignature).await;
         };
 
         let account_id = match req.account_id {
             Some(id) => id,
             None => {
-                return self.new_data(VerificationResult::MissingData).await;
+                return self.gen_result(VerificationResult::MissingData).await;
             }
         };
 
         let phone_number = match req.mobile_number {
             Some(n) => n,
             None => {
-                return self.new_data(VerificationResult::InvalidSignature).await;
+                return self.gen_result(VerificationResult::InvalidSignature).await;
             }
         };
 
         let requested_user_name = req.requested_user_name.clone();
+
+        if requested_user_name.is_empty() {
+            return self.gen_result(VerificationResult::MissingData).await;
+        }
 
         // check if there's a user for the accountId
         if let Some(user_data) = DatabaseService::read(ReadItem {
@@ -74,7 +67,7 @@ impl Handler<Verify> for VerifierService {
             let user = User::decode(user_data.0.as_ref())?;
             if user.user_name != requested_user_name {
                 // don't allow giving evidence on requested user name in case of existing user
-                return self.new_data(VerificationResult::UserNameTaken).await;
+                return self.gen_result(VerificationResult::UserNameTaken).await;
             }
         } else {
             // verify that the requested username not already registered to another user
@@ -86,7 +79,7 @@ impl Handler<Verify> for VerifierService {
             .await?)
                 .is_some()
             {
-                return self.new_data(VerificationResult::UserNameTaken).await;
+                return self.gen_result(VerificationResult::UserNameTaken).await;
             }
         }
 
@@ -111,10 +104,10 @@ impl Handler<Verify> for VerifierService {
 
                 match res.unwrap() {
                     AuthResult::AccountIdMismatch => {
-                        return self.new_data(VerificationResult::AccountMismatch).await
+                        return self.gen_result(VerificationResult::AccountMismatch).await
                     }
                     AuthResult::UserNotFound => {
-                        return self.new_data(VerificationResult::Unverified).await
+                        return self.gen_result(VerificationResult::Unverified).await
                     }
                     AuthResult::UserAuthenticated => info!("user phone and account id verifier"),
                 }
@@ -139,5 +132,16 @@ impl Handler<Verify> for VerifierService {
         resp.mobile_number = Some(phone_number);
         resp.signature = Some(resp.sign(&key_pair)?);
         Ok(resp)
+    }
+}
+
+impl VerifierService {
+    /// private helper function to generate a signed user verification data
+    async fn gen_result(&mut self, value: VerificationResult) -> Result<UserVerificationData> {
+        let mut data = UserVerificationData::from(value);
+        let verifier_key_pair = self.get_key_pair().await?.to_ed2559_keypair();
+        data.verifier_account_id = Some(self.get_account_id().await?);
+        data.signature = Some(data.sign(&verifier_key_pair)?);
+        Ok(data)
     }
 }

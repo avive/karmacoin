@@ -37,12 +37,14 @@ impl ApiServiceTrait for ApiService {
         &self,
         request: Request<GetUserInfoByUserNameRequest>,
     ) -> Result<Response<GetUserInfoByUserNameResponse>, Status> {
+        let req = request.into_inner();
+        info!("api call - get_user_info_by_user_name: {:?}", req.user_name);
         let service = BlockChainService::from_registry()
             .await
             .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?;
 
         let res = service
-            .call(GetUserInfoByUserName(request.into_inner()))
+            .call(GetUserInfoByUserName(req))
             .await
             .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?
             .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
@@ -131,33 +133,51 @@ impl ApiServiceTrait for ApiService {
         request: Request<SubmitTransactionRequest>,
     ) -> Result<Response<SubmitTransactionResponse>, Status> {
         info!("submit transaction...");
-        let tx = request
-            .into_inner()
-            .transaction
-            .ok_or_else(|| Status::invalid_argument("transaction is required"))?;
+        let tx = request.into_inner().transaction.ok_or_else(|| {
+            info!("missing transaction");
+            Status::invalid_argument("transaction is required")
+        })?;
 
-        let mem_pool = MemPoolService::from_registry()
-            .await
-            .map_err(|e| Status::internal(format!("failed to get mempool: {}", e)))?;
+        let mem_pool = MemPoolService::from_registry().await.map_err(|e| {
+            info!("failed to get mempool: {}", e);
+            Status::internal(format!("failed to get mempool: {}", e))
+        })?;
 
+        info!("adding tx to mempool...");
         mem_pool
             .call(AddTransaction(tx))
             .await
-            .map_err(|e| Status::internal(format!("internal error: {}", e)))?
-            .map_err(|e| Status::internal(format!("failed to process transaction: {}", e)))?;
+            .map_err(|e| {
+                info!("internal error: {}", e);
+                Status::internal(format!("internal error: {}", e))
+            })?
+            .map_err(|e| {
+                info!("internal error: {}", e);
+                Status::internal(format!("failed to process transaction: {}", e))
+            })?;
+
+        info!("tx added to mempool");
 
         // start transaction processing to process all transactions in the mem pool
         // in production this can be done on a timer every few seconds
         // here we just trigger block production when a new transaction is submitted
-        let service = BlockChainService::from_registry()
-            .await
-            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
+        let service = BlockChainService::from_registry().await.map_err(|e| {
+            info!("internal error: {}", e);
+            Status::internal(format!("internal error: {}", e))
+        })?;
 
+        info!("processing transactions...");
         service
             .call(ProcessTransactions {})
             .await
-            .map_err(|e| Status::internal(format!("internal error: {}", e)))?
-            .map_err(|e| Status::internal(format!("failed to call blockchain api: {}", e)))?;
+            .map_err(|e| {
+                info!("internal error: {}", e);
+                Status::internal(format!("internal error: {}", e))
+            })?
+            .map_err(|e| {
+                info!("internal error: {}", e);
+                Status::internal(format!("failed to call blockchain api: {}", e))
+            })?;
 
         info!("submit transaction returning response");
 
