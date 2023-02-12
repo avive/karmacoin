@@ -88,6 +88,9 @@ pub const BLOCK_REWARDS_AMOUNT: &str = "block_rewards_amount";
 /// Karma reward amount in KCents
 pub const KARMA_REWARD_AMOUNT: &str = "karma_reward_amount";
 
+/// Karma rewards period
+pub const KARMA_REWARD_PERIOD: &str = "karma_reward_period";
+
 /// Number of users to get rewarded each period
 pub const KARMA_REWARD_TOP_N_USERS_KEY: &str = "karma_reward_top_n_users";
 
@@ -156,55 +159,80 @@ impl Actor for GenesisConfigService {
             .unwrap()
             .set_default(CHAR_TRAITS_KEY, char_traits)
             .unwrap()
-            // 10 KC per signup
+            //
+            // 10 KC per signup in phase 1
             .set_default(SIGNUP_REWARD_AMOUNT_PHASE1_KEY, 10 * (10 ^ 6))
             .unwrap()
-            // 10 million users eligible for phase 1 rewards
-            .set_default(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY, 10 * (10 ^ 6))
+            // 100m KCs allocatd for signup rewards phase 1
+            .set_default(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY, 100 * (10 ^ 6))
             .unwrap()
             // Signup phase 2 rewards amount - 1 KC
             .set_default(SIGNUP_REWARD_AMOUNT_PHASE2_KEY, 10 ^ 6)
             .unwrap()
             // phase 2 rewards amount allocation
-            .set_default(SIGNUP_REWARD_ALLOCATION_PHASE2_KEY, 20 * (10 ^ 6))
+            .set_default(SIGNUP_REWARD_ALLOCATION_PHASE2_KEY, 200 * (10 ^ 6))
             .unwrap()
             // Phase 3 reward amount per signup - 1000 KCents
             .set_default(SIGNUP_REWARD_AMOUNT_PHASE3_KEY, 1000)
             .unwrap()
+            //
+            // phase 1 reward amount per referral - 10 KC
             .set_default(REFERRAL_REWARD_AMOUNT_PHASE1_KEY, 10 * (10 ^ 6))
             .unwrap()
+            // phase 1 referral rewards allocation - 100M Kcs
             .set_default(REFERRAL_REWARD_ALLOCATION_PHASE1_KEY, 100 * (10 ^ 6))
             .unwrap()
+            // phase 2 referral reward amount - 1 KC
             .set_default(REFERRAL_REWARD_AMOUNT_PHASE2_KEY, 10 ^ 6)
             .unwrap()
+            // phase 2 referral rewards allocation - 200M Kcs
             .set_default(REFERRAL_REWARD_ALLOCATION_PHASE2_KEY, 200 * (10 ^ 6))
             .unwrap()
+            //
             // Last block eligible for block rewards
             .set_default(BLOCK_REWARDS_LAST_BLOCK, 500 * (10 ^ 6))
             .unwrap()
             // The block reward constant amount
             .set_default(BLOCK_REWARDS_AMOUNT, 10 ^ 6)
             .unwrap()
+            //
+            // Karma rewards amount per user - 10 KC
             .set_default(KARMA_REWARD_AMOUNT, 10 * (10 ^ 6))
             .unwrap()
+            // Karma rewards computation period in weeks
+            .set_default(KARMA_REWARD_PERIOD, 4)
+            .unwrap()
+            // The top 1000 users who didn't get karma reward are eligable every period
             .set_default(KARMA_REWARD_TOP_N_USERS_KEY, 1_000)
             .unwrap()
+            // karma rewards allocation - 300M KCs
             .set_default(KARAM_REWARDS_ALLOCATION_KEY, 300 * (10 ^ 6))
             .unwrap()
+            //
+            // The max amount for a tx fee subsidy - 1 KCent
             .set_default(TX_FEE_SUBSIDY_MAX_AMOUNT_PHASE1_KEY, 1)
             .unwrap()
+            // The max amount for a tx fee subsidy after phase 1 - 1 KCent
             .set_default(TX_FEE_SUBSIDY_MAX_AMOUNT_KEY, 1)
             .unwrap()
+            // The amount of coins allocated for phase 1 tx fees - 250M KCs
             .set_default(TX_FEE_SUBSIDY_ALLOCATION_PHASE1_KEY, 250 * (10 ^ 6))
             .unwrap()
+            // The max number of txs that can be subsidised per user
             .set_default(TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY, 10)
             .unwrap()
+            //
+            // The period in weeks in which causes rewards are calculated
             .set_default(CAUSES_REWARD_WEEKS_PERIOD, 4)
             .unwrap()
+            // The number of causes rewarded in each period
             .set_default(CAUSES_PER_PERIOD, 20)
             .unwrap()
+            // Total coin allocated for causes rewards - 225M KCs
             .set_default(CAUSES_REWARDS_ALLOCATION, 225 * (10 ^ 6))
             .unwrap()
+            //
+            //
             .set_default(VERIFIERS_ACCOUNTS_IDS, verifiers)
             .unwrap()
             .set_default(TREASURY_PREMINT_COINS_AMOUNT_KEY, 5 * (10 ^ 6))
