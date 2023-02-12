@@ -29,40 +29,55 @@ pub const DEF_TX_FEE_KEY: &str = "def_tx_fee_key";
 pub const CHAR_TRAITS_KEY: &str = "char_traits_key";
 
 /// Signup reward in KCents in phase 1
-pub const SIGNUP_REWARD_PHASE1_KEY: &str = "signup_reward_p1_key";
+pub const SIGNUP_REWARD_AMOUNT_PHASE1_KEY: &str = "signup_reward_p1_key";
 
-/// Max number of rewards for phase 1
-pub const SIGNUP_REWARD_PHASE1_ALLOCATION_KEY: &str = "signup_reward_alloc_p1_key";
+/// Total rewards for phase 1
+pub const SIGNUP_REWARD_ALLOCATION_PHASE1_KEY: &str = "signup_reward_alloc_p1_key";
 
-/// Signup reward in KCents in phase 2
-pub const SIGNUP_REWARD_PHASE2_KEY: &str = "signup_reward_p2_key";
+/// Signup reward in KCents in phase 2. eligibility
+pub const SIGNUP_REWARD_AMOUNT_PHASE2_KEY: &str = "signup_reward_p2_key";
 
 /// Max number of signup rewards for phase 2
-pub const SIGNUP_REWARD_PHASE2_ALLOCATION_KEY: &str = "signup_reward_alloc_p2";
+pub const SIGNUP_REWARD_ALLOCATION_PHASE2_KEY: &str = "signup_reward_alloc_p2";
 
 /// Referral reward in KCents in phase 3
-pub const SIGNUP_REWARD_PHASE3_KEY: &str = "signup_reward_p3";
+pub const SIGNUP_REWARD_AMOUNT_PHASE3_KEY: &str = "signup_reward_p3";
 
 /// Referral reward in KCents in phase 1
-pub const REFERRAL_REWARD_PHASE1_KEY: &str = "referral_reward_p1";
+pub const REFERRAL_REWARD_AMOUNT_PHASE1_KEY: &str = "referral_reward_p1";
 
-/// Max number of referral rewards for phase 1
-pub const REFERRAL_REWARD_PHASE1_ALLOCATION_KEY: &str = "referral_reward_alloc_p1";
+/// Total referral rewards for phase 1
+pub const REFERRAL_REWARD_ALLOCATION_PHASE1_KEY: &str = "referral_reward_alloc_p1";
 
 /// Referral reward in KCents in phase 2
-pub const REFERRAL_REWARD_PHASE2_KEY: &str = "referral_reward_p2";
+pub const REFERRAL_REWARD_AMOUNT_PHASE2_KEY: &str = "referral_reward_p2";
 
-/// Max number of referral rewards for phase 2
-pub const REFERRAL_REWARD_PHASE2_ALLOCATION_KEY: &str = "referral_reward_alloc_p2";
+/// Total rewards for phase 2
+pub const REFERRAL_REWARD_ALLOCATION_PHASE2_KEY: &str = "referral_reward_alloc_p2";
 
-/// Total max number of tx fee subsidies
-pub const TX_FEE_SUBSIDY_ALLOCATION_KEY: &str = "tx_fee_subsidy_total";
+/// Total tx fee subsidies phase 1
+pub const TX_FEE_SUBSIDY_MAX_AMOUNT_PHASE1_KEY: &str = "tx_fee_subsidy_max_amount_p1";
+
+/// Total tx fee subsidies phase 1
+pub const TX_FEE_SUBSIDY_ALLOCATION_PHASE1_KEY: &str = "tx_fee_subsidy_allocation_p1";
 
 /// Max subsided transactions per user
 pub const TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY: &str = "tx_fee_subsidy_max_txs_per_user";
 
-/// The Max tx fee amount that the protocol should subsidise
-pub const TX_FEE_SUBSIDY_MAX_AMOUNT: &str = "tx_fee_subsidy_max_amount";
+/// The Max tx fee amount that the protocol should subsidise after phase 1 allocation is exhausted
+pub const TX_FEE_SUBSIDY_MAX_AMOUNT_KEY: &str = "tx_fee_subsidy_max_amount";
+
+/// Causes reward per period0
+pub const CAUSES_REWARD_AMOUNT_PER_PERIOD: &str = "causes_reward_amount_per_period";
+
+/// Causes allocation period. e.g. every 4 weeks
+pub const CAUSES_REWARD_WEEKS_PERIOD: &str = "causes_reward_weeks_period";
+
+/// Number of causes to reward each period
+pub const CAUSES_PER_PERIOD: &str = "causes_per_period";
+
+/// Total Kcs allocated for causes rewards
+pub const CAUSES_REWARDS_ALLOCATION: &str = "causes_rewards_allocation";
 
 /// last block alienable for block reward
 pub const BLOCK_REWARDS_LAST_BLOCK: &str = "block_rewards_last_block";
@@ -76,7 +91,7 @@ pub const KARMA_REWARD_AMOUNT: &str = "karma_reward_amount";
 /// Number of users to get rewarded each period
 pub const KARMA_REWARD_TOP_N_USERS_KEY: &str = "karma_reward_top_n_users";
 
-/// Max number of karma rewards
+/// Karma rewards allocation
 pub const KARAM_REWARDS_ALLOCATION_KEY: &str = "karma_rewards_allocation";
 
 /// Treasury account id
@@ -141,24 +156,28 @@ impl Actor for GenesisConfigService {
             .unwrap()
             .set_default(CHAR_TRAITS_KEY, char_traits)
             .unwrap()
-            .set_default(SIGNUP_REWARD_PHASE1_KEY, 10 * (10 ^ 6))
+            // 10 KC per signup
+            .set_default(SIGNUP_REWARD_AMOUNT_PHASE1_KEY, 10 * (10 ^ 6))
             .unwrap()
-            .set_default(SIGNUP_REWARD_PHASE1_ALLOCATION_KEY, 40 * (10 ^ 6))
+            // 10 million users eligible for phase 1 rewards
+            .set_default(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY, 10 * (10 ^ 6))
             .unwrap()
-            .set_default(SIGNUP_REWARD_PHASE2_KEY, 10 ^ 6)
+            // Signup phase 2 rewards amount - 1 KC
+            .set_default(SIGNUP_REWARD_AMOUNT_PHASE2_KEY, 10 ^ 6)
             .unwrap()
-            .set_default(SIGNUP_REWARD_PHASE2_ALLOCATION_KEY, 100 * (10 ^ 6))
+            // phase 2 rewards amount allocation
+            .set_default(SIGNUP_REWARD_ALLOCATION_PHASE2_KEY, 20 * (10 ^ 6))
             .unwrap()
-            // Phase 3 rewards post the phase 2 allocated number of users
-            .set_default(SIGNUP_REWARD_PHASE3_KEY, 1000)
+            // Phase 3 reward amount per signup - 1000 KCents
+            .set_default(SIGNUP_REWARD_AMOUNT_PHASE3_KEY, 1000)
             .unwrap()
-            .set_default(REFERRAL_REWARD_PHASE1_KEY, 10 * (10 ^ 6))
+            .set_default(REFERRAL_REWARD_AMOUNT_PHASE1_KEY, 10 * (10 ^ 6))
             .unwrap()
-            .set_default(REFERRAL_REWARD_PHASE1_ALLOCATION_KEY, 40 * (10 ^ 6))
+            .set_default(REFERRAL_REWARD_ALLOCATION_PHASE1_KEY, 100 * (10 ^ 6))
             .unwrap()
-            .set_default(REFERRAL_REWARD_PHASE2_KEY, 10 ^ 6)
+            .set_default(REFERRAL_REWARD_AMOUNT_PHASE2_KEY, 10 ^ 6)
             .unwrap()
-            .set_default(REFERRAL_REWARD_PHASE2_ALLOCATION_KEY, 100 * (10 ^ 6))
+            .set_default(REFERRAL_REWARD_ALLOCATION_PHASE2_KEY, 200 * (10 ^ 6))
             .unwrap()
             // Last block eligible for block rewards
             .set_default(BLOCK_REWARDS_LAST_BLOCK, 500 * (10 ^ 6))
@@ -170,13 +189,21 @@ impl Actor for GenesisConfigService {
             .unwrap()
             .set_default(KARMA_REWARD_TOP_N_USERS_KEY, 1_000)
             .unwrap()
-            .set_default(KARAM_REWARDS_ALLOCATION_KEY, 250 * (10 ^ 6))
+            .set_default(KARAM_REWARDS_ALLOCATION_KEY, 300 * (10 ^ 6))
             .unwrap()
-            .set_default(TX_FEE_SUBSIDY_MAX_AMOUNT, 1000)
+            .set_default(TX_FEE_SUBSIDY_MAX_AMOUNT_PHASE1_KEY, 1)
             .unwrap()
-            .set_default(TX_FEE_SUBSIDY_ALLOCATION_KEY, 250 * (10 ^ 6))
+            .set_default(TX_FEE_SUBSIDY_MAX_AMOUNT_KEY, 1)
+            .unwrap()
+            .set_default(TX_FEE_SUBSIDY_ALLOCATION_PHASE1_KEY, 250 * (10 ^ 6))
             .unwrap()
             .set_default(TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY, 10)
+            .unwrap()
+            .set_default(CAUSES_REWARD_WEEKS_PERIOD, 4)
+            .unwrap()
+            .set_default(CAUSES_PER_PERIOD, 20)
+            .unwrap()
+            .set_default(CAUSES_REWARDS_ALLOCATION, 225 * (10 ^ 6))
             .unwrap()
             .set_default(VERIFIERS_ACCOUNTS_IDS, verifiers)
             .unwrap()
@@ -442,29 +469,35 @@ impl Handler<GetGenesisData> for GenesisConfigService {
             net_name: self.config.get_string(NET_NAME_KEY)?,
             genesis_time: self.config.get_int(GENESIS_TIMESTAMP_MS_KEY)? as u64,
 
-            signup_reward_phase1_alloc: self.config.get_int(SIGNUP_REWARD_PHASE1_ALLOCATION_KEY)?
+            signup_reward_phase1_alloc: self.config.get_int(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY)?
                 as u64,
-            signup_reward_phase2_alloc: self.config.get_int(SIGNUP_REWARD_PHASE2_ALLOCATION_KEY)?
+            signup_reward_phase2_alloc: self.config.get_int(SIGNUP_REWARD_ALLOCATION_PHASE2_KEY)?
                 as u64,
-            signup_reward_phase1_amount: self.config.get_int(SIGNUP_REWARD_PHASE1_KEY)? as u64,
-            signup_reward_phase2_amount: self.config.get_int(SIGNUP_REWARD_PHASE2_KEY)? as u64,
-            signup_reward_phase3_start: self.config.get_int(SIGNUP_REWARD_PHASE3_KEY)? as u64,
+            signup_reward_phase1_amount: self.config.get_int(SIGNUP_REWARD_AMOUNT_PHASE1_KEY)?
+                as u64,
+            signup_reward_phase2_amount: self.config.get_int(SIGNUP_REWARD_AMOUNT_PHASE2_KEY)?
+                as u64,
+            signup_reward_phase3_start: self.config.get_int(SIGNUP_REWARD_AMOUNT_PHASE3_KEY)?
+                as u64,
 
             referral_reward_phase1_alloc: self
                 .config
-                .get_int(REFERRAL_REWARD_PHASE1_ALLOCATION_KEY)?
+                .get_int(REFERRAL_REWARD_ALLOCATION_PHASE1_KEY)?
                 as u64,
             referral_reward_phase2_alloc: self
                 .config
-                .get_int(REFERRAL_REWARD_PHASE2_ALLOCATION_KEY)?
+                .get_int(REFERRAL_REWARD_ALLOCATION_PHASE2_KEY)?
                 as u64,
-            referral_reward_phase1_amount: self.config.get_int(REFERRAL_REWARD_PHASE1_KEY)? as u64,
-            referral_reward_phase2_amount: self.config.get_int(REFERRAL_REWARD_PHASE2_KEY)? as u64,
+            referral_reward_phase1_amount: self.config.get_int(REFERRAL_REWARD_AMOUNT_PHASE1_KEY)?
+                as u64,
+            referral_reward_phase2_amount: self.config.get_int(REFERRAL_REWARD_AMOUNT_PHASE2_KEY)?
+                as u64,
 
             tx_fee_subsidy_max_per_user: self.config.get_int(TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY)?
                 as u64,
-            tx_fee_subsidies_alloc: self.config.get_int(TX_FEE_SUBSIDY_ALLOCATION_KEY)? as u64,
-            tx_fee_subsidy_max_amount: self.config.get_int(TX_FEE_SUBSIDY_MAX_AMOUNT)? as u64,
+            tx_fee_subsidies_alloc: self.config.get_int(TX_FEE_SUBSIDY_ALLOCATION_PHASE1_KEY)?
+                as u64,
+            tx_fee_subsidy_max_amount: self.config.get_int(TX_FEE_SUBSIDY_MAX_AMOUNT_KEY)? as u64,
 
             block_reward_amount: self.config.get_int(BLOCK_REWARDS_AMOUNT)? as u64,
             block_reward_last_block: self.config.get_int(BLOCK_REWARDS_LAST_BLOCK)? as u64,

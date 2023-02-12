@@ -11,7 +11,8 @@ use crate::services::db_config_service::{
     MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY, USERS_NAMES_COL_FAMILY,
 };
 use base::karma_coin::karma_coin_core_types::{
-    ExecutionInfo, ExecutionResult, FeeType, SignedTransaction, TransactionEvent, User,
+    ExecutionInfo, ExecutionResult, FeeType, SignedTransaction, TransactionEvent, TransactionType,
+    User,
 };
 use base::signed_trait::SignedTrait;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
@@ -162,7 +163,7 @@ impl BlockChainService {
         };
 
         let apply_subsidy = tokenomics
-            .should_subsidise_transaction_fee(0, tx_fee)
+            .should_subsidise_transaction_fee(0, tx_fee, TransactionType::NewUserV1)
             .await
             .map_err(|_| NewUserProcessingError {
                 execution_info: ExecutionInfo::InternalNodeError,

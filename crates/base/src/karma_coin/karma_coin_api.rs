@@ -1,3 +1,13 @@
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetExchangeRateRequest {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetExchangeRateResponse {
+    /// Estiamted 1 KC value in USD
+    #[prost(double, tag = "1")]
+    pub exchange_rate: f64,
+}
 /// Get user by user name
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

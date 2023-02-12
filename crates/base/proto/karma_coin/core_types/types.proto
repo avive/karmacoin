@@ -260,6 +260,12 @@ message BlockchainStats {
     // total number of payment transactions
     uint64 update_user_transactions_count = 17;
 
+    // estimated KC to USD exchange rate
+    double exchange_rate = 18;
+
+    // amount of rewards paid to causes
+    uint64 causes_rewards_amount = 19;
+
 }
 
 // Block events

@@ -45,6 +45,14 @@ service ApiService {
 
 }
 
+message GetExchangeRateRequest {
+}
+
+message GetExchangeRateResponse {
+  // Estiamted 1 KC value in USD
+  double exchange_rate = 1;
+}
+
 // Get user by user name
 message GetUserInfoByUserNameRequest {
   string user_name = 1;

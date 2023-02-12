@@ -24,6 +24,9 @@ impl BlockchainStats {
             validator_rewards_count: 0,
             referral_rewards_count: 0,
             validator_rewards_amount: 0,
+            // todo: get this from external data file
+            exchange_rate: 0.2,
+            causes_rewards_amount: 0,
         }
     }
 }

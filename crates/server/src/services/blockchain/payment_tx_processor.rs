@@ -12,7 +12,8 @@ use base::genesis_config_service::{
     KARMA_COIN_AMBASSADOR_CHAR_TRAIT_ID, KARMA_COIN_SPENDER_CHAR_TRAIT_ID,
 };
 use base::karma_coin::karma_coin_core_types::{
-    ExecutionResult, FeeType, PaymentTransactionV1, SignedTransaction, TransactionEvent, User,
+    ExecutionResult, FeeType, PaymentTransactionV1, SignedTransaction, TransactionEvent,
+    TransactionType, User,
 };
 use bytes::Bytes;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
@@ -77,7 +78,7 @@ impl BlockChainService {
         let payment = payment_tx.amount;
 
         let apply_subsidy = tokenomics
-            .should_subsidise_transaction_fee(0, transaction.fee)
+            .should_subsidise_transaction_fee(0, transaction.fee, TransactionType::PaymentV1)
             .await?;
 
         // actual fee amount to be paid by the user. 0 if fee is subsidised by the protocol

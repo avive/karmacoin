@@ -156,12 +156,9 @@ async fn referral_signup_happy_flow_test() {
         .user
         .unwrap();
 
-    let referral_reward = Tokenomics {
-        stats: BlockchainStats::new(),
-    }
-    .get_referral_reward_amount()
-    .await
-    .unwrap();
+    let tokenomics = Tokenomics::new(BlockchainStats::new());
+
+    let referral_reward = tokenomics.get_referral_reward_amount().await.unwrap();
 
     assert_eq!(
         user1_balance_pre + referral_reward - payment_amount,

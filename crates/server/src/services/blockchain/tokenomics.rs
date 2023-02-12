@@ -4,38 +4,51 @@
 
 use anyhow::Result;
 use base::genesis_config_service::*;
-use base::karma_coin::karma_coin_core_types::BlockchainStats;
+use base::karma_coin::karma_coin_core_types::{BlockchainStats, TransactionType};
 
 pub struct Tokenomics {
     pub stats: BlockchainStats,
 }
 
 impl Tokenomics {
+    pub fn new(stats: BlockchainStats) -> Self {
+        Self { stats }
+    }
+}
+
+impl Tokenomics {
     /// Get current signup reward amount based on consensus rules, genesis config and blockchain data
     pub async fn get_signup_reward_amount(&self) -> Result<u64> {
-        if self.stats.users_count
-            > GenesisConfigService::get_u64(SIGNUP_REWARD_PHASE2_ALLOCATION_KEY.into())
+        let signup_rewards_alloc_phase1 =
+            GenesisConfigService::get_u64(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY.into())
                 .await?
-                .unwrap()
+                .unwrap();
+
+        let signup_rewards_alloc_phase2 =
+            GenesisConfigService::get_u64(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY.into())
+                .await?
+                .unwrap();
+
+        if self.stats.signup_rewards_amount
+            > signup_rewards_alloc_phase1 + signup_rewards_alloc_phase2
         {
+            // We are in phase 3
             Ok(
-                GenesisConfigService::get_u64(SIGNUP_REWARD_PHASE3_KEY.into())
+                GenesisConfigService::get_u64(SIGNUP_REWARD_AMOUNT_PHASE3_KEY.into())
                     .await?
                     .unwrap(),
             )
-        } else if self.stats.users_count
-            > GenesisConfigService::get_u64(SIGNUP_REWARD_PHASE1_ALLOCATION_KEY.into())
-                .await?
-                .unwrap()
-        {
+        } else if self.stats.signup_rewards_amount > signup_rewards_alloc_phase1 {
+            // we are in phase 2
             Ok(
-                GenesisConfigService::get_u64(SIGNUP_REWARD_PHASE2_KEY.into())
+                GenesisConfigService::get_u64(SIGNUP_REWARD_AMOUNT_PHASE2_KEY.into())
                     .await?
                     .unwrap(),
             )
         } else {
+            // we are in phase 1
             Ok(
-                GenesisConfigService::get_u64(SIGNUP_REWARD_PHASE1_KEY.into())
+                GenesisConfigService::get_u64(SIGNUP_REWARD_AMOUNT_PHASE1_KEY.into())
                     .await?
                     .unwrap(),
             )
@@ -44,25 +57,27 @@ impl Tokenomics {
 
     /// Get current referral; reward amount based on consensus rules, genesis config and blockchain data
     pub async fn get_referral_reward_amount(&self) -> Result<u64> {
-        if self.stats.users_count
-            > GenesisConfigService::get_u64(REFERRAL_REWARD_PHASE2_ALLOCATION_KEY.into())
+        let rewards_alloc_phase1 =
+            GenesisConfigService::get_u64(REFERRAL_REWARD_ALLOCATION_PHASE1_KEY.into())
                 .await?
-                .unwrap()
-        {
+                .unwrap();
+
+        let rewards_alloc_phase2 =
+            GenesisConfigService::get_u64(REFERRAL_REWARD_ALLOCATION_PHASE2_KEY.into())
+                .await?
+                .unwrap();
+
+        if self.stats.referral_rewards_amount > rewards_alloc_phase2 + rewards_alloc_phase1 {
             Ok(0)
-        } else if self.stats.users_count
-            > GenesisConfigService::get_u64(REFERRAL_REWARD_PHASE1_ALLOCATION_KEY.into())
-                .await?
-                .unwrap()
-        {
+        } else if self.stats.referral_rewards_amount > rewards_alloc_phase1 {
             Ok(
-                GenesisConfigService::get_u64(REFERRAL_REWARD_PHASE2_KEY.into())
+                GenesisConfigService::get_u64(REFERRAL_REWARD_AMOUNT_PHASE2_KEY.into())
                     .await?
                     .unwrap(),
             )
         } else {
             Ok(
-                GenesisConfigService::get_u64(REFERRAL_REWARD_PHASE1_KEY.into())
+                GenesisConfigService::get_u64(REFERRAL_REWARD_AMOUNT_PHASE1_KEY.into())
                     .await?
                     .unwrap(),
             )
@@ -74,9 +89,10 @@ impl Tokenomics {
         &self,
         user_nonce: u64,
         fee_amount: u64,
+        tx_type: TransactionType,
     ) -> Result<bool> {
         if fee_amount
-            > GenesisConfigService::get_u64(TX_FEE_SUBSIDY_MAX_AMOUNT.into())
+            > GenesisConfigService::get_u64(TX_FEE_SUBSIDY_MAX_AMOUNT_KEY.into())
                 .await?
                 .unwrap()
         {
@@ -84,16 +100,39 @@ impl Tokenomics {
             return Ok(false);
         }
 
-        if self.stats.fee_subs_count
-            > GenesisConfigService::get_u64(TX_FEE_SUBSIDY_ALLOCATION_KEY.into())
+        if user_nonce
+            > GenesisConfigService::get_u64(TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY.into())
                 .await?
                 .unwrap()
         {
             return Ok(false);
         }
 
-        if user_nonce
-            > GenesisConfigService::get_u64(TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY.into())
+        if self.stats.fee_subs_amount
+            <= GenesisConfigService::get_u64(TX_FEE_SUBSIDY_ALLOCATION_PHASE1_KEY.into())
+                .await?
+                .unwrap()
+        {
+            // we are in phase 1 subsidies, validate fee is below the max phase1 subsidy amount
+            if fee_amount
+                > GenesisConfigService::get_u64(TX_FEE_SUBSIDY_MAX_AMOUNT_PHASE1_KEY.into())
+                    .await?
+                    .unwrap()
+            {
+                return Ok(false);
+            }
+
+            return Ok(true);
+        }
+
+        // we are beyond phase 1 subsidies, only signup txs up to max fee are subsided
+        if tx_type != TransactionType::NewUserV1 {
+            return Ok(false);
+        }
+
+        // Validate signup tx fee is below max subsidy amount
+        if fee_amount
+            > GenesisConfigService::get_u64(TX_FEE_SUBSIDY_MAX_AMOUNT_KEY.into())
                 .await?
                 .unwrap()
         {

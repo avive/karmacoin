@@ -355,6 +355,12 @@ pub struct BlockchainStats {
     /// total number of payment transactions
     #[prost(uint64, tag = "17")]
     pub update_user_transactions_count: u64,
+    /// estimated KC to USD exchange rate
+    #[prost(double, tag = "18")]
+    pub exchange_rate: f64,
+    /// amount of rewards paid to causes
+    #[prost(uint64, tag = "19")]
+    pub causes_rewards_amount: u64,
 }
 /// Block events
 #[allow(clippy::derive_partial_eq_without_eq)]

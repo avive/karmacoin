@@ -48,9 +48,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
 
         // get current blockchain stats and tokenomics
         let stats = get_stats().await?;
-        let tokenomics = Tokenomics {
-            stats: stats.clone(),
-        };
+        let tokenomics = Tokenomics::new(stats.clone());
         let block_height = stats.tip_height + 1;
         let mut tx_hashes: Vec<Vec<u8>> = vec![];
 
