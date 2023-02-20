@@ -201,11 +201,12 @@ const User$json = const {
     const {'1': 'balance', '3': 5, '4': 1, '5': 4, '10': 'balance'},
     const {'1': 'trait_scores', '3': 6, '4': 3, '5': 11, '6': '.karma_coin.core_types.TraitScore', '10': 'traitScores'},
     const {'1': 'pre_keys', '3': 7, '4': 3, '5': 11, '6': '.karma_coin.core_types.PreKey', '10': 'preKeys'},
+    const {'1': 'karma_score', '3': 8, '4': 1, '5': 13, '10': 'karmaScore'},
   ],
 };
 
 /// Descriptor for `User`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List userDescriptor = $convert.base64Decode('CgRVc2VyEj8KCmFjY291bnRfaWQYASABKAsyIC5rYXJtYV9jb2luLmNvcmVfdHlwZXMuQWNjb3VudElkUglhY2NvdW50SWQSFAoFbm9uY2UYAiABKARSBW5vbmNlEhsKCXVzZXJfbmFtZRgDIAEoCVIIdXNlck5hbWUSSAoNbW9iaWxlX251bWJlchgEIAEoCzIjLmthcm1hX2NvaW4uY29yZV90eXBlcy5Nb2JpbGVOdW1iZXJSDG1vYmlsZU51bWJlchIYCgdiYWxhbmNlGAUgASgEUgdiYWxhbmNlEkQKDHRyYWl0X3Njb3JlcxgGIAMoCzIhLmthcm1hX2NvaW4uY29yZV90eXBlcy5UcmFpdFNjb3JlUgt0cmFpdFNjb3JlcxI4CghwcmVfa2V5cxgHIAMoCzIdLmthcm1hX2NvaW4uY29yZV90eXBlcy5QcmVLZXlSB3ByZUtleXM=');
+final $typed_data.Uint8List userDescriptor = $convert.base64Decode('CgRVc2VyEj8KCmFjY291bnRfaWQYASABKAsyIC5rYXJtYV9jb2luLmNvcmVfdHlwZXMuQWNjb3VudElkUglhY2NvdW50SWQSFAoFbm9uY2UYAiABKARSBW5vbmNlEhsKCXVzZXJfbmFtZRgDIAEoCVIIdXNlck5hbWUSSAoNbW9iaWxlX251bWJlchgEIAEoCzIjLmthcm1hX2NvaW4uY29yZV90eXBlcy5Nb2JpbGVOdW1iZXJSDG1vYmlsZU51bWJlchIYCgdiYWxhbmNlGAUgASgEUgdiYWxhbmNlEkQKDHRyYWl0X3Njb3JlcxgGIAMoCzIhLmthcm1hX2NvaW4uY29yZV90eXBlcy5UcmFpdFNjb3JlUgt0cmFpdFNjb3JlcxI4CghwcmVfa2V5cxgHIAMoCzIdLmthcm1hX2NvaW4uY29yZV90eXBlcy5QcmVLZXlSB3ByZUtleXMSHwoLa2FybWFfc2NvcmUYCCABKA1SCmthcm1hU2NvcmU=');
 @$core.Deprecated('Use phoneVerifierDescriptor instead')
 const PhoneVerifier$json = const {
   '1': 'PhoneVerifier',
@@ -417,11 +418,13 @@ const BlockchainStats$json = const {
     const {'1': 'validator_rewards_count', '3': 15, '4': 1, '5': 4, '10': 'validatorRewardsCount'},
     const {'1': 'validator_rewards_amount', '3': 16, '4': 1, '5': 4, '10': 'validatorRewardsAmount'},
     const {'1': 'update_user_transactions_count', '3': 17, '4': 1, '5': 4, '10': 'updateUserTransactionsCount'},
+    const {'1': 'exchange_rate', '3': 18, '4': 1, '5': 1, '10': 'exchangeRate'},
+    const {'1': 'causes_rewards_amount', '3': 19, '4': 1, '5': 4, '10': 'causesRewardsAmount'},
   ],
 };
 
 /// Descriptor for `BlockchainStats`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List blockchainStatsDescriptor = $convert.base64Decode('Cg9CbG9ja2NoYWluU3RhdHMSJgoPbGFzdF9ibG9ja190aW1lGAEgASgEUg1sYXN0QmxvY2tUaW1lEh0KCnRpcF9oZWlnaHQYAiABKARSCXRpcEhlaWdodBItChJ0cmFuc2FjdGlvbnNfY291bnQYAyABKARSEXRyYW5zYWN0aW9uc0NvdW50Ej4KG3BheW1lbnRzX3RyYW5zYWN0aW9uc19jb3VudBgEIAEoBFIZcGF5bWVudHNUcmFuc2FjdGlvbnNDb3VudBIfCgt1c2Vyc19jb3VudBgFIAEoBFIKdXNlcnNDb3VudBIfCgtmZWVzX2Ftb3VudBgGIAEoBFIKZmVlc0Ftb3VudBIjCg1taW50ZWRfYW1vdW50GAcgASgEUgxtaW50ZWRBbW91bnQSIAoLY2lyY3VsYXRpb24YCCABKARSC2NpcmN1bGF0aW9uEiQKDmZlZV9zdWJzX2NvdW50GAkgASgEUgxmZWVTdWJzQ291bnQSJgoPZmVlX3N1YnNfYW1vdW50GAogASgEUg1mZWVTdWJzQW1vdW50EjAKFHNpZ251cF9yZXdhcmRzX2NvdW50GAsgASgEUhJzaWdudXBSZXdhcmRzQ291bnQSMgoVc2lnbnVwX3Jld2FyZHNfYW1vdW50GAwgASgEUhNzaWdudXBSZXdhcmRzQW1vdW50EjQKFnJlZmVycmFsX3Jld2FyZHNfY291bnQYDSABKARSFHJlZmVycmFsUmV3YXJkc0NvdW50EjYKF3JlZmVycmFsX3Jld2FyZHNfYW1vdW50GA4gASgEUhVyZWZlcnJhbFJld2FyZHNBbW91bnQSNgoXdmFsaWRhdG9yX3Jld2FyZHNfY291bnQYDyABKARSFXZhbGlkYXRvclJld2FyZHNDb3VudBI4Chh2YWxpZGF0b3JfcmV3YXJkc19hbW91bnQYECABKARSFnZhbGlkYXRvclJld2FyZHNBbW91bnQSQwoedXBkYXRlX3VzZXJfdHJhbnNhY3Rpb25zX2NvdW50GBEgASgEUht1cGRhdGVVc2VyVHJhbnNhY3Rpb25zQ291bnQ=');
+final $typed_data.Uint8List blockchainStatsDescriptor = $convert.base64Decode('Cg9CbG9ja2NoYWluU3RhdHMSJgoPbGFzdF9ibG9ja190aW1lGAEgASgEUg1sYXN0QmxvY2tUaW1lEh0KCnRpcF9oZWlnaHQYAiABKARSCXRpcEhlaWdodBItChJ0cmFuc2FjdGlvbnNfY291bnQYAyABKARSEXRyYW5zYWN0aW9uc0NvdW50Ej4KG3BheW1lbnRzX3RyYW5zYWN0aW9uc19jb3VudBgEIAEoBFIZcGF5bWVudHNUcmFuc2FjdGlvbnNDb3VudBIfCgt1c2Vyc19jb3VudBgFIAEoBFIKdXNlcnNDb3VudBIfCgtmZWVzX2Ftb3VudBgGIAEoBFIKZmVlc0Ftb3VudBIjCg1taW50ZWRfYW1vdW50GAcgASgEUgxtaW50ZWRBbW91bnQSIAoLY2lyY3VsYXRpb24YCCABKARSC2NpcmN1bGF0aW9uEiQKDmZlZV9zdWJzX2NvdW50GAkgASgEUgxmZWVTdWJzQ291bnQSJgoPZmVlX3N1YnNfYW1vdW50GAogASgEUg1mZWVTdWJzQW1vdW50EjAKFHNpZ251cF9yZXdhcmRzX2NvdW50GAsgASgEUhJzaWdudXBSZXdhcmRzQ291bnQSMgoVc2lnbnVwX3Jld2FyZHNfYW1vdW50GAwgASgEUhNzaWdudXBSZXdhcmRzQW1vdW50EjQKFnJlZmVycmFsX3Jld2FyZHNfY291bnQYDSABKARSFHJlZmVycmFsUmV3YXJkc0NvdW50EjYKF3JlZmVycmFsX3Jld2FyZHNfYW1vdW50GA4gASgEUhVyZWZlcnJhbFJld2FyZHNBbW91bnQSNgoXdmFsaWRhdG9yX3Jld2FyZHNfY291bnQYDyABKARSFXZhbGlkYXRvclJld2FyZHNDb3VudBI4Chh2YWxpZGF0b3JfcmV3YXJkc19hbW91bnQYECABKARSFnZhbGlkYXRvclJld2FyZHNBbW91bnQSQwoedXBkYXRlX3VzZXJfdHJhbnNhY3Rpb25zX2NvdW50GBEgASgEUht1cGRhdGVVc2VyVHJhbnNhY3Rpb25zQ291bnQSIwoNZXhjaGFuZ2VfcmF0ZRgSIAEoAVIMZXhjaGFuZ2VSYXRlEjIKFWNhdXNlc19yZXdhcmRzX2Ftb3VudBgTIAEoBFITY2F1c2VzUmV3YXJkc0Ftb3VudA==');
 @$core.Deprecated('Use blockEventDescriptor instead')
 const BlockEvent$json = const {
   '1': 'BlockEvent',

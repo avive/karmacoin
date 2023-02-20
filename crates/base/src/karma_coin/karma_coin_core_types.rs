@@ -94,6 +94,9 @@ pub struct User {
     /// one-time enc pre-keys for e2e messaging
     #[prost(message, repeated, tag = "7")]
     pub pre_keys: ::prost::alloc::vec::Vec<PreKey>,
+    /// user's current karma score
+    #[prost(uint32, tag = "8")]
+    pub karma_score: u32,
 }
 /// Phone verifier is an entity that verifies account mobile phone numbers
 #[allow(clippy::derive_partial_eq_without_eq)]

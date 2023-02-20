@@ -517,6 +517,7 @@ class User extends $pb.GeneratedMessage {
     ..a<$fixnum.Int64>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'balance', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..pc<TraitScore>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'traitScores', $pb.PbFieldType.PM, subBuilder: TraitScore.create)
     ..pc<PreKey>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'preKeys', $pb.PbFieldType.PM, subBuilder: PreKey.create)
+    ..a<$core.int>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'karmaScore', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
   ;
 
@@ -529,6 +530,7 @@ class User extends $pb.GeneratedMessage {
     $fixnum.Int64? balance,
     $core.Iterable<TraitScore>? traitScores,
     $core.Iterable<PreKey>? preKeys,
+    $core.int? karmaScore,
   }) {
     final _result = create();
     if (accountId != null) {
@@ -551,6 +553,9 @@ class User extends $pb.GeneratedMessage {
     }
     if (preKeys != null) {
       _result.preKeys.addAll(preKeys);
+    }
+    if (karmaScore != null) {
+      _result.karmaScore = karmaScore;
     }
     return _result;
   }
@@ -629,6 +634,15 @@ class User extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(7)
   $core.List<PreKey> get preKeys => $_getList(6);
+
+  @$pb.TagNumber(8)
+  $core.int get karmaScore => $_getIZ(7);
+  @$pb.TagNumber(8)
+  set karmaScore($core.int v) { $_setUnsignedInt32(7, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasKarmaScore() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearKarmaScore() => clearField(8);
 }
 
 class PhoneVerifier extends $pb.GeneratedMessage {
@@ -1923,6 +1937,8 @@ class BlockchainStats extends $pb.GeneratedMessage {
     ..a<$fixnum.Int64>(15, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'validatorRewardsCount', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$fixnum.Int64>(16, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'validatorRewardsAmount', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$fixnum.Int64>(17, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updateUserTransactionsCount', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$core.double>(18, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'exchangeRate', $pb.PbFieldType.OD)
+    ..a<$fixnum.Int64>(19, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'causesRewardsAmount', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
@@ -1945,6 +1961,8 @@ class BlockchainStats extends $pb.GeneratedMessage {
     $fixnum.Int64? validatorRewardsCount,
     $fixnum.Int64? validatorRewardsAmount,
     $fixnum.Int64? updateUserTransactionsCount,
+    $core.double? exchangeRate,
+    $fixnum.Int64? causesRewardsAmount,
   }) {
     final _result = create();
     if (lastBlockTime != null) {
@@ -1997,6 +2015,12 @@ class BlockchainStats extends $pb.GeneratedMessage {
     }
     if (updateUserTransactionsCount != null) {
       _result.updateUserTransactionsCount = updateUserTransactionsCount;
+    }
+    if (exchangeRate != null) {
+      _result.exchangeRate = exchangeRate;
+    }
+    if (causesRewardsAmount != null) {
+      _result.causesRewardsAmount = causesRewardsAmount;
     }
     return _result;
   }
@@ -2173,6 +2197,24 @@ class BlockchainStats extends $pb.GeneratedMessage {
   $core.bool hasUpdateUserTransactionsCount() => $_has(16);
   @$pb.TagNumber(17)
   void clearUpdateUserTransactionsCount() => clearField(17);
+
+  @$pb.TagNumber(18)
+  $core.double get exchangeRate => $_getN(17);
+  @$pb.TagNumber(18)
+  set exchangeRate($core.double v) { $_setDouble(17, v); }
+  @$pb.TagNumber(18)
+  $core.bool hasExchangeRate() => $_has(17);
+  @$pb.TagNumber(18)
+  void clearExchangeRate() => clearField(18);
+
+  @$pb.TagNumber(19)
+  $fixnum.Int64 get causesRewardsAmount => $_getI64(18);
+  @$pb.TagNumber(19)
+  set causesRewardsAmount($fixnum.Int64 v) { $_setInt64(18, v); }
+  @$pb.TagNumber(19)
+  $core.bool hasCausesRewardsAmount() => $_has(18);
+  @$pb.TagNumber(19)
+  void clearCausesRewardsAmount() => clearField(19);
 }
 
 class BlockEvent extends $pb.GeneratedMessage {

@@ -19,6 +19,23 @@ const SubmitTransactionResult$json = const {
 
 /// Descriptor for `SubmitTransactionResult`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List submitTransactionResultDescriptor = $convert.base64Decode('ChdTdWJtaXRUcmFuc2FjdGlvblJlc3VsdBImCiJTVUJNSVRfVFJBTlNBQ1RJT05fUkVTVUxUX1JFSkVDVEVEEAASJwojU1VCTUlUX1RSQU5TQUNUSU9OX1JFU1VMVF9TVUJNSVRURUQQAQ==');
+@$core.Deprecated('Use getExchangeRateRequestDescriptor instead')
+const GetExchangeRateRequest$json = const {
+  '1': 'GetExchangeRateRequest',
+};
+
+/// Descriptor for `GetExchangeRateRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getExchangeRateRequestDescriptor = $convert.base64Decode('ChZHZXRFeGNoYW5nZVJhdGVSZXF1ZXN0');
+@$core.Deprecated('Use getExchangeRateResponseDescriptor instead')
+const GetExchangeRateResponse$json = const {
+  '1': 'GetExchangeRateResponse',
+  '2': const [
+    const {'1': 'exchange_rate', '3': 1, '4': 1, '5': 1, '10': 'exchangeRate'},
+  ],
+};
+
+/// Descriptor for `GetExchangeRateResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getExchangeRateResponseDescriptor = $convert.base64Decode('ChdHZXRFeGNoYW5nZVJhdGVSZXNwb25zZRIjCg1leGNoYW5nZV9yYXRlGAEgASgBUgxleGNoYW5nZVJhdGU=');
 @$core.Deprecated('Use getUserInfoByUserNameRequestDescriptor instead')
 const GetUserInfoByUserNameRequest$json = const {
   '1': 'GetUserInfoByUserNameRequest',

@@ -160,6 +160,7 @@ impl BlockChainService {
             balance: 0,
             trait_scores: vec![],
             pre_keys: vec![],
+            karma_score: 1,
         };
 
         let apply_subsidy = tokenomics
