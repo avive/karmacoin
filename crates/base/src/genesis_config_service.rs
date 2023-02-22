@@ -25,9 +25,6 @@ pub const GENESIS_TIMESTAMP_MS_KEY: &str = "genesis_timestamp_key";
 // Default tx fee amount
 pub const DEF_TX_FEE_KEY: &str = "def_tx_fee_key";
 
-/// Signup reward in KCents in phase 2
-pub const CHAR_TRAITS_KEY: &str = "char_traits_key";
-
 /// Signup reward in KCents in phase 1
 pub const SIGNUP_REWARD_AMOUNT_PHASE1_KEY: &str = "signup_reward_p1_key";
 
@@ -109,11 +106,17 @@ pub const TREASURY_PREMINT_COINS_AMOUNT_KEY: &str = "treasury_premint_coins";
 /// A set of canonical mobile phone verifiers accounts ids
 pub const VERIFIERS_ACCOUNTS_IDS: &str = "verifiers_accounts_ids";
 
-/// This must be true across all traits defined in genesis configs
-pub const KARMA_COIN_AMBASSADOR_CHAR_TRAIT_ID: u32 = 1;
+/// This is the signup trait - user gets it for signing up
+pub const SIGNUP_CHAR_TRAIT_ID: usize = 1;
+
+/// User gets a point in this trait for each sent appreciation / payment
+pub const SPENDER_CHAR_TRAIT_ID: usize = 2;
+
+/// User gets one for each referral who signed up
+pub const AMBASADOR_CHAR_TRAIT_ID: usize = 41;
 
 /// This must be true across all traits defined in genesis configs
-pub const KARMA_COIN_SPENDER_CHAR_TRAIT_ID: u32 = 2;
+pub const NO_CHAR_TRAIT_ID: u32 = 0;
 
 /// This service handles the kc blockchain genesis configuration
 /// It provides default values for development, and merges in values from
@@ -123,6 +126,7 @@ pub struct GenesisConfigService {
     config: Config,
     config_file: Option<String>,
     pub(crate) genesis_data: Option<GetGenesisDataResponse>,
+    char_traits: Option<Vec<CharTrait>>,
 }
 
 #[async_trait::async_trait]
@@ -131,15 +135,50 @@ impl Actor for GenesisConfigService {
         info!("starting...");
 
         // default supported char traits
-        let char_traits: HashMap<String, String> = map! {
-            "0".into() => "None".into(),
-            // note that this must remain constant in all genesis configs:
-            "1".into() => "KarmaCoin Ambassador".into(),
-            "2".into() => "KarmaCoin Spender".into(),
-            "3".into() => "Kind".into(),
-            "4".into() => "Smart".into(),
-            "5".into() => "Sexy".into(),
-        };
+        // todo: update based on canonical list of traits
+        self.char_traits = Some(vec![
+            CharTrait::new(0, "".into(), "".into()),
+            CharTrait::new(1, "a Karma Grower".into(), "😇".into()),
+            CharTrait::new(2, "a Karma Spender".into(), "🖖".into()),
+            CharTrait::new(3, "Kind".into(), "😀".into()),
+            CharTrait::new(4, "Helpful".into(), "😇".into()),
+            CharTrait::new(5, "an Uber Geek".into(), "🖖".into()),
+            CharTrait::new(6, "Awesome".into(), "😎".into()),
+            CharTrait::new(7, "Smart".into(), "🥸".into()),
+            CharTrait::new(8, "Sexy".into(), "😍".into()),
+            CharTrait::new(9, "Patient".into(), "😀".into()),
+            CharTrait::new(10, "Grateful".into(), "😇".into()),
+            CharTrait::new(11, "Spiritual".into(), "🖖".into()),
+            CharTrait::new(12, "Funny".into(), "😎".into()),
+            CharTrait::new(13, "Caring".into(), "🥸".into()),
+            CharTrait::new(14, "Loving".into(), "😍".into()),
+            CharTrait::new(15, "Generous".into(), "😀".into()),
+            CharTrait::new(16, "Honest".into(), "😇".into()),
+            CharTrait::new(17, "Respectful".into(), "🖖".into()),
+            CharTrait::new(18, "Creative".into(), "😎".into()),
+            CharTrait::new(19, "Intelligent".into(), "🥸".into()),
+            CharTrait::new(20, "Loyal".into(), "😍".into()),
+            CharTrait::new(21, "Trustworthy".into(), "😀".into()),
+            CharTrait::new(22, "Humble".into(), "😇".into()),
+            CharTrait::new(23, "Courageous".into(), "🖖".into()),
+            CharTrait::new(24, "Confident".into(), "😎".into()),
+            CharTrait::new(25, "Passionate".into(), "🥸".into()),
+            CharTrait::new(26, "Optimistic".into(), "😍".into()),
+            CharTrait::new(27, "Adventurous".into(), "😀".into()),
+            CharTrait::new(28, "Determined".into(), "😇".into()),
+            CharTrait::new(29, "Selfless".into(), "🖖".into()),
+            CharTrait::new(30, "Self-aware".into(), "😎".into()),
+            CharTrait::new(31, "Self-disciplined".into(), "🥸".into()),
+            CharTrait::new(32, "Mindful".into(), "😍".into()),
+            CharTrait::new(33, "My Guardian Angel".into(), "😍".into()),
+            CharTrait::new(34, "a Fairy".into(), "😍".into()),
+            CharTrait::new(35, "a Wizard".into(), "😍".into()),
+            CharTrait::new(36, "a Witch".into(), "😍".into()),
+            CharTrait::new(37, "a Warrior".into(), "😍".into()),
+            CharTrait::new(38, "a Healer".into(), "😍".into()),
+            CharTrait::new(39, "a Guardian".into(), "😍".into()),
+            CharTrait::new(40, "an Inspiration".into(), "😍".into()),
+        ]);
 
         // default supported verifiers
         let verifiers: HashMap<String, String> = map! {
@@ -157,56 +196,54 @@ impl Actor for GenesisConfigService {
             .unwrap()
             .set_default(DEF_TX_FEE_KEY, 100)
             .unwrap()
-            .set_default(CHAR_TRAITS_KEY, char_traits)
-            .unwrap()
             //
             // 10 KC per signup in phase 1
-            .set_default(SIGNUP_REWARD_AMOUNT_PHASE1_KEY, 10 * (10 ^ 6))
+            .set_default(SIGNUP_REWARD_AMOUNT_PHASE1_KEY, 10_000_000)
             .unwrap()
-            // 100m KCs allocatd for signup rewards phase 1
-            .set_default(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY, 100 * (10 ^ 6))
+            // 100m KCs allocated for signup rewards phase 1
+            .set_default(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY, 100_000_000)
             .unwrap()
             // Signup phase 2 rewards amount - 1 KC
-            .set_default(SIGNUP_REWARD_AMOUNT_PHASE2_KEY, 10 ^ 6)
+            .set_default(SIGNUP_REWARD_AMOUNT_PHASE2_KEY, 1_000_000)
             .unwrap()
             // phase 2 rewards amount allocation
-            .set_default(SIGNUP_REWARD_ALLOCATION_PHASE2_KEY, 200 * (10 ^ 6))
+            .set_default(SIGNUP_REWARD_ALLOCATION_PHASE2_KEY, 200_000_000)
             .unwrap()
             // Phase 3 reward amount per signup - 1000 KCents
             .set_default(SIGNUP_REWARD_AMOUNT_PHASE3_KEY, 1000)
             .unwrap()
             //
             // phase 1 reward amount per referral - 10 KC
-            .set_default(REFERRAL_REWARD_AMOUNT_PHASE1_KEY, 10 * (10 ^ 6))
+            .set_default(REFERRAL_REWARD_AMOUNT_PHASE1_KEY, 10_000_000)
             .unwrap()
             // phase 1 referral rewards allocation - 100M Kcs
-            .set_default(REFERRAL_REWARD_ALLOCATION_PHASE1_KEY, 100 * (10 ^ 6))
+            .set_default(REFERRAL_REWARD_ALLOCATION_PHASE1_KEY, 100_000_000)
             .unwrap()
             // phase 2 referral reward amount - 1 KC
-            .set_default(REFERRAL_REWARD_AMOUNT_PHASE2_KEY, 10 ^ 6)
+            .set_default(REFERRAL_REWARD_AMOUNT_PHASE2_KEY, 10_000_000)
             .unwrap()
             // phase 2 referral rewards allocation - 200M Kcs
-            .set_default(REFERRAL_REWARD_ALLOCATION_PHASE2_KEY, 200 * (10 ^ 6))
+            .set_default(REFERRAL_REWARD_ALLOCATION_PHASE2_KEY, 200_000_000)
             .unwrap()
             //
             // Last block eligible for block rewards
-            .set_default(BLOCK_REWARDS_LAST_BLOCK, 500 * (10 ^ 6))
+            .set_default(BLOCK_REWARDS_LAST_BLOCK, 500_000_000)
             .unwrap()
             // The block reward constant amount
-            .set_default(BLOCK_REWARDS_AMOUNT, 10 ^ 6)
+            .set_default(BLOCK_REWARDS_AMOUNT, 1_000_000)
             .unwrap()
             //
             // Karma rewards amount per user - 10 KC
-            .set_default(KARMA_REWARD_AMOUNT, 10 * (10 ^ 6))
+            .set_default(KARMA_REWARD_AMOUNT, 10_000_000)
             .unwrap()
             // Karma rewards computation period in weeks
             .set_default(KARMA_REWARD_PERIOD, 4)
             .unwrap()
-            // The top 1000 users who didn't get karma reward are eligable every period
+            // The top 1000 users who didn't get karma reward are eligible every period
             .set_default(KARMA_REWARD_TOP_N_USERS_KEY, 1_000)
             .unwrap()
             // karma rewards allocation - 300M KCs
-            .set_default(KARAM_REWARDS_ALLOCATION_KEY, 300 * (10 ^ 6))
+            .set_default(KARAM_REWARDS_ALLOCATION_KEY, 300_000_000)
             .unwrap()
             //
             // The max amount for a tx fee subsidy - 1 KCent
@@ -216,7 +253,7 @@ impl Actor for GenesisConfigService {
             .set_default(TX_FEE_SUBSIDY_MAX_AMOUNT_KEY, 1)
             .unwrap()
             // The amount of coins allocated for phase 1 tx fees - 250M KCs
-            .set_default(TX_FEE_SUBSIDY_ALLOCATION_PHASE1_KEY, 250 * (10 ^ 6))
+            .set_default(TX_FEE_SUBSIDY_ALLOCATION_PHASE1_KEY, 250_000_000)
             .unwrap()
             // The max number of txs that can be subsidised per user
             .set_default(TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY, 10)
@@ -229,13 +266,13 @@ impl Actor for GenesisConfigService {
             .set_default(CAUSES_PER_PERIOD, 20)
             .unwrap()
             // Total coin allocated for causes rewards - 225M KCs
-            .set_default(CAUSES_REWARDS_ALLOCATION, 225 * (10 ^ 6))
+            .set_default(CAUSES_REWARDS_ALLOCATION, 225_000_000)
             .unwrap()
             //
             //
             .set_default(VERIFIERS_ACCOUNTS_IDS, verifiers)
             .unwrap()
-            .set_default(TREASURY_PREMINT_COINS_AMOUNT_KEY, 5 * (10 ^ 6))
+            .set_default(TREASURY_PREMINT_COINS_AMOUNT_KEY, 5_000_000)
             .unwrap()
             // todo: replace it with 3 accounts with 3 different keys
             .set_default(
@@ -285,19 +322,6 @@ impl GenesisConfigService {
         }
 
         Ok(verifiers)
-    }
-
-    /// Returns all supported char traits from genesis data
-    async fn get_char_traits(&mut self) -> Result<Vec<CharTrait>> {
-        let mut traits = vec![];
-        for (id, name) in self.config.get_table(CHAR_TRAITS_KEY).unwrap() {
-            traits.push(CharTrait::new(
-                id.parse().unwrap(),
-                name.into_string().unwrap().as_str(),
-            ));
-        }
-
-        Ok(traits)
     }
 
     pub async fn get(key: String) -> Result<Option<String>> {
@@ -538,8 +562,9 @@ impl Handler<GetGenesisData> for GenesisConfigService {
             treasury_account_id: self.config.get_string(TREASURY_ACCOUNT_ID_KEY)?,
             treasury_account_name: self.config.get_string(TREASURY_ACCOUNT_NAME_KEY)?,
 
-            char_traits: self.get_char_traits().await?,
             verifiers: self.get_verifiers().await?,
+
+            char_traits: self.char_traits.as_ref().unwrap().clone(),
         };
 
         // cache genesis data as it is read-only

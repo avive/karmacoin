@@ -90,6 +90,7 @@ message Block {
 message CharTrait {
     uint32 id = 1;
     string name = 2;
+    string emoji = 3;
 }
 
 message TraitScore {

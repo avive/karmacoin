@@ -10,9 +10,10 @@ use crate::services::blockchain::tokenomics::Tokenomics;
 use crate::services::db_config_service::{
     MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY, USERS_NAMES_COL_FAMILY,
 };
+use base::genesis_config_service::SIGNUP_CHAR_TRAIT_ID;
 use base::karma_coin::karma_coin_core_types::{
-    ExecutionInfo, ExecutionResult, FeeType, SignedTransaction, TransactionEvent, TransactionType,
-    User,
+    ExecutionInfo, ExecutionResult, FeeType, SignedTransaction, TraitScore, TransactionEvent,
+    TransactionType, User,
 };
 use base::signed_trait::SignedTrait;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
@@ -152,13 +153,18 @@ impl BlockChainService {
             });
         }
 
+        let sign_up_trait_score = TraitScore {
+            trait_id: SIGNUP_CHAR_TRAIT_ID as u32,
+            score: 1,
+        };
+
         let mut user = User {
             account_id: Some(account_id.clone()),
             nonce: 1,
             user_name: verification_evidence.requested_user_name.clone(),
             mobile_number: Some(mobile_number.clone()),
             balance: 0,
-            trait_scores: vec![],
+            trait_scores: vec![sign_up_trait_score],
             pre_keys: vec![],
             karma_score: 1,
         };
@@ -180,6 +186,8 @@ impl BlockChainService {
                     error_message: "internal node error".into(),
                 })?;
 
+        info!("Current signup reward amount: {}", signup_reward_amount);
+
         let user_tx_fee = if apply_subsidy { 0 } else { tx_fee };
 
         if !apply_subsidy && tx_fee >= signup_reward_amount {
@@ -199,6 +207,8 @@ impl BlockChainService {
         };
 
         user.balance += signup_reward_amount - user_tx_fee;
+
+        info!("new user balance: {}", user.balance);
 
         // todo: figure out personality trait for joiner - brave? ahead of the curve?
         user.trait_scores = vec![];

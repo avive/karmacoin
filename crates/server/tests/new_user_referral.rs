@@ -8,9 +8,7 @@ extern crate log;
 mod common;
 use common::{create_user, finalize_test, init_test};
 
-use base::genesis_config_service::{
-    GenesisConfigService, KARMA_COIN_AMBASSADOR_CHAR_TRAIT_ID, NET_ID_KEY,
-};
+use base::genesis_config_service::{GenesisConfigService, AMBASADOR_CHAR_TRAIT_ID, NET_ID_KEY};
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{
     GetTransactionsRequest, GetUserInfoByAccountRequest, SubmitTransactionRequest,
@@ -170,7 +168,7 @@ async fn referral_signup_happy_flow_test() {
     assert_eq!(user1.trait_scores.len(), 2);
     assert_eq!(
         user1.trait_scores[0].trait_id,
-        KARMA_COIN_AMBASSADOR_CHAR_TRAIT_ID
+        AMBASADOR_CHAR_TRAIT_ID as u32
     );
     assert_eq!(user1.trait_scores[0].score, 1);
 

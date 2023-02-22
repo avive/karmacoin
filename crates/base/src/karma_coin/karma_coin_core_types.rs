@@ -144,6 +144,8 @@ pub struct CharTrait {
     pub id: u32,
     #[prost(string, tag = "2")]
     pub name: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub emoji: ::prost::alloc::string::String,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]

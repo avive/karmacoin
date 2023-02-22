@@ -39,14 +39,15 @@ impl Tokenomics {
                     .unwrap(),
             )
         } else if self.stats.signup_rewards_amount > signup_rewards_alloc_phase1 {
-            // we are in phase 2
+            // We are in phase 2
             Ok(
                 GenesisConfigService::get_u64(SIGNUP_REWARD_AMOUNT_PHASE2_KEY.into())
                     .await?
                     .unwrap(),
             )
         } else {
-            // we are in phase 1
+            info!("Signup rewards phase I");
+            // We are in phase 1
             Ok(
                 GenesisConfigService::get_u64(SIGNUP_REWARD_AMOUNT_PHASE1_KEY.into())
                     .await?

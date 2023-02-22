@@ -156,6 +156,11 @@ impl Handler<AddTransaction> for MemPoolService {
         tx.verify_signature()?;
         tx.verify_tx_fee()?;
 
+        info!(
+            "adding tx to pool: {:?}",
+            short_hex_string(tx_hash.as_slice())
+        );
+
         self.transactions.insert(tx_hash, tx);
         self.persist().await
     }

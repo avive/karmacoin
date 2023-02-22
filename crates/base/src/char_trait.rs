@@ -5,10 +5,7 @@
 use crate::karma_coin::karma_coin_core_types::CharTrait;
 
 impl CharTrait {
-    pub fn new(id: u32, name: &str) -> Self {
-        CharTrait {
-            id,
-            name: name.to_string(),
-        }
+    pub fn new(id: u32, name: String, emoji: String) -> Self {
+        Self { id, name, emoji }
     }
 }

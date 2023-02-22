@@ -153,7 +153,7 @@ impl ApiServiceTrait for ApiService {
             })?
             .map_err(|e| {
                 info!("internal error: {}", e);
-                Status::internal(format!("failed to process transaction: {}", e))
+                Status::internal(format!("failed to add tx to pool: {}", e))
             })?;
 
         info!("tx added to mempool");
