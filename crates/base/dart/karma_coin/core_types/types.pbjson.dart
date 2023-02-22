@@ -243,11 +243,12 @@ const CharTrait$json = const {
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 13, '10': 'id'},
     const {'1': 'name', '3': 2, '4': 1, '5': 9, '10': 'name'},
+    const {'1': 'emoji', '3': 3, '4': 1, '5': 9, '10': 'emoji'},
   ],
 };
 
 /// Descriptor for `CharTrait`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List charTraitDescriptor = $convert.base64Decode('CglDaGFyVHJhaXQSDgoCaWQYASABKA1SAmlkEhIKBG5hbWUYAiABKAlSBG5hbWU=');
+final $typed_data.Uint8List charTraitDescriptor = $convert.base64Decode('CglDaGFyVHJhaXQSDgoCaWQYASABKA1SAmlkEhIKBG5hbWUYAiABKAlSBG5hbWUSFAoFZW1vamkYAyABKAlSBWVtb2pp');
 @$core.Deprecated('Use traitScoreDescriptor instead')
 const TraitScore$json = const {
   '1': 'TraitScore',

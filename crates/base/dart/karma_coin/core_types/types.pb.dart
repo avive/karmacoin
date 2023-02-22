@@ -883,6 +883,7 @@ class CharTrait extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CharTrait', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'karma_coin.core_types'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.OU3)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'emoji')
     ..hasRequiredFields = false
   ;
 
@@ -890,6 +891,7 @@ class CharTrait extends $pb.GeneratedMessage {
   factory CharTrait({
     $core.int? id,
     $core.String? name,
+    $core.String? emoji,
   }) {
     final _result = create();
     if (id != null) {
@@ -897,6 +899,9 @@ class CharTrait extends $pb.GeneratedMessage {
     }
     if (name != null) {
       _result.name = name;
+    }
+    if (emoji != null) {
+      _result.emoji = emoji;
     }
     return _result;
   }
@@ -938,6 +943,15 @@ class CharTrait extends $pb.GeneratedMessage {
   $core.bool hasName() => $_has(1);
   @$pb.TagNumber(2)
   void clearName() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get emoji => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set emoji($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasEmoji() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearEmoji() => clearField(3);
 }
 
 class TraitScore extends $pb.GeneratedMessage {
