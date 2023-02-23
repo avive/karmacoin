@@ -107,16 +107,17 @@ pub const TREASURY_PREMINT_COINS_AMOUNT_KEY: &str = "treasury_premint_coins";
 pub const VERIFIERS_ACCOUNTS_IDS: &str = "verifiers_accounts_ids";
 
 /// This is the signup trait - user gets it for signing up
-pub const SIGNUP_CHAR_TRAIT_ID: usize = 1;
+pub const SIGNUP_CHAR_TRAIT_ID: u64 = 1;
 
 /// User gets a point in this trait for each sent appreciation / payment
-pub const SPENDER_CHAR_TRAIT_ID: usize = 2;
+pub const SPENDER_CHAR_TRAIT_ID: u64 = 2;
 
-/// User gets one for each referral who signed up
-pub const AMBASADOR_CHAR_TRAIT_ID: usize = 41;
+/// User get
+/// s one for each referral who signed up
+pub const AMBASSADOR_CHAR_TRAIT_ID: u64 = 41;
 
 /// This must be true across all traits defined in genesis configs
-pub const NO_CHAR_TRAIT_ID: u32 = 0;
+pub const NO_CHAR_TRAIT_ID: u64 = 0;
 
 /// This service handles the kc blockchain genesis configuration
 /// It provides default values for development, and merges in values from
@@ -137,8 +138,11 @@ impl Actor for GenesisConfigService {
         // default supported char traits
         // todo: update based on canonical list of traits
         self.char_traits = Some(vec![
+            // no appreciation is index 0
             CharTrait::new(0, "".into(), "".into()),
+            // user gets 1 in this trait for signing up
             CharTrait::new(1, "a Karma Grower".into(), "😇".into()),
+            // User gets this for every sent transaction / appreciation
             CharTrait::new(2, "a Karma Spender".into(), "🖖".into()),
             CharTrait::new(3, "Kind".into(), "😀".into()),
             CharTrait::new(4, "Helpful".into(), "😇".into()),
@@ -178,6 +182,8 @@ impl Actor for GenesisConfigService {
             CharTrait::new(38, "a Healer".into(), "😍".into()),
             CharTrait::new(39, "a Guardian".into(), "😍".into()),
             CharTrait::new(40, "an Inspiration".into(), "😍".into()),
+            // user gets 1 in this trait for each referral who signed up
+            CharTrait::new(40, "a Karma Ambassador".into(), "😍".into()),
         ]);
 
         // default supported verifiers

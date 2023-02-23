@@ -151,10 +151,34 @@ pub struct CharTrait {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TraitScore {
-    #[prost(uint32, tag = "1")]
-    pub trait_id: u32,
-    #[prost(uint32, tag = "2")]
-    pub score: u32,
+    #[prost(uint64, tag = "1")]
+    pub trait_id: u64,
+    #[prost(uint64, tag = "2")]
+    pub score: u64,
+}
+/// new user transactions submitted by users
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct NewUserTransactionV1 {
+    /// Evidence from a valid verifier about the new user
+    #[prost(message, optional, tag = "1")]
+    pub verify_number_response: ::core::option::Option<UserVerificationData>,
+}
+/// Basic payment transaction with optional character appreciation
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PaymentTransactionV1 {
+    /// amount in tokens to transfer
+    #[prost(uint64, tag = "1")]
+    pub amount: u64,
+    /// dest is always a mobile number (of a user or a non-user) no accountId needed.
+    #[prost(message, optional, tag = "2")]
+    pub to: ::core::option::Option<MobileNumber>,
+    /// char trait id set by sender. e.g. smart
+    #[prost(uint64, tag = "3")]
+    pub char_trait_id: u64,
+    #[prost(uint64, tag = "4")]
+    pub community_id: u64,
 }
 /// Update user info
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -170,46 +194,25 @@ pub struct UpdateUserTransactionV1 {
     #[prost(message, optional, tag = "3")]
     pub user_verification_data: ::core::option::Option<UserVerificationData>,
 }
-/// Basic payment transaction with optional character appreciation
+/// The generic transaction payload - unsigned
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct PaymentTransactionV1 {
-    /// dest is always a mobile number (of a user or a non-user) no accountId needed.
-    #[prost(message, optional, tag = "1")]
-    pub to: ::core::option::Option<MobileNumber>,
-    /// amount in tokens to transfer
-    #[prost(uint64, tag = "2")]
-    pub amount: u64,
-    /// char trait id set by sender. e.g. smart
-    #[prost(uint32, tag = "3")]
-    pub char_trait_id: u32,
-}
-/// Created and signed by a verifier to attest that an account owns a mobile number
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct UserVerificationData {
-    #[prost(message, optional, tag = "1")]
-    pub verifier_account_id: ::core::option::Option<AccountId>,
-    #[prost(uint64, tag = "2")]
+pub struct TransactionBody {
+    /// time transaction was signed
+    #[prost(uint64, tag = "1")]
     pub timestamp: u64,
-    #[prost(enumeration = "VerificationResult", tag = "3")]
-    pub verification_result: i32,
+    /// tx nonce
+    #[prost(uint64, tag = "2")]
+    pub nonce: u64,
+    /// network fee provided by sender
+    #[prost(uint64, tag = "3")]
+    pub fee: u64,
+    /// binary transaction data
     #[prost(message, optional, tag = "4")]
-    pub account_id: ::core::option::Option<AccountId>,
-    #[prost(message, optional, tag = "5")]
-    pub mobile_number: ::core::option::Option<MobileNumber>,
-    #[prost(string, tag = "7")]
-    pub requested_user_name: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "8")]
-    pub signature: ::core::option::Option<Signature>,
-}
-/// new user transactions submitted by users
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct NewUserTransactionV1 {
-    /// Evidence from a valid verifier about the new user
-    #[prost(message, optional, tag = "1")]
-    pub verify_number_response: ::core::option::Option<UserVerificationData>,
+    pub transaction_data: ::core::option::Option<TransactionData>,
+    /// network id to avoid confusion with testnets
+    #[prost(uint32, tag = "5")]
+    pub net_id: u32,
 }
 /// serialized transaction data
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -230,23 +233,30 @@ pub struct SignedTransaction {
     /// account this tx is signed by
     #[prost(message, optional, tag = "1")]
     pub signer: ::core::option::Option<AccountId>,
-    /// time transaction was signed
+    /// Transaction data
+    #[prost(bytes = "vec", tag = "2")]
+    pub transaction_body: ::prost::alloc::vec::Vec<u8>,
+    /// signer signature on all of the above data
+    #[prost(message, optional, tag = "3")]
+    pub signature: ::core::option::Option<Signature>,
+}
+/// Created and signed by a verifier to attest that an account owns a mobile number
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UserVerificationData {
+    #[prost(message, optional, tag = "1")]
+    pub verifier_account_id: ::core::option::Option<AccountId>,
     #[prost(uint64, tag = "2")]
     pub timestamp: u64,
-    /// tx nonce
-    #[prost(uint64, tag = "3")]
-    pub nonce: u64,
-    /// network fee provided by sender
-    #[prost(uint64, tag = "4")]
-    pub fee: u64,
-    /// binary transaction data
+    #[prost(enumeration = "VerificationResult", tag = "3")]
+    pub verification_result: i32,
+    #[prost(message, optional, tag = "4")]
+    pub account_id: ::core::option::Option<AccountId>,
     #[prost(message, optional, tag = "5")]
-    pub transaction_data: ::core::option::Option<TransactionData>,
-    /// network id to avoid confusion with testnets
-    #[prost(uint32, tag = "6")]
-    pub net_id: u32,
-    /// signer signature on all of the above data
-    #[prost(message, optional, tag = "7")]
+    pub mobile_number: ::core::option::Option<MobileNumber>,
+    #[prost(string, tag = "7")]
+    pub requested_user_name: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "8")]
     pub signature: ::core::option::Option<Signature>,
 }
 /// a collection of signed transactions
@@ -301,6 +311,8 @@ pub struct TransactionEvent {
     #[prost(uint64, tag = "10")]
     pub referral_reward: u64,
     #[prost(uint64, tag = "11")]
+    pub appreciation_char_trait_idx: u64,
+    #[prost(uint64, tag = "12")]
     pub fee: u64,
 }
 /// A collection of events for a transaction
@@ -328,43 +340,46 @@ pub struct BlockchainStats {
     /// total number of payment transactions
     #[prost(uint64, tag = "4")]
     pub payments_transactions_count: u64,
-    /// total number of verified user accounts
+    /// total number of payment transactions with an appreciation
     #[prost(uint64, tag = "5")]
+    pub appreciations_transactions_count: u64,
+    /// total number of verified user accounts
+    #[prost(uint64, tag = "6")]
     pub users_count: u64,
     /// total tx fees collected by block producers
-    #[prost(uint64, tag = "6")]
+    #[prost(uint64, tag = "7")]
     pub fees_amount: u64,
     /// total number of kCents minted by the protocol since genesis
-    #[prost(uint64, tag = "7")]
+    #[prost(uint64, tag = "8")]
     pub minted_amount: u64,
     /// total number of kCents in circulation by minting. Not including pre-mint
-    #[prost(uint64, tag = "8")]
+    #[prost(uint64, tag = "9")]
     pub circulation: u64,
     /// total tx fee subsidies issued by the protocol
-    #[prost(uint64, tag = "9")]
-    pub fee_subs_count: u64,
     #[prost(uint64, tag = "10")]
-    pub fee_subs_amount: u64,
+    pub fee_subs_count: u64,
     #[prost(uint64, tag = "11")]
-    pub signup_rewards_count: u64,
+    pub fee_subs_amount: u64,
     #[prost(uint64, tag = "12")]
-    pub signup_rewards_amount: u64,
+    pub signup_rewards_count: u64,
     #[prost(uint64, tag = "13")]
-    pub referral_rewards_count: u64,
+    pub signup_rewards_amount: u64,
     #[prost(uint64, tag = "14")]
-    pub referral_rewards_amount: u64,
+    pub referral_rewards_count: u64,
     #[prost(uint64, tag = "15")]
-    pub validator_rewards_count: u64,
+    pub referral_rewards_amount: u64,
     #[prost(uint64, tag = "16")]
+    pub validator_rewards_count: u64,
+    #[prost(uint64, tag = "17")]
     pub validator_rewards_amount: u64,
     /// total number of payment transactions
-    #[prost(uint64, tag = "17")]
+    #[prost(uint64, tag = "18")]
     pub update_user_transactions_count: u64,
     /// estimated KC to USD exchange rate
-    #[prost(double, tag = "18")]
+    #[prost(double, tag = "19")]
     pub exchange_rate: f64,
     /// amount of rewards paid to causes
-    #[prost(uint64, tag = "19")]
+    #[prost(uint64, tag = "20")]
     pub causes_rewards_amount: u64,
 }
 /// Block events
@@ -384,16 +399,18 @@ pub struct BlockEvent {
     #[prost(uint64, tag = "6")]
     pub payments_count: u64,
     #[prost(uint64, tag = "7")]
-    pub user_updates_count: u64,
+    pub appreciations_count: u64,
     #[prost(uint64, tag = "8")]
-    pub fees_amount: u64,
+    pub user_updates_count: u64,
     #[prost(uint64, tag = "9")]
-    pub signup_rewards_amount: u64,
+    pub fees_amount: u64,
     #[prost(uint64, tag = "10")]
-    pub referral_rewards_amount: u64,
+    pub signup_rewards_amount: u64,
     #[prost(uint64, tag = "11")]
-    pub referral_rewards_count: u64,
+    pub referral_rewards_amount: u64,
     #[prost(uint64, tag = "12")]
+    pub referral_rewards_count: u64,
+    #[prost(uint64, tag = "13")]
     pub reward: u64,
 }
 /// Supported signature schemes

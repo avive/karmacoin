@@ -73,18 +73,19 @@ impl BlockChainService {
     /// Process a user update transaction
     pub(crate) async fn process_update_transaction(
         &mut self,
-        transaction: &SignedTransaction,
+        signed_transaction: &SignedTransaction,
         tokenomics: &Tokenomics,
         event: &mut TransactionEvent,
     ) -> Result<()> {
-        let account_id = transaction
+        let account_id = signed_transaction
             .signer
             .as_ref()
             .ok_or_else(|| anyhow!("missing account id in tx"))?;
-        let tx_hash = transaction.get_hash()?;
+        let tx_hash = signed_transaction.get_hash()?;
 
         // validate tx syntax, fields, signature, net_id before processing it
-        transaction.validate(0).await?;
+        signed_transaction.validate().await?;
+        let tx_body = signed_transaction.get_body()?;
 
         // Check user account id is not already on chain
         let user_data = DatabaseService::read(ReadItem {
@@ -99,8 +100,10 @@ impl BlockChainService {
 
         let mut user = User::decode(user_data.unwrap().0.as_ref())?;
 
+        tx_body.validate(user.nonce).await?;
+
         // check tx fee
-        let tx_fee = transaction.fee;
+        let tx_fee = tx_body.fee;
         let apply_subsidy = tokenomics
             .should_subsidise_transaction_fee(0, tx_fee, TransactionType::UpdateUserV1)
             .await?;
@@ -139,7 +142,7 @@ impl BlockChainService {
         event.fee_type = fee_type as i32;
         event.result = ExecutionResult::Executed as i32;
 
-        let update_user_tx = transaction.get_update_user_transaction_v1()?;
+        let update_user_tx = tx_body.get_update_user_transaction_v1()?;
         update_user_tx.verify_syntax()?;
 
         let requested_nickname = update_user_tx.nickname;
@@ -211,9 +214,12 @@ impl BlockChainService {
         })
         .await?;
 
-        let mut tx_data = Vec::with_capacity(transaction.encoded_len());
-        info!("binary transaction size: {}", transaction.encoded_len());
-        transaction.encode(&mut tx_data)?;
+        let mut tx_data = Vec::with_capacity(signed_transaction.encoded_len());
+        info!(
+            "binary transaction size: {}",
+            signed_transaction.encoded_len()
+        );
+        signed_transaction.encode(&mut tx_data)?;
 
         // index the transaction in the db by hash
         DatabaseService::write(WriteItem {
@@ -227,8 +233,11 @@ impl BlockChainService {
         .await?;
 
         // index the transaction in the db for the user's account id
-        self.index_transaction_by_account_id(transaction, Bytes::from(account_id.data.to_vec()))
-            .await?;
+        self.index_transaction_by_account_id(
+            signed_transaction,
+            Bytes::from(account_id.data.to_vec()),
+        )
+        .await?;
 
         Ok(())
     }

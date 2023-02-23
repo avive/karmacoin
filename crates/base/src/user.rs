@@ -30,7 +30,7 @@ impl User {
     }
 
     /// Inc the trait score for a given trait
-    pub fn inc_trait_score(&mut self, trait_id: u32) {
+    pub fn inc_trait_score(&mut self, trait_id: u64) {
         let mut found = false;
         for trait_score in self.trait_scores.iter_mut() {
             if trait_score.trait_id == trait_id {

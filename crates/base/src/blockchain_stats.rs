@@ -27,6 +27,7 @@ impl BlockchainStats {
             // todo: get this from external data file
             exchange_rate: 0.2,
             causes_rewards_amount: 0,
+            appreciations_transactions_count: 0,
         }
     }
 }

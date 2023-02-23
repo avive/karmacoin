@@ -15,10 +15,9 @@ use base::karma_coin::karma_coin_api::{
 use base::karma_coin::karma_coin_core_types::TransactionStatus::OnChain;
 use base::karma_coin::karma_coin_core_types::TransactionType::PaymentV1;
 use base::karma_coin::karma_coin_core_types::{
-    AccountId, PaymentTransactionV1, SignedTransaction, TransactionData,
+    AccountId, PaymentTransactionV1, SignedTransaction, TransactionBody, TransactionData,
 };
 use base::server_config_service::DEFAULT_GRPC_SERVER_PORT;
-use base::signed_trait::SignedTrait;
 use chrono::Utc;
 use prost::Message;
 use server::server_service::{ServerService, Startup};
@@ -56,6 +55,7 @@ async fn payment_tx_happy_flow() {
         to: Some(user2_number.clone()),
         amount: payment_amount,
         char_trait_id,
+        community_id: 0,
     };
 
     let user1_account_id = AccountId {
@@ -99,22 +99,29 @@ async fn payment_tx_happy_flow() {
         .unwrap()
         .unwrap() as u32;
 
-    let mut signed_tx = SignedTransaction {
-        signer: Some(user1_account_id.clone()),
+    let tx_body = TransactionBody {
         timestamp: Utc::now().timestamp_millis() as u64,
-        nonce: 2,
+        nonce: 1,
         fee: 10,
         transaction_data: Some(TransactionData {
             transaction_data: buf,
             transaction_type: PaymentV1 as i32,
         }),
         net_id,
+    };
+
+    let mut buf1 = Vec::with_capacity(tx_body.encoded_len());
+    tx_body.encode(&mut buf1).unwrap();
+
+    let mut signed_tx = SignedTransaction {
+        signer: Some(user1_account_id.clone()),
+        transaction_body: buf1,
         signature: None,
     };
 
     signed_tx.signature = Some(signed_tx.sign(&user1_key_pair.to_ed2559_keypair()).unwrap());
 
-    signed_tx.validate(1).await.expect("invalid transaction");
+    signed_tx.validate().await.expect("invalid transaction");
 
     let resp = api_client
         .submit_transaction(SubmitTransactionRequest {

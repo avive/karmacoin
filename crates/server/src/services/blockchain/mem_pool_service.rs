@@ -11,7 +11,6 @@ use base::karma_coin::karma_coin_core_types::{MemPool, SignedTransaction};
 use base::server_config_service::{
     ServerConfigService, MEM_POOL_MAX_ITEMS_KEY, MEM_POOL_MAX_TX_AGE_HOURS,
 };
-use base::signed_trait::SignedTrait;
 use bytes::Bytes;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use prost::Message;
@@ -68,7 +67,15 @@ impl Handler<RemoveOldTransactions> for MemPoolService {
         let duration = chrono::Duration::hours(max_age as i64).num_milliseconds() as u64;
         let txs = self.transactions.clone();
         for (tx_hash, tx) in txs.iter() {
-            if tx.timestamp < (chrono::Utc::now().timestamp_millis() as u64 - duration) {
+            let tx_body = match tx.get_body() {
+                Ok(tx_body) => tx_body,
+                Err(_) => {
+                    info!("failed to get tx body... deal with this case");
+                    continue;
+                }
+            };
+
+            if tx_body.timestamp < (chrono::Utc::now().timestamp_millis() as u64 - duration) {
                 self.transactions.remove(tx_hash);
             }
         }
@@ -94,7 +101,7 @@ impl Handler<GetTransactions> for MemPoolService {
 #[message(result = "Result<()>")]
 pub(crate) struct RemoveOnChainTransactions;
 
-/// Remove from the pool all transactions that are already onchain
+/// Remove from the pool all transactions that are already on-chain
 #[async_trait::async_trait]
 impl Handler<RemoveOnChainTransactions> for MemPoolService {
     async fn handle(
@@ -150,18 +157,16 @@ impl Handler<AddTransaction> for MemPoolService {
             return Err(anyhow!("tx already on chain"));
         }
 
-        // basic tx validation before inserting to mem pool
-        tx.verify_syntax().await?;
-        tx.verify_timestamp()?;
-        tx.verify_signature()?;
-        tx.verify_tx_fee()?;
-
-        info!(
-            "adding tx to pool: {:?}",
-            short_hex_string(tx_hash.as_slice())
-        );
+        // basic common tx validation before inserting to mem pool
+        // note that we don't check nonce here as txs with 'wrong' nonce
+        // may be good after other transactions are processed in the pool
+        tx.validate().await?;
+        let tx_body = tx.get_body()?;
+        tx_body.verify_timestamp()?;
+        tx_body.verify_tx_fee()?;
 
         self.transactions.insert(tx_hash, tx);
+
         self.persist().await
     }
 }

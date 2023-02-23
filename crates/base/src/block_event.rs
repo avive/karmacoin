@@ -16,6 +16,7 @@ impl BlockEvent {
             block_hash: vec![],
             signups_count: 0,
             payments_count: 0,
+            appreciations_count: 0,
             fees_amount: 0,
             signup_rewards_amount: 0,
             referral_rewards_amount: 0,

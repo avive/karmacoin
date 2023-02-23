@@ -8,7 +8,7 @@ use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{SubmitTransactionRequest, SubmitTransactionResult};
 use base::karma_coin::karma_coin_core_types::TransactionType::NewUserV1;
 use base::karma_coin::karma_coin_core_types::{
-    AccountId, KeyPair, MobileNumber, VerificationResult,
+    AccountId, KeyPair, MobileNumber, TransactionBody, VerificationResult,
 };
 use base::karma_coin::karma_coin_core_types::{
     NewUserTransactionV1, SignedTransaction, TransactionData,
@@ -79,8 +79,7 @@ pub async fn create_user(
         .unwrap()
         .unwrap() as u32;
 
-    let mut signed_tx = SignedTransaction {
-        signer: Some(account_id.clone()),
+    let tx_body = TransactionBody {
         timestamp: Utc::now().timestamp_millis() as u64,
         nonce: 1,
         fee: 10,
@@ -89,12 +88,20 @@ pub async fn create_user(
             transaction_type: NewUserV1 as i32,
         }),
         net_id,
+    };
+
+    let mut buf1 = Vec::with_capacity(tx_body.encoded_len());
+    tx_body.encode(&mut buf1).unwrap();
+
+    let mut signed_tx = SignedTransaction {
+        signer: Some(account_id.clone()),
+        transaction_body: buf1,
         signature: None,
     };
 
     signed_tx.signature = Some(signed_tx.sign(&user_ed_key_pair).unwrap());
 
-    signed_tx.validate(0).await.expect("invalid transaction");
+    signed_tx.validate().await.expect("invalid transaction");
     info!("new user tx signature's valid");
 
     let mut api_client = ApiServiceClient::connect("http://[::1]:9080")

@@ -5,6 +5,7 @@
 use anyhow::Result;
 use bytes::Bytes;
 
+use crate::base::signed_trait::SignedTrait;
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::tokenomics::Tokenomics;
 use crate::services::db_config_service::{
@@ -12,10 +13,9 @@ use crate::services::db_config_service::{
 };
 use base::genesis_config_service::SIGNUP_CHAR_TRAIT_ID;
 use base::karma_coin::karma_coin_core_types::{
-    ExecutionInfo, ExecutionResult, FeeType, SignedTransaction, TraitScore, TransactionEvent,
-    TransactionType, User,
+    ExecutionInfo, ExecutionResult, FeeType, SignedTransaction, TraitScore, TransactionBody,
+    TransactionEvent, TransactionType, User,
 };
-use base::signed_trait::SignedTrait;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use prost::Message;
 
@@ -35,40 +35,57 @@ impl BlockChainService {
     /// This method will not add the tx to a block and is used as part of block creation flow
     pub(crate) async fn process_new_user_transaction(
         &mut self,
-        transaction: &SignedTransaction,
+        signed_transaction: &SignedTransaction,
         tokenomics: &Tokenomics,
         event: &mut TransactionEvent,
     ) -> Result<NewUserProcessingResponse, NewUserProcessingError> {
-        let account_id = transaction
-            .signer
-            .as_ref()
-            .ok_or_else(|| NewUserProcessingError {
+        let account_id =
+            signed_transaction
+                .signer
+                .as_ref()
+                .ok_or_else(|| NewUserProcessingError {
+                    execution_info: ExecutionInfo::InvalidData,
+                    error_message: "Missing verification evidence".into(),
+                })?;
+
+        let tx_hash = signed_transaction
+            .get_hash()
+            .map_err(|_| NewUserProcessingError {
                 execution_info: ExecutionInfo::InvalidData,
                 error_message: "Missing verification evidence".into(),
             })?;
 
-        let tx_hash = transaction.get_hash().map_err(|_| NewUserProcessingError {
-            execution_info: ExecutionInfo::InvalidData,
-            error_message: "Missing verification evidence".into(),
-        })?;
-
         // validate tx syntax, fields, signature, net_id before processing it
-        transaction
-            .validate(0)
+        // new user transaction should always have nonce of 0
+        signed_transaction
+            .validate()
             .await
             .map_err(|_| NewUserProcessingError {
                 execution_info: ExecutionInfo::InvalidData,
                 error_message: "Invalid transaction data".into(),
             })?;
 
-        let tx_fee = transaction.fee;
-        let new_user_tx =
-            transaction
-                .get_new_user_transaction_v1()
+        let tx: TransactionBody =
+            signed_transaction
+                .get_body()
                 .map_err(|_| NewUserProcessingError {
                     execution_info: ExecutionInfo::InvalidData,
-                    error_message: "Invalid new user tx data".into(),
+                    error_message: "Invalid transaction data".into(),
                 })?;
+
+        // Validate the Transaction object
+        tx.validate(0).await.map_err(|_| NewUserProcessingError {
+            execution_info: ExecutionInfo::InvalidData,
+            error_message: "Invalid transaction data".into(),
+        })?;
+
+        let tx_fee = tx.fee;
+        let new_user_tx = tx
+            .get_new_user_transaction_v1()
+            .map_err(|_| NewUserProcessingError {
+                execution_info: ExecutionInfo::InvalidData,
+                error_message: "Invalid new user tx data".into(),
+            })?;
 
         let verification_evidence =
             new_user_tx
@@ -154,7 +171,7 @@ impl BlockChainService {
         }
 
         let sign_up_trait_score = TraitScore {
-            trait_id: SIGNUP_CHAR_TRAIT_ID as u32,
+            trait_id: SIGNUP_CHAR_TRAIT_ID,
             score: 1,
         };
 
@@ -272,10 +289,13 @@ impl BlockChainService {
             error_message: "internal node error".into(),
         })?;
 
-        let mut tx_data = Vec::with_capacity(transaction.encoded_len());
-        info!("binary transaction size: {}", transaction.encoded_len());
+        let mut tx_data = Vec::with_capacity(signed_transaction.encoded_len());
+        info!(
+            "binary transaction size: {}",
+            signed_transaction.encoded_len()
+        );
 
-        transaction
+        signed_transaction
             .encode(&mut tx_data)
             .map_err(|_| NewUserProcessingError {
                 execution_info: ExecutionInfo::InternalNodeError,
@@ -298,12 +318,15 @@ impl BlockChainService {
         })?;
 
         // index the transaction in the db by signer account id
-        self.index_transaction_by_account_id(transaction, Bytes::from(account_id.data.to_vec()))
-            .await
-            .map_err(|_| NewUserProcessingError {
-                execution_info: ExecutionInfo::InternalNodeError,
-                error_message: "internal node error".into(),
-            })?;
+        self.index_transaction_by_account_id(
+            signed_transaction,
+            Bytes::from(account_id.data.to_vec()),
+        )
+        .await
+        .map_err(|_| NewUserProcessingError {
+            execution_info: ExecutionInfo::InternalNodeError,
+            error_message: "internal node error".into(),
+        })?;
 
         event.fee_type = fee_type as i32;
         event.fee = tx_fee;

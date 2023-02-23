@@ -23,6 +23,7 @@ impl TransactionEvent {
             signup_reward: 0,
             result: ExecutionResult::Executed as i32,
             info: ExecutionInfo::Unknown as i32,
+            appreciation_char_trait_idx: 0,
             fee: 0,
         }
     }

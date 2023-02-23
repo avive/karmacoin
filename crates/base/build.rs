@@ -28,6 +28,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "#[derive(serde::Serialize, serde::Deserialize)]",
         )
         .type_attribute(
+            "Transaction",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
+        .type_attribute(
             "SignedTransactionsHashes",
             "#[derive(serde::Serialize, serde::Deserialize)]",
         )

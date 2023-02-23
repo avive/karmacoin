@@ -8,7 +8,7 @@ use crate::services::db_config_service::{
     MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY,
 };
 use anyhow::{anyhow, Result};
-use base::genesis_config_service::{AMBASADOR_CHAR_TRAIT_ID, SPENDER_CHAR_TRAIT_ID};
+use base::genesis_config_service::{AMBASSADOR_CHAR_TRAIT_ID, SPENDER_CHAR_TRAIT_ID};
 use base::karma_coin::karma_coin_core_types::{
     ExecutionResult, FeeType, PaymentTransactionV1, SignedTransaction, TransactionEvent,
     TransactionType, User,
@@ -20,8 +20,10 @@ use std::collections::HashMap;
 
 /// Get the on-chain User for the tx payee.
 /// Returns None if no user exists for the payee mobile number
-pub(crate) async fn get_payee_user(tx: &SignedTransaction) -> Result<Option<User>> {
-    let payment_tx: PaymentTransactionV1 = tx.get_payment_transaction_v1()?;
+pub(crate) async fn get_payee_user(signed_transaction: &SignedTransaction) -> Result<Option<User>> {
+    let tx_body = signed_transaction.get_body()?;
+
+    let payment_tx: PaymentTransactionV1 = tx_body.get_payment_transaction_v1()?;
     let mobile_number: String = payment_tx.to.unwrap().number;
 
     // locate payee by mobile number
@@ -54,20 +56,26 @@ impl BlockChainService {
     /// This is a helper method for the block creator and is used as part of block creation flow
     pub(crate) async fn process_payment_transaction(
         &mut self,
-        transaction: &SignedTransaction,
+        signed_transaction: &SignedTransaction,
         payer: &mut User,
         payee: &mut User,
         sign_ups: &mut HashMap<Vec<u8>, SignedTransaction>,
         tokenomics: &Tokenomics,
         event: &mut TransactionEvent,
     ) -> Result<()> {
-        transaction.validate(payer.nonce).await?;
+        // validate nonce
 
-        info!("Processing payment transaction: {}", transaction);
+        // validate the transaction
+        signed_transaction.validate().await?;
+        let tx_body = signed_transaction.get_body()?;
+        tx_body.validate(payer.nonce).await?;
+
+        info!("Processing payment transaction: {}", signed_transaction);
+        info!("Body: {}", tx_body);
         info!("From user: {}", payer);
         info!("To user: {}", payee);
 
-        let payment_tx: PaymentTransactionV1 = transaction.get_payment_transaction_v1()?;
+        let payment_tx: PaymentTransactionV1 = tx_body.get_payment_transaction_v1()?;
         payment_tx.verify_syntax()?;
 
         info!("Payment data: {}", payment_tx);
@@ -76,11 +84,11 @@ impl BlockChainService {
         let payment = payment_tx.amount;
 
         let apply_subsidy = tokenomics
-            .should_subsidise_transaction_fee(0, transaction.fee, TransactionType::PaymentV1)
+            .should_subsidise_transaction_fee(0, tx_body.fee, TransactionType::PaymentV1)
             .await?;
 
         // actual fee amount to be paid by the user. 0 if fee is subsidised by the protocol
-        let user_tx_fee = if apply_subsidy { 0 } else { transaction.fee };
+        let user_tx_fee = if apply_subsidy { 0 } else { tx_body.fee };
 
         let fee_type = if apply_subsidy {
             FeeType::Mint
@@ -103,6 +111,7 @@ impl BlockChainService {
         if payment_tx.char_trait_id != 0 {
             // payment includes an appreciation for a character trait - update user character trait points
             payee.inc_trait_score(payment_tx.char_trait_id);
+            event.appreciation_char_trait_idx = payment_tx.char_trait_id as u64;
         }
 
         let referral_reward = tokenomics.get_referral_reward_amount().await?;
@@ -119,18 +128,21 @@ impl BlockChainService {
             payer.balance += referral_reward;
 
             // Give payer karma points for helping to grow the network
-            payer.inc_trait_score(AMBASADOR_CHAR_TRAIT_ID as u32);
+            payer.inc_trait_score(AMBASSADOR_CHAR_TRAIT_ID);
         };
 
         // Give payer karma points for spending karma coins
-        payer.inc_trait_score(SPENDER_CHAR_TRAIT_ID as u32);
+        payer.inc_trait_score(SPENDER_CHAR_TRAIT_ID);
 
         // index the transaction in the db by hash
-        let mut tx_data = Vec::with_capacity(transaction.encoded_len());
-        info!("binary transaction size: {}", transaction.encoded_len());
+        let mut tx_data = Vec::with_capacity(signed_transaction.encoded_len());
+        info!(
+            "binary transaction size: {}",
+            signed_transaction.encoded_len()
+        );
 
-        transaction.encode(&mut tx_data)?;
-        let tx_hash = transaction.get_hash()?;
+        signed_transaction.encode(&mut tx_data)?;
+        let tx_hash = signed_transaction.get_hash()?;
         DatabaseService::write(WriteItem {
             data: DataItem {
                 key: tx_hash.clone(),
@@ -143,13 +155,13 @@ impl BlockChainService {
 
         // index the transaction in the db for both payer and payee
         self.index_transaction_by_account_id(
-            transaction,
+            signed_transaction,
             Bytes::from(payer.account_id.as_ref().unwrap().data.to_vec()),
         )
         .await?;
 
         self.index_transaction_by_account_id(
-            transaction,
+            signed_transaction,
             Bytes::from(payee.account_id.as_ref().unwrap().data.to_vec()),
         )
         .await?;
@@ -182,7 +194,7 @@ impl BlockChainService {
 
         event.referral_reward = referral_reward;
         event.fee_type = fee_type as i32;
-        event.fee = transaction.fee;
+        event.fee = tx_body.fee;
         event.result = ExecutionResult::Executed as i32;
 
         Ok(())

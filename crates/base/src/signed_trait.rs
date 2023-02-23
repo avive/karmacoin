@@ -2,10 +2,13 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use crate::hex_utils::hex_string;
 use crate::karma_coin::karma_coin_core_types::Signature;
 use anyhow::{anyhow, Result};
 use ed25519_dalek::ed25519::signature::Signer;
 use ed25519_dalek::{Keypair, Verifier};
+use log::*;
+use orion::hazardous::hash::sha2::sha256::Sha256;
 
 pub trait SignedTrait {
     /// return the data of the message that is signed by this type
@@ -19,9 +22,25 @@ pub trait SignedTrait {
 
     /// Verify the signature of this type
     fn verify_signature(&self) -> Result<()> {
+        use ed25519_dalek::ed25519::signature::Signature;
+
+        let signature = &self.get_signature()?;
+        let message = &self.get_sign_message()?;
+        let pub_key = &self.get_public_key().unwrap();
+
+        info!("Debug info:");
+
+        // message hash
+        let digest = Sha256::digest(message)?;
+        let hash = digest.as_ref().to_vec();
+
+        info!("Message hash: {}", hex_string(&hash));
+        info!("Signature: {}", hex_string(signature.as_bytes()));
+        info!("Pub key: {}", hex_string(pub_key.to_bytes().as_ref()));
+
         self.get_public_key()?
             .verify(&self.get_sign_message()?, &self.get_signature()?)
-            .map_err(|_| anyhow!("invalid signature"))
+            .map_err(|e| anyhow!("invalid signature: {:?}", e))
     }
 
     /// Sign the message of this type. Note that signature will not set on the type

@@ -94,8 +94,8 @@ message CharTrait {
 }
 
 message TraitScore {
-    uint32 trait_id = 1;
-    uint32 score = 2;
+    uint64 trait_id = 1;
+    uint64 score = 2;
 }
 
 /// transactions
@@ -104,6 +104,20 @@ enum TransactionType {
     TRANSACTION_TYPE_PAYMENT_V1 = 0;
     TRANSACTION_TYPE_NEW_USER_V1 = 1;
     TRANSACTION_TYPE_UPDATE_USER_V1 = 2;
+}
+
+// new user transactions submitted by users
+message NewUserTransactionV1 {
+    // Evidence from a valid verifier about the new user
+    UserVerificationData verify_number_response = 1;
+}
+
+// Basic payment transaction with optional character appreciation
+message PaymentTransactionV1 {
+    uint64 amount = 1; // amount in tokens to transfer
+    MobileNumber to = 2; // dest is always a mobile number (of a user or a non-user) no accountId needed.
+    uint64 char_trait_id = 3; // char trait id set by sender. e.g. smart
+    uint64 community_id = 4;
 }
 
 // Update user info
@@ -119,13 +133,27 @@ message UpdateUserTransactionV1 {
     UserVerificationData user_verification_data = 3;
 }
 
-// Basic payment transaction with optional character appreciation
-message PaymentTransactionV1 {
-    MobileNumber to = 1; // dest is always a mobile number (of a user or a non-user) no accountId needed.
-    uint64 amount = 2; // amount in tokens to transfer
-    uint32 char_trait_id = 3; // char trait id set by sender. e.g. smart
+// The generic transaction payload - unsigned
+message TransactionBody {
+    uint64 timestamp = 1; // time transaction was signed
+    uint64 nonce = 2; // tx nonce
+    uint64 fee = 3; // network fee provided by sender
+    TransactionData transaction_data = 4; // binary transaction data
+    uint32 net_id = 5; // network id to avoid confusion with testnets
 }
 
+// serialized transaction data
+message TransactionData {
+    bytes transaction_data = 1; // binary transaction data (e.g. NewUserTxV1, PaymentV1, etc...)
+    TransactionType transaction_type = 2; // transaction type for deserialization
+}
+
+
+message SignedTransaction {
+    AccountId signer = 1; // account this tx is signed by
+    bytes transaction_body = 2; // Transaction data
+    Signature signature = 3; // signer signature on all of the above data
+}
 
 enum VerificationResult {
     VERIFICATION_RESULT_UNSPECIFIED = 0;
@@ -136,7 +164,6 @@ enum VerificationResult {
     VERIFICATION_RESULT_INVALID_SIGNATURE = 5; // bad client signature
     VERIFICATION_RESULT_ACCOUNT_MISMATCH = 6; // different account associated with phone number
 }
-
 
 // Created and signed by a verifier to attest that an account owns a mobile number
 message UserVerificationData {
@@ -149,34 +176,12 @@ message UserVerificationData {
     Signature signature = 8;
 }
 
-// new user transactions submitted by users
-message NewUserTransactionV1 {
-    // Evidence from a valid verifier about the new user
-    UserVerificationData verify_number_response = 1;
-}
-
-// serialized transaction data
-message TransactionData {
-    bytes transaction_data = 1; // binary transaction data (e.g. NewUserTxV1, PaymentV1, etc...)
-    TransactionType transaction_type = 2; // transaction type for deserialization
-}
-
 enum TransactionStatus {
     TRANSACTION_STATUS_UNKNOWN = 0;
     TRANSACTION_STATUS_NOT_SUBMITTED = 1;
     TRANSACTION_STATUS_SUBMITTED = 2;
     TRANSACTION_STATUS_REJECTED = 3;
     TRANSACTION_STATUS_ON_CHAIN = 4;
-}
-
-message SignedTransaction {
-    AccountId signer = 1; // account this tx is signed by
-    uint64 timestamp = 2; // time transaction was signed
-    uint64 nonce = 3; // tx nonce
-    uint64 fee = 4; // network fee provided by sender
-    TransactionData transaction_Data = 5; // binary transaction data
-    uint32 net_id = 6; // network id to avoid confusion with testnets
-    Signature signature = 7; // signer signature on all of the above data
 }
 
 // a collection of signed transactions
@@ -211,7 +216,8 @@ message TransactionEvent {
     FeeType fee_type = 8;
     uint64 signup_reward = 9;
     uint64 referral_reward = 10;
-    uint64 fee = 11;
+    uint64 appreciation_char_trait_idx = 11;
+    uint64 fee = 12;
 }
 
 // A collection of events for a transaction
@@ -234,40 +240,42 @@ message BlockchainStats {
     // total number of payment transactions
     uint64 payments_transactions_count = 4;
 
+    // total number of payment transactions with an appreciation
+    uint64 appreciations_transactions_count = 5;
+
     // total number of verified user accounts
-    uint64 users_count = 5;
+    uint64 users_count = 6;
 
     // total tx fees collected by block producers
-    uint64 fees_amount = 6;
+    uint64 fees_amount = 7;
 
     // total number of kCents minted by the protocol since genesis
-    uint64 minted_amount = 7;
+    uint64 minted_amount = 8;
 
     // total number of kCents in circulation by minting. Not including pre-mint
-    uint64 circulation = 8;
+    uint64 circulation = 9;
 
     // total tx fee subsidies issued by the protocol
-    uint64 fee_subs_count = 9;
-    uint64 fee_subs_amount = 10;
+    uint64 fee_subs_count = 10;
+    uint64 fee_subs_amount = 11;
 
-    uint64 signup_rewards_count = 11;
-    uint64 signup_rewards_amount = 12;
+    uint64 signup_rewards_count = 12;
+    uint64 signup_rewards_amount = 13;
 
-    uint64 referral_rewards_count = 13;
-    uint64 referral_rewards_amount = 14;
+    uint64 referral_rewards_count = 14;
+    uint64 referral_rewards_amount = 15;
 
-    uint64 validator_rewards_count = 15;
-    uint64 validator_rewards_amount = 16;
+    uint64 validator_rewards_count = 16;
+    uint64 validator_rewards_amount = 17;
 
     // total number of payment transactions
-    uint64 update_user_transactions_count = 17;
+    uint64 update_user_transactions_count = 18;
 
     // estimated KC to USD exchange rate
-    double exchange_rate = 18;
+    double exchange_rate = 19;
 
     // amount of rewards paid to causes
-    uint64 causes_rewards_amount = 19;
-
+    uint64 causes_rewards_amount = 20;
 }
 
 // Block events
@@ -278,12 +286,13 @@ message BlockEvent {
     repeated TransactionEvent transactions_events = 4;
     uint64 signups_count = 5;
     uint64 payments_count = 6;
-    uint64 user_updates_count = 7;
-    uint64 fees_amount = 8;
-    uint64 signup_rewards_amount = 9;
-    uint64 referral_rewards_amount = 10;
-    uint64 referral_rewards_count = 11;
-    uint64 reward = 12;
+    uint64 appreciations_count = 7;
+    uint64 user_updates_count = 8;
+    uint64 fees_amount = 9;
+    uint64 signup_rewards_amount = 10;
+    uint64 referral_rewards_amount = 11;
+    uint64 referral_rewards_count = 12;
+    uint64 reward = 13;
 }
 
 enum ExecutionResult {

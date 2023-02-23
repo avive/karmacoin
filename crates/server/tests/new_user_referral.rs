@@ -8,7 +8,7 @@ extern crate log;
 mod common;
 use common::{create_user, finalize_test, init_test};
 
-use base::genesis_config_service::{GenesisConfigService, AMBASADOR_CHAR_TRAIT_ID, NET_ID_KEY};
+use base::genesis_config_service::{GenesisConfigService, AMBASSADOR_CHAR_TRAIT_ID, NET_ID_KEY};
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{
     GetTransactionsRequest, GetUserInfoByAccountRequest, SubmitTransactionRequest,
@@ -18,10 +18,9 @@ use base::karma_coin::karma_coin_core_types::TransactionStatus::OnChain;
 use base::karma_coin::karma_coin_core_types::TransactionType::PaymentV1;
 use base::karma_coin::karma_coin_core_types::{
     AccountId, BlockchainStats, MobileNumber, PaymentTransactionV1, SignedTransaction,
-    TransactionData,
+    TransactionBody, TransactionData,
 };
 use base::server_config_service::DEFAULT_GRPC_SERVER_PORT;
-use base::signed_trait::SignedTrait;
 use chrono::Utc;
 use prost::Message;
 
@@ -65,6 +64,7 @@ async fn referral_signup_happy_flow_test() {
         }),
         amount: payment_amount,
         char_trait_id,
+        community_id: 0,
     };
 
     let user1_account_id = AccountId {
@@ -91,22 +91,29 @@ async fn referral_signup_happy_flow_test() {
         .unwrap()
         .unwrap() as u32;
 
-    let mut signed_tx = SignedTransaction {
-        signer: Some(user1_account_id.clone()),
+    let tx_body = TransactionBody {
         timestamp: Utc::now().timestamp_millis() as u64,
-        nonce: 2,
+        nonce: 1,
         fee: 10,
         transaction_data: Some(TransactionData {
             transaction_data: buf,
             transaction_type: PaymentV1 as i32,
         }),
         net_id,
+    };
+
+    let mut buf1 = Vec::with_capacity(tx_body.encoded_len());
+    tx_body.encode(&mut buf1).unwrap();
+
+    let mut signed_tx = SignedTransaction {
+        signer: Some(user1_account_id.clone()),
+        transaction_body: buf1,
         signature: None,
     };
 
     signed_tx.signature = Some(signed_tx.sign(&user1_key_pair.to_ed2559_keypair()).unwrap());
 
-    signed_tx.validate(1).await.expect("invalid transaction");
+    signed_tx.validate().await.expect("invalid transaction");
 
     let resp = api_client
         .submit_transaction(SubmitTransactionRequest {
@@ -166,10 +173,7 @@ async fn referral_signup_happy_flow_test() {
     // check that referral got the karma points rewards
     // 2 are expected - 1 for the referral and 1 for spender
     assert_eq!(user1.trait_scores.len(), 2);
-    assert_eq!(
-        user1.trait_scores[0].trait_id,
-        AMBASADOR_CHAR_TRAIT_ID as u32
-    );
+    assert_eq!(user1.trait_scores[0].trait_id, AMBASSADOR_CHAR_TRAIT_ID);
     assert_eq!(user1.trait_scores[0].score, 1);
 
     // check appreciation stored in user2 account

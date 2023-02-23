@@ -22,6 +22,7 @@ pub mod signed_trait;
 pub mod signed_tx;
 pub mod tests_helpers;
 pub mod transaction_event;
+pub mod tx_body;
 pub mod update_user_tx;
 pub mod user;
 pub mod user_verification_data;
