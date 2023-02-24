@@ -20,6 +20,7 @@ pub mod payment_tx;
 pub mod server_config_service;
 pub mod signed_trait;
 pub mod signed_tx;
+pub mod sms_invite_data;
 pub mod tests_helpers;
 pub mod transaction_event;
 pub mod tx_body;

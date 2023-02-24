@@ -2425,6 +2425,7 @@ dependencies = [
  "sha2 0.10.6",
  "tokio",
  "tokio-stream",
+ "tokio_schedule",
  "tonic",
  "tonic-health",
  "tonic-web",
@@ -2698,6 +2699,16 @@ dependencies = [
  "pin-project-lite",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "tokio_schedule"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1b91f371e5032da918342685fde2ca040710d38aaec985378e121055fbf031e9"
+dependencies = [
+ "chrono",
+ "tokio",
 ]
 
 [[package]]

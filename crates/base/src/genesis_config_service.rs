@@ -107,17 +107,17 @@ pub const TREASURY_PREMINT_COINS_AMOUNT_KEY: &str = "treasury_premint_coins";
 pub const VERIFIERS_ACCOUNTS_IDS: &str = "verifiers_accounts_ids";
 
 /// This is the signup trait - user gets it for signing up
-pub const SIGNUP_CHAR_TRAIT_ID: u64 = 1;
+pub const SIGNUP_CHAR_TRAIT_ID: u32 = 1;
 
 /// User gets a point in this trait for each sent appreciation / payment
-pub const SPENDER_CHAR_TRAIT_ID: u64 = 2;
+pub const SPENDER_CHAR_TRAIT_ID: u32 = 2;
 
 /// User get
 /// s one for each referral who signed up
-pub const AMBASSADOR_CHAR_TRAIT_ID: u64 = 41;
+pub const AMBASSADOR_CHAR_TRAIT_ID: u32 = 41;
 
 /// This must be true across all traits defined in genesis configs
-pub const NO_CHAR_TRAIT_ID: u64 = 0;
+pub const NO_CHAR_TRAIT_ID: u32 = 0;
 
 /// This service handles the kc blockchain genesis configuration
 /// It provides default values for development, and merges in values from

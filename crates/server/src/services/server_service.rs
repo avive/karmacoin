@@ -9,11 +9,11 @@ use anyhow::Result;
 use base::genesis_config_service::GenesisConfigService;
 use base::karma_coin::karma_coin_api::api_service_server::ApiServiceServer;
 use base::karma_coin::karma_coin_verifier::verifier_service_server::VerifierServiceServer;
-use base::server_config_service::START_VERIFIER_SERVICE_CONFIG_KEY;
 use base::server_config_service::{
     ServerConfigService, GRPC_SERVER_HOST_CONFIG_KEY, GRPC_SERVER_HOST_PORT_CONFIG_KEY,
     SERVER_NAME_CONFIG_KEY,
 };
+use base::server_config_service::{SetConfigFile, START_VERIFIER_SERVICE_CONFIG_KEY};
 use db::db_service::{DatabaseService, Destroy};
 use tonic::transport::Server;
 use tonic_web::GrpcWebLayer;
@@ -32,19 +32,18 @@ impl Actor for ServerService {
         BlockchainConfigService::from_registry().await?;
         GenesisConfigService::from_registry().await?;
 
-        //let server_config_server = ServerConfigService::from_registry().await?;
+        let server_config_server = ServerConfigService::from_registry().await?;
 
         // if we start a verifier then load private secrets from an external verifier config file
         if ServerConfigService::get_bool(START_VERIFIER_SERVICE_CONFIG_KEY.into())
             .await?
             .unwrap()
         {
-            /*
             server_config_server
                 .call(SetConfigFile {
                     config_file: "./verifier_config.yaml".to_string(),
                 })
-                .await??;*/
+                .await??;
 
             VerifierService::from_registry().await?;
         }

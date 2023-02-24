@@ -68,6 +68,9 @@ pub const TRANSACTIONS_HASHES_BY_ACCOUNT_IDX_COL_FAMILY: &str = "txs_hashes_by_a
 /// This is the actual blockchain
 pub const BLOCKS_COL_FAMILY: &str = "blocks_cf";
 
+/// stores data about sent sms invites
+pub const INVITE_SMS_COL_FAMILY: &str = "welcome_sms_col_family";
+
 /// Valid transactions submitted to the chain, not yet processed and queued in the txs pool
 /// This is off-chain tx pool data
 /// key: tx MEM_POOL. value: MemPool
@@ -107,7 +110,10 @@ impl Actor for BlockchainConfigService {
             drop_on_exit,
             db_name,
             col_descriptors: vec![
+                // verifier data
                 ColumnFamilyDescriptor::new(VERIFIERS_COL_FAMILY, Options::default()),
+                ColumnFamilyDescriptor::new(INVITE_SMS_COL_FAMILY, Options::default()),
+                // blockchain data
                 ColumnFamilyDescriptor::new(USERS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(USERS_NAMES_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(MOBILE_NUMBERS_COL_FAMILY, Options::default()),

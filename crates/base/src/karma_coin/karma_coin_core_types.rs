@@ -151,10 +151,10 @@ pub struct CharTrait {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TraitScore {
-    #[prost(uint64, tag = "1")]
-    pub trait_id: u64,
-    #[prost(uint64, tag = "2")]
-    pub score: u64,
+    #[prost(uint32, tag = "1")]
+    pub trait_id: u32,
+    #[prost(uint32, tag = "2")]
+    pub score: u32,
 }
 /// new user transactions submitted by users
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -175,10 +175,10 @@ pub struct PaymentTransactionV1 {
     #[prost(message, optional, tag = "2")]
     pub to: ::core::option::Option<MobileNumber>,
     /// char trait id set by sender. e.g. smart
-    #[prost(uint64, tag = "3")]
-    pub char_trait_id: u64,
-    #[prost(uint64, tag = "4")]
-    pub community_id: u64,
+    #[prost(uint32, tag = "3")]
+    pub char_trait_id: u32,
+    #[prost(uint32, tag = "4")]
+    pub community_id: u32,
 }
 /// Update user info
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -310,8 +310,8 @@ pub struct TransactionEvent {
     pub signup_reward: u64,
     #[prost(uint64, tag = "10")]
     pub referral_reward: u64,
-    #[prost(uint64, tag = "11")]
-    pub appreciation_char_trait_idx: u64,
+    #[prost(uint32, tag = "11")]
+    pub appreciation_char_trait_idx: u32,
     #[prost(uint64, tag = "12")]
     pub fee: u64,
 }

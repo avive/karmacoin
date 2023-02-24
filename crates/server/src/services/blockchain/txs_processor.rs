@@ -112,6 +112,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
             let tx_body = match tx.get_body() {
                 Ok(body) => body,
                 Err(_) => {
+                    info!("missing tx body");
                     continue;
                 }
             };

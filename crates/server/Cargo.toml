@@ -10,6 +10,7 @@ features = ["full"]
 
 [dependencies]
 tokio-stream = "0.1.7"
+tokio_schedule = "0.3.0"
 
 base = { path = "../base" }
 db = { path = "../db" }

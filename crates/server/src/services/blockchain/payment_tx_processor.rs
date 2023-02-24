@@ -63,11 +63,16 @@ impl BlockChainService {
         tokenomics: &Tokenomics,
         event: &mut TransactionEvent,
     ) -> Result<()> {
-        // validate nonce
+        // reject a payment from user to itself
+        if payer.account_id.as_ref().unwrap().data == payee.account_id.as_ref().unwrap().data {
+            return Err(anyhow!("You can't send karma coins to yourself"));
+        }
 
         // validate the transaction
         signed_transaction.validate().await?;
         let tx_body = signed_transaction.get_body()?;
+
+        // validate tx body and user nonce
         tx_body.validate(payer.nonce).await?;
 
         info!("Processing payment transaction: {}", signed_transaction);
@@ -111,7 +116,7 @@ impl BlockChainService {
         if payment_tx.char_trait_id != 0 {
             // payment includes an appreciation for a character trait - update user character trait points
             payee.inc_trait_score(payment_tx.char_trait_id);
-            event.appreciation_char_trait_idx = payment_tx.char_trait_id as u64;
+            event.appreciation_char_trait_idx = payment_tx.char_trait_id;
         }
 
         let referral_reward = tokenomics.get_referral_reward_amount().await?;

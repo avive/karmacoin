@@ -36,3 +36,17 @@ message VerifyNumberRequest {
   string requested_user_name = 4;
   core_types.Signature signature = 5;
 }
+
+/// Data object stored in db to track invite sms messages
+message SmsInviteMetadata {
+  // invited person mobile phone number
+  core_types.MobileNumber mobile_number = 1;
+  // the time of the last invite sms message sent
+  uint64 last_message_sent_time_stamp = 2;
+  // total number of invite sms messages sent
+  uint32 messages_sent = 3;
+  // inviter mobile phone number (from appreciation tx)
+  core_types.AccountId inviter_account_id = 4;
+  // the hash of the payment tx that triggers this invite
+  bytes invite_tx_hash = 5;
+}

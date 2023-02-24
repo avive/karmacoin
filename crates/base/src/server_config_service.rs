@@ -15,6 +15,10 @@ pub const VERIFIER_ID_PRIVATE_KEY: &str = "verifier_id_key_private";
 pub const VERIFIER_ID_PUBLIC_KEY: &str = "verifier_id_key_public";
 pub const START_VERIFIER_SERVICE_CONFIG_KEY: &str = "start_verifier_service";
 
+/// When true, verify will send invite sms messages
+pub const SEND_INVITE_SMS_MESSAGES_CONFIG_KEY: &str = "send_sms_invites";
+pub const MAX_SMS_INVITES_PER_NUMBER_CONFIG_KEY: &str = "max_sms_invites_per_number";
+
 pub const AUTH_SERVICE_HOST_KEY: &str = "auth_host_key";
 pub const AUTH_SERVICE_PORT_KEY: &str = "auth_port_key";
 pub const AUTH_SERVICE_PROTOCOL_KEY: &str = "auth_protocol_key";
@@ -82,6 +86,10 @@ impl Actor for ServerConfigService {
             .set_default(BLOCK_PRODUCER_USER_NAME, "Block producer 1")
             .unwrap()
             .set_default(BLOCK_PRODUCER_USER_NAME, "Block producer 1")
+            .unwrap()
+            .set_default(SEND_INVITE_SMS_MESSAGES_CONFIG_KEY, true)
+            .unwrap()
+            .set_default(MAX_SMS_INVITES_PER_NUMBER_CONFIG_KEY, 2)
             .unwrap()
             // todo: move this to a config file
             .set_default(
@@ -285,7 +293,7 @@ impl Handler<SetConfigFile> for ServerConfigService {
         self.config_file = Some(msg.config_file.clone());
 
         info!(
-            "Merging content of config file {:?}",
+            "Merging content of server config file {:?}",
             msg.config_file.as_str()
         );
 

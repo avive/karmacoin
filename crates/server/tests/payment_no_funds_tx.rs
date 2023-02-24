@@ -16,7 +16,6 @@ use base::karma_coin::karma_coin_core_types::{
     AccountId, PaymentTransactionV1, SignedTransaction, TransactionBody, TransactionData,
 };
 use base::server_config_service::DEFAULT_GRPC_SERVER_PORT;
-use base::signed_trait::SignedTrait;
 use chrono::Utc;
 use prost::Message;
 use server::server_service::{ServerService, Startup};
@@ -64,7 +63,6 @@ async fn payment_tx_no_funds_test() {
 
     let user1_balance_pre = user1.balance;
     let payment_amount = user1_balance_pre + 1;
-    let tx_fee = 10;
 
     let user2 = api_client
         .get_user_info_by_account(GetUserInfoByAccountRequest {

@@ -82,7 +82,7 @@ message Block {
     bytes prev_block_digest = 6; // digest of block in consensus at the previous height
     core_types.Signature signature = 7;
     uint64 reward = 8;
-    uint64 minted= 9; // total coins minted in this block (rewards + tx fee subsidies)
+    uint64 minted = 9; // total coins minted in this block (rewards + tx fee subsidies)
     bytes digest = 10; // block digest includes hash of all above data
 
 }
@@ -94,8 +94,8 @@ message CharTrait {
 }
 
 message TraitScore {
-    uint64 trait_id = 1;
-    uint64 score = 2;
+    uint32 trait_id = 1;
+    uint32 score = 2;
 }
 
 /// transactions
@@ -116,8 +116,8 @@ message NewUserTransactionV1 {
 message PaymentTransactionV1 {
     uint64 amount = 1; // amount in tokens to transfer
     MobileNumber to = 2; // dest is always a mobile number (of a user or a non-user) no accountId needed.
-    uint64 char_trait_id = 3; // char trait id set by sender. e.g. smart
-    uint64 community_id = 4;
+    uint32 char_trait_id = 3; // char trait id set by sender. e.g. smart
+    uint32 community_id = 4;
 }
 
 // Update user info
@@ -216,7 +216,7 @@ message TransactionEvent {
     FeeType fee_type = 8;
     uint64 signup_reward = 9;
     uint64 referral_reward = 10;
-    uint64 appreciation_char_trait_idx = 11;
+    uint32 appreciation_char_trait_idx = 11;
     uint64 fee = 12;
 }
 

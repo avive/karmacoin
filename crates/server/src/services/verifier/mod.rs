@@ -5,5 +5,6 @@
 /// The Verifier module provides the KarmaCoin mobile phone verification api to users.
 /// Users use the verifier to verify their mobile phone number on-chain.
 /// For further details read the KarmaCoin docs and onboarding flows.
+pub(crate) mod sms_invites_sender;
 pub(crate) mod verifier_service;
 pub(crate) mod verify_number;

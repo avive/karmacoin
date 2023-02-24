@@ -44,6 +44,27 @@ pub struct VerifyNumberRequest {
     #[prost(message, optional, tag = "5")]
     pub signature: ::core::option::Option<super::core_types::Signature>,
 }
+/// / Data object stored in db to track invite sms messages
+#[derive(serde::Serialize, serde::Deserialize)]
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SmsInviteMetadata {
+    /// invited person mobile phone number
+    #[prost(message, optional, tag = "1")]
+    pub mobile_number: ::core::option::Option<super::core_types::MobileNumber>,
+    /// the time of the last invite sms message sent
+    #[prost(uint64, tag = "2")]
+    pub last_message_sent_time_stamp: u64,
+    /// total number of invite sms messages sent
+    #[prost(uint32, tag = "3")]
+    pub messages_sent: u32,
+    /// inviter mobile phone number (from appreciation tx)
+    #[prost(message, optional, tag = "4")]
+    pub inviter_account_id: ::core::option::Option<super::core_types::AccountId>,
+    /// the hash of the payment tx that triggers this invite
+    #[prost(bytes = "vec", tag = "5")]
+    pub invite_tx_hash: ::prost::alloc::vec::Vec<u8>,
+}
 /// Generated client implementations.
 pub mod verifier_service_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]

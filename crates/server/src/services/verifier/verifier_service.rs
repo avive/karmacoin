@@ -2,17 +2,20 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use crate::services::verifier::sms_invites_sender::SendInvites;
 use crate::services::verifier::verify_number::Verify;
 use anyhow::{anyhow, Result};
-use base::hex_utils::{hex_string, short_hex_string};
+use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_auth::auth_service_client::AuthServiceClient;
 use base::karma_coin::karma_coin_core_types::{AccountId, KeyPair};
 use base::karma_coin::karma_coin_verifier::verifier_service_server::VerifierService as VerifierServiceTrait;
 use base::karma_coin::karma_coin_verifier::{VerifyNumberRequest, VerifyNumberResponse};
 use base::server_config_service::{
     GetVerifierIdKeyPair, ServerConfigService, AUTH_SERVICE_HOST_KEY, AUTH_SERVICE_PORT_KEY,
-    AUTH_SERVICE_PROTOCOL_KEY,
+    AUTH_SERVICE_PROTOCOL_KEY, SEND_INVITE_SMS_MESSAGES_CONFIG_KEY,
 };
+use tokio::spawn;
+use tokio_schedule::{every, Job};
 use tonic::transport::Channel;
 use tonic::{Request, Response, Status};
 use xactor::*;
@@ -39,6 +42,7 @@ impl Actor for VerifierService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
         info!("VerifierService started");
 
+        /*
         let key_pair = KeyPair::new();
         info!(
             "temp key pair public: {}",
@@ -47,7 +51,7 @@ impl Actor for VerifierService {
         info!(
             "temp key pair private: {}",
             hex_string(key_pair.private_key.as_ref().unwrap().key.as_slice())
-        );
+        );*/
 
         let host = ServerConfigService::get(AUTH_SERVICE_HOST_KEY.into())
             .await?
@@ -63,6 +67,33 @@ impl Actor for VerifierService {
 
         self.auth_client =
             Some(AuthServiceClient::connect(format!("{}://{}:{}", protocol, host, port)).await?);
+
+        let send_invites =
+            ServerConfigService::get_bool(SEND_INVITE_SMS_MESSAGES_CONFIG_KEY.into())
+                .await?
+                .unwrap();
+
+        if send_invites {
+            let every_30_minutes = every(5).minutes().perform(|| async {
+                let service = VerifierService::from_registry().await;
+                if service.is_err() {
+                    error!("VerifierService not available");
+                    return;
+                }
+                info!("Starting invites task...");
+                match service.unwrap().call(SendInvites).await {
+                    Ok(res) => {
+                        info!("Invites sent task completed");
+                        match res {
+                            Ok(_) => info!("Invites task completed"),
+                            Err(e) => error!("Invites task error: {}", e),
+                        }
+                    }
+                    Err(e) => error!("Error running invites task: {}", e),
+                }
+            });
+            spawn(every_30_minutes);
+        }
 
         Ok(())
     }
@@ -133,16 +164,5 @@ impl VerifierServiceTrait for VerifierService {
             }
             Err(e) => Err(Status::internal(format!("internal error: {:?}", e))),
         }
-    }
-}
-
-// write a unit test for register_number() and verify_number() methods
-#[cfg(test)]
-mod tests {
-    //use super::*;
-
-    #[tokio::test]
-    async fn test_register_number() {
-        //let service = VerifierService::default();
     }
 }

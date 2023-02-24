@@ -82,7 +82,7 @@ pub async fn create_user(
     let tx_body = TransactionBody {
         timestamp: Utc::now().timestamp_millis() as u64,
         nonce: 1,
-        fee: 10,
+        fee: 1,
         transaction_data: Some(TransactionData {
             transaction_data: buf,
             transaction_type: NewUserV1 as i32,
