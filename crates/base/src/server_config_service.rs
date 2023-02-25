@@ -5,8 +5,10 @@
 use crate::hex_utils::hex_from_string;
 use crate::karma_coin::karma_coin_core_types::{KeyPair, PrivateKey, PublicKey};
 use anyhow::{anyhow, Result};
-use config::{Config, Environment};
+use config::builder::DefaultState;
+use config::{Config, ConfigBuilder, Environment};
 use log::*;
+use std::path::Path;
 use xactor::*;
 
 // Verifier data
@@ -18,6 +20,8 @@ pub const START_VERIFIER_SERVICE_CONFIG_KEY: &str = "start_verifier_service";
 /// When true, verify will send invite sms messages
 pub const SEND_INVITE_SMS_MESSAGES_CONFIG_KEY: &str = "send_sms_invites";
 pub const MAX_SMS_INVITES_PER_NUMBER_CONFIG_KEY: &str = "max_sms_invites_per_number";
+pub const SEND_INVITE_SMS_TASK_FREQ_SECS_CONFIG_KEY: &str = "send_sms_task_freq";
+pub const SEND_INVITE_SMS_TIME_BETWEEN_SMS_SECS_CONFIG_KEY: &str = "send_sms_time_between";
 
 pub const AUTH_SERVICE_HOST_KEY: &str = "auth_host_key";
 pub const AUTH_SERVICE_PORT_KEY: &str = "auth_port_key";
@@ -55,10 +59,9 @@ pub struct ServerConfigService {
     config_file: Option<String>,
 }
 
-#[async_trait::async_trait]
-impl Actor for ServerConfigService {
-    async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        let config = Config::builder()
+impl ServerConfigService {
+    fn get_default_builder(&self) -> ConfigBuilder<DefaultState> {
+        Config::builder()
             .set_default(DROP_DB_CONFIG_KEY, DEFAULT_DROP_DB_ON_EXIT)
             .unwrap()
             .set_default(
@@ -89,9 +92,14 @@ impl Actor for ServerConfigService {
             .unwrap()
             .set_default(SEND_INVITE_SMS_MESSAGES_CONFIG_KEY, true)
             .unwrap()
+            // how frequently to send sms
+            .set_default(SEND_INVITE_SMS_TASK_FREQ_SECS_CONFIG_KEY, 30)
+            .unwrap()
             .set_default(MAX_SMS_INVITES_PER_NUMBER_CONFIG_KEY, 2)
             .unwrap()
-            // todo: move this to a config file
+            // don't send invite sms more frequently then this cool down period
+            .set_default(SEND_INVITE_SMS_TIME_BETWEEN_SMS_SECS_CONFIG_KEY, 3600)
+            .unwrap()
             .set_default(
                 BLOCK_PRODUCER_ID_PRIVATE_KEY,
                 "67c31f3fb18572e97a851f757fc64fc1d0f8ed77c36abdd210f93711eb14f062",
@@ -125,11 +133,18 @@ impl Actor for ServerConfigService {
                     .separator("_")
                     .list_separator(" "),
             )
-            .build()
-            .unwrap();
+    }
+}
+
+#[async_trait::async_trait]
+impl Actor for ServerConfigService {
+    async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
+        let mut builder = self.get_default_builder();
 
         // load configs from file if it was set
         if let Some(config_file) = &self.config_file {
+            builder = builder.add_source(config::File::with_name(config_file));
+
             #[allow(deprecated)]
             self.config
                 .merge(config::File::with_name(config_file))
@@ -137,7 +152,7 @@ impl Actor for ServerConfigService {
         }
 
         // todo: if id private key not set then generate random keypair and store private key
-        self.config = config;
+        self.config = builder.build().unwrap();
 
         info!("service started");
 
@@ -160,11 +175,11 @@ impl Default for ServerConfigService {
 // helpers
 impl ServerConfigService {
     pub async fn get(key: String) -> Result<Option<String>> {
-        info!("Get config value for key: {}", key);
+        //info!("Get config value for key: {}", key);
         let config = ServerConfigService::from_registry().await?;
-        info!("got service");
+        // info!("got service");
         let res = config.call(GetValue(key)).await?;
-        info!("got value for key: {:?}", res);
+        // info!("got value for key: {:?}", res);
         Ok(res)
     }
 
@@ -282,18 +297,27 @@ pub struct SetConfigFile {
 #[async_trait::async_trait]
 impl Handler<SetConfigFile> for ServerConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: SetConfigFile) -> Result<()> {
-        // todo: verify config file exists and is readable by this process
+        info!("Current dir: {:?}", std::env::current_dir().unwrap());
+        if !Path::new(&msg.config_file).exists() {
+            warn!(
+                "using default config. Requested config file {:?} does not exist",
+                msg.config_file.as_str()
+            );
+            return Ok(());
+        }
 
-        #[allow(deprecated)]
-        self.config
-            .merge(config::File::with_name(&msg.config_file))
+        let builder = self.get_default_builder();
+
+        self.config = builder
+            .add_source(config::File::with_name(&msg.config_file))
+            .build()
             .unwrap();
 
         // save config file so it can be used if we need to reload config
         self.config_file = Some(msg.config_file.clone());
 
         info!(
-            "Merging content of server config file {:?}",
+            "merged content of server config file {:?}",
             msg.config_file.as_str()
         );
 
@@ -333,7 +357,7 @@ pub struct GetValue(pub String);
 #[async_trait::async_trait]
 impl Handler<GetValue> for ServerConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: GetValue) -> Option<String> {
-        info!("Getting value for key {:?}", msg.0.as_str());
+        // info!("Getting value for key {:?}", msg.0.as_str());
         match self.config.get_string(&msg.0.as_str()) {
             Ok(res) => Some(res),
             Err(_) => None,

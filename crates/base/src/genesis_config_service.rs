@@ -10,6 +10,7 @@ use crate::karma_coin::karma_coin_core_types::{AccountId, CharTrait, PhoneVerifi
 use config::{Config, Environment, Map, Value};
 use log::*;
 use std::collections::HashMap;
+use std::path::Path;
 use xactor::*;
 
 // Blockchain network id
@@ -385,7 +386,10 @@ pub struct SetConfigFile {
 #[async_trait::async_trait]
 impl Handler<SetConfigFile> for GenesisConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: SetConfigFile) -> Result<()> {
-        // todo: verify config file exists and is readable by this process
+        if !Path::new(&msg.config_file).exists() {
+            info!("config file {:?} does not exist", msg.config_file.as_str());
+            return Ok(());
+        }
 
         #[allow(deprecated)]
         self.config

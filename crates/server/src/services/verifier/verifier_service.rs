@@ -13,6 +13,7 @@ use base::karma_coin::karma_coin_verifier::{VerifyNumberRequest, VerifyNumberRes
 use base::server_config_service::{
     GetVerifierIdKeyPair, ServerConfigService, AUTH_SERVICE_HOST_KEY, AUTH_SERVICE_PORT_KEY,
     AUTH_SERVICE_PROTOCOL_KEY, SEND_INVITE_SMS_MESSAGES_CONFIG_KEY,
+    SEND_INVITE_SMS_TASK_FREQ_SECS_CONFIG_KEY,
 };
 use tokio::spawn;
 use tokio_schedule::{every, Job};
@@ -25,6 +26,9 @@ use xactor::*;
 pub(crate) struct VerifierService {
     key_pair: Option<KeyPair>,
     pub(crate) auth_client: Option<AuthServiceClient<Channel>>,
+    pub(crate) sms_gateway_endpoint: Option<String>,
+    pub(crate) sms_gateway_from_number: Option<String>,
+    pub(crate) sms_gateway_auth_token: Option<String>,
 }
 
 impl Default for VerifierService {
@@ -33,6 +37,9 @@ impl Default for VerifierService {
         VerifierService {
             key_pair: None,
             auth_client: None,
+            sms_gateway_endpoint: None,
+            sms_gateway_from_number: None,
+            sms_gateway_auth_token: None,
         }
     }
 }
@@ -41,17 +48,6 @@ impl Default for VerifierService {
 impl Actor for VerifierService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
         info!("VerifierService started");
-
-        /*
-        let key_pair = KeyPair::new();
-        info!(
-            "temp key pair public: {}",
-            hex_string(key_pair.public_key.as_ref().unwrap().key.as_slice())
-        );
-        info!(
-            "temp key pair private: {}",
-            hex_string(key_pair.private_key.as_ref().unwrap().key.as_slice())
-        );*/
 
         let host = ServerConfigService::get(AUTH_SERVICE_HOST_KEY.into())
             .await?
@@ -73,8 +69,13 @@ impl Actor for VerifierService {
                 .await?
                 .unwrap();
 
+        let send_invite_task_period =
+            ServerConfigService::get_u64(SEND_INVITE_SMS_TASK_FREQ_SECS_CONFIG_KEY.into())
+                .await?
+                .unwrap() as u32;
+
         if send_invites {
-            let every_30_minutes = every(5).minutes().perform(|| async {
+            let send_sms_task = every(send_invite_task_period).seconds().perform(|| async {
                 let service = VerifierService::from_registry().await;
                 if service.is_err() {
                     error!("VerifierService not available");
@@ -92,7 +93,9 @@ impl Actor for VerifierService {
                     Err(e) => error!("Error running invites task: {}", e),
                 }
             });
-            spawn(every_30_minutes);
+            spawn(send_sms_task);
+        } else {
+            info!("verifier is configured NOT to send smsm invites");
         }
 
         Ok(())

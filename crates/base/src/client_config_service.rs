@@ -11,6 +11,7 @@ use crate::server_config_service::{
 use anyhow::{anyhow, Result};
 use config::{Config, Environment};
 use log::*;
+use std::path::Path;
 use xactor::*;
 
 pub const CLIENT_NAME_CONFIG_KEY: &str = "client_name";
@@ -63,7 +64,11 @@ pub struct SetConfigFile {
 #[async_trait::async_trait]
 impl Handler<SetConfigFile> for ClientConfigService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: SetConfigFile) -> Result<()> {
-        // todo: verify config file exists and is readable by this process
+        if !Path::new(&msg.config_file).exists() {
+            info!("config file {:?} does not exist", msg.config_file.as_str());
+            return Ok(());
+        }
+
         #[allow(deprecated)]
         self.config
             .merge(config::File::with_name(msg.config_file.as_str()).required(false))

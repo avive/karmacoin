@@ -4,16 +4,23 @@ use crate::services::verifier::verifier_service::VerifierService;
 use anyhow::anyhow;
 use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_core_types::{
-    SignedTransaction, TransactionBody, TransactionType,
+    SignedTransaction, TransactionBody, TransactionType, User,
 };
 use base::karma_coin::karma_coin_verifier::SmsInviteMetadata;
 use base::server_config_service::{
-    ServerConfigService, MAX_SMS_INVITES_PER_NUMBER_CONFIG_KEY, SEND_INVITE_SMS_MESSAGES_CONFIG_KEY,
+    ServerConfigService, MAX_SMS_INVITES_PER_NUMBER_CONFIG_KEY,
+    SEND_INVITE_SMS_TIME_BETWEEN_SMS_SECS_CONFIG_KEY,
 };
+// use base64::{engine::general_purpose, Engine as _};
 use bytes::Bytes;
-use chrono::{Duration, Utc};
+use chrono::Duration;
+use chrono::Utc;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
+use http::StatusCode;
 use prost::Message;
+// use tonic::transport::Server;
+
+use crate::services::db_config_service::{INVITE_SMS_COL_FAMILY, USERS_COL_FAMILY};
 use xactor::*;
 
 #[message(result = "Result<()>")]
@@ -39,8 +46,55 @@ impl Handler<SendInvites> for VerifierService {
                 .await?
                 .unwrap();
 
+        let cool_down_period =
+            ServerConfigService::get_u64(SEND_INVITE_SMS_TIME_BETWEEN_SMS_SECS_CONFIG_KEY.into())
+                .await?
+                .unwrap();
+
+        if self.sms_gateway_auth_token.is_none() {
+            self.sms_gateway_auth_token = Some(
+                ServerConfigService::get("verifier.sms_gateway.auth_value".into())
+                    .await?
+                    .unwrap(),
+            );
+        }
+
+        if self.sms_gateway_endpoint.is_none() {
+            self.sms_gateway_endpoint = Some(
+                ServerConfigService::get("verifier.sms_gateway.api_endpoint".into())
+                    .await?
+                    .unwrap(),
+            );
+        }
+
+        if self.sms_gateway_from_number.is_none() {
+            self.sms_gateway_from_number = Some(
+                ServerConfigService::get("verifier.sms_gateway.from_number".into())
+                    .await?
+                    .unwrap(),
+            );
+        }
+
+        // shared http client for this iteration
+        let client = reqwest::Client::new();
+
         for (tx_hash, tx) in txs.iter() {
             info!("processing tx: {}", short_hex_string(tx_hash.as_slice()));
+
+            let inviter = match DatabaseService::read(ReadItem {
+                key: Bytes::from(tx.signer.as_ref().unwrap().data.clone()),
+                cf: USERS_COL_FAMILY,
+            })
+            .await?
+            {
+                Some(data) => User::decode(data.0.as_ref())?,
+                None => {
+                    info!(
+                        "Inviter (tx signer) account not found on chain yet - ignoring tx and leaving it in mempool"
+                    );
+                    continue;
+                }
+            };
 
             let tx_body = match tx.get_body() {
                 Ok(tx_body) => tx_body,
@@ -68,7 +122,17 @@ impl Handler<SendInvites> for VerifierService {
             }
 
             // payment transaction to a non-user - send him an invite!
-            let _ = self.send_invite(tx, &tx_body, max_invites_per_number).await;
+            let _ = self
+                .send_invite(
+                    tx,
+                    &tx_body,
+                    max_invites_per_number,
+                    cool_down_period,
+                    &client,
+                    &inviter,
+                )
+                .await
+                .map_err(|e| info!("failed to send invite: {}", e));
         }
 
         Ok(())
@@ -81,9 +145,17 @@ impl VerifierService {
         signed_tx: &SignedTransaction,
         tx_body: &TransactionBody,
         max_invites_per_number: u64,
+        cool_down_period: u64,
+        client: &reqwest::Client,
+        inviter: &User,
     ) -> Result<()> {
         let payment_tx = tx_body.get_payment_transaction_v1().unwrap();
         let invite_tx_hash = signed_tx.get_hash()?;
+
+        info!(
+            "Computing sms invite to: {}",
+            payment_tx.to.as_ref().unwrap().number
+        );
 
         let invite_mobile_number = payment_tx
             .to
@@ -94,7 +166,7 @@ impl VerifierService {
 
         let mut sms_invite_data = match DatabaseService::read(ReadItem {
             key: invite_db_key.clone(),
-            cf: SEND_INVITE_SMS_MESSAGES_CONFIG_KEY,
+            cf: INVITE_SMS_COL_FAMILY,
         })
         .await?
         {
@@ -106,22 +178,73 @@ impl VerifierService {
             ),
         };
 
+        let inviter_phone_number = inviter
+            .mobile_number
+            .as_ref()
+            .ok_or_else(|| anyhow!("inviter mobile number not found on chain"))?
+            .number
+            .clone();
+
         let now = Utc::now().timestamp_millis() as u64;
 
-        // todo: move the 7 days to the verifier config so it is configurable
         if i64::abs(now as i64 - sms_invite_data.last_message_sent_time_stamp as i64)
-            < Duration::days(7).num_milliseconds()
+            < Duration::seconds(cool_down_period as i64).num_milliseconds()
         {
-            info!("Last sms sent less than 1 week ago - skipping invite");
+            info!("last sms sent not too long ago (within cool-down period) - skipping invite");
             return Ok(());
         }
 
         if sms_invite_data.messages_sent >= max_invites_per_number as u32 {
-            info!("Already sent the max invites to this number - skipping invite");
+            info!("already sent the max number of invites to this number - skipping invite");
             return Ok(());
         }
 
-        // todo: send the invite here
+        // todo: get amount of payment tx (non zero) and format it properly in KC and in USD units.
+        // people want to know how much coins they got
+
+        // todo: move this out of the loop as these don't change per server instance
+
+        let sms_body = format!(
+            "👋 I just appreciated you and sent you some Karma Coins! 🙏
+- {} ({})
+
+☯️ To get these, signup with your mobile number to the Karma Coin App:
+iOS: https://karmaco.in
+Android: https://karmaco.in
+Web: https://karmaco.in'",
+            inviter.user_name.clone(),
+            inviter_phone_number
+        );
+
+        // todo: take from number from config file
+        let params = [
+            ("To", invite_mobile_number.number.as_str()),
+            ("Body", sms_body.as_str()),
+            (
+                "From",
+                self.sms_gateway_from_number.as_ref().unwrap().as_str(),
+            ),
+        ];
+
+        info!("calling sms gateway api...");
+
+        // todo: get api endpoint url from config file
+        match client
+            .post(self.sms_gateway_endpoint.as_ref().unwrap().clone())
+            .form(&params)
+            .header(
+                "Authorization",
+                self.sms_gateway_auth_token.as_ref().unwrap().clone(),
+            )
+            .send()
+            .await?
+            .status()
+        {
+            StatusCode::CREATED => info!("sms sent via gateway :-)"),
+            status => {
+                return Err(anyhow!(format!("sms gateway api call failed: {}", status)));
+            }
+        }
 
         // Update data and store in the db
         sms_invite_data.last_message_sent_time_stamp = now;
@@ -134,7 +257,7 @@ impl VerifierService {
                 key: invite_db_key,
                 value: Bytes::from(buf),
             },
-            cf: SEND_INVITE_SMS_MESSAGES_CONFIG_KEY,
+            cf: INVITE_SMS_COL_FAMILY,
             ttl: 0,
         })
         .await?;
