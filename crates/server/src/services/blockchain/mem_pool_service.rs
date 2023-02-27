@@ -144,7 +144,7 @@ impl Handler<AddTransaction> for MemPoolService {
         }
 
         let tx = msg.0;
-        let tx_hash = tx.get_hash().unwrap().as_ref().to_vec();
+        let tx_hash = tx.get_hash()?.as_ref().to_vec();
 
         // reject transaction which already exists on chain
         if (DatabaseService::read(ReadItem {

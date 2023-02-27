@@ -114,10 +114,11 @@ message NewUserTransactionV1 {
 
 // Basic payment transaction with optional character appreciation
 message PaymentTransactionV1 {
-    uint64 amount = 1; // amount in tokens to transfer
-    MobileNumber to = 2; // dest is always a mobile number (of a user or a non-user) no accountId needed.
-    uint32 char_trait_id = 3; // char trait id set by sender. e.g. smart
-    uint32 community_id = 4;
+    AccountId from = 1; // must be included so it is part of signed message and part of the tx hash
+    uint64 amount = 2; // amount in tokens to transfer
+    MobileNumber to = 3; // dest is always a mobile number (of a user or a non-user) no accountId needed.
+    uint32 char_trait_id = 4; // char trait id set by sender. e.g. smart
+    uint32 community_id = 5;
 }
 
 // Update user info
@@ -147,7 +148,6 @@ message TransactionData {
     bytes transaction_data = 1; // binary transaction data (e.g. NewUserTxV1, PaymentV1, etc...)
     TransactionType transaction_type = 2; // transaction type for deserialization
 }
-
 
 message SignedTransaction {
     AccountId signer = 1; // account this tx is signed by

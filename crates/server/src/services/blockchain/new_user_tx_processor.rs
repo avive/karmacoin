@@ -65,7 +65,7 @@ impl BlockChainService {
                 error_message: "Invalid transaction data".into(),
             })?;
 
-        let tx: TransactionBody =
+        let tx_body: TransactionBody =
             signed_transaction
                 .get_body()
                 .map_err(|_| NewUserProcessingError {
@@ -74,18 +74,22 @@ impl BlockChainService {
                 })?;
 
         // Validate the Transaction object
-        tx.validate(0).await.map_err(|_| NewUserProcessingError {
-            execution_info: ExecutionInfo::InvalidData,
-            error_message: "Invalid transaction data".into(),
-        })?;
-
-        let tx_fee = tx.fee;
-        let new_user_tx = tx
-            .get_new_user_transaction_v1()
+        tx_body
+            .validate(0)
+            .await
             .map_err(|_| NewUserProcessingError {
                 execution_info: ExecutionInfo::InvalidData,
-                error_message: "Invalid new user tx data".into(),
+                error_message: "Invalid transaction data".into(),
             })?;
+
+        let tx_fee_amount = tx_body.fee;
+        let new_user_tx =
+            tx_body
+                .get_new_user_transaction_v1()
+                .map_err(|_| NewUserProcessingError {
+                    execution_info: ExecutionInfo::InvalidData,
+                    error_message: "Invalid new user tx data".into(),
+                })?;
 
         let verification_evidence =
             new_user_tx
@@ -96,8 +100,7 @@ impl BlockChainService {
                 })?;
 
         // verify evidence signature
-        // todo: verify verifier is valid according to consensus rules
-        // and genesis config
+        // todo: verify verifier is valid according to consensus rules and genesis config
         verification_evidence
             .verify_signature()
             .map_err(|_| NewUserProcessingError {
@@ -148,7 +151,7 @@ impl BlockChainService {
         {
             return Err(NewUserProcessingError {
                 execution_info: ExecutionInfo::AccountAlreadyExists,
-                error_message: "There is already an account the provided account id".into(),
+                error_message: "there's already an onchain account the provided account id".into(),
             });
         }
 
@@ -166,7 +169,7 @@ impl BlockChainService {
         {
             return Err(NewUserProcessingError {
                 execution_info: ExecutionInfo::NicknameNotAvailable,
-                error_message: "There is already an account with requested user name".into(),
+                error_message: "there's already an account with requested user name".into(),
             });
         }
 
@@ -175,9 +178,9 @@ impl BlockChainService {
             score: 1,
         };
 
-        let mut user = User {
+        let mut new_user = User {
             account_id: Some(account_id.clone()),
-            nonce: 1,
+            nonce: 1, // signup tx nonce is 0, so the first tx nonce is 1
             user_name: verification_evidence.requested_user_name.clone(),
             mobile_number: Some(mobile_number.clone()),
             balance: 0,
@@ -187,7 +190,7 @@ impl BlockChainService {
         };
 
         let apply_subsidy = tokenomics
-            .should_subsidise_transaction_fee(0, tx_fee, TransactionType::NewUserV1)
+            .should_subsidise_transaction_fee(0, tx_fee_amount, TransactionType::NewUserV1)
             .await
             .map_err(|_| NewUserProcessingError {
                 execution_info: ExecutionInfo::InternalNodeError,
@@ -205,10 +208,10 @@ impl BlockChainService {
 
         info!("Current signup reward amount: {}", signup_reward_amount);
 
-        let user_tx_fee = if apply_subsidy { 0 } else { tx_fee };
+        let user_tx_fee_amount = if apply_subsidy { 0 } else { tx_fee_amount };
 
-        if !apply_subsidy && tx_fee >= signup_reward_amount {
-            // invalid tx - tx fee is higher than the block award
+        if !apply_subsidy && tx_fee_amount >= signup_reward_amount {
+            // invalid tx - tx fee is higher than the block award and no tx fee subsidy is applied
             return Err(NewUserProcessingError {
                 execution_info: ExecutionInfo::TxFeeTooLow,
                 error_message:
@@ -223,22 +226,21 @@ impl BlockChainService {
             FeeType::User
         };
 
-        user.balance += signup_reward_amount - user_tx_fee;
+        new_user.balance += signup_reward_amount - user_tx_fee_amount;
 
-        info!("new user balance: {}", user.balance);
-
-        // todo: figure out personality trait for joiner - brave? ahead of the curve?
-        user.trait_scores = vec![];
+        info!("new user balance: {}", new_user.balance);
 
         // add the new user to db
 
         // todo: update existing user if it exists - this will happen for a block producer or a verifier
 
-        let mut buf = Vec::with_capacity(user.encoded_len());
-        user.encode(&mut buf).map_err(|_| NewUserProcessingError {
-            execution_info: ExecutionInfo::InternalNodeError,
-            error_message: "internal node error".into(),
-        })?;
+        let mut buf = Vec::with_capacity(new_user.encoded_len());
+        new_user
+            .encode(&mut buf)
+            .map_err(|_| NewUserProcessingError {
+                execution_info: ExecutionInfo::InternalNodeError,
+                error_message: "internal node error".into(),
+            })?;
 
         DatabaseService::write(WriteItem {
             data: DataItem {
@@ -328,8 +330,9 @@ impl BlockChainService {
             error_message: "internal node error".into(),
         })?;
 
+        // update the txs event
         event.fee_type = fee_type as i32;
-        event.fee = tx_fee;
+        event.fee = tx_fee_amount;
         event.signup_reward = signup_reward_amount;
         event.result = ExecutionResult::Executed as i32;
 

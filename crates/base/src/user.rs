@@ -4,13 +4,20 @@
 
 use crate::hex_utils::short_hex_string;
 use crate::karma_coin::karma_coin_core_types::{AccountId, MobileNumber, TraitScore, User};
-use anyhow::Result;
+use anyhow::{anyhow, Result};
+use log::info;
 use std::fmt;
 use std::fmt::{Display, Formatter};
 
 impl User {
     /// Verify all fields
     pub fn verify_syntax(&self) -> Result<()> {
+        if self.account_id.is_none() {
+            return Err(anyhow!("account id is required"));
+        }
+        if self.mobile_number.is_none() {
+            return Err(anyhow!("mobile number is required"));
+        }
         Ok(())
     }
 }
@@ -36,11 +43,19 @@ impl User {
             if trait_score.trait_id == trait_id {
                 trait_score.score += 1;
                 found = true;
+                info!(
+                    "User name: {}, inc_trait_score: trait_id: {}, score: {}",
+                    self.user_name, trait_id, trait_score.score
+                );
                 break;
             }
         }
         if !found {
             self.trait_scores.push(TraitScore { trait_id, score: 1 });
+            info!(
+                "User name: {}, inc_trait_score: trait_id: {}, score: {}",
+                self.user_name, trait_id, 1
+            );
         }
     }
 }
@@ -50,7 +65,7 @@ impl Display for User {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(
             f,
-            "User {{ user_name: {}, mobile_number: {}, account_id: {}, nonce: {}, \
+            "User {{ name: {}, number: {}, account_id: {}, nonce: {}, \
             balance: {}, trait_scores: {:?}, pre_keys: {:?} }}",
             self.user_name,
             self.mobile_number.as_ref().unwrap().number,

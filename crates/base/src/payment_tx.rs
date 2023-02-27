@@ -2,6 +2,7 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use crate::hex_utils::short_hex_string;
 use crate::karma_coin::karma_coin_core_types::PaymentTransactionV1;
 use anyhow::{anyhow, Result};
 use std::fmt;
@@ -10,6 +11,10 @@ use std::fmt::{Display, Formatter};
 impl PaymentTransactionV1 {
     /// Verify all fields
     pub fn verify_syntax(&self) -> Result<()> {
+        if self.from.is_none() {
+            return Err(anyhow!("sender's account id is required"));
+        }
+
         if self.to.is_none() {
             return Err(anyhow!("mobile number is required"));
         }
@@ -27,7 +32,8 @@ impl Display for PaymentTransactionV1 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(
             f,
-            "PaymentTransactionV1 {{ to: {}, amount: {}, char trait id: {} }}",
+            "PaymentTransactionV1 {{ from: {}, to: {}, amount: {}, char trait id: {} }}",
+            short_hex_string(self.from.as_ref().unwrap().data.as_ref()),
             self.to.as_ref().unwrap().number,
             self.amount,
             self.char_trait_id

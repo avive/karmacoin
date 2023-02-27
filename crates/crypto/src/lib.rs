@@ -18,7 +18,6 @@ extern crate x25519_dalek;
 /// This design makes testing and security audits of this crate much simpler.
 pub mod aead_cypher;
 pub mod aes_cypher;
-pub mod hasher;
 pub mod hmacer;
 pub mod kdfer;
 pub mod utils;

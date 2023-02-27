@@ -7,12 +7,33 @@ To learn more about KarmaCoin visit https://karmaco.in
 ---
 
 ## Building
+
+### Buiilding a dev build
 ```cargo build```
+
+### Building for release
+```cargo build --release```
 
 ## Testing
 Use [cargo-nextest](https://nexte.st/) runner.
 
 ```cargo nextest run --test-threads 1```
+
+## Running
+
+To start a server that runs the KarmaCoin blockchain node and provides the KarmaCoin API and verifier API, create a config file `verifier.yaml` with the authentication tokens for the service providers used by the verifier, and provide the path to the config file to the server app.
+
+### Running a dev build
+```bash
+cargo build
+./target/debug/server-app -c verifier.yaml
+```
+
+### Running a release build
+```bash
+cargo build -- release
+./target/debug/server-app -c verifier.yaml
+```
 
 ---
 

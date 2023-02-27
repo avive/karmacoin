@@ -305,3 +305,110 @@ class VerifyNumberRequest extends $pb.GeneratedMessage {
   $3.Signature ensureSignature() => $_ensure(4);
 }
 
+class SmsInviteMetadata extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SmsInviteMetadata', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'karma_coin.verifier'), createEmptyInstance: create)
+    ..aOM<$3.MobileNumber>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'mobileNumber', subBuilder: $3.MobileNumber.create)
+    ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'lastMessageSentTimeStamp', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'messagesSent', $pb.PbFieldType.OU3)
+    ..aOM<$3.AccountId>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'inviterAccountId', subBuilder: $3.AccountId.create)
+    ..a<$core.List<$core.int>>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'inviteTxHash', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false
+  ;
+
+  SmsInviteMetadata._() : super();
+  factory SmsInviteMetadata({
+    $3.MobileNumber? mobileNumber,
+    $fixnum.Int64? lastMessageSentTimeStamp,
+    $core.int? messagesSent,
+    $3.AccountId? inviterAccountId,
+    $core.List<$core.int>? inviteTxHash,
+  }) {
+    final _result = create();
+    if (mobileNumber != null) {
+      _result.mobileNumber = mobileNumber;
+    }
+    if (lastMessageSentTimeStamp != null) {
+      _result.lastMessageSentTimeStamp = lastMessageSentTimeStamp;
+    }
+    if (messagesSent != null) {
+      _result.messagesSent = messagesSent;
+    }
+    if (inviterAccountId != null) {
+      _result.inviterAccountId = inviterAccountId;
+    }
+    if (inviteTxHash != null) {
+      _result.inviteTxHash = inviteTxHash;
+    }
+    return _result;
+  }
+  factory SmsInviteMetadata.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SmsInviteMetadata.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SmsInviteMetadata clone() => SmsInviteMetadata()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SmsInviteMetadata copyWith(void Function(SmsInviteMetadata) updates) => super.copyWith((message) => updates(message as SmsInviteMetadata)) as SmsInviteMetadata; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SmsInviteMetadata create() => SmsInviteMetadata._();
+  SmsInviteMetadata createEmptyInstance() => create();
+  static $pb.PbList<SmsInviteMetadata> createRepeated() => $pb.PbList<SmsInviteMetadata>();
+  @$core.pragma('dart2js:noInline')
+  static SmsInviteMetadata getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SmsInviteMetadata>(create);
+  static SmsInviteMetadata? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $3.MobileNumber get mobileNumber => $_getN(0);
+  @$pb.TagNumber(1)
+  set mobileNumber($3.MobileNumber v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasMobileNumber() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearMobileNumber() => clearField(1);
+  @$pb.TagNumber(1)
+  $3.MobileNumber ensureMobileNumber() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get lastMessageSentTimeStamp => $_getI64(1);
+  @$pb.TagNumber(2)
+  set lastMessageSentTimeStamp($fixnum.Int64 v) { $_setInt64(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasLastMessageSentTimeStamp() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearLastMessageSentTimeStamp() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get messagesSent => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set messagesSent($core.int v) { $_setUnsignedInt32(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasMessagesSent() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearMessagesSent() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $3.AccountId get inviterAccountId => $_getN(3);
+  @$pb.TagNumber(4)
+  set inviterAccountId($3.AccountId v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasInviterAccountId() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearInviterAccountId() => clearField(4);
+  @$pb.TagNumber(4)
+  $3.AccountId ensureInviterAccountId() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  $core.List<$core.int> get inviteTxHash => $_getN(4);
+  @$pb.TagNumber(5)
+  set inviteTxHash($core.List<$core.int> v) { $_setBytes(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasInviteTxHash() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearInviteTxHash() => clearField(5);
+}
+

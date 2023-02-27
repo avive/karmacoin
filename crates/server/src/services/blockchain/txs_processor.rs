@@ -55,7 +55,8 @@ impl Handler<ProcessTransactions> for BlockChainService {
         // the block event for the new block
         let mut block_event = BlockEvent::new(block_height);
 
-        // new signups txs indexed by mobile number - used for referral reward calculations
+        // new signups txs in this block indexed by mobile number - used for referral reward calculations
+
         let mut sign_ups: HashMap<Vec<u8>, SignedTransaction> = HashMap::new();
 
         for (tx_hash, tx) in transactions_map.iter() {
@@ -81,7 +82,11 @@ impl Handler<ProcessTransactions> for BlockChainService {
                 .await
             {
                 Ok(res) => {
-                    info!("new user transaction processed: {}", tx_event);
+                    info!(
+                        "new user tx hash {} processed: {}",
+                        short_hex_string(tx_hash),
+                        tx_event
+                    );
                     tx_hashes.push(tx_hash.to_vec());
                     block_event.signups_count += 1;
                     block_event.signup_rewards_amount += tx_event.signup_reward;
@@ -91,7 +96,11 @@ impl Handler<ProcessTransactions> for BlockChainService {
                     sign_ups.insert(res.mobile_number.as_bytes().to_vec(), tx.clone());
                 }
                 Err(e) => {
-                    error!("Failed to process new user transaction: {:?}", e);
+                    error!(
+                        "Failed to process new user tx {}: {:?}",
+                        short_hex_string(tx_hash),
+                        e
+                    );
                     tx_event.result = ExecutionResult::Invalid as i32;
                     tx_event.info = e.execution_info as i32;
                     tx_event.error_message = e.error_message;

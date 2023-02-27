@@ -168,16 +168,19 @@ pub struct NewUserTransactionV1 {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PaymentTransactionV1 {
+    /// must be included so it is part of signed message and part of the tx hash
+    #[prost(message, optional, tag = "1")]
+    pub from: ::core::option::Option<AccountId>,
     /// amount in tokens to transfer
-    #[prost(uint64, tag = "1")]
+    #[prost(uint64, tag = "2")]
     pub amount: u64,
     /// dest is always a mobile number (of a user or a non-user) no accountId needed.
-    #[prost(message, optional, tag = "2")]
+    #[prost(message, optional, tag = "3")]
     pub to: ::core::option::Option<MobileNumber>,
     /// char trait id set by sender. e.g. smart
-    #[prost(uint32, tag = "3")]
-    pub char_trait_id: u32,
     #[prost(uint32, tag = "4")]
+    pub char_trait_id: u32,
+    #[prost(uint32, tag = "5")]
     pub community_id: u32,
 }
 /// Update user info

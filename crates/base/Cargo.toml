@@ -29,6 +29,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_bytes = "0.11"
 serde_derive = "1.0"
 serde_json = "1.0"
+sha2 = "0.10.6"
 
 bytes = { version = "1", features = ["serde"] }
 anyhow = "1.0"
@@ -42,7 +43,6 @@ custom_error = "1.8.0"
 log = "0.4.8"
 env_logger = "*"
 config = "0.13.1"
-orion = "0.17.3"
 
 [dependencies.rand_core]
 version = "0.5"

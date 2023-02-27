@@ -57,18 +57,19 @@ async fn referral_signup_happy_flow_test() {
 
     let char_trait_id = 1;
 
+    let user1_account_id = AccountId {
+        data: user1_key_pair.public_key.as_ref().unwrap().key.clone(),
+    };
+
     // Appreciation from user 1 to person 2 with phone number (not yet user 2)
     let payment_tx = PaymentTransactionV1 {
+        from: Some(user1_account_id.clone()),
         to: Some(MobileNumber {
             number: user2_phone_number.into(),
         }),
         amount: payment_amount,
         char_trait_id,
         community_id: 0,
-    };
-
-    let user1_account_id = AccountId {
-        data: user1_key_pair.public_key.as_ref().unwrap().key.clone(),
     };
 
     let user1 = api_client

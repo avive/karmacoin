@@ -48,3 +48,17 @@ const VerifyNumberRequest$json = const {
 
 /// Descriptor for `VerifyNumberRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List verifyNumberRequestDescriptor = $convert.base64Decode('ChNWZXJpZnlOdW1iZXJSZXF1ZXN0EhwKCXRpbWVzdGFtcBgBIAEoBFIJdGltZXN0YW1wEj8KCmFjY291bnRfaWQYAiABKAsyIC5rYXJtYV9jb2luLmNvcmVfdHlwZXMuQWNjb3VudElkUglhY2NvdW50SWQSSAoNbW9iaWxlX251bWJlchgDIAEoCzIjLmthcm1hX2NvaW4uY29yZV90eXBlcy5Nb2JpbGVOdW1iZXJSDG1vYmlsZU51bWJlchIuChNyZXF1ZXN0ZWRfdXNlcl9uYW1lGAQgASgJUhFyZXF1ZXN0ZWRVc2VyTmFtZRI+CglzaWduYXR1cmUYBSABKAsyIC5rYXJtYV9jb2luLmNvcmVfdHlwZXMuU2lnbmF0dXJlUglzaWduYXR1cmU=');
+@$core.Deprecated('Use smsInviteMetadataDescriptor instead')
+const SmsInviteMetadata$json = const {
+  '1': 'SmsInviteMetadata',
+  '2': const [
+    const {'1': 'mobile_number', '3': 1, '4': 1, '5': 11, '6': '.karma_coin.core_types.MobileNumber', '10': 'mobileNumber'},
+    const {'1': 'last_message_sent_time_stamp', '3': 2, '4': 1, '5': 4, '10': 'lastMessageSentTimeStamp'},
+    const {'1': 'messages_sent', '3': 3, '4': 1, '5': 13, '10': 'messagesSent'},
+    const {'1': 'inviter_account_id', '3': 4, '4': 1, '5': 11, '6': '.karma_coin.core_types.AccountId', '10': 'inviterAccountId'},
+    const {'1': 'invite_tx_hash', '3': 5, '4': 1, '5': 12, '10': 'inviteTxHash'},
+  ],
+};
+
+/// Descriptor for `SmsInviteMetadata`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List smsInviteMetadataDescriptor = $convert.base64Decode('ChFTbXNJbnZpdGVNZXRhZGF0YRJICg1tb2JpbGVfbnVtYmVyGAEgASgLMiMua2FybWFfY29pbi5jb3JlX3R5cGVzLk1vYmlsZU51bWJlclIMbW9iaWxlTnVtYmVyEj4KHGxhc3RfbWVzc2FnZV9zZW50X3RpbWVfc3RhbXAYAiABKARSGGxhc3RNZXNzYWdlU2VudFRpbWVTdGFtcBIjCg1tZXNzYWdlc19zZW50GAMgASgNUgxtZXNzYWdlc1NlbnQSTgoSaW52aXRlcl9hY2NvdW50X2lkGAQgASgLMiAua2FybWFfY29pbi5jb3JlX3R5cGVzLkFjY291bnRJZFIQaW52aXRlckFjY291bnRJZBIkCg5pbnZpdGVfdHhfaGFzaBgFIAEoDFIMaW52aXRlVHhIYXNo');

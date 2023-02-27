@@ -11,6 +11,7 @@ pub mod blockchain_stats;
 pub mod char_trait;
 pub mod client_config_service;
 pub mod genesis_config_service;
+pub mod hasher;
 pub mod hex_utils;
 pub mod karma_coin;
 pub mod key_pair;
