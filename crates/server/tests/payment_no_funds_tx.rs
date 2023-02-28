@@ -79,7 +79,8 @@ async fn payment_tx_no_funds_test() {
     // payment from user 1 to user 2
     let payment_tx = PaymentTransactionV1 {
         from: Some(user1_account_id.clone()),
-        to: Some(user2_number.clone()),
+        to_number: Some(user2_number.clone()),
+        to_account_id: None,
         amount: payment_amount,
         char_trait_id: 1,
         community_id: 0,

@@ -64,9 +64,10 @@ async fn referral_signup_happy_flow_test() {
     // Appreciation from user 1 to person 2 with phone number (not yet user 2)
     let payment_tx = PaymentTransactionV1 {
         from: Some(user1_account_id.clone()),
-        to: Some(MobileNumber {
+        to_number: Some(MobileNumber {
             number: user2_phone_number.into(),
         }),
+        to_account_id: None,
         amount: payment_amount,
         char_trait_id,
         community_id: 0,

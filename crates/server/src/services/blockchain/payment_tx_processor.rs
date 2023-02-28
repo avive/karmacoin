@@ -11,48 +11,67 @@ use anyhow::{anyhow, Result};
 use base::genesis_config_service::{AMBASSADOR_CHAR_TRAIT_ID, SPENDER_CHAR_TRAIT_ID};
 use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_core_types::{
-    ExecutionResult, FeeType, PaymentTransactionV1, SignedTransaction, TransactionEvent,
-    TransactionType, User,
+    ExecutionResult, FeeType, PaymentTransactionV1, SignedTransaction, TransactionBody,
+    TransactionEvent, TransactionType, User,
 };
 use bytes::Bytes;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use prost::Message;
 use std::collections::HashMap;
 
-/// Get the on-chain User for the tx payee.
-/// Returns None if no user exists for the payee's mobile number
-pub(crate) async fn get_payee_user(signed_transaction: &SignedTransaction) -> Result<Option<User>> {
-    let tx_body = signed_transaction.get_body()?;
-
-    let payment_tx: PaymentTransactionV1 = tx_body.get_payment_transaction_v1()?;
-    let mobile_number: String = payment_tx.to.unwrap().number;
-
-    // locate payee's account Id by mobile number
-    let payee_account_id_data = DatabaseService::read(ReadItem {
-        key: Bytes::from(mobile_number.as_bytes().to_vec()),
-        cf: MOBILE_NUMBERS_COL_FAMILY,
-    })
-    .await?;
-
-    if payee_account_id_data.is_none() {
-        return Ok(None);
-    }
-
-    let payee_account_id = payee_account_id_data.unwrap().0.as_ref().to_vec();
-    let payee_user_data = DatabaseService::read(ReadItem {
-        key: Bytes::from(payee_account_id.clone()),
-        cf: USERS_COL_FAMILY,
-    })
-    .await?;
-
-    if payee_user_data.is_none() {
-        return Ok(None);
-    }
-
-    Ok(Some(User::decode(payee_user_data.unwrap().0.as_ref())?))
-}
-
 impl BlockChainService {
+    /// Get payee User from chain from the body of a payment transaction
+    pub(crate) async fn get_payee_user_from_tx_body(
+        tx_body: &TransactionBody,
+    ) -> Result<Option<User>> {
+        let payment_tx: PaymentTransactionV1 = tx_body.get_payment_transaction_v1()?;
+
+        // find payee account id by phone number of from tx to_account_id field
+        let payee_account_id = match payment_tx.to_number {
+            Some(to_number) => {
+                let mobile_number: String = to_number.number;
+
+                // locate payee's account Id by mobile number form the index
+                // note that this index always have the last created account with this phone number
+                let payee_account_id_data = DatabaseService::read(ReadItem {
+                    key: Bytes::from(mobile_number.as_bytes().to_vec()),
+                    cf: MOBILE_NUMBERS_COL_FAMILY,
+                })
+                .await?;
+
+                if payee_account_id_data.is_none() {
+                    return Ok(None);
+                }
+
+                payee_account_id_data.unwrap().0.as_ref().to_vec()
+            }
+            None => payment_tx.to_account_id.as_ref().unwrap().data.clone(),
+        };
+
+        let payee_user_data = DatabaseService::read(ReadItem {
+            key: Bytes::from(payee_account_id.clone()),
+            cf: USERS_COL_FAMILY,
+        })
+        .await?;
+
+        if payee_user_data.is_none() {
+            info!("payee account not found on chain");
+            return Ok(None);
+        }
+
+        Ok(Some(User::decode(payee_user_data.unwrap().0.as_ref())?))
+    }
+
+    /// Get the on-chain User for the tx payee for a payment transaction
+    /// Returns None if no user exists for the payee's mobile number provided in the tx
+    /// or if there is no onchain account for the tx provided account_to id
+    pub(crate) async fn get_payee_user(
+        signed_transaction: &SignedTransaction,
+    ) -> Result<Option<User>> {
+        let tx_body = signed_transaction.get_body()?;
+        BlockChainService::get_payee_user_from_tx_body(&tx_body).await
+    }
+
     /// Process a payment transaction from payer to payee - update ledger state, emit tx event
     /// This is a helper method for the block creator and is used as part of block creation flow
     pub(crate) async fn process_payment_transaction(
@@ -99,7 +118,6 @@ impl BlockChainService {
 
         info!("Payment data: {}", payment_tx);
 
-        let payee_mobile_number = payment_tx.to.unwrap().number;
         let payment_amount = payment_tx.amount;
 
         let apply_subsidy = tokenomics
@@ -135,23 +153,26 @@ impl BlockChainService {
 
         let referral_reward_amount = tokenomics.get_referral_reward_amount().await?;
 
-        // apply new user referral reward to the payer if applicable
-        if sign_ups.contains_key(payee_mobile_number.as_bytes()) {
-            // remove from signups map to prevent double referral rewards for for the same new user
-            sign_ups.remove(payee_mobile_number.as_bytes());
+        if let Some(payee_number) = payment_tx.to_number {
+            let number = payee_number.number;
+            // apply new user referral reward to the payer if applicable
+            if sign_ups.contains_key(number.as_bytes()) {
+                // remove from signups map to prevent double referral rewards for for the same new user
+                sign_ups.remove(number.as_bytes());
 
-            // this is a new user referral payment tx - payer should get the referral fee!
-            //let _sign_up_tx = sign_ups.get(mobile_number.as_bytes()).unwrap();
-            // todo: award signer with the referral reward if applicable
-            info!(
-                "apply referral reward: {} to: {}",
-                referral_reward_amount, payer.user_name
-            );
-            payer.balance += referral_reward_amount;
+                // this is a new user referral payment tx - payer should get the referral fee!
+                //let _sign_up_tx = sign_ups.get(mobile_number.as_bytes()).unwrap();
+                // todo: award signer with the referral reward if applicable
+                info!(
+                    "apply referral reward amount: {} to: {}",
+                    referral_reward_amount, payer.user_name
+                );
+                payer.balance += referral_reward_amount;
 
-            // Give payer karma points for helping to grow the network
-            payer.inc_trait_score(AMBASSADOR_CHAR_TRAIT_ID);
-        };
+                // Give payer karma points for helping to grow the network
+                payer.inc_trait_score(AMBASSADOR_CHAR_TRAIT_ID);
+            };
+        }
 
         // Give payer karma points for spending karma coins
         payer.inc_trait_score(SPENDER_CHAR_TRAIT_ID);

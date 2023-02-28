@@ -165,6 +165,7 @@ pub struct NewUserTransactionV1 {
     pub verify_number_response: ::core::option::Option<UserVerificationData>,
 }
 /// Basic payment transaction with optional character appreciation
+/// Receiver must be identified by phone number or a karma coin account id
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PaymentTransactionV1 {
@@ -174,23 +175,34 @@ pub struct PaymentTransactionV1 {
     /// amount in tokens to transfer
     #[prost(uint64, tag = "2")]
     pub amount: u64,
-    /// dest is always a mobile number (of a user or a non-user) no accountId needed.
+    /// one of the next to\_ must be provided as the payee
+    ///
+    /// pay to a mobile number
     #[prost(message, optional, tag = "3")]
-    pub to: ::core::option::Option<MobileNumber>,
+    pub to_number: ::core::option::Option<MobileNumber>,
+    /// pay to a Karma Coin account id
+    #[prost(message, optional, tag = "4")]
+    pub to_account_id: ::core::option::Option<AccountId>,
     /// char trait id set by sender. e.g. smart
-    #[prost(uint32, tag = "4")]
-    pub char_trait_id: u32,
     #[prost(uint32, tag = "5")]
+    pub char_trait_id: u32,
+    #[prost(uint32, tag = "6")]
     pub community_id: u32,
 }
 /// Update user info
+/// User can update his nickname, mobile phone number or accountId in case
+/// he wants to associate his number with a new accountId.
+/// in that case, only way to transact from old account with old account id is via
+/// payment transactions from an accountId signed by this accountId private key
+/// Also in this case a new onchain account should be created with the new accountId
+/// and the user's phone number is going to be assoicated with the new account
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UpdateUserTransactionV1 {
     /// new requested nickname
     #[prost(string, tag = "1")]
     pub nickname: ::prost::alloc::string::String,
-    /// Updated verified number
+    /// Updated mobile number oe existing one
     #[prost(message, optional, tag = "2")]
     pub mobile_number: ::core::option::Option<MobileNumber>,
     /// verifier attestation regarding the number and the account
@@ -286,6 +298,12 @@ pub struct SignedTransactionWithStatus {
     /// transaction status
     #[prost(enumeration = "TransactionStatus", tag = "2")]
     pub status: i32,
+    /// sender
+    #[prost(message, optional, tag = "3")]
+    pub from: ::core::option::Option<User>,
+    /// receiver
+    #[prost(message, optional, tag = "4")]
+    pub to: ::core::option::Option<User>,
 }
 /// Transaction added to ledger
 #[derive(serde::Serialize, serde::Deserialize)]

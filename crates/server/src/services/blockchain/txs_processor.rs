@@ -7,7 +7,6 @@ use crate::services::blockchain::mem_pool_service::{
     GetTransactions, MemPoolService, RemoveOldTransactions, RemoveOnChainTransactions,
     RemoveTransactionByHash, RemoveTransactionsByHashes,
 };
-use crate::services::blockchain::payment_tx_processor;
 use crate::services::blockchain::stats::get_stats;
 use crate::services::db_config_service::USERS_COL_FAMILY;
 use anyhow::Result;
@@ -153,7 +152,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
 
             match tx_type {
                 TransactionType::PaymentV1 => {
-                    if let Some(mut payee) = payment_tx_processor::get_payee_user(tx).await? {
+                    if let Some(mut payee) = BlockChainService::get_payee_user(tx).await? {
                         match self
                             .process_payment_transaction(
                                 tx,

@@ -15,8 +15,8 @@ impl PaymentTransactionV1 {
             return Err(anyhow!("sender's account id is required"));
         }
 
-        if self.to.is_none() {
-            return Err(anyhow!("mobile number is required"));
+        if self.to_number.is_none() || self.to_account_id.is_none() {
+            return Err(anyhow!("payee mobile number or account id is required"));
         }
 
         if self.amount == 0 {
@@ -28,15 +28,28 @@ impl PaymentTransactionV1 {
 }
 
 impl Display for PaymentTransactionV1 {
-    // This trait requires `fmt` with this exact signature.
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(
-            f,
-            "PaymentTransactionV1 {{ from: {}, to: {}, amount: {}, char trait id: {} }}",
-            short_hex_string(self.from.as_ref().unwrap().data.as_ref()),
-            self.to.as_ref().unwrap().number,
-            self.amount,
-            self.char_trait_id
-        )
+        match self.to_number {
+            Some(ref to_number) => {
+                write!(
+                    f,
+                    "PaymentTransactionV1 {{ from: {}, to: {}, amount: {}, char trait id: {} }}",
+                    short_hex_string(self.from.as_ref().unwrap().data.as_ref()),
+                    to_number.number,
+                    self.amount,
+                    self.char_trait_id
+                )
+            }
+            None => {
+                write!(
+                    f,
+                    "PaymentTransactionV1 {{ from: {}, to: {}, amount: {}, char trait id: {} }}",
+                    short_hex_string(self.from.as_ref().unwrap().data.as_ref()),
+                    short_hex_string(self.to_account_id.as_ref().unwrap().data.as_ref()),
+                    self.amount,
+                    self.char_trait_id
+                )
+            }
+        }
     }
 }

@@ -1720,6 +1720,8 @@ class SignedTransactionWithStatus extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SignedTransactionWithStatus', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'karma_coin.core_types'), createEmptyInstance: create)
     ..aOM<SignedTransaction>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'transaction', subBuilder: SignedTransaction.create)
     ..e<TransactionStatus>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status', $pb.PbFieldType.OE, defaultOrMaker: TransactionStatus.TRANSACTION_STATUS_UNKNOWN, valueOf: TransactionStatus.valueOf, enumValues: TransactionStatus.values)
+    ..aOM<User>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'from', subBuilder: User.create)
+    ..aOM<User>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'to', subBuilder: User.create)
     ..hasRequiredFields = false
   ;
 
@@ -1727,6 +1729,8 @@ class SignedTransactionWithStatus extends $pb.GeneratedMessage {
   factory SignedTransactionWithStatus({
     SignedTransaction? transaction,
     TransactionStatus? status,
+    User? from,
+    User? to,
   }) {
     final _result = create();
     if (transaction != null) {
@@ -1734,6 +1738,12 @@ class SignedTransactionWithStatus extends $pb.GeneratedMessage {
     }
     if (status != null) {
       _result.status = status;
+    }
+    if (from != null) {
+      _result.from = from;
+    }
+    if (to != null) {
+      _result.to = to;
     }
     return _result;
   }
@@ -1777,6 +1787,28 @@ class SignedTransactionWithStatus extends $pb.GeneratedMessage {
   $core.bool hasStatus() => $_has(1);
   @$pb.TagNumber(2)
   void clearStatus() => clearField(2);
+
+  @$pb.TagNumber(3)
+  User get from => $_getN(2);
+  @$pb.TagNumber(3)
+  set from(User v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasFrom() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearFrom() => clearField(3);
+  @$pb.TagNumber(3)
+  User ensureFrom() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  User get to => $_getN(3);
+  @$pb.TagNumber(4)
+  set to(User v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasTo() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearTo() => clearField(4);
+  @$pb.TagNumber(4)
+  User ensureTo() => $_ensure(3);
 }
 
 class TransactionEvent extends $pb.GeneratedMessage {

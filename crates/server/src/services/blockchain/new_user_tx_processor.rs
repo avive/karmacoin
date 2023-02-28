@@ -12,6 +12,7 @@ use crate::services::db_config_service::{
     MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY, USERS_NAMES_COL_FAMILY,
 };
 use base::genesis_config_service::SIGNUP_CHAR_TRAIT_ID;
+use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_core_types::{
     ExecutionInfo, ExecutionResult, FeeType, SignedTransaction, TraitScore, TransactionBody,
     TransactionEvent, TransactionType, User,
@@ -127,14 +128,48 @@ impl BlockChainService {
         if account_id.data != evidence_account_id.data {
             return Err(NewUserProcessingError {
                 execution_info: ExecutionInfo::InvalidData,
-                error_message: "account id must match account id in verification data mismatch"
-                    .into(),
+                error_message: "account id must match account id in verification data".into(),
             });
         }
 
+        // we allow creation of a new account with a number that already has a different account on chain
+        // to handle the case where user lost access to his old account private key.
+        // a new account will be created with the user requested accountId and associated with this number
+        // the old account is still on-chain and is accessible via transactions that use account id
+        /*
+        if let Some(data) = DatabaseService::read(ReadItem {
+            key: Bytes::from(mobile_number.number.as_bytes().to_vec()),
+            cf: MOBILE_NUMBERS_COL_FAMILY,
+        })
+        .await
+        .map_err(|_| NewUserProcessingError {
+            execution_info: ExecutionInfo::InvalidData,
+            error_message: "internal node error".into(),
+        })? {
+            let existing_user =
+                User::decode(data.0.as_ref()).map_err(|_| NewUserProcessingError {
+                    execution_info: ExecutionInfo::InvalidData,
+                    error_message: "internal node error".into(),
+                })?;
+
+            info!(
+                "There's already a user with account id {} for this mobile number",
+                short_hex_string(existing_user.account_id.as_ref().unwrap().data.as_ref())
+            );
+
+            return Err(NewUserProcessingError {
+                execution_info: ExecutionInfo::AccountAlreadyExists,
+                error_message: "account already exists for the provided mobile number. consider updating your existing account".into(),
+            });
+        } else {
+            info!('there is no existing user account with th)
+        }*/
+
         info!(
-            "new user transaction for {} - {}",
-            verification_evidence.requested_user_name, mobile_number.number
+            "new user transaction for {}, {}, accountId: {}",
+            verification_evidence.requested_user_name,
+            mobile_number.number,
+            short_hex_string(account_id.data.as_ref())
         );
 
         // Check user account id is not already on chain
@@ -172,6 +207,10 @@ impl BlockChainService {
                 error_message: "there's already an account with requested user name".into(),
             });
         }
+
+        //
+        // end of validation part
+        //
 
         let sign_up_trait_score = TraitScore {
             trait_id: SIGNUP_CHAR_TRAIT_ID,

@@ -113,21 +113,30 @@ message NewUserTransactionV1 {
 }
 
 // Basic payment transaction with optional character appreciation
+// Receiver must be identified by phone number or a karma coin account id
 message PaymentTransactionV1 {
     AccountId from = 1; // must be included so it is part of signed message and part of the tx hash
     uint64 amount = 2; // amount in tokens to transfer
-    MobileNumber to = 3; // dest is always a mobile number (of a user or a non-user) no accountId needed.
-    uint32 char_trait_id = 4; // char trait id set by sender. e.g. smart
-    uint32 community_id = 5;
+    // one of the next to_ must be provided as the payee
+    MobileNumber to_number = 3; // pay to a mobile number
+    AccountId to_account_id = 4; // pay to a Karma Coin account id
+    uint32 char_trait_id = 5; // char trait id set by sender. e.g. smart
+    uint32 community_id = 6;
 }
 
 // Update user info
+// User can update his nickname, mobile phone number or accountId in case
+// he wants to associate his number with a new accountId.
+// in that case, only way to transact from old account with old account id is via
+// payment transactions from an accountId signed by this accountId private key
+// Also in this case a new onchain account should be created with the new accountId
+// and the user's phone number is going to be assoicated with the new account
 message UpdateUserTransactionV1 {
 
     // new requested nickname
     string nickname = 1;
 
-    // Updated verified number
+    // Updated mobile number oe existing one
     MobileNumber mobile_number = 2;
 
     // verifier attestation regarding the number and the account
@@ -197,6 +206,8 @@ message MemPool {
 message SignedTransactionWithStatus {
     SignedTransaction transaction = 1;
     TransactionStatus status = 2; // transaction status
+    core_types.User from = 3; // sender
+    core_types.User to = 4; // receiver
 }
 
 enum FeeType {

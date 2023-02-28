@@ -28,6 +28,8 @@ impl Display for SignedTransaction {
 }
 
 impl SignedTransaction {
+    // todo: add get type
+
     fn get_signature(&self) -> Result<Signature> {
         Ok(Signature::from_bytes(
             &self

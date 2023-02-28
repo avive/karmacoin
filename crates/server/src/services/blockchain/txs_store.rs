@@ -4,7 +4,7 @@
 
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::db_config_service::{
-    TRANSACTIONS_COL_FAMILY, TRANSACTIONS_HASHES_BY_ACCOUNT_IDX_COL_FAMILY,
+    TRANSACTIONS_COL_FAMILY, TRANSACTIONS_HASHES_BY_ACCOUNT_IDX_COL_FAMILY, USERS_COL_FAMILY,
 };
 use anyhow::{anyhow, Result};
 use base::karma_coin::karma_coin_core_types::TransactionStatus::OnChain;
@@ -65,6 +65,40 @@ impl Handler<GetTransactionByHash> for BlockChainService {
 }
 
 impl BlockChainService {
+    /// create signed tx with status from a signed tx
+    pub(crate) async fn create_signed_tx_with_status(
+        tx: &SignedTransaction,
+    ) -> Result<SignedTransactionWithStatus> {
+        let sender = match DatabaseService::read(ReadItem {
+            key: Bytes::from(tx.signer.as_ref().unwrap().data.clone()),
+            cf: USERS_COL_FAMILY,
+        })
+        .await?
+        {
+            Some(data) => User::decode(data.0.as_ref())?,
+            None => {
+                info!("Tx signer user not found on chain");
+                return Err(anyhow!("can't find sender account on chain for tx"));
+            }
+        };
+
+        // Add tx receiver if exists (should exist for one-chain payment txs)
+        let tx_body = tx.get_body()?;
+        let receiver = match tx_body.get_tx_type()? {
+            TransactionType::PaymentV1 => {
+                BlockChainService::get_payee_user_from_tx_body(&tx_body).await?
+            }
+            _ => None,
+        };
+
+        Ok(SignedTransactionWithStatus {
+            from: Some(sender),
+            to: receiver,
+            transaction: Some(tx.clone()),
+            status: OnChain as i32,
+        })
+    }
+
     pub(crate) async fn get_transaction_by_hash(
         &self,
         hash: Bytes,
@@ -76,10 +110,9 @@ impl BlockChainService {
         .await?
         {
             let tx = SignedTransaction::decode(data.0.as_ref())?;
-            Ok(Some(SignedTransactionWithStatus {
-                transaction: Some(tx),
-                status: OnChain as i32,
-            }))
+            Ok(Some(
+                BlockChainService::create_signed_tx_with_status(&tx).await?,
+            ))
         } else {
             Ok(None)
         }
@@ -113,7 +146,7 @@ impl BlockChainService {
         &self,
         account_id: Bytes,
     ) -> Result<Vec<SignedTransactionWithStatus>> {
-        return if let Some(data) = DatabaseService::read(ReadItem {
+        if let Some(data) = DatabaseService::read(ReadItem {
             key: account_id,
             cf: TRANSACTIONS_HASHES_BY_ACCOUNT_IDX_COL_FAMILY,
         })
@@ -130,16 +163,13 @@ impl BlockChainService {
                 .await?
                 {
                     let tx = SignedTransaction::decode(data.0.as_ref())?;
-                    txs.push(SignedTransactionWithStatus {
-                        transaction: Some(tx),
-                        status: OnChain as i32,
-                    });
+                    txs.push(BlockChainService::create_signed_tx_with_status(&tx).await?);
                 }
             }
             Ok(txs)
         } else {
             Ok(vec![])
-        };
+        }
     }
 
     /// Index a transaction by an account id

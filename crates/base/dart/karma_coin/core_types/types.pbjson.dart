@@ -375,11 +375,13 @@ const SignedTransactionWithStatus$json = const {
   '2': const [
     const {'1': 'transaction', '3': 1, '4': 1, '5': 11, '6': '.karma_coin.core_types.SignedTransaction', '10': 'transaction'},
     const {'1': 'status', '3': 2, '4': 1, '5': 14, '6': '.karma_coin.core_types.TransactionStatus', '10': 'status'},
+    const {'1': 'from', '3': 3, '4': 1, '5': 11, '6': '.karma_coin.core_types.User', '10': 'from'},
+    const {'1': 'to', '3': 4, '4': 1, '5': 11, '6': '.karma_coin.core_types.User', '10': 'to'},
   ],
 };
 
 /// Descriptor for `SignedTransactionWithStatus`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List signedTransactionWithStatusDescriptor = $convert.base64Decode('ChtTaWduZWRUcmFuc2FjdGlvbldpdGhTdGF0dXMSSgoLdHJhbnNhY3Rpb24YASABKAsyKC5rYXJtYV9jb2luLmNvcmVfdHlwZXMuU2lnbmVkVHJhbnNhY3Rpb25SC3RyYW5zYWN0aW9uEkAKBnN0YXR1cxgCIAEoDjIoLmthcm1hX2NvaW4uY29yZV90eXBlcy5UcmFuc2FjdGlvblN0YXR1c1IGc3RhdHVz');
+final $typed_data.Uint8List signedTransactionWithStatusDescriptor = $convert.base64Decode('ChtTaWduZWRUcmFuc2FjdGlvbldpdGhTdGF0dXMSSgoLdHJhbnNhY3Rpb24YASABKAsyKC5rYXJtYV9jb2luLmNvcmVfdHlwZXMuU2lnbmVkVHJhbnNhY3Rpb25SC3RyYW5zYWN0aW9uEkAKBnN0YXR1cxgCIAEoDjIoLmthcm1hX2NvaW4uY29yZV90eXBlcy5UcmFuc2FjdGlvblN0YXR1c1IGc3RhdHVzEi8KBGZyb20YAyABKAsyGy5rYXJtYV9jb2luLmNvcmVfdHlwZXMuVXNlclIEZnJvbRIrCgJ0bxgEIAEoCzIbLmthcm1hX2NvaW4uY29yZV90eXBlcy5Vc2VyUgJ0bw==');
 @$core.Deprecated('Use transactionEventDescriptor instead')
 const TransactionEvent$json = const {
   '1': 'TransactionEvent',

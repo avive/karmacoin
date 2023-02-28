@@ -1,5 +1,4 @@
 use crate::services::blockchain::mem_pool_service::{GetTransactions, MemPoolService};
-use crate::services::blockchain::payment_tx_processor::get_payee_user;
 use crate::services::verifier::verifier_service::VerifierService;
 use anyhow::anyhow;
 use base::hex_utils::short_hex_string;
@@ -20,6 +19,7 @@ use http::StatusCode;
 use prost::Message;
 // use tonic::transport::Server;
 
+use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::db_config_service::{INVITE_SMS_COL_FAMILY, USERS_COL_FAMILY};
 use xactor::*;
 
@@ -117,7 +117,7 @@ impl Handler<SendInvites> for VerifierService {
                 continue;
             }
 
-            if (get_payee_user(tx).await?).is_some() {
+            if (BlockChainService::get_payee_user(tx).await?).is_some() {
                 info!("tx payee already has an on-chain account - skipping");
             }
 
@@ -152,15 +152,12 @@ impl VerifierService {
         let payment_tx = tx_body.get_payment_transaction_v1().unwrap();
         let invite_tx_hash = signed_tx.get_hash()?;
 
-        info!(
-            "Computing sms invite to: {}",
-            payment_tx.to.as_ref().unwrap().number
-        );
-
         let invite_mobile_number = payment_tx
-            .to
+            .to_number
             .as_ref()
-            .ok_or_else(|| anyhow!("missing receiver mobile number"))?;
+            .ok_or_else(|| anyhow!("missing tx receiver's mobile number"))?;
+
+        info!("Computing sms invite to: {}", invite_mobile_number.number);
 
         let invite_db_key = Bytes::from(invite_mobile_number.number.as_bytes().to_vec());
 
