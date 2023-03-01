@@ -276,14 +276,15 @@ const PaymentTransactionV1$json = const {
   '2': const [
     const {'1': 'from', '3': 1, '4': 1, '5': 11, '6': '.karma_coin.core_types.AccountId', '10': 'from'},
     const {'1': 'amount', '3': 2, '4': 1, '5': 4, '10': 'amount'},
-    const {'1': 'to', '3': 3, '4': 1, '5': 11, '6': '.karma_coin.core_types.MobileNumber', '10': 'to'},
-    const {'1': 'char_trait_id', '3': 4, '4': 1, '5': 13, '10': 'charTraitId'},
-    const {'1': 'community_id', '3': 5, '4': 1, '5': 13, '10': 'communityId'},
+    const {'1': 'to_number', '3': 3, '4': 1, '5': 11, '6': '.karma_coin.core_types.MobileNumber', '10': 'toNumber'},
+    const {'1': 'to_account_id', '3': 4, '4': 1, '5': 11, '6': '.karma_coin.core_types.AccountId', '10': 'toAccountId'},
+    const {'1': 'char_trait_id', '3': 5, '4': 1, '5': 13, '10': 'charTraitId'},
+    const {'1': 'community_id', '3': 6, '4': 1, '5': 13, '10': 'communityId'},
   ],
 };
 
 /// Descriptor for `PaymentTransactionV1`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List paymentTransactionV1Descriptor = $convert.base64Decode('ChRQYXltZW50VHJhbnNhY3Rpb25WMRI0CgRmcm9tGAEgASgLMiAua2FybWFfY29pbi5jb3JlX3R5cGVzLkFjY291bnRJZFIEZnJvbRIWCgZhbW91bnQYAiABKARSBmFtb3VudBIzCgJ0bxgDIAEoCzIjLmthcm1hX2NvaW4uY29yZV90eXBlcy5Nb2JpbGVOdW1iZXJSAnRvEiIKDWNoYXJfdHJhaXRfaWQYBCABKA1SC2NoYXJUcmFpdElkEiEKDGNvbW11bml0eV9pZBgFIAEoDVILY29tbXVuaXR5SWQ=');
+final $typed_data.Uint8List paymentTransactionV1Descriptor = $convert.base64Decode('ChRQYXltZW50VHJhbnNhY3Rpb25WMRI0CgRmcm9tGAEgASgLMiAua2FybWFfY29pbi5jb3JlX3R5cGVzLkFjY291bnRJZFIEZnJvbRIWCgZhbW91bnQYAiABKARSBmFtb3VudBJACgl0b19udW1iZXIYAyABKAsyIy5rYXJtYV9jb2luLmNvcmVfdHlwZXMuTW9iaWxlTnVtYmVyUgh0b051bWJlchJECg10b19hY2NvdW50X2lkGAQgASgLMiAua2FybWFfY29pbi5jb3JlX3R5cGVzLkFjY291bnRJZFILdG9BY2NvdW50SWQSIgoNY2hhcl90cmFpdF9pZBgFIAEoDVILY2hhclRyYWl0SWQSIQoMY29tbXVuaXR5X2lkGAYgASgNUgtjb21tdW5pdHlJZA==');
 @$core.Deprecated('Use updateUserTransactionV1Descriptor instead')
 const UpdateUserTransactionV1$json = const {
   '1': 'UpdateUserTransactionV1',

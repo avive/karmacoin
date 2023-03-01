@@ -1068,9 +1068,10 @@ class PaymentTransactionV1 extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'PaymentTransactionV1', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'karma_coin.core_types'), createEmptyInstance: create)
     ..aOM<AccountId>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'from', subBuilder: AccountId.create)
     ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'amount', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOM<MobileNumber>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'to', subBuilder: MobileNumber.create)
-    ..a<$core.int>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'charTraitId', $pb.PbFieldType.OU3)
-    ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'communityId', $pb.PbFieldType.OU3)
+    ..aOM<MobileNumber>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'toNumber', subBuilder: MobileNumber.create)
+    ..aOM<AccountId>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'toAccountId', subBuilder: AccountId.create)
+    ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'charTraitId', $pb.PbFieldType.OU3)
+    ..a<$core.int>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'communityId', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
   ;
 
@@ -1078,7 +1079,8 @@ class PaymentTransactionV1 extends $pb.GeneratedMessage {
   factory PaymentTransactionV1({
     AccountId? from,
     $fixnum.Int64? amount,
-    MobileNumber? to,
+    MobileNumber? toNumber,
+    AccountId? toAccountId,
     $core.int? charTraitId,
     $core.int? communityId,
   }) {
@@ -1089,8 +1091,11 @@ class PaymentTransactionV1 extends $pb.GeneratedMessage {
     if (amount != null) {
       _result.amount = amount;
     }
-    if (to != null) {
-      _result.to = to;
+    if (toNumber != null) {
+      _result.toNumber = toNumber;
+    }
+    if (toAccountId != null) {
+      _result.toAccountId = toAccountId;
     }
     if (charTraitId != null) {
       _result.charTraitId = charTraitId;
@@ -1142,33 +1147,44 @@ class PaymentTransactionV1 extends $pb.GeneratedMessage {
   void clearAmount() => clearField(2);
 
   @$pb.TagNumber(3)
-  MobileNumber get to => $_getN(2);
+  MobileNumber get toNumber => $_getN(2);
   @$pb.TagNumber(3)
-  set to(MobileNumber v) { setField(3, v); }
+  set toNumber(MobileNumber v) { setField(3, v); }
   @$pb.TagNumber(3)
-  $core.bool hasTo() => $_has(2);
+  $core.bool hasToNumber() => $_has(2);
   @$pb.TagNumber(3)
-  void clearTo() => clearField(3);
+  void clearToNumber() => clearField(3);
   @$pb.TagNumber(3)
-  MobileNumber ensureTo() => $_ensure(2);
+  MobileNumber ensureToNumber() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  $core.int get charTraitId => $_getIZ(3);
+  AccountId get toAccountId => $_getN(3);
   @$pb.TagNumber(4)
-  set charTraitId($core.int v) { $_setUnsignedInt32(3, v); }
+  set toAccountId(AccountId v) { setField(4, v); }
   @$pb.TagNumber(4)
-  $core.bool hasCharTraitId() => $_has(3);
+  $core.bool hasToAccountId() => $_has(3);
   @$pb.TagNumber(4)
-  void clearCharTraitId() => clearField(4);
+  void clearToAccountId() => clearField(4);
+  @$pb.TagNumber(4)
+  AccountId ensureToAccountId() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  $core.int get communityId => $_getIZ(4);
+  $core.int get charTraitId => $_getIZ(4);
   @$pb.TagNumber(5)
-  set communityId($core.int v) { $_setUnsignedInt32(4, v); }
+  set charTraitId($core.int v) { $_setUnsignedInt32(4, v); }
   @$pb.TagNumber(5)
-  $core.bool hasCommunityId() => $_has(4);
+  $core.bool hasCharTraitId() => $_has(4);
   @$pb.TagNumber(5)
-  void clearCommunityId() => clearField(5);
+  void clearCharTraitId() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.int get communityId => $_getIZ(5);
+  @$pb.TagNumber(6)
+  set communityId($core.int v) { $_setUnsignedInt32(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasCommunityId() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearCommunityId() => clearField(6);
 }
 
 class UpdateUserTransactionV1 extends $pb.GeneratedMessage {

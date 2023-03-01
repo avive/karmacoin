@@ -15,8 +15,10 @@ impl PaymentTransactionV1 {
             return Err(anyhow!("sender's account id is required"));
         }
 
-        if self.to_number.is_none() || self.to_account_id.is_none() {
-            return Err(anyhow!("payee mobile number or account id is required"));
+        if self.to_number.is_none() && self.to_account_id.is_none() {
+            return Err(anyhow!(
+                "payee mobile number OR payee account id is required"
+            ));
         }
 
         if self.amount == 0 {

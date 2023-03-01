@@ -90,7 +90,8 @@ impl ServerConfigService {
             .unwrap()
             .set_default(BLOCK_PRODUCER_USER_NAME, "Block producer 1")
             .unwrap()
-            .set_default(SEND_INVITE_SMS_MESSAGES_CONFIG_KEY, true)
+            // off by default to prevent charges - set to true to test sms messages
+            .set_default(SEND_INVITE_SMS_MESSAGES_CONFIG_KEY, false)
             .unwrap()
             // how frequently to send sms
             .set_default(SEND_INVITE_SMS_TASK_FREQ_SECS_CONFIG_KEY, 30)

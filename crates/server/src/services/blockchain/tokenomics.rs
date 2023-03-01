@@ -10,6 +10,8 @@ pub struct Tokenomics {
     pub stats: BlockchainStats,
 }
 
+const K_CENTS_IN_KC: u64 = 1_000_000;
+
 impl Tokenomics {
     pub fn new(stats: BlockchainStats) -> Self {
         Self { stats }
@@ -19,15 +21,19 @@ impl Tokenomics {
 impl Tokenomics {
     /// Get current signup reward amount based on consensus rules, genesis config and blockchain data
     pub async fn get_signup_reward_amount(&self) -> Result<u64> {
+        // In Kcents
         let signup_rewards_alloc_phase1 =
             GenesisConfigService::get_u64(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY.into())
                 .await?
-                .unwrap();
+                .unwrap()
+                * K_CENTS_IN_KC;
 
+        // In Kcents
         let signup_rewards_alloc_phase2 =
             GenesisConfigService::get_u64(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY.into())
                 .await?
-                .unwrap();
+                .unwrap()
+                * K_CENTS_IN_KC;
 
         if self.stats.signup_rewards_amount
             > signup_rewards_alloc_phase1 + signup_rewards_alloc_phase2
