@@ -117,7 +117,8 @@ message NewUserTransactionV1 {
 message PaymentTransactionV1 {
     AccountId from = 1; // must be included so it is part of signed message and part of the tx hash
     uint64 amount = 2; // amount in tokens to transfer
-    // one of the next to_ must be provided as the payee
+    // IMPORTANT: one of the next fields must be provided as the payee for the tx to be valid
+    // todo: use oneof proto feature here
     MobileNumber to_number = 3; // pay to a mobile number
     AccountId to_account_id = 4; // pay to a Karma Coin account id
     uint32 char_trait_id = 5; // char trait id set by sender. e.g. smart

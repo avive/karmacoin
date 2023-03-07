@@ -175,7 +175,8 @@ pub struct PaymentTransactionV1 {
     /// amount in tokens to transfer
     #[prost(uint64, tag = "2")]
     pub amount: u64,
-    /// one of the next to\_ must be provided as the payee
+    /// IMPORTANT: one of the next fields must be provided as the payee for the tx to be valid
+    /// todo: use oneof proto feature here
     ///
     /// pay to a mobile number
     #[prost(message, optional, tag = "3")]
