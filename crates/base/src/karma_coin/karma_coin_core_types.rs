@@ -97,6 +97,21 @@ pub struct User {
     /// user's current karma score
     #[prost(uint32, tag = "8")]
     pub karma_score: u32,
+    /// all communities user is member of, admin rights and score in each
+    #[prost(message, repeated, tag = "9")]
+    pub community_memberships: ::prost::alloc::vec::Vec<CommunityMembership>,
+}
+#[derive(serde::Serialize, serde::Deserialize)]
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CommunityMembership {
+    #[prost(uint32, tag = "1")]
+    pub community_id: u32,
+    #[prost(uint32, tag = "2")]
+    pub karma_score: u32,
+    /// when true user is admin of the community - set by sudo
+    #[prost(bool, tag = "3")]
+    pub is_admin: bool,
 }
 /// Phone verifier is an entity that verifies account mobile phone numbers
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -155,6 +170,38 @@ pub struct TraitScore {
     pub trait_id: u32,
     #[prost(uint32, tag = "2")]
     pub score: u32,
+    /// 0 for no community, otherwise community id this trait was assigned
+    #[prost(uint32, tag = "3")]
+    pub community_id: u32,
+}
+/// a community partner
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Community {
+    #[prost(uint32, tag = "1")]
+    pub id: u32,
+    #[prost(string, tag = "2")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub desc: ::prost::alloc::string::String,
+    #[prost(string, tag = "4")]
+    pub emoji: ::prost::alloc::string::String,
+    #[prost(string, tag = "5")]
+    pub website_url: ::prost::alloc::string::String,
+    #[prost(string, tag = "6")]
+    pub twitter_url: ::prost::alloc::string::String,
+    #[prost(string, tag = "7")]
+    pub insta_url: ::prost::alloc::string::String,
+    #[prost(string, tag = "8")]
+    pub face_url: ::prost::alloc::string::String,
+    #[prost(string, tag = "9")]
+    pub discord_url: ::prost::alloc::string::String,
+    #[prost(uint32, repeated, tag = "10")]
+    pub char_trait_ids: ::prost::alloc::vec::Vec<u32>,
+    /// closed community - only community manager can invite new members
+    /// and only members can appreciate each other in the community
+    #[prost(bool, tag = "11")]
+    pub closed: bool,
 }
 /// new user transactions submitted by users
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -203,7 +250,7 @@ pub struct UpdateUserTransactionV1 {
     /// new requested nickname
     #[prost(string, tag = "1")]
     pub nickname: ::prost::alloc::string::String,
-    /// Updated mobile number oe existing one
+    /// Updated mobile number or existing one
     #[prost(message, optional, tag = "2")]
     pub mobile_number: ::core::option::Option<MobileNumber>,
     /// verifier attestation regarding the number and the account
@@ -334,7 +381,9 @@ pub struct TransactionEvent {
     pub referral_reward: u64,
     #[prost(uint32, tag = "11")]
     pub appreciation_char_trait_idx: u32,
-    #[prost(uint64, tag = "12")]
+    #[prost(uint32, tag = "12")]
+    pub appreciation_community_id: u32,
+    #[prost(uint64, tag = "13")]
     pub fee: u64,
 }
 /// A collection of events for a transaction
@@ -459,6 +508,7 @@ impl KeyScheme {
         }
     }
 }
+/// / transactions
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum TransactionType {

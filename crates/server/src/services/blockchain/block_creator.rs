@@ -63,6 +63,7 @@ impl BlockChainService {
                     trait_scores: vec![],
                     pre_keys: vec![],
                     karma_score: 1,
+                    community_memberships: vec![],
                 }
             }
         };

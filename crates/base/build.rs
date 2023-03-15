@@ -44,6 +44,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "#[derive(serde::Serialize, serde::Deserialize)]",
         )
         .type_attribute(
+            "CommunityMembership",
+            "#[derive(serde::Serialize, serde::Deserialize)]",
+        )
+        .type_attribute(
             "TransactionEvents",
             "#[derive(serde::Serialize, serde::Deserialize)]",
         )

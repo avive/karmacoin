@@ -11,8 +11,8 @@ use anyhow::{anyhow, Result};
 use base::genesis_config_service::{AMBASSADOR_CHAR_TRAIT_ID, SPENDER_CHAR_TRAIT_ID};
 use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_core_types::{
-    ExecutionResult, FeeType, PaymentTransactionV1, SignedTransaction, TransactionBody,
-    TransactionEvent, TransactionType, User,
+    CommunityMembership, ExecutionResult, FeeType, PaymentTransactionV1, SignedTransaction,
+    TransactionBody, TransactionEvent, TransactionType, User,
 };
 use bytes::Bytes;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
@@ -70,6 +70,58 @@ impl BlockChainService {
     ) -> Result<Option<User>> {
         let tx_body = signed_transaction.get_body()?;
         BlockChainService::get_payee_user_from_tx_body(&tx_body).await
+    }
+
+    /// Process a user to user appreciation part of a pyament transaction
+    fn process_appreciation(
+        &mut self,
+        payer: &mut User,
+        payee: &mut User,
+        payment_tx: &PaymentTransactionV1,
+        event: &mut TransactionEvent,
+    ) {
+        let community_id = payment_tx.community_id;
+        if community_id == 0 {
+            // standard appreciation w/o a community context
+            payee.inc_trait_score(payment_tx.char_trait_id, 0);
+            payee.karma_score += 1;
+            event.appreciation_char_trait_idx = payment_tx.char_trait_id;
+            event.appreciation_community_id = 0;
+            return;
+        }
+
+        if let Some(membership) = payer.get_community_membership(community_id) {
+            // Payer is member of the community - check if payee is a member
+            let payee_membership = payee.get_community_membership(community_id);
+
+            if payee_membership.is_none() && membership.is_admin {
+                info!("payer is admin and payee is not a member - creating community membership");
+                let new_membership = CommunityMembership {
+                    community_id,
+                    is_admin: false,
+                    karma_score: 0,
+                };
+                payee.community_memberships.push(new_membership);
+            }
+
+            // get updated membership status
+            let payee_membership = payee.get_community_membership(community_id);
+
+            if payee_membership.is_none() {
+                info!("payer is not admin in community and payee is not a already member - disregard this community appreciation");
+                return;
+            }
+
+            // payee is  a member
+            payee_membership.unwrap().karma_score += 1;
+            payee.inc_trait_score(payment_tx.char_trait_id, community_id);
+            // give payer one karma score in the community
+            membership.karma_score += 1;
+            event.appreciation_char_trait_idx = payment_tx.char_trait_id;
+            event.appreciation_community_id = payment_tx.community_id;
+        } else {
+            info!("Payer non a member of the community - disregard this community appreciation");
+        }
     }
 
     /// Process a payment transaction from payer to payee - update ledger state, emit tx event
@@ -146,9 +198,7 @@ impl BlockChainService {
         payer.balance -= payment_amount + user_tx_fee_amount;
 
         if payment_tx.char_trait_id != 0 {
-            // payment includes an appreciation for a character trait - update user character trait points
-            payee.inc_trait_score(payment_tx.char_trait_id);
-            event.appreciation_char_trait_idx = payment_tx.char_trait_id;
+            self.process_appreciation(payer, payee, &payment_tx, event);
         }
 
         let referral_reward_amount = tokenomics.get_referral_reward_amount().await?;
@@ -170,12 +220,18 @@ impl BlockChainService {
                 payer.balance += referral_reward_amount;
 
                 // Give payer karma points for helping to grow the network
-                payer.inc_trait_score(AMBASSADOR_CHAR_TRAIT_ID);
+                payer.inc_trait_score(AMBASSADOR_CHAR_TRAIT_ID, 0);
+                payer.karma_score += 1;
             };
         }
 
         // Give payer karma points for spending karma coins
-        payer.inc_trait_score(SPENDER_CHAR_TRAIT_ID);
+        payer.inc_trait_score(SPENDER_CHAR_TRAIT_ID, 0);
+        payer.karma_score += 1;
+
+        // update the user's nonce to the tx nonce
+        info!("setting user nonce to {}", payer.nonce + 1);
+        payer.nonce += 1;
 
         // index the transaction in the db by hash
         let mut tx_data = Vec::with_capacity(signed_transaction.encoded_len());

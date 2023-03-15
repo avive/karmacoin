@@ -65,6 +65,16 @@ message User {
     repeated TraitScore trait_scores = 6;
     repeated PreKey pre_keys = 7; // one-time enc pre-keys for e2e messaging
     uint32 karma_score = 8; // user's current karma score
+
+    // all communities user is member of, admin rights and score in each
+    repeated CommunityMembership community_memberships = 9;
+}
+
+message CommunityMembership {
+    uint32 community_id = 1;
+    uint32 karma_score = 2;
+    // when true user is admin of the community - set by sudo
+    bool is_admin = 3;
 }
 
 // Phone verifier is an entity that verifies account mobile phone numbers
@@ -84,7 +94,6 @@ message Block {
     uint64 reward = 8;
     uint64 minted = 9; // total coins minted in this block (rewards + tx fee subsidies)
     bytes digest = 10; // block digest includes hash of all above data
-
 }
 
 message CharTrait {
@@ -93,13 +102,31 @@ message CharTrait {
     string emoji = 3;
 }
 
-message TraitScore {
+//message TraitScore {
     uint32 trait_id = 1;
     uint32 score = 2;
+    // 0 for no community, otherwise community id this trait was assigned
+    uint32 community_id = 3;
+}
+
+// a community partner
+message Community {
+    uint32 id = 1;
+    string name = 2;
+    string desc = 3;
+    string emoji = 4;
+    string website_url = 5;
+    string twitter_url = 6;
+    string insta_url = 7;
+    string face_url = 8;
+    string discord_url = 9;
+    repeated uint32 char_trait_ids = 10;
+    // closed community - only community manager can invite new members
+    // and only members can appreciate each other in the community
+    bool closed = 11;
 }
 
 /// transactions
-
 enum TransactionType {
     TRANSACTION_TYPE_PAYMENT_V1 = 0;
     TRANSACTION_TYPE_NEW_USER_V1 = 1;
@@ -137,7 +164,7 @@ message UpdateUserTransactionV1 {
     // new requested nickname
     string nickname = 1;
 
-    // Updated mobile number oe existing one
+    // Updated mobile number or existing one
     MobileNumber mobile_number = 2;
 
     // verifier attestation regarding the number and the account
@@ -229,7 +256,8 @@ message TransactionEvent {
     uint64 signup_reward = 9;
     uint64 referral_reward = 10;
     uint32 appreciation_char_trait_idx = 11;
-    uint64 fee = 12;
+    uint32 appreciation_community_id = 12;
+    uint64 fee = 13;
 }
 
 // A collection of events for a transaction
