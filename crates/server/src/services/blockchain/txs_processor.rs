@@ -35,6 +35,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
         let mem_pool = MemPoolService::from_registry().await?;
 
         // remove from pool all transactions that are already on chain
+        // this block execution of transactions that were already processed in a previous block
         mem_pool.call(RemoveOnChainTransactions).await??;
 
         // get all pending txs from mem-pool
@@ -145,10 +146,12 @@ impl Handler<ProcessTransactions> for BlockChainService {
             };
 
             // check nonce and ignore txs with wrong nonce here
+            // Nonce checking is disabled until design is figured out
+            /*
             if tx_body.validate_nonce(user.nonce).is_err() {
                 info!("Tx nonce is invalid - ignoring tx and leaving it in mempool");
                 continue;
-            }
+            }*/
 
             match tx_type {
                 TransactionType::PaymentV1 => {
@@ -193,6 +196,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
                     }
                 }
                 TransactionType::UpdateUserV1 => {
+                    info!("processing update user transaction");
                     // Get tx signer user from chain and reject tx if it doesn't exist
                     match DatabaseService::read(ReadItem {
                         key: Bytes::from(tx.signer.as_ref().unwrap().data.clone()),
@@ -200,7 +204,10 @@ impl Handler<ProcessTransactions> for BlockChainService {
                     })
                     .await?
                     {
-                        Some(data) => User::decode(data.0.as_ref())?,
+                        Some(data) => {
+                            info!("user found on chain");
+                            User::decode(data.0.as_ref())?
+                        }
                         None => {
                             info!("Tx signer not on chain - rejecting & removing tx from pool");
 

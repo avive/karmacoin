@@ -9,6 +9,7 @@ use crate::karma_coin::karma_coin_core_types::{
 };
 use anyhow::{anyhow, Result};
 use chrono::{Duration, Utc};
+use log::info;
 use prost::Message;
 use std::fmt;
 use std::fmt::{Display, Formatter};
@@ -27,8 +28,9 @@ impl Display for TransactionBody {
 impl TransactionBody {
     /// Validate transaction has valid syntax, fields has the correct net id and is properly
     /// signed before processing it
-    pub async fn validate(&self, user_nonce: u64) -> Result<()> {
-        self.validate_nonce(user_nonce)?;
+    pub async fn validate(&self, _user_nonce: u64) -> Result<()> {
+        // skip nonce validation for now until the design is fully sorted out
+        //self.validate_nonce(user_nonce)?;
         self.verify_syntax().await?;
         self.verify_timestamp()?;
         self.verify_tx_fee()
@@ -36,9 +38,13 @@ impl TransactionBody {
 
     /// Validate tx nonce against user's current nonce
     pub fn validate_nonce(&self, user_nonce: u64) -> Result<()> {
-        if self.nonce != user_nonce + 1 {
+        info!(
+            "validating tx nonce. tx nonce: {}, user_nonce: {}",
+            self.nonce, user_nonce
+        );
+        if self.nonce <= user_nonce {
             return Err(anyhow!(
-                "Invalid nonce in tx. Got: {}, Expected: {}",
+                "invalid nonce in tx. Got: {}, Expected at least: {}",
                 self.nonce,
                 user_nonce + 1
             ));

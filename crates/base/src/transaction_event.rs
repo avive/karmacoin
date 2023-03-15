@@ -24,6 +24,7 @@ impl TransactionEvent {
             result: ExecutionResult::Executed as i32,
             info: ExecutionInfo::Unknown as i32,
             appreciation_char_trait_idx: 0,
+            appreciation_community_id: 0,
             fee: 0,
         }
     }
@@ -46,7 +47,7 @@ impl Display for TransactionEvent {
             self.signup_reward,
             self.result,
             self.info,
-            self.fee
+            self.fee // todo: add missing fields
         )
     }
 }

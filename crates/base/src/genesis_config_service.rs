@@ -6,7 +6,7 @@ use anyhow::{anyhow, Result};
 use map_macro::map;
 
 use crate::karma_coin::karma_coin_api::{GetGenesisDataRequest, GetGenesisDataResponse};
-use crate::karma_coin::karma_coin_core_types::{AccountId, CharTrait, PhoneVerifier};
+use crate::karma_coin::karma_coin_core_types::{AccountId, CharTrait, Community, PhoneVerifier};
 use config::{Config, Environment, Map, Value};
 use log::*;
 use std::collections::HashMap;
@@ -129,6 +129,7 @@ pub struct GenesisConfigService {
     config_file: Option<String>,
     pub(crate) genesis_data: Option<GetGenesisDataResponse>,
     char_traits: Option<Vec<CharTrait>>,
+    communities: Option<Vec<Community>>,
 }
 
 #[async_trait::async_trait]
@@ -152,7 +153,7 @@ impl Actor for GenesisConfigService {
             CharTrait::new(7, "Smart".into(), "🧠".into()),
             CharTrait::new(8, "Sexy".into(), "🔥".into()),
             CharTrait::new(9, "Patient".into(), "🐛".into()),
-            CharTrait::new(10, "Grateful".into(), "🙏".into()),
+            CharTrait::new(10, "Grateful".into(), "🦒".into()),
             CharTrait::new(11, "Spiritual".into(), "🕊️".into()),
             CharTrait::new(12, "Funny".into(), "🤣".into()),
             CharTrait::new(13, "Caring".into(), "🤲".into()),
@@ -206,6 +207,20 @@ impl Actor for GenesisConfigService {
             CharTrait::new(60, "an Imaginative Motivator".into(), "🌻".into()),
             CharTrait::new(61, "a Campaigner".into(), "📣".into()),
         ]);
+
+        self.communities = Some(vec![Community {
+            id: 1,
+            name: "Grateful Giraffes".to_string(),
+            desc: "A global community of of leaders that come together for powerful wellness experiences".into(),
+            emoji: "🦒".to_string(),
+            website_url: "https://www.gratefulgiraffes.com".to_string(),
+            twitter_url: "https://twitter.com/TheGratefulDAO".to_string(),
+            insta_url: "https://www.instagram.com/gratefulgiraffes".to_string(),
+            face_url: "".to_string(),
+            discord_url: "https://discord.gg/7FMTXavy8N".to_string(),
+            char_trait_ids: vec![10, 4, 3, 11, 15, 18, 39, 42, 60],
+            closed: true,
+        }]);
 
         // default supported verifiers
         let verifiers: HashMap<String, String> = map! {

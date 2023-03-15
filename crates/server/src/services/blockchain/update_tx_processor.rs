@@ -32,7 +32,6 @@ impl BlockChainService {
         let account_id = user.account_id.as_ref().unwrap();
 
         // verify that the requested nickname not registered to another user
-
         if (DatabaseService::read(ReadItem {
             key: nick_name_key.clone(),
             cf: USERS_NAMES_COL_FAMILY,
@@ -46,20 +45,9 @@ impl BlockChainService {
 
         // update user's nickname
         user.user_name = nickname.clone();
-        let mut buf = Vec::with_capacity(user.encoded_len());
-        user.encode(&mut buf)?;
-        DatabaseService::write(WriteItem {
-            data: DataItem {
-                key: Bytes::from(account_id.data.clone()),
-                value: Bytes::from(buf),
-            },
-            cf: USERS_COL_FAMILY,
-            ttl: 0,
-        })
-        .await?;
 
         // update nickname index
-        DatabaseService::write(WriteItem {
+        let result = DatabaseService::write(WriteItem {
             data: DataItem {
                 key: nick_name_key,
                 value: Bytes::from(account_id.data.to_vec()),
@@ -67,7 +55,11 @@ impl BlockChainService {
             cf: USERS_NAMES_COL_FAMILY,
             ttl: 0,
         })
-        .await
+        .await;
+
+        info!("Updated user name to {}", nickname);
+
+        result
     }
 
     /// Process a user update transaction
@@ -146,7 +138,7 @@ impl BlockChainService {
         update_user_tx.verify_syntax()?;
 
         let requested_nickname = update_user_tx.nickname;
-        if requested_nickname.is_empty() && update_user_tx.user_verification_data == None {
+        if requested_nickname.is_empty() && update_user_tx.user_verification_data.is_none() {
             event.info = NicknameInvalid as i32;
             return Ok(());
         }
@@ -160,37 +152,50 @@ impl BlockChainService {
 
         // handle mobile number update, if requested
 
-        if update_user_tx.user_verification_data.is_none() {
-            return Ok(());
+        if let Some(evidence) = update_user_tx.user_verification_data {
+            if evidence.verify_signature().is_err() {
+                event.info = InvalidData as i32;
+                return Ok(());
+            }
+
+            // todo: verify evidence fields are valid
+
+            let new_mobile_number = update_user_tx.mobile_number.unwrap();
+            let verified_number = evidence.mobile_number.unwrap();
+
+            if new_mobile_number.number != verified_number.number {
+                event.info = InvalidData as i32;
+                return Ok(());
+            }
+
+            let evidence_account_id = evidence
+                .account_id
+                .ok_or_else(|| anyhow!("missing account id in verifier data"))?;
+
+            if account_id.data != evidence_account_id.data {
+                event.info = InvalidData as i32;
+                return Ok(());
+            }
+
+            // update user's mobile number
+            user.mobile_number = Some(new_mobile_number.clone());
+
+            // update mobile numbers index
+            DatabaseService::write(WriteItem {
+                data: DataItem {
+                    key: Bytes::from(new_mobile_number.number.as_bytes().to_vec()),
+                    value: Bytes::from(account_id.data.to_vec()),
+                },
+                cf: MOBILE_NUMBERS_COL_FAMILY,
+                ttl: 0,
+            })
+            .await?;
         }
 
-        let evidence = update_user_tx.user_verification_data.unwrap();
-        if evidence.verify_signature().is_err() {
-            event.info = InvalidData as i32;
-            return Ok(());
-        }
+        // update user nonce and account
+        info!("setting user's nonce to {}", user.nonce + 1);
+        user.nonce += 1;
 
-        // todo: verify evidence fields are valid
-
-        let new_mobile_number = update_user_tx.mobile_number.unwrap();
-        let verified_number = evidence.mobile_number.unwrap();
-
-        if new_mobile_number.number != verified_number.number {
-            event.info = InvalidData as i32;
-            return Ok(());
-        }
-
-        let evidence_account_id = evidence
-            .account_id
-            .ok_or_else(|| anyhow!("missing account id in verifier data"))?;
-
-        if account_id.data != evidence_account_id.data {
-            event.info = InvalidData as i32;
-            return Ok(());
-        }
-
-        // update user's mobile number
-        user.mobile_number = Some(new_mobile_number.clone());
         let mut buf = Vec::with_capacity(user.encoded_len());
         user.encode(&mut buf)?;
         DatabaseService::write(WriteItem {
@@ -199,17 +204,6 @@ impl BlockChainService {
                 value: Bytes::from(buf),
             },
             cf: USERS_COL_FAMILY,
-            ttl: 0,
-        })
-        .await?;
-
-        // update mobile numbers index
-        DatabaseService::write(WriteItem {
-            data: DataItem {
-                key: Bytes::from(new_mobile_number.number.as_bytes().to_vec()),
-                value: Bytes::from(account_id.data.to_vec()),
-            },
-            cf: MOBILE_NUMBERS_COL_FAMILY,
             ttl: 0,
         })
         .await?;

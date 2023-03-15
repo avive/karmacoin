@@ -518,6 +518,7 @@ class User extends $pb.GeneratedMessage {
     ..pc<TraitScore>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'traitScores', $pb.PbFieldType.PM, subBuilder: TraitScore.create)
     ..pc<PreKey>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'preKeys', $pb.PbFieldType.PM, subBuilder: PreKey.create)
     ..a<$core.int>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'karmaScore', $pb.PbFieldType.OU3)
+    ..pc<CommunityMembership>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'communityMemberships', $pb.PbFieldType.PM, subBuilder: CommunityMembership.create)
     ..hasRequiredFields = false
   ;
 
@@ -531,6 +532,7 @@ class User extends $pb.GeneratedMessage {
     $core.Iterable<TraitScore>? traitScores,
     $core.Iterable<PreKey>? preKeys,
     $core.int? karmaScore,
+    $core.Iterable<CommunityMembership>? communityMemberships,
   }) {
     final _result = create();
     if (accountId != null) {
@@ -556,6 +558,9 @@ class User extends $pb.GeneratedMessage {
     }
     if (karmaScore != null) {
       _result.karmaScore = karmaScore;
+    }
+    if (communityMemberships != null) {
+      _result.communityMemberships.addAll(communityMemberships);
     }
     return _result;
   }
@@ -643,6 +648,84 @@ class User extends $pb.GeneratedMessage {
   $core.bool hasKarmaScore() => $_has(7);
   @$pb.TagNumber(8)
   void clearKarmaScore() => clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.List<CommunityMembership> get communityMemberships => $_getList(8);
+}
+
+class CommunityMembership extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CommunityMembership', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'karma_coin.core_types'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'communityId', $pb.PbFieldType.OU3)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'karmaScore', $pb.PbFieldType.OU3)
+    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isAdmin')
+    ..hasRequiredFields = false
+  ;
+
+  CommunityMembership._() : super();
+  factory CommunityMembership({
+    $core.int? communityId,
+    $core.int? karmaScore,
+    $core.bool? isAdmin,
+  }) {
+    final _result = create();
+    if (communityId != null) {
+      _result.communityId = communityId;
+    }
+    if (karmaScore != null) {
+      _result.karmaScore = karmaScore;
+    }
+    if (isAdmin != null) {
+      _result.isAdmin = isAdmin;
+    }
+    return _result;
+  }
+  factory CommunityMembership.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CommunityMembership.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CommunityMembership clone() => CommunityMembership()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CommunityMembership copyWith(void Function(CommunityMembership) updates) => super.copyWith((message) => updates(message as CommunityMembership)) as CommunityMembership; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CommunityMembership create() => CommunityMembership._();
+  CommunityMembership createEmptyInstance() => create();
+  static $pb.PbList<CommunityMembership> createRepeated() => $pb.PbList<CommunityMembership>();
+  @$core.pragma('dart2js:noInline')
+  static CommunityMembership getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CommunityMembership>(create);
+  static CommunityMembership? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get communityId => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set communityId($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCommunityId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCommunityId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get karmaScore => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set karmaScore($core.int v) { $_setUnsignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasKarmaScore() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearKarmaScore() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get isAdmin => $_getBF(2);
+  @$pb.TagNumber(3)
+  set isAdmin($core.bool v) { $_setBool(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasIsAdmin() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearIsAdmin() => clearField(3);
 }
 
 class PhoneVerifier extends $pb.GeneratedMessage {
@@ -958,6 +1041,7 @@ class TraitScore extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TraitScore', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'karma_coin.core_types'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'traitId', $pb.PbFieldType.OU3)
     ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'score', $pb.PbFieldType.OU3)
+    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'communityId', $pb.PbFieldType.OU3)
     ..hasRequiredFields = false
   ;
 
@@ -965,6 +1049,7 @@ class TraitScore extends $pb.GeneratedMessage {
   factory TraitScore({
     $core.int? traitId,
     $core.int? score,
+    $core.int? communityId,
   }) {
     final _result = create();
     if (traitId != null) {
@@ -972,6 +1057,9 @@ class TraitScore extends $pb.GeneratedMessage {
     }
     if (score != null) {
       _result.score = score;
+    }
+    if (communityId != null) {
+      _result.communityId = communityId;
     }
     return _result;
   }
@@ -1013,6 +1101,196 @@ class TraitScore extends $pb.GeneratedMessage {
   $core.bool hasScore() => $_has(1);
   @$pb.TagNumber(2)
   void clearScore() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get communityId => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set communityId($core.int v) { $_setUnsignedInt32(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasCommunityId() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearCommunityId() => clearField(3);
+}
+
+class Community extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Community', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'karma_coin.core_types'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.OU3)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'desc')
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'emoji')
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'websiteUrl')
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'twitterUrl')
+    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'instaUrl')
+    ..aOS(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'faceUrl')
+    ..aOS(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discordUrl')
+    ..p<$core.int>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'charTraitIds', $pb.PbFieldType.KU3)
+    ..aOB(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'closed')
+    ..hasRequiredFields = false
+  ;
+
+  Community._() : super();
+  factory Community({
+    $core.int? id,
+    $core.String? name,
+    $core.String? desc,
+    $core.String? emoji,
+    $core.String? websiteUrl,
+    $core.String? twitterUrl,
+    $core.String? instaUrl,
+    $core.String? faceUrl,
+    $core.String? discordUrl,
+    $core.Iterable<$core.int>? charTraitIds,
+    $core.bool? closed,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    if (name != null) {
+      _result.name = name;
+    }
+    if (desc != null) {
+      _result.desc = desc;
+    }
+    if (emoji != null) {
+      _result.emoji = emoji;
+    }
+    if (websiteUrl != null) {
+      _result.websiteUrl = websiteUrl;
+    }
+    if (twitterUrl != null) {
+      _result.twitterUrl = twitterUrl;
+    }
+    if (instaUrl != null) {
+      _result.instaUrl = instaUrl;
+    }
+    if (faceUrl != null) {
+      _result.faceUrl = faceUrl;
+    }
+    if (discordUrl != null) {
+      _result.discordUrl = discordUrl;
+    }
+    if (charTraitIds != null) {
+      _result.charTraitIds.addAll(charTraitIds);
+    }
+    if (closed != null) {
+      _result.closed = closed;
+    }
+    return _result;
+  }
+  factory Community.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Community.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Community clone() => Community()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Community copyWith(void Function(Community) updates) => super.copyWith((message) => updates(message as Community)) as Community; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Community create() => Community._();
+  Community createEmptyInstance() => create();
+  static $pb.PbList<Community> createRepeated() => $pb.PbList<Community>();
+  @$core.pragma('dart2js:noInline')
+  static Community getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Community>(create);
+  static Community? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get id => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set id($core.int v) { $_setUnsignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get name => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set name($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasName() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearName() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get desc => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set desc($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasDesc() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearDesc() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get emoji => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set emoji($core.String v) { $_setString(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasEmoji() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearEmoji() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get websiteUrl => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set websiteUrl($core.String v) { $_setString(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasWebsiteUrl() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearWebsiteUrl() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get twitterUrl => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set twitterUrl($core.String v) { $_setString(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasTwitterUrl() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearTwitterUrl() => clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.String get instaUrl => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set instaUrl($core.String v) { $_setString(6, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasInstaUrl() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearInstaUrl() => clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.String get faceUrl => $_getSZ(7);
+  @$pb.TagNumber(8)
+  set faceUrl($core.String v) { $_setString(7, v); }
+  @$pb.TagNumber(8)
+  $core.bool hasFaceUrl() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearFaceUrl() => clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.String get discordUrl => $_getSZ(8);
+  @$pb.TagNumber(9)
+  set discordUrl($core.String v) { $_setString(8, v); }
+  @$pb.TagNumber(9)
+  $core.bool hasDiscordUrl() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearDiscordUrl() => clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.List<$core.int> get charTraitIds => $_getList(9);
+
+  @$pb.TagNumber(11)
+  $core.bool get closed => $_getBF(10);
+  @$pb.TagNumber(11)
+  set closed($core.bool v) { $_setBool(10, v); }
+  @$pb.TagNumber(11)
+  $core.bool hasClosed() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearClosed() => clearField(11);
 }
 
 class NewUserTransactionV1 extends $pb.GeneratedMessage {
@@ -1840,7 +2118,8 @@ class TransactionEvent extends $pb.GeneratedMessage {
     ..a<$fixnum.Int64>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'signupReward', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$fixnum.Int64>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'referralReward', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$core.int>(11, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'appreciationCharTraitIdx', $pb.PbFieldType.OU3)
-    ..a<$fixnum.Int64>(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fee', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$core.int>(12, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'appreciationCommunityId', $pb.PbFieldType.OU3)
+    ..a<$fixnum.Int64>(13, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fee', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..hasRequiredFields = false
   ;
 
@@ -1857,6 +2136,7 @@ class TransactionEvent extends $pb.GeneratedMessage {
     $fixnum.Int64? signupReward,
     $fixnum.Int64? referralReward,
     $core.int? appreciationCharTraitIdx,
+    $core.int? appreciationCommunityId,
     $fixnum.Int64? fee,
   }) {
     final _result = create();
@@ -1892,6 +2172,9 @@ class TransactionEvent extends $pb.GeneratedMessage {
     }
     if (appreciationCharTraitIdx != null) {
       _result.appreciationCharTraitIdx = appreciationCharTraitIdx;
+    }
+    if (appreciationCommunityId != null) {
+      _result.appreciationCommunityId = appreciationCommunityId;
     }
     if (fee != null) {
       _result.fee = fee;
@@ -2021,13 +2304,22 @@ class TransactionEvent extends $pb.GeneratedMessage {
   void clearAppreciationCharTraitIdx() => clearField(11);
 
   @$pb.TagNumber(12)
-  $fixnum.Int64 get fee => $_getI64(11);
+  $core.int get appreciationCommunityId => $_getIZ(11);
   @$pb.TagNumber(12)
-  set fee($fixnum.Int64 v) { $_setInt64(11, v); }
+  set appreciationCommunityId($core.int v) { $_setUnsignedInt32(11, v); }
   @$pb.TagNumber(12)
-  $core.bool hasFee() => $_has(11);
+  $core.bool hasAppreciationCommunityId() => $_has(11);
   @$pb.TagNumber(12)
-  void clearFee() => clearField(12);
+  void clearAppreciationCommunityId() => clearField(12);
+
+  @$pb.TagNumber(13)
+  $fixnum.Int64 get fee => $_getI64(12);
+  @$pb.TagNumber(13)
+  set fee($fixnum.Int64 v) { $_setInt64(12, v); }
+  @$pb.TagNumber(13)
+  $core.bool hasFee() => $_has(12);
+  @$pb.TagNumber(13)
+  void clearFee() => clearField(13);
 }
 
 class TransactionEvents extends $pb.GeneratedMessage {

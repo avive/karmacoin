@@ -14,8 +14,8 @@ use crate::services::db_config_service::{
 use base::genesis_config_service::SIGNUP_CHAR_TRAIT_ID;
 use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_core_types::{
-    ExecutionInfo, ExecutionResult, FeeType, SignedTransaction, TraitScore, TransactionBody,
-    TransactionEvent, TransactionType, User,
+    CommunityMembership, ExecutionInfo, ExecutionResult, FeeType, SignedTransaction, TraitScore,
+    TransactionBody, TransactionEvent, TransactionType, User,
 };
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use prost::Message;
@@ -215,17 +215,30 @@ impl BlockChainService {
         let sign_up_trait_score = TraitScore {
             trait_id: SIGNUP_CHAR_TRAIT_ID,
             score: 1,
+            community_id: 0,
         };
+
+        let mut community_memberships: Vec<CommunityMembership> = vec![];
+
+        // hack to set admin for specific numbers - should be handeled by admin api / sudo
+        if mobile_number.number == "+972549805380" || mobile_number.number == "+972549805381" {
+            community_memberships.push(CommunityMembership {
+                community_id: 1,
+                karma_score: 0,
+                is_admin: true,
+            });
+        }
 
         let mut new_user = User {
             account_id: Some(account_id.clone()),
-            nonce: 1, // signup tx nonce is 0, so the first tx nonce is 1
+            nonce: 1, // signup tx nonce is 1, so the next tx nonce should be 2
             user_name: verification_evidence.requested_user_name.clone(),
             mobile_number: Some(mobile_number.clone()),
             balance: 0,
             trait_scores: vec![sign_up_trait_score],
             pre_keys: vec![],
             karma_score: 1,
+            community_memberships,
         };
 
         let apply_subsidy = tokenomics

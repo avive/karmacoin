@@ -3,7 +3,9 @@
 //
 
 use crate::hex_utils::short_hex_string;
-use crate::karma_coin::karma_coin_core_types::{AccountId, MobileNumber, TraitScore, User};
+use crate::karma_coin::karma_coin_core_types::{
+    AccountId, CommunityMembership, MobileNumber, TraitScore, User,
+};
 use anyhow::{anyhow, Result};
 use log::info;
 use std::fmt;
@@ -33,28 +35,44 @@ impl User {
             trait_scores: vec![],
             pre_keys: vec![],
             karma_score: 1, // new users have karma score of 1
+            community_memberships: vec![],
         }
     }
 
+    /// Returns community membership for a given community id
+    pub fn get_community_membership(
+        &mut self,
+        community_id: u32,
+    ) -> Option<&mut CommunityMembership> {
+        self.community_memberships
+            .iter_mut()
+            .find(|community_membership| community_membership.community_id == community_id)
+    }
+
     /// Inc the trait score for a given trait
-    pub fn inc_trait_score(&mut self, trait_id: u32) {
+    pub fn inc_trait_score(&mut self, trait_id: u32, community_id: u32) {
         let mut found = false;
         for trait_score in self.trait_scores.iter_mut() {
-            if trait_score.trait_id == trait_id {
+            if trait_score.trait_id == trait_id && trait_score.community_id == community_id {
                 trait_score.score += 1;
                 found = true;
                 info!(
-                    "User name: {}, inc_trait_score: trait_id: {}, score: {}",
-                    self.user_name, trait_id, trait_score.score
+                    "User name: {}, inc_trait_score: trait_id: {}, score: {}, community: {}",
+                    self.user_name, trait_id, trait_score.score, community_id
                 );
                 break;
             }
         }
+
         if !found {
-            self.trait_scores.push(TraitScore { trait_id, score: 1 });
+            self.trait_scores.push(TraitScore {
+                trait_id,
+                score: 1,
+                community_id,
+            });
             info!(
-                "User name: {}, inc_trait_score: trait_id: {}, score: {}",
-                self.user_name, trait_id, 1
+                "User name: {}, inc_trait_score: trait_id: {}, score: {}, community: {}",
+                self.user_name, trait_id, 1, community_id,
             );
         }
     }
