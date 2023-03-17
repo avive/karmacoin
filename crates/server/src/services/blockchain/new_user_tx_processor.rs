@@ -224,7 +224,9 @@ impl BlockChainService {
 
         // hack to set admin for specific numbers in test community
         // should be handeled by admin api / sudo
-        if mobile_number.number == "+972549805380" || mobile_number.number == "+972549805381" {
+        if mobile_number.number == "+972549805380"
+        /*|| mobile_number.number == "+972549805381"*/
+        {
             community_memberships.push(CommunityMembership {
                 community_id: 1,
                 karma_score: 1, // initial community karma score is 1 for joining
