@@ -104,6 +104,7 @@ impl Tokenomics {
                 .unwrap()
         {
             // tx fee too high for subsidy
+            info!("tx fee too high for subsidy");
             return Ok(false);
         }
 

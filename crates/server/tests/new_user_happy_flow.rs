@@ -5,18 +5,20 @@
 #[path = "common/mod.rs"]
 mod common;
 
+use base::genesis_config_service::SIGNUP_CHAR_TRAIT_ID;
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{
     GetBlockchainDataRequest, GetBlockchainEventsRequest, GetBlocksRequest, GetTransactionsRequest,
     GetUserInfoByAccountRequest, GetUserInfoByNumberRequest, GetUserInfoByUserNameRequest,
 };
 use base::karma_coin::karma_coin_core_types::TransactionStatus::OnChain;
-use base::karma_coin::karma_coin_core_types::{AccountId, MobileNumber};
+use base::karma_coin::karma_coin_core_types::{AccountId, BlockchainStats, MobileNumber};
 use base::server_config_service::DEFAULT_GRPC_SERVER_PORT;
 use common::{create_user, finalize_test, init_test};
 
 /// tests in this file should be run sequentially and not in parallel
 use server::server_service::{ServerService, Startup};
+use server::Tokenomics;
 use xactor::Service;
 
 /// Test complete user signup flow
@@ -30,9 +32,14 @@ async fn new_user_happy_flow_test() {
     let user_name = "avive";
     let mobile_number = "+972549805381";
 
+    // todo: figure out why grpc warmup is needed - without the delay we have random connection refused
+    // from api client
+    use tokio::time::{sleep, Duration};
+    sleep(Duration::from_millis(300)).await;
+
     //We use ipv4 for testing, we could also connect via [::1] or [::]
     let mut api_client =
-        ApiServiceClient::connect(format!("http://[::1]:{}", DEFAULT_GRPC_SERVER_PORT))
+        ApiServiceClient::connect(format!("http://[::]:{}", DEFAULT_GRPC_SERVER_PORT))
             .await
             .unwrap();
 
@@ -62,6 +69,14 @@ async fn new_user_happy_flow_test() {
         mobile_number
     );
     assert_eq!(resp_user.nonce, 1);
+
+    let tokenomics = Tokenomics::new(BlockchainStats::new());
+    let signup_reward_amount = tokenomics.get_signup_reward_amount().await.unwrap();
+
+    assert_eq!(
+        resp_user.balance, signup_reward_amount,
+        "expected signup rewards balance"
+    );
 
     // get user by name
     let resp = api_client
@@ -98,6 +113,17 @@ async fn new_user_happy_flow_test() {
         mobile_number
     );
     assert_eq!(resp_user.nonce, 1);
+    assert_eq!(
+        resp_user.karma_score, 1,
+        "expected 1 karma score for signing up"
+    );
+
+    assert_eq!(
+        resp_user.trait_scores.len(),
+        1,
+        "expected signup trait score"
+    );
+    assert_eq!(resp_user.get_trait_score(SIGNUP_CHAR_TRAIT_ID, 0), 1);
 
     // verify that the new user transaction is on chain
     let resp = api_client

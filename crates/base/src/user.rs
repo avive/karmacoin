@@ -49,6 +49,17 @@ impl User {
             .find(|community_membership| community_membership.community_id == community_id)
     }
 
+    /// Rertuns score for a trait_id with optional community context
+    pub fn get_trait_score(&self, trait_id: u32, community_id: u32) -> u32 {
+        for trait_score in self.trait_scores.iter() {
+            if trait_score.trait_id == trait_id && trait_score.community_id == community_id {
+                return trait_score.score;
+            }
+        }
+
+        0
+    }
+
     /// Inc the trait score for a given trait
     pub fn inc_trait_score(&mut self, trait_id: u32, community_id: u32) {
         let mut found = false;

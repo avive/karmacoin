@@ -1,0 +1,8 @@
+# Server configuration yaml file
+# These configs override the default config values
+
+# Verifier SMS invites configuration
+verifier.sms_gateway:
+  auth_value: [TWILIO AUTH TOKEN]
+  from_number: [TWILIO SMS SENDER PHONE NUMBER]
+  api_endpoint: [TWILIO API ENDPOINT]

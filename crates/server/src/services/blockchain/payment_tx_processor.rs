@@ -176,6 +176,8 @@ impl BlockChainService {
             .should_subsidise_transaction_fee(0, tx_body.fee, TransactionType::PaymentV1)
             .await?;
 
+        info!("fee subsidised applied: {}", apply_subsidy);
+
         // actual fee amount to be paid by the user. 0 if fee is subsidised by the protocol
         let user_tx_fee_amount = if apply_subsidy { 0 } else { tx_body.fee };
 
@@ -194,13 +196,19 @@ impl BlockChainService {
         // update payee balance to reflect payment and tx fee (when applicable)
         payee.balance += payment_amount;
 
+        info!("user paid tx fee: {}", user_tx_fee_amount);
+
+        info!("payer balance before tx: {}", payer.balance);
+
         // update payer balance to reflect payment
         payer.balance -= payment_amount + user_tx_fee_amount;
+
+        info!("payer balance after tx: {}", payer.balance);
 
         if payment_tx.char_trait_id != 0 {
             self.process_appreciation(payer, payee, &payment_tx, event);
         } else {
-            // payment transaciton w/o an appreciation
+            // payment transaction w/o an appreciation
             // payer gets 1 point in spender char trait and in karma score
             payer.inc_trait_score(SPENDER_CHAR_TRAIT_ID, 0);
             payer.karma_score += 1;
