@@ -15,7 +15,19 @@ To learn more about KarmaCoin visit https://karmaco.in
 ```cargo build --release```
 
 ## Testing
-Use [cargo-nextest](https://nexte.st/) runner.
+- Make sure you have a valid `verifier_config.yaml` file in `crates/server/` with the following syntax:
+
+```YAML
+verifier.sms_gateway:
+  auth_value: Basic [TWILLO_AUTH_TOKEN]
+  from_number: [TWILLO_SEND_SMS_FROM_NUMBER]
+  api_endpoint: [TWILLO_API_ENDPOINT]
+```
+
+Check `crates/server/verifier_config_template.yaml` for an example.
+
+- Use [cargo-nextest](https://nexte.st/) runner.
+
 
 ```cargo nextest run --test-threads 1```
 

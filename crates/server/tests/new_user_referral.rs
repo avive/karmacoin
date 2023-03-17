@@ -8,7 +8,10 @@ extern crate log;
 mod common;
 use common::{create_user, finalize_test, init_test};
 
-use base::genesis_config_service::{GenesisConfigService, AMBASSADOR_CHAR_TRAIT_ID, NET_ID_KEY};
+use base::genesis_config_service::{
+    GenesisConfigService, AMBASSADOR_CHAR_TRAIT_ID, NET_ID_KEY, SIGNUP_CHAR_TRAIT_ID,
+    SPENDER_CHAR_TRAIT_ID,
+};
 use base::karma_coin::karma_coin_api::api_service_client::ApiServiceClient;
 use base::karma_coin::karma_coin_api::{
     GetTransactionsRequest, GetUserInfoByAccountRequest, SubmitTransactionRequest,
@@ -22,6 +25,7 @@ use base::karma_coin::karma_coin_core_types::{
 };
 use base::server_config_service::DEFAULT_GRPC_SERVER_PORT;
 use chrono::Utc;
+use log::info;
 use prost::Message;
 
 mod new_user_happy_flow;
@@ -40,12 +44,15 @@ async fn referral_signup_happy_flow_test() {
     let server = ServerService::from_registry().await.unwrap();
     server.call(Startup {}).await.unwrap().unwrap();
 
+    use tokio::time::{sleep, Duration};
+    sleep(Duration::from_millis(300)).await;
+
     // create user 1 - inviter
     let (user1_key_pair, _, _) = create_user("avive".into(), "+972539805381".into())
         .await
         .unwrap();
 
-    let payment_amount = 1;
+    let payment_amount = 10;
 
     // invited person mobile phone number
     let user2_phone_number = "+972549805382";
@@ -55,7 +62,7 @@ async fn referral_signup_happy_flow_test() {
             .await
             .unwrap();
 
-    let char_trait_id = 1;
+    let char_trait_id = 34;
 
     let user1_account_id = AccountId {
         data: user1_key_pair.public_key.as_ref().unwrap().key.clone(),
@@ -84,6 +91,7 @@ async fn referral_signup_happy_flow_test() {
         .unwrap();
 
     let user1_balance_pre = user1.balance;
+    info!("user balance pre referral: {}", user1_balance_pre);
 
     let mut buf = Vec::with_capacity(payment_tx.encoded_len());
     payment_tx.encode(&mut buf).unwrap();
@@ -96,7 +104,7 @@ async fn referral_signup_happy_flow_test() {
     let tx_body = TransactionBody {
         timestamp: Utc::now().timestamp_millis() as u64,
         nonce: 1,
-        fee: 10,
+        fee: 1,
         transaction_data: Some(TransactionData {
             transaction_data: buf,
             transaction_type: PaymentV1 as i32,
@@ -130,9 +138,7 @@ async fn referral_signup_happy_flow_test() {
         SubmitTransactionResult::Submitted as i32,
     );
 
-    // user 1 signs up
-
-    // create user 2 - inviter
+    // user 2 signs up
     let (user2_key_pair, _, _) = create_user("rachel".into(), user2_phone_number.into())
         .await
         .unwrap();
@@ -141,7 +147,7 @@ async fn referral_signup_happy_flow_test() {
         data: user2_key_pair.public_key.as_ref().unwrap().key.clone(),
     };
 
-    // read updated user 1 chain data
+    // get updated user 1 on chain data
     let user1 = api_client
         .get_user_info_by_account(GetUserInfoByAccountRequest {
             account_id: Some(user1_account_id.clone()),
@@ -152,7 +158,7 @@ async fn referral_signup_happy_flow_test() {
         .user
         .unwrap();
 
-    // get user 2 by account id
+    // get user 2 by account id onchain data
     let user2 = api_client
         .get_user_info_by_account(GetUserInfoByAccountRequest {
             account_id: Some(user2_account_id.clone()),
@@ -164,24 +170,28 @@ async fn referral_signup_happy_flow_test() {
         .unwrap();
 
     let tokenomics = Tokenomics::new(BlockchainStats::new());
-
     let referral_reward = tokenomics.get_referral_reward_amount().await.unwrap();
 
     assert_eq!(
         user1_balance_pre + referral_reward - payment_amount,
-        user1.balance
+        user1.balance,
+        "unexpected payer balance"
     );
 
     // check that referral got the karma points rewards
-    // 2 are expected - 1 for the referral and 1 for spender
-    assert_eq!(user1.trait_scores.len(), 2);
-    assert_eq!(user1.trait_scores[0].trait_id, AMBASSADOR_CHAR_TRAIT_ID);
-    assert_eq!(user1.trait_scores[0].score, 1);
+    // 3 are expected - 1 for signup, 1 for referral and 1 for spender
+    assert_eq!(user1.karma_score, 3);
+    assert_eq!(user1.trait_scores.len(), 3);
+    assert_eq!(user1.get_trait_score(SIGNUP_CHAR_TRAIT_ID, 0), 1);
+    assert_eq!(user1.get_trait_score(AMBASSADOR_CHAR_TRAIT_ID, 0), 1);
+    assert_eq!(user1.get_trait_score(SPENDER_CHAR_TRAIT_ID, 0), 1);
 
     // check appreciation stored in user2 account
-    assert_eq!(user2.trait_scores.len(), 1);
-    assert_eq!(user2.trait_scores[0].trait_id, char_trait_id);
-    assert_eq!(user2.trait_scores[0].score, 1);
+    // 1 for signup, 1 for received appreciation
+    assert_eq!(user2.karma_score, 2);
+    assert_eq!(user2.trait_scores.len(), 2);
+    assert_eq!(user2.get_trait_score(SIGNUP_CHAR_TRAIT_ID, 0), 1);
+    assert_eq!(user2.get_trait_score(char_trait_id, 0), 1);
 
     // verify that the payment transaction is on chain indexed by user 1
     let resp = api_client
