@@ -20,6 +20,11 @@ async fn new_user_existing_user_name() {
     let server = ServerService::from_registry().await.unwrap();
     server.call(Startup {}).await.unwrap().unwrap();
 
+    // todo: figure out why grpc warmup is needed - without the delay we have random connection refused
+    // from api client
+    use tokio::time::{sleep, Duration};
+    sleep(Duration::from_millis(300)).await;
+
     create_user("avive".into(), "+972539805381".into())
         .await
         .unwrap();

@@ -23,6 +23,11 @@ async fn get_genesis_config() {
     let server = ServerService::from_registry().await.unwrap();
     server.call(Startup {}).await.unwrap().unwrap();
 
+    // todo: figure out why grpc warmup is needed - without the delay we have random connection refused
+    // from api client
+    use tokio::time::{sleep, Duration};
+    sleep(Duration::from_millis(300)).await;
+
     let mut api_client =
         ApiServiceClient::connect(format!("http://[::1]:{}", DEFAULT_GRPC_SERVER_PORT))
             .await

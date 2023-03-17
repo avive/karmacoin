@@ -30,6 +30,11 @@ async fn payment_tx_no_funds_test() {
     let server = ServerService::from_registry().await.unwrap();
     server.call(Startup {}).await.unwrap().unwrap();
 
+    // todo: figure out why grpc warmup is needed - without the delay we have random connection refused
+    // from api client
+    use tokio::time::{sleep, Duration};
+    sleep(Duration::from_millis(300)).await;
+
     let (user1_key_pair, _, _) = create_user("avive".into(), "+972539805381".into())
         .await
         .unwrap();
@@ -97,7 +102,7 @@ async fn payment_tx_no_funds_test() {
     let tx_body = TransactionBody {
         timestamp: Utc::now().timestamp_millis() as u64,
         nonce: 1,
-        fee: 10,
+        fee: 1,
         transaction_data: Some(TransactionData {
             transaction_data: buf,
             transaction_type: PaymentV1 as i32,
