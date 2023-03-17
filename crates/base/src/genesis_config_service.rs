@@ -110,11 +110,10 @@ pub const VERIFIERS_ACCOUNTS_IDS: &str = "verifiers_accounts_ids";
 /// This is the signup trait - user gets it for signing up
 pub const SIGNUP_CHAR_TRAIT_ID: u32 = 1;
 
-/// User gets a point in this trait for each sent appreciation / payment
+/// User gets a point in this trait for each sent payment
 pub const SPENDER_CHAR_TRAIT_ID: u32 = 2;
 
-/// User get
-/// s one for each referral who signed up
+/// User gets one for each referral who signed up
 pub const AMBASSADOR_CHAR_TRAIT_ID: u32 = 41;
 
 /// This must be true across all traits defined in genesis configs

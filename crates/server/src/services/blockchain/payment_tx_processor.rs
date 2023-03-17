@@ -72,7 +72,7 @@ impl BlockChainService {
         BlockChainService::get_payee_user_from_tx_body(&tx_body).await
     }
 
-    /// Process a user to user appreciation part of a pyament transaction
+    /// Process a user to user appreciation part of a payment transaction
     fn process_appreciation(
         &mut self,
         payer: &mut User,
@@ -82,7 +82,7 @@ impl BlockChainService {
     ) {
         let community_id = payment_tx.community_id;
         if community_id == 0 {
-            // standard appreciation w/o a community context
+            // handle standard appreciation w/o a community context - assign trait and update score
             payee.inc_trait_score(payment_tx.char_trait_id, 0);
             payee.karma_score += 1;
             event.appreciation_char_trait_idx = payment_tx.char_trait_id;
@@ -90,16 +90,16 @@ impl BlockChainService {
             return;
         }
 
-        if let Some(membership) = payer.get_community_membership(community_id) {
+        if let Some(payer_membership) = payer.get_community_membership(community_id) {
             // Payer is member of the community - check if payee is a member
             let payee_membership = payee.get_community_membership(community_id);
 
-            if payee_membership.is_none() && membership.is_admin {
+            if payee_membership.is_none() && payer_membership.is_admin {
                 info!("payer is admin and payee is not a member - creating community membership");
                 let new_membership = CommunityMembership {
                     community_id,
                     is_admin: false,
-                    karma_score: 0,
+                    karma_score: 1, // payee gets 1 karma point for joining the community
                 };
                 payee.community_memberships.push(new_membership);
             }
@@ -112,11 +112,11 @@ impl BlockChainService {
                 return;
             }
 
-            // payee is  a member
+            // payee is now a member - add 1 karma point in the community for the received appreciation
             payee_membership.unwrap().karma_score += 1;
             payee.inc_trait_score(payment_tx.char_trait_id, community_id);
-            // give payer one karma score in the community
-            membership.karma_score += 1;
+            // give payer 1 karma score in the community for the sent appreciation
+            payer_membership.karma_score += 1;
             event.appreciation_char_trait_idx = payment_tx.char_trait_id;
             event.appreciation_community_id = payment_tx.community_id;
         } else {
@@ -199,6 +199,11 @@ impl BlockChainService {
 
         if payment_tx.char_trait_id != 0 {
             self.process_appreciation(payer, payee, &payment_tx, event);
+        } else {
+            // payment transaciton w/o an appreciation
+            // payer gets 1 point in spender char trait and in karma score
+            payer.inc_trait_score(SPENDER_CHAR_TRAIT_ID, 0);
+            payer.karma_score += 1;
         }
 
         let referral_reward_amount = tokenomics.get_referral_reward_amount().await?;
@@ -219,7 +224,7 @@ impl BlockChainService {
                 );
                 payer.balance += referral_reward_amount;
 
-                // Give payer karma points for helping to grow the network
+                // Give payer the ambassador trait and 1 karma point for helping to grow the network
                 payer.inc_trait_score(AMBASSADOR_CHAR_TRAIT_ID, 0);
                 payer.karma_score += 1;
             };
