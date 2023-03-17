@@ -116,6 +116,11 @@ impl ServerService {
                 .await?
                 .unwrap();
 
+        let (mut api_health_reporter, api_health_service) = tonic_health::server::health_reporter();
+        api_health_reporter
+            .set_serving::<ApiServiceServer<ApiService>>()
+            .await;
+
         // todo: add back health service for the api service
         // todo: add reflection support for grpc_ci and grpcurl
         spawn(async move {
@@ -124,6 +129,7 @@ impl ServerService {
                 .accept_http1(true)
                 .layer(CorsLayer::very_permissive())
                 .layer(GrpcWebLayer::new())
+                .add_service(api_health_service)
                 .add_service(ApiServiceServer::new(ApiService::default()));
 
             if start_verifier {
