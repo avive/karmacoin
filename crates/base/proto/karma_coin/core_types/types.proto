@@ -102,7 +102,7 @@ message CharTrait {
     string emoji = 3;
 }
 
-//message TraitScore {
+message TraitScore {
     uint32 trait_id = 1;
     uint32 score = 2;
     // 0 for no community, otherwise community id this trait was assigned

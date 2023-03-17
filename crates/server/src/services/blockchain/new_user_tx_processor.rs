@@ -2,21 +2,20 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use anyhow::Result;
-use bytes::Bytes;
-
 use crate::base::signed_trait::SignedTrait;
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::tokenomics::Tokenomics;
 use crate::services::db_config_service::{
     MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY, USERS_NAMES_COL_FAMILY,
 };
+use anyhow::Result;
 use base::genesis_config_service::SIGNUP_CHAR_TRAIT_ID;
 use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_core_types::{
     CommunityMembership, ExecutionInfo, ExecutionResult, FeeType, SignedTransaction, TraitScore,
     TransactionBody, TransactionEvent, TransactionType, User,
 };
+use bytes::Bytes;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use prost::Message;
 
@@ -186,7 +185,8 @@ impl BlockChainService {
         {
             return Err(NewUserProcessingError {
                 execution_info: ExecutionInfo::AccountAlreadyExists,
-                error_message: "there's already an onchain account the provided account id".into(),
+                error_message: "there's already an onchain account for the provided account id"
+                    .into(),
             });
         }
 
@@ -209,9 +209,11 @@ impl BlockChainService {
         }
 
         //
-        // end of validation part
+        // end of user data validation part
         //
+        /////////////////////////////////////////////////////////////////////////
 
+        // signup char trait assignment to new user
         let sign_up_trait_score = TraitScore {
             trait_id: SIGNUP_CHAR_TRAIT_ID,
             score: 1,
@@ -220,11 +222,12 @@ impl BlockChainService {
 
         let mut community_memberships: Vec<CommunityMembership> = vec![];
 
-        // hack to set admin for specific numbers - should be handeled by admin api / sudo
+        // hack to set admin for specific numbers in test community
+        // should be handeled by admin api / sudo
         if mobile_number.number == "+972549805380" || mobile_number.number == "+972549805381" {
             community_memberships.push(CommunityMembership {
                 community_id: 1,
-                karma_score: 0,
+                karma_score: 1, // initial community karma score is 1 for joining
                 is_admin: true,
             });
         }
@@ -237,7 +240,7 @@ impl BlockChainService {
             balance: 0,
             trait_scores: vec![sign_up_trait_score],
             pre_keys: vec![],
-            karma_score: 1,
+            karma_score: 1, // initial karma score is 1 for getting the signup trait score
             community_memberships,
         };
 
