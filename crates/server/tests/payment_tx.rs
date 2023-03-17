@@ -25,12 +25,17 @@ use xactor::Service;
 
 /// Test payment transaction between 2 users
 #[tokio::test(flavor = "multi_thread")]
-async fn payment_tx_happy_flow() {
+async fn payment_with_appreciation_tx_happy_flow() {
     init_test().await;
 
     // Start the server
     let server = ServerService::from_registry().await.unwrap();
     server.call(Startup {}).await.unwrap().unwrap();
+
+    // todo: figure out why grpc warmup is needed - without the delay we have random connection refused
+    // from api client
+    use tokio::time::{sleep, Duration};
+    sleep(Duration::from_millis(300)).await;
 
     let (user1_key_pair, _, _) = create_user("avive".into(), "+972539805381".into())
         .await
@@ -43,7 +48,7 @@ async fn payment_tx_happy_flow() {
     let payment_amount = 100;
 
     //
-    let char_trait_id = 1;
+    let char_trait_id = 40;
 
     let mut api_client =
         ApiServiceClient::connect(format!("http://[::1]:{}", DEFAULT_GRPC_SERVER_PORT))
@@ -104,7 +109,7 @@ async fn payment_tx_happy_flow() {
     let tx_body = TransactionBody {
         timestamp: Utc::now().timestamp_millis() as u64,
         nonce: 1,
-        fee: 10,
+        fee: 1,
         transaction_data: Some(TransactionData {
             transaction_data: buf,
             transaction_type: PaymentV1 as i32,
@@ -163,10 +168,9 @@ async fn payment_tx_happy_flow() {
     assert_eq!(user1_balance_pre - payment_amount, user1.balance);
     assert_eq!(user2_balance_pre + payment_amount, user2.balance);
 
-    // check appreciation stored in user2 account
-    assert_eq!(user2.trait_scores.len(), 1);
-    assert_eq!(user2.trait_scores[0].trait_id, char_trait_id);
-    assert_eq!(user2.trait_scores[0].score, 1);
+    // Should be 2 - one for signup and 1 for the received appreciation
+    assert_eq!(user2.trait_scores.len(), 2);
+    assert_eq!(user2.get_trait_score(char_trait_id, 0), 1);
 
     // verify that the payment transaction is on chain indexed by user 1
     let resp = api_client
