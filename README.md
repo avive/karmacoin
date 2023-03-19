@@ -6,6 +6,21 @@ To learn more about KarmaCoin visit https://karmaco.in
 
 ---
 
+## Setup
+- Clone this repo
+- Install rust via rustup - stable toolchain - default installation options
+- Install cargo-nextest. See https://nexte.st/book/pre-built-binaries 
+
+
+### Ubuntu
+Install the following packages via apt-get or similar:
+- build-essential
+- pkg-config
+- libssl-dev
+- protobuf-compiler
+- libclang-dev
+ 
+
 ## Building
 
 ### Buiilding a dev build
@@ -42,10 +57,13 @@ cargo build
 ```
 
 ### Running a release build
+
 ```bash
 cargo build -- release
 ./target/debug/server-app -c verifier.yaml
 ```
+
+
 
 ---
 
