@@ -15,7 +15,9 @@ use base::server_config_service::{
 };
 use base::server_config_service::{SetConfigFile, START_VERIFIER_SERVICE_CONFIG_KEY};
 use db::db_service::{DatabaseService, Destroy};
-use tonic::transport::Server;
+//use tonic::transport::Server;
+use tonic::transport::*;
+
 use tonic_web::GrpcWebLayer;
 use tower_http::cors::CorsLayer;
 use xactor::*;
@@ -121,12 +123,23 @@ impl ServerService {
             .set_serving::<ApiServiceServer<ApiService>>()
             .await;
 
-        // todo: add back health service for the api service
+        // configure fucken tls bs
+        let cert = std::fs::read_to_string("./server.pem")?;
+        let key = std::fs::read_to_string("./server.key")?;
+        let id = tonic::transport::Identity::from_pem(cert.as_bytes(), key.as_bytes());
+        let s = std::fs::read_to_string("./my_ca.pem")?;
+        let ca = Certificate::from_pem(s.as_bytes());
+        let tls = tonic::transport::ServerTlsConfig::new()
+            .identity(id)
+            .client_ca_root(ca);
+
         // todo: add reflection support for grpc_ci and grpcurl
         spawn(async move {
             // this only return when server is stopped due to error or shutdown
             let mut router = Server::builder()
                 .accept_http1(true)
+                .tls_config(tls)
+                .unwrap()
                 .layer(CorsLayer::very_permissive())
                 .layer(GrpcWebLayer::new())
                 .add_service(api_health_service)

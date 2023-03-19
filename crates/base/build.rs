@@ -2,7 +2,7 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::{fs, io};
 
 // we allow this as we often comment out this method to cut time of local builds
@@ -16,6 +16,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // We add serde support for Protobuf structs that needs to be persisted locally as member of rust structs.
 
     std::env::set_var("OUT_DIR", "src");
+
+    let original_out_dir = PathBuf::from("src/karma_coin");
+
     tonic_build::configure()
         .build_server(true)
         .out_dir("src/karma_coin")
@@ -101,6 +104,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "#[derive(serde::Serialize, serde::Deserialize)]",
         )
         .type_attribute("User", "#[derive(serde::Serialize, serde::Deserialize)]")
+        .file_descriptor_set_path(original_out_dir.join("descriptor.bin"))
         .compile(
             &[
                 "proto/karma_coin/core_types/types.proto",
@@ -125,7 +129,13 @@ fn rename_prost_generated_filenames(dir: &Path) -> io::Result<()> {
         for entry in fs::read_dir(dir)? {
             let entry = entry?;
             let path = entry.path();
+
             if path.is_file() {
+                if let Some(ext) = path.extension() {
+                    if ext == "bin" {
+                        continue;
+                    }
+                }
                 let file_stem_renamed = &path
                     .file_stem()
                     .unwrap()
