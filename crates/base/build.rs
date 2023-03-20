@@ -16,7 +16,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // We add serde support for Protobuf structs that needs to be persisted locally as member of rust structs.
 
     std::env::set_var("OUT_DIR", "src");
-
     let original_out_dir = PathBuf::from("src/karma_coin");
 
     tonic_build::configure()

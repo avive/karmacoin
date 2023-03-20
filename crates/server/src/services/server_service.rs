@@ -122,6 +122,10 @@ impl ServerService {
             .set_serving::<ApiServiceServer<ApiService>>()
             .await;
 
+        let reflection_server = tonic_reflection::server::Builder::configure()
+            .register_encoded_file_descriptor_set(base::GRPC_DESCRIPTOR)
+            .build()?;
+
         // configure fucken tls bs
         /*
         let cert = std::fs::read_to_string("./server.pem")?;
@@ -142,6 +146,7 @@ impl ServerService {
                 //.tls_config(tls).unwrap()
                 .layer(CorsLayer::very_permissive())
                 .layer(GrpcWebLayer::new())
+                .add_service(reflection_server)
                 .add_service(api_health_service)
                 .add_service(ApiServiceServer::new(ApiService::default()));
 
