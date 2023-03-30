@@ -18,7 +18,7 @@ pub const NET_ID_KEY: &str = "net_id_key";
 pub const NET_NAME_KEY: &str = "net_name_key";
 
 pub const DEVNET_ID: u32 = 1;
-pub const DEVNET_NAME: &str = "devnet";
+pub const DEVNET_NAME: &str = "Karmachain Testnet 1";
 
 // consensus genesis time in milliseconds
 pub const GENESIS_TIMESTAMP_MS_KEY: &str = "genesis_timestamp_key";

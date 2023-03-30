@@ -9,6 +9,13 @@ import "karma_coin/core_types/types.proto";
 
 // Unified public API provided by blockchain nodes and verifiers
 service ApiService {
+
+  // todo add these methods:
+      // Get transactions for collection of tx hashes
+      // Get transaction hashes for an accountId
+      // Get all users on chain
+      // Get tx hashes of a block
+
   // check if a nickname is available
   rpc GetUserInfoByUserName(GetUserInfoByUserNameRequest) returns (GetUserInfoByUserNameResponse);
 
@@ -49,7 +56,7 @@ message GetExchangeRateRequest {
 }
 
 message GetExchangeRateResponse {
-  // Estiamted 1 KC value in USD
+  // Estimated 1 KC value in USD
   double exchange_rate = 1;
 }
 
