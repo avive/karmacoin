@@ -5,6 +5,7 @@
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::db_config_service::LEADER_BOARD_COL_FAMILY;
 use anyhow::Result;
+use base::genesis_config_service::{GenesisConfigService, KARMA_REWARDS_ELIGIBILITY};
 use base::karma_coin::karma_coin_api::{GetLeaderBoardRequest, GetLeaderBoardResponse};
 use base::karma_coin::karma_coin_core_types::LeaderboardEntry;
 use db::db_service::{DatabaseService, ReadAllItems};
@@ -21,6 +22,12 @@ impl Handler<GetLeaderBoard> for BlockChainService {
         _ctx: &mut Context<Self>,
         _msg: GetLeaderBoard,
     ) -> Result<GetLeaderBoardResponse> {
+        let min_appreciations = usize::try_from(
+            GenesisConfigService::get_u64(KARMA_REWARDS_ELIGIBILITY.into())
+                .await?
+                .ok_or_else(|| anyhow::anyhow!("Karma Reward Max Users not set"))?,
+        )?;
+
         let mut leaderboard_entries = vec![];
 
         let data = DatabaseService::read_all_items(ReadAllItems {
@@ -31,7 +38,10 @@ impl Handler<GetLeaderBoard> for BlockChainService {
         .await?;
 
         for item in data.items.iter() {
-            leaderboard_entries.push(LeaderboardEntry::decode(item.1.value.as_ref())?);
+            let entry = LeaderboardEntry::decode(item.1.value.as_ref())?;
+            if entry.score >= min_appreciations as u32 {
+                leaderboard_entries.push(entry);
+            }
         }
 
         Ok(GetLeaderBoardResponse {
