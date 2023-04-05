@@ -19,16 +19,32 @@ impl Tokenomics {
 }
 
 impl Tokenomics {
+    pub async fn get_karma_coin_reward_amount(&self) -> Result<u64> {
+        let karma_rewards_allocation =
+            GenesisConfigService::get_u64(KARAM_REWARDS_ALLOCATION_KEY.into())
+                .await?
+                .unwrap()
+                * K_CENTS_IN_KC;
+
+        if self.stats.karma_rewards_amount >= karma_rewards_allocation {
+            return Ok(0);
+        }
+
+        Ok(GenesisConfigService::get_u64(KARMA_REWARD_AMOUNT.into())
+            .await?
+            .unwrap())
+    }
+
     /// Get current signup reward amount based on consensus rules, genesis config and blockchain data
     pub async fn get_signup_reward_amount(&self) -> Result<u64> {
-        // In Kcents
+        // In KCents
         let signup_rewards_alloc_phase1 =
             GenesisConfigService::get_u64(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY.into())
                 .await?
                 .unwrap()
                 * K_CENTS_IN_KC;
 
-        // In Kcents
+        // In KCents
         let signup_rewards_alloc_phase2 =
             GenesisConfigService::get_u64(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY.into())
                 .await?

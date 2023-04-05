@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 base = { path = "../base" }
-getrandom = "0.2"
+getrandom = "0.2.8"
 curve25519-dalek = "3"
 sha2 = "0.10.6"
 

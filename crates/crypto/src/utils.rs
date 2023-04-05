@@ -6,11 +6,18 @@ use anyhow::{anyhow, Result};
 use curve25519_dalek::edwards::CompressedEdwardsY;
 use ed25519_dalek::PUBLIC_KEY_LENGTH;
 use ed25519_dalek::{Keypair, PublicKey, SecretKey};
+use rand_core::{OsRng, RngCore};
 use sha2::{Digest, Sha512};
 use std::convert::TryFrom;
 use x25519_dalek::StaticSecret;
 
 const ADDRESS_LEN: usize = 20; // bytes
+
+/// Returns a random number between 0 and max_value exclusive
+pub fn get_random(max_value: u32) -> u32 {
+    let mut rng = OsRng;
+    rng.next_u32() % max_value
+}
 
 /// Returns sha512 of the data
 pub fn sha512(data: &[u8]) -> Vec<u8> {

@@ -5,6 +5,9 @@
 use crate::services::blockchain::block_event::GetBlocksEvents;
 use crate::services::blockchain::blockchain_service::BlockChainService;
 use crate::services::blockchain::blocks_store::GetBlocks;
+use crate::services::blockchain::get_all_users::GetAllUsers;
+use crate::services::blockchain::get_contacts::GetContacts;
+use crate::services::blockchain::get_leader_board::GetLeaderBoard;
 use crate::services::blockchain::get_user_by_account_id::GetUserInfoByAccountId;
 use crate::services::blockchain::get_user_by_number::GetUserInfoByNumber;
 use crate::services::blockchain::get_user_by_user_name::GetUserInfoByUserName;
@@ -32,6 +35,83 @@ pub(crate) struct ApiService {}
 /// of the backing blockchain node.
 #[tonic::async_trait]
 impl ApiServiceTrait for ApiService {
+    async fn set_community_admin(
+        &self,
+        _request: Request<SetCommunityAdminRequest>,
+    ) -> std::result::Result<Response<SetCommunityAdminResponse>, Status> {
+        unimplemented!("not implemented yet")
+    }
+
+    async fn get_leader_board(
+        &self,
+        request: Request<GetLeaderBoardRequest>,
+    ) -> std::result::Result<Response<GetLeaderBoardResponse>, Status> {
+        let req = request.into_inner();
+        info!("api call - get leader board");
+
+        let service = BlockChainService::from_registry()
+            .await
+            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?;
+
+        let res = service
+            .call(GetLeaderBoard(req))
+            .await
+            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
+
+        Ok(Response::new(res))
+    }
+
+    async fn get_all_users(
+        &self,
+        request: Request<GetAllUsersRequest>,
+    ) -> std::result::Result<Response<GetAllUsersResponse>, Status> {
+        let req = request.into_inner();
+        info!("api call - get all users");
+
+        let service = BlockChainService::from_registry()
+            .await
+            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?;
+
+        let res = service
+            .call(GetAllUsers(req))
+            .await
+            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
+
+        Ok(Response::new(res))
+    }
+
+    /// Get contacts with optional suffix - for use in autocomplete when sending an appreciation
+    async fn get_contacts(
+        &self,
+        request: Request<GetContactsRequest>,
+    ) -> std::result::Result<Response<GetContactsResponse>, Status> {
+        let req = request.into_inner();
+        info!("api call - get contacts for prefix {}", req.prefix);
+
+        let service = BlockChainService::from_registry()
+            .await
+            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?;
+
+        let res = service
+            .call(GetContacts(req))
+            .await
+            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
+
+        info!("returning {} contacts", res.contacts.len());
+
+        Ok(Response::new(res))
+    }
+
+    async fn get_transactions_from_hashes(
+        &self,
+        _request: Request<GetTransactionsFromHashesRequest>,
+    ) -> std::result::Result<Response<GetTransactionsFromHashesResponse>, Status> {
+        unimplemented!("not implemented yet");
+    }
+
     /// Returns user info by nickname
     async fn get_user_info_by_user_name(
         &self,

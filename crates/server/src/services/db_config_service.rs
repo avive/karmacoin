@@ -45,6 +45,9 @@ pub const VERIFIERS_COL_FAMILY: &str = "verifiers_cf";
 /// All users accounts in consensus on-chain.
 pub const USERS_COL_FAMILY: &str = "users_cf";
 
+/// Index: accountId. Data: LeaderBoardEntry
+pub const LEADER_BOARD_COL_FAMILY: &str = "leader_board_cf";
+
 /// A mapping of nicknames to account ids.
 /// This is on-chain data derived from on-chain users accounts data.
 /// key: nickname (utf8 encoded string). value: accountId.
@@ -115,6 +118,7 @@ impl Actor for BlockchainConfigService {
                 ColumnFamilyDescriptor::new(INVITE_SMS_COL_FAMILY, Options::default()),
                 // blockchain data
                 ColumnFamilyDescriptor::new(USERS_COL_FAMILY, Options::default()),
+                ColumnFamilyDescriptor::new(LEADER_BOARD_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(USERS_NAMES_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(MOBILE_NUMBERS_COL_FAMILY, Options::default()),
                 ColumnFamilyDescriptor::new(TESTS_COL_FAMILY, Options::default()),

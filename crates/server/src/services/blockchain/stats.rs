@@ -15,6 +15,7 @@ use xactor::*;
 impl BlockChainService {
     /// Update blockchain stats with new block data and store in db
     pub(crate) async fn update_blockchain_stats(
+        &self,
         mut stats: BlockchainStats,
         block_event: &BlockEvent,
         block: &Block,
@@ -46,7 +47,23 @@ impl BlockChainService {
             }
         }
 
-        write_stats(stats).await
+        self.write_stats(stats).await
+    }
+
+    /// Helper function to write stats to the db - todo: make actor
+    pub(crate) async fn write_stats(&self, stats: BlockchainStats) -> Result<()> {
+        info!("updating stats");
+        let mut buf = Vec::with_capacity(stats.encoded_len());
+        stats.encode(&mut buf)?;
+        DatabaseService::write(WriteItem {
+            data: DataItem {
+                key: Bytes::from(CHAIN_AGG_DATA_KEY.as_bytes()),
+                value: Bytes::from(buf),
+            },
+            cf: BLOCKCHAIN_DATA_COL_FAMILY,
+            ttl: 0,
+        })
+        .await
     }
 }
 
@@ -68,6 +85,8 @@ impl Handler<GetStats> for BlockChainService {
 
 /// Helper function to get the current blockchain stats
 pub(crate) async fn get_stats() -> Result<BlockchainStats> {
+    // hack until genesis time from genesis config is solid on long running testnets
+
     if let Some(data) = DatabaseService::read(ReadItem {
         key: Bytes::from(CHAIN_AGG_DATA_KEY.as_bytes()),
         cf: BLOCKCHAIN_DATA_COL_FAMILY,
@@ -81,17 +100,12 @@ pub(crate) async fn get_stats() -> Result<BlockchainStats> {
     }
 }
 
-/// Helper function to write stats to the db
-pub(crate) async fn write_stats(stats: BlockchainStats) -> Result<()> {
-    let mut buf = Vec::with_capacity(stats.encoded_len());
-    stats.encode(&mut buf)?;
-    DatabaseService::write(WriteItem {
-        data: DataItem {
-            key: Bytes::from(CHAIN_AGG_DATA_KEY.as_bytes()),
-            value: Bytes::from(buf),
-        },
-        cf: BLOCKCHAIN_DATA_COL_FAMILY,
-        ttl: 0,
-    })
-    .await
+#[message(result = "Result<()>")]
+pub(crate) struct WriteStats(pub(crate) BlockchainStats);
+
+#[async_trait::async_trait]
+impl Handler<WriteStats> for BlockChainService {
+    async fn handle(&mut self, _ctx: &mut Context<Self>, msg: WriteStats) -> Result<()> {
+        self.write_stats(msg.0).await
+    }
 }

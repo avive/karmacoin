@@ -6,7 +6,9 @@ use anyhow::{anyhow, Result};
 use map_macro::map;
 
 use crate::karma_coin::karma_coin_api::{GetGenesisDataRequest, GetGenesisDataResponse};
-use crate::karma_coin::karma_coin_core_types::{AccountId, CharTrait, Community, PhoneVerifier};
+use crate::karma_coin::karma_coin_core_types::{
+    AccountId, CharTrait, Community, GenesisData, PhoneVerifier,
+};
 use config::{Config, Environment, Map, Value};
 use log::*;
 use std::collections::HashMap;
@@ -83,17 +85,20 @@ pub const BLOCK_REWARDS_LAST_BLOCK: &str = "block_rewards_last_block";
 /// Block reward amount
 pub const BLOCK_REWARDS_AMOUNT: &str = "block_rewards_amount";
 
-/// Karma reward amount in KCents
+/// Karma reward amount in KCents per reward
 pub const KARMA_REWARD_AMOUNT: &str = "karma_reward_amount";
 
 /// Karma rewards period
-pub const KARMA_REWARD_PERIOD: &str = "karma_reward_period";
+pub const KARMA_REWARD_PERIOD_MINUTES: &str = "karma_reward_period_minutes";
 
-/// Number of users to get rewarded each period
-pub const KARMA_REWARD_TOP_N_USERS_KEY: &str = "karma_reward_top_n_users";
+/// Max number of users to get rewarded each period - selected randomly from leader boards
+pub const KARMA_REWARD_MAX_USERS_KEY: &str = "karma_reward_top_n_users";
 
-/// Karma rewards allocation
+/// Karma rewards allocation in KCs - total
 pub const KARAM_REWARDS_ALLOCATION_KEY: &str = "karma_rewards_allocation";
+
+/// min number of appreciations to qualify for karma rewards in a period
+pub const KARMA_REWARDS_ELIGIBILITY: &str = "karma_rewards_min_appreciations";
 
 /// Treasury account id
 pub const TREASURY_ACCOUNT_ID_KEY: &str = "treasury_account_id";
@@ -113,6 +118,9 @@ pub const SIGNUP_CHAR_TRAIT_ID: u32 = 1;
 /// User gets a point in this trait for each sent payment
 pub const SPENDER_CHAR_TRAIT_ID: u32 = 2;
 
+/// User gets a point in this trait for each sent payment
+pub const KARMA_REWARD_TRAIT_ID: u32 = 62;
+
 /// User gets one for each referral who signed up
 pub const AMBASSADOR_CHAR_TRAIT_ID: u32 = 41;
 
@@ -126,7 +134,7 @@ pub const NO_CHAR_TRAIT_ID: u32 = 0;
 pub struct GenesisConfigService {
     config: Config,
     config_file: Option<String>,
-    pub(crate) genesis_data: Option<GetGenesisDataResponse>,
+    pub(crate) genesis_data: Option<GenesisData>,
     char_traits: Option<Vec<CharTrait>>,
     communities: Option<Vec<Community>>,
 }
@@ -195,7 +203,7 @@ impl Actor for GenesisConfigService {
             CharTrait::new(49, "a Commander".into(), "👨‍✈️".into()),
             CharTrait::new(50, "a Visionary".into(), "👁️".into()),
             CharTrait::new(51, "a Teacher".into(), "👩‍🏫".into()),
-            CharTrait::new(52, "a Craftsperson".into(), "🛠️".into()),
+            CharTrait::new(52, "a Crafts Person".into(), "🛠️".into()),
             CharTrait::new(53, "an Inspector".into(), "🔍".into()),
             CharTrait::new(54, "a Composer".into(), "📝".into()),
             CharTrait::new(55, "a Protector".into(), "⚔️".into()),
@@ -205,6 +213,7 @@ impl Actor for GenesisConfigService {
             CharTrait::new(59, "a Dynamo".into(), "🚀".into()),
             CharTrait::new(60, "an Imaginative Motivator".into(), "🌻".into()),
             CharTrait::new(61, "a Campaigner".into(), "📣".into()),
+            CharTrait::new(62, "a Karma Rewards Winner".into(), "🏆".into()),
         ]);
 
         self.communities = Some(vec![Community {
@@ -277,11 +286,15 @@ impl Actor for GenesisConfigService {
             // Karma rewards amount per user - 10 KC
             .set_default(KARMA_REWARD_AMOUNT, 10_000_000)
             .unwrap()
-            // Karma rewards computation period in weeks
-            .set_default(KARMA_REWARD_PERIOD, 4)
+            // Karma rewards computation period in hours (1 for dev mode, 24 for testnet, 1 week for mainnet, etc...)
+            // 60 * 24 * 2
+            .set_default(KARMA_REWARD_PERIOD_MINUTES, 2)
+            .unwrap()
+            // min num of appreciations  in period to be eligible for reward
+            .set_default(KARMA_REWARDS_ELIGIBILITY, 2)
             .unwrap()
             // The top 1000 users who didn't get karma reward are eligible every period
-            .set_default(KARMA_REWARD_TOP_N_USERS_KEY, 1_000)
+            .set_default(KARMA_REWARD_MAX_USERS_KEY, 2)
             .unwrap()
             // karma rewards allocation - 300M KCs
             .set_default(KARAM_REWARDS_ALLOCATION_KEY, 300_000_000)
@@ -557,12 +570,15 @@ impl Handler<GetGenesisData> for GenesisConfigService {
         _msg: GetGenesisData,
     ) -> Result<GetGenesisDataResponse> {
         if let Some(data) = self.genesis_data.as_ref() {
-            return Ok(data.clone());
+            return Ok(GetGenesisDataResponse {
+                genesis_data: Some(data.clone()),
+            });
         }
 
-        let genesis_data = GetGenesisDataResponse {
+        let genesis_data = GenesisData {
             net_id: self.config.get_int(NET_ID_KEY).unwrap() as u32,
             net_name: self.config.get_string(NET_NAME_KEY)?,
+
             genesis_time: self.config.get_int(GENESIS_TIMESTAMP_MS_KEY)? as u64,
 
             signup_reward_phase1_alloc: self.config.get_int(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY)?
@@ -600,7 +616,9 @@ impl Handler<GetGenesisData> for GenesisConfigService {
 
             karma_reward_amount: self.config.get_int(KARMA_REWARD_AMOUNT)? as u64,
             karma_reward_alloc: self.config.get_int(KARAM_REWARDS_ALLOCATION_KEY)? as u64,
-            karma_reward_top_n_users: self.config.get_int(KARMA_REWARD_TOP_N_USERS_KEY)? as u64,
+            karma_reward_top_n_users: self.config.get_int(KARMA_REWARD_MAX_USERS_KEY)? as u64,
+            karma_rewards_eligibility: self.config.get_int(KARMA_REWARDS_ELIGIBILITY)? as u64,
+            karma_rewards_period_hours: self.config.get_int(KARMA_REWARD_PERIOD_MINUTES)? as u64,
 
             treasury_premint_amount: self.config.get_int(TREASURY_PREMINT_COINS_AMOUNT_KEY)? as u64,
             treasury_account_id: self.config.get_string(TREASURY_ACCOUNT_ID_KEY)?,
@@ -614,7 +632,9 @@ impl Handler<GetGenesisData> for GenesisConfigService {
         // cache genesis data as it is read-only
         self.genesis_data = Some(genesis_data.clone());
 
-        Ok(genesis_data)
+        Ok(GetGenesisDataResponse {
+            genesis_data: Some(genesis_data.clone()),
+        })
     }
 }
 

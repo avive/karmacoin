@@ -28,6 +28,8 @@ impl BlockchainStats {
             exchange_rate: 0.2,
             causes_rewards_amount: 0,
             appreciations_transactions_count: 0,
+            karma_rewards_amount: 0,
+            karma_rewards_count: 0,
         }
     }
 }

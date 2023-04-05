@@ -73,13 +73,16 @@ impl BlockChainService {
     }
 
     /// Process a user to user appreciation part of a payment transaction
-    fn process_appreciation(
+    fn process_community_appreciation(
         &mut self,
         payer: &mut User,
         payee: &mut User,
         payment_tx: &PaymentTransactionV1,
         event: &mut TransactionEvent,
     ) {
+        // leadaerboard processing
+
+        // community appreciation processing
         let community_id = payment_tx.community_id;
         if community_id == 0 {
             // handle standard appreciation w/o a community context - assign trait and update score
@@ -206,7 +209,7 @@ impl BlockChainService {
         info!("payer balance after tx: {}", payer.balance);
 
         if payment_tx.char_trait_id != 0 {
-            self.process_appreciation(payer, payee, &payment_tx, event);
+            self.process_community_appreciation(payer, payee, &payment_tx, event);
         } else {
             // payment transaction w/o an appreciation
             // payer gets 1 point in spender char trait and in karma score
@@ -241,6 +244,17 @@ impl BlockChainService {
         // Give payer karma points for spending karma coins
         payer.inc_trait_score(SPENDER_CHAR_TRAIT_ID, 0);
         payer.karma_score += 1;
+
+        // add user to leaderboard only if karma rewards are still allocated
+        // and user is eligible for a reward
+        if tokenomics.get_karma_coin_reward_amount().await? > 0
+            && payer.is_eligible_for_karma_reward()
+        {
+            info!("Adding payer to leaderboard");
+            // update leader board for an appreciation
+            self.leader_board_upsert(payer, payment_tx.char_trait_id)
+                .await?;
+        }
 
         // update the user's nonce to the tx nonce
         info!("setting user nonce to {}", payer.nonce + 1);

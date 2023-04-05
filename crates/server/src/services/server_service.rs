@@ -6,7 +6,7 @@ use crate::services::api::api_service::ApiService;
 use crate::services::db_config_service::BlockchainConfigService;
 use crate::services::verifier::verifier_service::VerifierService;
 use anyhow::Result;
-use base::genesis_config_service::GenesisConfigService;
+use base::genesis_config_service::{GenesisConfigService, GetGenesisData};
 use base::karma_coin::karma_coin_api::api_service_server::ApiServiceServer;
 use base::karma_coin::karma_coin_verifier::verifier_service_server::VerifierServiceServer;
 use base::server_config_service::{
@@ -17,6 +17,13 @@ use base::server_config_service::{SetConfigFile, START_VERIFIER_SERVICE_CONFIG_K
 use db::db_service::{DatabaseService, Destroy};
 use tonic::transport::*;
 
+use crate::services::blockchain::karma_rewards_service::KarmaRewardsService;
+
+//use crate::services::blockchain::karma_rewards_service::{
+//    KarmaRewardsService, ProcessKarmaRewards,
+//};
+
+use base::karma_coin::karma_coin_api::GetGenesisDataRequest;
 use tonic_web::GrpcWebLayer;
 use tower_http::cors::CorsLayer;
 use xactor::*;
@@ -31,9 +38,18 @@ impl Actor for ServerService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
         // start the config services to config db, blockchain and the server
         BlockchainConfigService::from_registry().await?;
-        GenesisConfigService::from_registry().await?;
-
+        let genesis_config_service = GenesisConfigService::from_registry().await?;
         let server_config_server = ServerConfigService::from_registry().await?;
+
+        let genesis_data = genesis_config_service
+            .call(GetGenesisData {
+                request: GetGenesisDataRequest {},
+            })
+            .await??
+            .genesis_data
+            .unwrap();
+
+        info!("genesis data: {}", genesis_data);
 
         // if we start a verifier then load private secrets from an external verifier config file
         if ServerConfigService::get_bool(START_VERIFIER_SERVICE_CONFIG_KEY.into())
@@ -48,6 +64,15 @@ impl Actor for ServerService {
 
             VerifierService::from_registry().await?;
         }
+
+        info!("starting karma rewards service...");
+
+        KarmaRewardsService::from_registry().await?;
+
+        // uncomment following to process rewards on server startup
+        //let karma_rewards_service = KarmaRewardsService::from_registry().await?;
+        //karma_rewards_service.call(ProcessKarmaRewards).await??;
+
         info!("started");
         Ok(())
     }
@@ -125,18 +150,6 @@ impl ServerService {
         let reflection_server = tonic_reflection::server::Builder::configure()
             .register_encoded_file_descriptor_set(base::GRPC_DESCRIPTOR)
             .build()?;
-
-        // configure fucken tls bs
-        /*
-        let cert = std::fs::read_to_string("./server.pem")?;
-        let key = std::fs::read_to_string("./server.key")?;
-        let id = tonic::transport::Identity::from_pem(cert.as_bytes(), key.as_bytes());
-        let s = std::fs::read_to_string("./my_ca.pem")?;
-        let ca = Certificate::from_pem(s.as_bytes());
-        let tls = tonic::transport::ServerTlsConfig::new()
-            .identity(id)
-            .client_ca_root(ca);
-         */
 
         // todo: add reflection support for grpc_ci and grpcurl
         spawn(async move {

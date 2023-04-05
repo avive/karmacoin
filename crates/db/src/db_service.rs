@@ -55,6 +55,12 @@ impl DatabaseService {
         db_service.call(item).await?
     }
 
+    /// Delete all items (key,value) from a column family
+    pub async fn delete_all(item: DeleteAllItems) -> Result<()> {
+        let db_service = DatabaseService::from_registry().await?;
+        db_service.call(item).await?
+    }
+
     /// Drop the db and delete its data folder
     pub async fn drop_db(&mut self) -> Result<()> {
         if self.db.is_none() {
@@ -94,6 +100,7 @@ impl DatabaseService {
 }
 
 /// DatabaseService
+#[derive(Default)]
 pub struct DatabaseService {
     db: Option<rocks>,
     drop_on_exit: bool,
@@ -148,16 +155,8 @@ impl Actor for DatabaseService {
         }
     }
 }
+
 impl Service for DatabaseService {}
-impl Default for DatabaseService {
-    fn default() -> Self {
-        DatabaseService {
-            db: None,
-            drop_on_exit: false,
-            db_name: None,
-        }
-    }
-}
 
 /////////////  Writing data
 
@@ -194,7 +193,7 @@ impl Handler<WriteItem> for DatabaseService {
         let data = buf.freeze();
         let db_ref = self.db.as_ref().ok_or_else(|| anyhow!("db is nil"))?;
         let cf = db_ref
-            .cf_handle(&msg.cf)
+            .cf_handle(msg.cf)
             .ok_or_else(|| anyhow!("missing db column family: {}", msg.cf))?;
 
         Ok(db_ref
@@ -228,8 +227,8 @@ impl Handler<Compact> for DatabaseService {
 #[message(result = "Result<ReadAllItemsData>")]
 #[derive(Clone)]
 pub struct ReadAllItems {
-    pub from: Option<String>, // when non-empty - return from key (excluding it)
-    pub max_results: u32,     // 0 for no limit, otherwise, return up to max_results
+    pub from_key: Option<String>, // when non-empty - return from key (excluding it)
+    pub max_results: u32,         // 0 for no limit, otherwise, return up to max_results
     pub cf: &'static str,
 }
 
@@ -248,22 +247,24 @@ impl Handler<ReadAllItems> for DatabaseService {
     ) -> Result<ReadAllItemsData> {
         let db_ref = self.db.as_ref().ok_or_else(|| anyhow!("db is nil"))?;
         let cf = db_ref
-            .cf_handle(&msg.cf)
+            .cf_handle(msg.cf)
             .ok_or_else(|| anyhow!("no matching cf: {:?}", &msg.cf))?;
 
-        let mut iter = match msg.from.as_ref() {
-            Some(name) => {
-                db_ref.iterator_cf(cf, IteratorMode::From(name.as_bytes(), Direction::Forward))
-            }
+        let iter = match msg.from_key.as_ref() {
+            Some(form_key) => db_ref.iterator_cf(
+                cf,
+                IteratorMode::From(form_key.as_bytes(), Direction::Forward),
+            ),
             None => db_ref.iterator_cf(cf, IteratorMode::Start),
         };
 
         let mut res: Vec<(Bytes, DbValue)> = vec![];
 
-        if msg.from.is_some() {
+        /*
+        if msg.from_key.is_some() {
             // we skip the first result if from was provided
             let _ = iter.next();
-        }
+        }*/
 
         for item in iter {
             let kv_bytes = item.unwrap();
@@ -325,6 +326,65 @@ impl Handler<ReadItem> for DatabaseService {
     }
 }
 
+///// Reading data
+
+#[message(result = "Result<Vec<(Bytes, u64)>>")]
+#[derive(Clone)]
+pub struct ReadMultiItems {
+    pub keys: Vec<Bytes>,
+    pub cf: &'static str,
+}
+
+/// Read an item identified by a binary key from the db
+#[async_trait::async_trait]
+impl Handler<ReadMultiItems> for DatabaseService {
+    async fn handle(
+        &mut self,
+        _ctx: &mut Context<Self>,
+        msg: ReadMultiItems,
+    ) -> Result<Vec<(Bytes, u64)>> {
+        let db_ref = self.db.as_ref().ok_or_else(|| anyhow!("db is nil"))?;
+
+        let cf = db_ref
+            .cf_handle(msg.cf)
+            .ok_or_else(|| anyhow!("no matching cf: {:?}", &msg.cf))?;
+
+        let param: Vec<_> = msg.keys.iter().map(|k| (cf, k.as_ref())).collect();
+
+        let _data = db_ref
+            .multi_get_cf(param)
+            .into_iter()
+            .map(Result::unwrap)
+            .collect::<Vec<_>>();
+
+        // todo: finish this and add tests
+
+        unimplemented!()
+    }
+}
+
+#[message(result = "Result<()>")]
+#[derive(Clone)]
+pub struct DeleteAllItems {
+    pub cf: &'static str,
+}
+
+#[async_trait::async_trait]
+/// Delete all items from a column family
+impl Handler<DeleteAllItems> for DatabaseService {
+    async fn handle(&mut self, _ctx: &mut Context<Self>, msg: DeleteAllItems) -> Result<()> {
+        let db_ref = self.db.as_mut().ok_or_else(|| anyhow!("db is nil"))?;
+
+        db_ref
+            .drop_cf(msg.cf)
+            .map_err(|e| anyhow!(format!("db error: {}", e)))?;
+
+        db_ref
+            .create_cf(msg.cf, &Default::default())
+            .map_err(|e| anyhow!(format!("db error: {}", e)))
+    }
+}
+
 #[message(result = "Result<()>")]
 #[derive(Clone)]
 pub struct DeleteItem {
@@ -333,7 +393,7 @@ pub struct DeleteItem {
 }
 
 #[async_trait::async_trait]
-/// Read an item identified by a binary key from the db
+/// Delete an item from the db
 impl Handler<DeleteItem> for DatabaseService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, msg: DeleteItem) -> Result<()> {
         let db_ref = self.db.as_ref().ok_or_else(|| anyhow!("db is nil"))?;

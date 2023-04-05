@@ -158,7 +158,8 @@ impl BlockChainService {
         .await?;
 
         // Update blockchain global stats and persist
-        BlockChainService::update_blockchain_stats(stats, &block_event, &block).await?;
+        self.update_blockchain_stats(stats, &block_event, &block)
+            .await?;
 
         Ok(block)
     }

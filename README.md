@@ -8,8 +8,8 @@ To learn more about KarmaCoin visit https://karmaco.in
 
 ## Setup
 - Clone this repo
-- Install rust via rustup - stable toolchain - default installation options
-- Install cargo-nextest. See https://nexte.st/book/pre-built-binaries 
+- Install rust via `rustup` - stable toolchain - default installation options
+- Install `cargo-nextest`. See https://nexte.st/book/pre-built-binaries 
 
 
 ### Ubuntu
@@ -23,7 +23,7 @@ Install the following packages via apt-get or similar:
 
 ## Building
 
-### Buiilding a dev build
+### Building a dev build
 ```cargo build```
 
 ### Building for release
@@ -70,11 +70,18 @@ cargo build -- release
 ## Dev Notes
 
 ### Protos for downstream Dart repos
-This repo contains the canonical protobufs definitions for the KarmaCoin APIs. To generate protos for other Karma Coin projects in Dart, run the following commands:
+This repo contains the canonical protobufs definitions for the Karma Coin APIs. To generate protos for other Karma Coin projects in Dart, first enable the dart protoc plugin:
+
+```bash
+dart pub global activate protoc_plugin
+```
+Next, run the following commands from `[project_root]/crates/base/proto`.
+
 ```bash
 mkdir dart
-protoc -I proto crates/base/proto/karma_coin/core_types/*.proto --dart_out=grpc:dart 
+protoc --dart_out=grpc:dart  karma_coin/core_types/*.proto
 ```
+
 and copy over the generated files to your Dart project.
 
 ### Timestamps

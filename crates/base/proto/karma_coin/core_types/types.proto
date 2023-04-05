@@ -70,12 +70,30 @@ message User {
     repeated CommunityMembership community_memberships = 9;
 }
 
+// Contact information for easy appreciation in the app of any contact
+message Contact {
+    string user_name = 1;
+    AccountId account_id = 2;
+    MobileNumber mobile_number = 3;
+    repeated CommunityMembership community_memberships = 4;
+}
+
 message CommunityMembership {
     uint32 community_id = 1;
     uint32 karma_score = 2;
     // when true user is admin of the community - set by sudo
     bool is_admin = 3;
 }
+
+message LeaderboardEntry {
+    string user_name = 1;
+    AccountId account_id = 2;
+    // score in leaderboard
+    uint32 score = 4;
+    // outgoing appreciations char traits
+    repeated uint32 char_traits_ids = 5;
+}
+
 
 // Phone verifier is an entity that verifies account mobile phone numbers
 message PhoneVerifier {
@@ -316,6 +334,13 @@ message BlockchainStats {
 
     // amount of rewards paid to causes
     uint64 causes_rewards_amount = 20;
+
+    // karma rewards given
+    uint64 karma_rewards_count = 21;
+
+    // karma rewards amount allocated
+    uint64 karma_rewards_amount = 22;
+
 }
 
 // Block events
@@ -352,5 +377,44 @@ enum ExecutionInfo {
     EXECUTION_INFO_ACCOUNT_ALREADY_EXISTS = 8;
     EXECUTION_INFO_TX_FEE_TOO_LOW = 9;
     EXECUTION_INFO_INTERNAL_NODE_ERROR = 10;
+}
+
+message GenesisData {
+    uint32 net_id = 1;
+    string net_name = 2;
+    uint64 genesis_time = 3;
+    uint64 signup_reward_phase1_alloc = 4;
+    uint64 signup_reward_phase2_alloc = 5;
+
+    uint64 signup_reward_phase1_amount = 6;
+    uint64 signup_reward_phase2_amount = 7;
+    uint64 signup_reward_phase3_start = 8;
+
+    uint64 referral_reward_phase1_alloc = 9;
+    uint64 referral_reward_phase2_alloc = 10;
+
+    uint64 referral_reward_phase1_amount = 11;
+    uint64 referral_reward_phase2_amount = 12;
+
+    uint64 tx_fee_subsidy_max_per_user = 13;
+    uint64 tx_fee_subsidies_alloc = 14;
+    uint64 tx_fee_subsidy_max_amount = 15;
+
+    uint64 block_reward_amount = 16;
+    uint64 block_reward_last_block = 17;
+
+    uint64 karma_reward_amount = 18;
+    uint64 karma_reward_alloc = 19;
+    uint64 karma_reward_top_n_users = 20;
+    uint64 karma_rewards_eligibility = 21;
+    uint64 karma_rewards_period_hours = 22;
+
+    uint64 treasury_premint_amount = 23;
+    string treasury_account_id = 24;
+    string treasury_account_name = 25;
+
+    repeated core_types.CharTrait char_traits = 26;
+    repeated core_types.PhoneVerifier verifiers = 27;
+
 }
 

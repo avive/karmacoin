@@ -101,6 +101,19 @@ pub struct User {
     #[prost(message, repeated, tag = "9")]
     pub community_memberships: ::prost::alloc::vec::Vec<CommunityMembership>,
 }
+/// Contact information for easy appreciation in the app of any contact
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Contact {
+    #[prost(string, tag = "1")]
+    pub user_name: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "2")]
+    pub account_id: ::core::option::Option<AccountId>,
+    #[prost(message, optional, tag = "3")]
+    pub mobile_number: ::core::option::Option<MobileNumber>,
+    #[prost(message, repeated, tag = "4")]
+    pub community_memberships: ::prost::alloc::vec::Vec<CommunityMembership>,
+}
 #[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -112,6 +125,20 @@ pub struct CommunityMembership {
     /// when true user is admin of the community - set by sudo
     #[prost(bool, tag = "3")]
     pub is_admin: bool,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct LeaderboardEntry {
+    #[prost(string, tag = "1")]
+    pub user_name: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "2")]
+    pub account_id: ::core::option::Option<AccountId>,
+    /// score in leaderboard
+    #[prost(uint32, tag = "4")]
+    pub score: u32,
+    /// outgoing appreciations char traits
+    #[prost(uint32, repeated, tag = "5")]
+    pub char_traits_ids: ::prost::alloc::vec::Vec<u32>,
 }
 /// Phone verifier is an entity that verifies account mobile phone numbers
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -452,6 +479,12 @@ pub struct BlockchainStats {
     /// amount of rewards paid to causes
     #[prost(uint64, tag = "20")]
     pub causes_rewards_amount: u64,
+    /// karma rewards given
+    #[prost(uint64, tag = "21")]
+    pub karma_rewards_count: u64,
+    /// karma rewards amount allocated
+    #[prost(uint64, tag = "22")]
+    pub karma_rewards_amount: u64,
 }
 /// Block events
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -483,6 +516,64 @@ pub struct BlockEvent {
     pub referral_rewards_count: u64,
     #[prost(uint64, tag = "13")]
     pub reward: u64,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GenesisData {
+    #[prost(uint32, tag = "1")]
+    pub net_id: u32,
+    #[prost(string, tag = "2")]
+    pub net_name: ::prost::alloc::string::String,
+    #[prost(uint64, tag = "3")]
+    pub genesis_time: u64,
+    #[prost(uint64, tag = "4")]
+    pub signup_reward_phase1_alloc: u64,
+    #[prost(uint64, tag = "5")]
+    pub signup_reward_phase2_alloc: u64,
+    #[prost(uint64, tag = "6")]
+    pub signup_reward_phase1_amount: u64,
+    #[prost(uint64, tag = "7")]
+    pub signup_reward_phase2_amount: u64,
+    #[prost(uint64, tag = "8")]
+    pub signup_reward_phase3_start: u64,
+    #[prost(uint64, tag = "9")]
+    pub referral_reward_phase1_alloc: u64,
+    #[prost(uint64, tag = "10")]
+    pub referral_reward_phase2_alloc: u64,
+    #[prost(uint64, tag = "11")]
+    pub referral_reward_phase1_amount: u64,
+    #[prost(uint64, tag = "12")]
+    pub referral_reward_phase2_amount: u64,
+    #[prost(uint64, tag = "13")]
+    pub tx_fee_subsidy_max_per_user: u64,
+    #[prost(uint64, tag = "14")]
+    pub tx_fee_subsidies_alloc: u64,
+    #[prost(uint64, tag = "15")]
+    pub tx_fee_subsidy_max_amount: u64,
+    #[prost(uint64, tag = "16")]
+    pub block_reward_amount: u64,
+    #[prost(uint64, tag = "17")]
+    pub block_reward_last_block: u64,
+    #[prost(uint64, tag = "18")]
+    pub karma_reward_amount: u64,
+    #[prost(uint64, tag = "19")]
+    pub karma_reward_alloc: u64,
+    #[prost(uint64, tag = "20")]
+    pub karma_reward_top_n_users: u64,
+    #[prost(uint64, tag = "21")]
+    pub karma_rewards_eligibility: u64,
+    #[prost(uint64, tag = "22")]
+    pub karma_rewards_period_hours: u64,
+    #[prost(uint64, tag = "23")]
+    pub treasury_premint_amount: u64,
+    #[prost(string, tag = "24")]
+    pub treasury_account_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "25")]
+    pub treasury_account_name: ::prost::alloc::string::String,
+    #[prost(message, repeated, tag = "26")]
+    pub char_traits: ::prost::alloc::vec::Vec<CharTrait>,
+    #[prost(message, repeated, tag = "27")]
+    pub verifiers: ::prost::alloc::vec::Vec<PhoneVerifier>,
 }
 /// Supported signature schemes
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]

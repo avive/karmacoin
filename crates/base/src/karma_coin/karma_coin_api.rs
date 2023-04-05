@@ -1,5 +1,75 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SetCommunityAdminRequest {
+    #[prost(message, optional, tag = "1")]
+    pub from_account_id: ::core::option::Option<super::core_types::AccountId>,
+    #[prost(message, optional, tag = "2")]
+    pub target_account_id: ::core::option::Option<super::core_types::AccountId>,
+    #[prost(uint32, tag = "3")]
+    pub community_id: u32,
+    #[prost(bool, tag = "4")]
+    pub admin: bool,
+    /// signature of all of the above
+    #[prost(bytes = "vec", tag = "5")]
+    pub signature: ::prost::alloc::vec::Vec<u8>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SetCommunityAdminResponse {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetLeaderBoardRequest {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetContactsRequest {
+    /// optional prefix over user names for auto-complete purposes
+    #[prost(string, tag = "1")]
+    pub prefix: ::prost::alloc::string::String,
+    /// optional filter by a community
+    #[prost(uint32, tag = "2")]
+    pub community_id: u32,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetContactsResponse {
+    #[prost(message, repeated, tag = "1")]
+    pub contacts: ::prost::alloc::vec::Vec<super::core_types::Contact>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetLeaderBoardResponse {
+    #[prost(message, repeated, tag = "1")]
+    pub leaderboard_entries: ::prost::alloc::vec::Vec<
+        super::core_types::LeaderboardEntry,
+    >,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetTransactionsFromHashesRequest {
+    #[prost(bytes = "vec", repeated, tag = "1")]
+    pub tx_hashes: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetTransactionsFromHashesResponse {
+    #[prost(message, repeated, tag = "1")]
+    pub transactions: ::prost::alloc::vec::Vec<
+        super::core_types::SignedTransactionWithStatus,
+    >,
+    #[prost(message, optional, tag = "2")]
+    pub tx_events: ::core::option::Option<super::core_types::TransactionEvents>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetAllUsersRequest {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct GetAllUsersResponse {
+    #[prost(message, repeated, tag = "1")]
+    pub users: ::prost::alloc::vec::Vec<super::core_types::User>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetExchangeRateRequest {}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -63,56 +133,8 @@ pub struct GetGenesisDataRequest {}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetGenesisDataResponse {
-    #[prost(uint32, tag = "1")]
-    pub net_id: u32,
-    #[prost(string, tag = "2")]
-    pub net_name: ::prost::alloc::string::String,
-    #[prost(uint64, tag = "3")]
-    pub genesis_time: u64,
-    #[prost(uint64, tag = "4")]
-    pub signup_reward_phase1_alloc: u64,
-    #[prost(uint64, tag = "5")]
-    pub signup_reward_phase2_alloc: u64,
-    #[prost(uint64, tag = "6")]
-    pub signup_reward_phase1_amount: u64,
-    #[prost(uint64, tag = "7")]
-    pub signup_reward_phase2_amount: u64,
-    #[prost(uint64, tag = "8")]
-    pub signup_reward_phase3_start: u64,
-    #[prost(uint64, tag = "9")]
-    pub referral_reward_phase1_alloc: u64,
-    #[prost(uint64, tag = "10")]
-    pub referral_reward_phase2_alloc: u64,
-    #[prost(uint64, tag = "11")]
-    pub referral_reward_phase1_amount: u64,
-    #[prost(uint64, tag = "12")]
-    pub referral_reward_phase2_amount: u64,
-    #[prost(uint64, tag = "13")]
-    pub tx_fee_subsidy_max_per_user: u64,
-    #[prost(uint64, tag = "14")]
-    pub tx_fee_subsidies_alloc: u64,
-    #[prost(uint64, tag = "15")]
-    pub tx_fee_subsidy_max_amount: u64,
-    #[prost(uint64, tag = "16")]
-    pub block_reward_amount: u64,
-    #[prost(uint64, tag = "17")]
-    pub block_reward_last_block: u64,
-    #[prost(uint64, tag = "18")]
-    pub karma_reward_amount: u64,
-    #[prost(uint64, tag = "19")]
-    pub karma_reward_alloc: u64,
-    #[prost(uint64, tag = "20")]
-    pub karma_reward_top_n_users: u64,
-    #[prost(uint64, tag = "21")]
-    pub treasury_premint_amount: u64,
-    #[prost(string, tag = "22")]
-    pub treasury_account_id: ::prost::alloc::string::String,
-    #[prost(string, tag = "23")]
-    pub treasury_account_name: ::prost::alloc::string::String,
-    #[prost(message, repeated, tag = "24")]
-    pub char_traits: ::prost::alloc::vec::Vec<super::core_types::CharTrait>,
-    #[prost(message, repeated, tag = "25")]
-    pub verifiers: ::prost::alloc::vec::Vec<super::core_types::PhoneVerifier>,
+    #[prost(message, optional, tag = "1")]
+    pub genesis_data: ::core::option::Option<super::core_types::GenesisData>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -280,7 +302,111 @@ pub mod api_service_client {
             self.inner = self.inner.accept_compressed(encoding);
             self
         }
-        /// check if a nickname is available
+        /// make another user a community admin. Can only be executed by an existing community admin
+        /// in Karmachain 2.0 this will need to come from sudo
+        pub async fn set_community_admin(
+            &mut self,
+            request: impl tonic::IntoRequest<super::SetCommunityAdminRequest>,
+        ) -> Result<tonic::Response<super::SetCommunityAdminResponse>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.api.ApiService/SetCommunityAdmin",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        /// get current karma rewards period leaderboard
+        pub async fn get_leader_board(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetLeaderBoardRequest>,
+        ) -> Result<tonic::Response<super::GetLeaderBoardResponse>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.api.ApiService/GetLeaderBoard",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        /// return all accounts on chain - doesn't support pagination yet but should
+        pub async fn get_all_users(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetAllUsersRequest>,
+        ) -> Result<tonic::Response<super::GetAllUsersResponse>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.api.ApiService/GetAllUsers",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        /// get contacts for easy appreciation from app of any existing user. should support pagination and prefix filtering
+        pub async fn get_contacts(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetContactsRequest>,
+        ) -> Result<tonic::Response<super::GetContactsResponse>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.api.ApiService/GetContacts",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        /// Return transactions for provided one or more tx hash
+        pub async fn get_transactions_from_hashes(
+            &mut self,
+            request: impl tonic::IntoRequest<super::GetTransactionsFromHashesRequest>,
+        ) -> Result<
+            tonic::Response<super::GetTransactionsFromHashesResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.api.ApiService/GetTransactionsFromHashes",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        /// check if a username is available
         pub async fn get_user_info_by_user_name(
             &mut self,
             request: impl tonic::IntoRequest<super::GetUserInfoByUserNameRequest>,
@@ -497,7 +623,36 @@ pub mod api_service_server {
     /// Generated trait containing gRPC methods that should be implemented for use with ApiServiceServer.
     #[async_trait]
     pub trait ApiService: Send + Sync + 'static {
-        /// check if a nickname is available
+        /// make another user a community admin. Can only be executed by an existing community admin
+        /// in Karmachain 2.0 this will need to come from sudo
+        async fn set_community_admin(
+            &self,
+            request: tonic::Request<super::SetCommunityAdminRequest>,
+        ) -> Result<tonic::Response<super::SetCommunityAdminResponse>, tonic::Status>;
+        /// get current karma rewards period leaderboard
+        async fn get_leader_board(
+            &self,
+            request: tonic::Request<super::GetLeaderBoardRequest>,
+        ) -> Result<tonic::Response<super::GetLeaderBoardResponse>, tonic::Status>;
+        /// return all accounts on chain - doesn't support pagination yet but should
+        async fn get_all_users(
+            &self,
+            request: tonic::Request<super::GetAllUsersRequest>,
+        ) -> Result<tonic::Response<super::GetAllUsersResponse>, tonic::Status>;
+        /// get contacts for easy appreciation from app of any existing user. should support pagination and prefix filtering
+        async fn get_contacts(
+            &self,
+            request: tonic::Request<super::GetContactsRequest>,
+        ) -> Result<tonic::Response<super::GetContactsResponse>, tonic::Status>;
+        /// Return transactions for provided one or more tx hash
+        async fn get_transactions_from_hashes(
+            &self,
+            request: tonic::Request<super::GetTransactionsFromHashesRequest>,
+        ) -> Result<
+            tonic::Response<super::GetTransactionsFromHashesResponse>,
+            tonic::Status,
+        >;
+        /// check if a username is available
         async fn get_user_info_by_user_name(
             &self,
             request: tonic::Request<super::GetUserInfoByUserNameRequest>,
@@ -613,6 +768,209 @@ pub mod api_service_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
+                "/karma_coin.api.ApiService/SetCommunityAdmin" => {
+                    #[allow(non_camel_case_types)]
+                    struct SetCommunityAdminSvc<T: ApiService>(pub Arc<T>);
+                    impl<
+                        T: ApiService,
+                    > tonic::server::UnaryService<super::SetCommunityAdminRequest>
+                    for SetCommunityAdminSvc<T> {
+                        type Response = super::SetCommunityAdminResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::SetCommunityAdminRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move {
+                                (*inner).set_community_admin(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = SetCommunityAdminSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/karma_coin.api.ApiService/GetLeaderBoard" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetLeaderBoardSvc<T: ApiService>(pub Arc<T>);
+                    impl<
+                        T: ApiService,
+                    > tonic::server::UnaryService<super::GetLeaderBoardRequest>
+                    for GetLeaderBoardSvc<T> {
+                        type Response = super::GetLeaderBoardResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetLeaderBoardRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move {
+                                (*inner).get_leader_board(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetLeaderBoardSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/karma_coin.api.ApiService/GetAllUsers" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetAllUsersSvc<T: ApiService>(pub Arc<T>);
+                    impl<
+                        T: ApiService,
+                    > tonic::server::UnaryService<super::GetAllUsersRequest>
+                    for GetAllUsersSvc<T> {
+                        type Response = super::GetAllUsersResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetAllUsersRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move {
+                                (*inner).get_all_users(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetAllUsersSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/karma_coin.api.ApiService/GetContacts" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetContactsSvc<T: ApiService>(pub Arc<T>);
+                    impl<
+                        T: ApiService,
+                    > tonic::server::UnaryService<super::GetContactsRequest>
+                    for GetContactsSvc<T> {
+                        type Response = super::GetContactsResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::GetContactsRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move {
+                                (*inner).get_contacts(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetContactsSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/karma_coin.api.ApiService/GetTransactionsFromHashes" => {
+                    #[allow(non_camel_case_types)]
+                    struct GetTransactionsFromHashesSvc<T: ApiService>(pub Arc<T>);
+                    impl<
+                        T: ApiService,
+                    > tonic::server::UnaryService<
+                        super::GetTransactionsFromHashesRequest,
+                    > for GetTransactionsFromHashesSvc<T> {
+                        type Response = super::GetTransactionsFromHashesResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<
+                                super::GetTransactionsFromHashesRequest,
+                            >,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move {
+                                (*inner).get_transactions_from_hashes(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = GetTransactionsFromHashesSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
                 "/karma_coin.api.ApiService/GetUserInfoByUserName" => {
                     #[allow(non_camel_case_types)]
                     struct GetUserInfoByUserNameSvc<T: ApiService>(pub Arc<T>);

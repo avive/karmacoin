@@ -10,13 +10,28 @@ import "karma_coin/core_types/types.proto";
 // Unified public API provided by blockchain nodes and verifiers
 service ApiService {
 
-  // todo add these methods:
-      // Get transactions for collection of tx hashes
-      // Get transaction hashes for an accountId
-      // Get all users on chain
-      // Get tx hashes of a block
+  // make another user a community admin. Can only be executed by an existing community admin
+  // in Karmachain 2.0 this will need to come from sudo
+  rpc SetCommunityAdmin(SetCommunityAdminRequest) returns (SetCommunityAdminResponse) {
+  }
 
-  // check if a nickname is available
+  // get current karma rewards period leaderboard
+  rpc GetLeaderBoard(GetLeaderBoardRequest) returns (GetLeaderBoardResponse) {
+  }
+
+  // return all accounts on chain - doesn't support pagination yet but should
+  rpc GetAllUsers(GetAllUsersRequest) returns (GetAllUsersResponse) {
+  }
+
+  // get contacts for easy appreciation from app of any existing user. should support pagination and prefix filtering
+  rpc GetContacts(GetContactsRequest) returns (GetContactsResponse) {
+  }
+
+  // Return transactions for provided one or more tx hash
+  rpc GetTransactionsFromHashes(GetTransactionsFromHashesRequest) returns (GetTransactionsFromHashesResponse) {
+  }
+
+  // check if a username is available
   rpc GetUserInfoByUserName(GetUserInfoByUserNameRequest) returns (GetUserInfoByUserNameResponse);
 
   // Returns on-chain user info by phone number if user exists
@@ -49,7 +64,53 @@ service ApiService {
   // Get blockchain events for a range of heights
   rpc GetBlocks(GetBlocksRequest) returns (GetBlocksResponse) {
   }
+}
 
+message SetCommunityAdminRequest {
+  core_types.AccountId from_account_id = 1;
+  core_types.AccountId target_account_id = 2;
+  uint32 community_id = 3;
+  bool admin = 4;
+  // signature of all of the above
+  bytes signature = 5;
+}
+
+message SetCommunityAdminResponse {
+}
+
+message GetLeaderBoardRequest {
+
+}
+
+message GetContactsRequest {
+  string prefix = 1; // optional prefix over user names for auto-complete purposes
+  uint32 community_id = 2; // optional filter by a community
+}
+
+message GetContactsResponse {
+  repeated core_types.Contact contacts = 1;
+}
+
+
+message GetLeaderBoardResponse {
+  repeated core_types.LeaderboardEntry leaderboard_entries = 1;
+}
+
+message GetTransactionsFromHashesRequest {
+  repeated bytes tx_hashes = 1;
+}
+
+message GetTransactionsFromHashesResponse {
+  repeated core_types.SignedTransactionWithStatus transactions = 1;
+  core_types.TransactionEvents tx_events = 2;
+}
+
+message GetAllUsersRequest {
+
+}
+
+message GetAllUsersResponse {
+  repeated core_types.User users = 1;
 }
 
 message GetExchangeRateRequest {
@@ -102,40 +163,7 @@ message GetGenesisDataRequest {
 }
 
 message GetGenesisDataResponse {
-  uint32 net_id = 1;
-  string net_name = 2;
-  uint64 genesis_time = 3;
-  uint64 signup_reward_phase1_alloc = 4;
-  uint64 signup_reward_phase2_alloc = 5;
-
-  uint64 signup_reward_phase1_amount = 6;
-  uint64 signup_reward_phase2_amount = 7;
-  uint64 signup_reward_phase3_start = 8;
-
-  uint64 referral_reward_phase1_alloc = 9;
-  uint64 referral_reward_phase2_alloc = 10;
-
-  uint64 referral_reward_phase1_amount = 11;
-  uint64 referral_reward_phase2_amount = 12;
-
-  uint64 tx_fee_subsidy_max_per_user = 13;
-  uint64 tx_fee_subsidies_alloc = 14;
-  uint64 tx_fee_subsidy_max_amount = 15;
-
-  uint64 block_reward_amount = 16;
-  uint64 block_reward_last_block = 17;
-
-  uint64 karma_reward_amount = 18;
-  uint64 karma_reward_alloc = 19;
-  uint64 karma_reward_top_n_users = 20;
-
-  uint64 treasury_premint_amount = 21;
-  string treasury_account_id = 22;
-  string treasury_account_name = 23;
-
-  repeated core_types.CharTrait char_traits = 24;
-  repeated core_types.PhoneVerifier verifiers = 25;
-
+  core_types.GenesisData genesis_data = 1;
 }
 
 message GetBlockchainDataRequest {

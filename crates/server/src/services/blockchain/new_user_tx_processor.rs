@@ -313,6 +313,8 @@ impl BlockChainService {
             error_message: "internal node error".into(),
         })?;
 
+        info!("added user to db");
+
         // update user name index
         DatabaseService::write(WriteItem {
             data: DataItem {

@@ -27,8 +27,10 @@ impl Handler<GetUserInfoByAccountId> for BlockChainService {
             return Err(anyhow!("missing account id from request"));
         };
 
+        let account_id = msg.0.account_id.as_ref().unwrap().data.clone();
+
         match DatabaseService::read(ReadItem {
-            key: Bytes::from(msg.0.account_id.as_ref().unwrap().data.clone()),
+            key: Bytes::from(account_id.clone()),
             cf: USERS_COL_FAMILY,
         })
         .await?
@@ -37,7 +39,7 @@ impl Handler<GetUserInfoByAccountId> for BlockChainService {
             Some(user_data) => {
                 info!(
                     "found user on-chain by account id: {}",
-                    short_hex_string(user_data.0.as_ref())
+                    short_hex_string(account_id.as_ref())
                 );
                 Ok(GetUserInfoByAccountResponse {
                     user: Some(User::decode(user_data.0.as_ref())?),
