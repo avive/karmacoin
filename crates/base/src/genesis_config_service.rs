@@ -288,7 +288,7 @@ impl Actor for GenesisConfigService {
             .unwrap()
             // Karma rewards computation period in hours (1 for dev mode, 24 for testnet, 1 week for mainnet, etc...)
             // 60 * 24 * 2
-            .set_default(KARMA_REWARD_PERIOD_MINUTES, 2)
+            .set_default(KARMA_REWARD_PERIOD_MINUTES, 60 * 24 * 2)
             .unwrap()
             // min num of appreciations  in period to be eligible for reward
             .set_default(KARMA_REWARDS_ELIGIBILITY, 2)
