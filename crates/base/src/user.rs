@@ -50,6 +50,12 @@ impl User {
             .find(|community_membership| community_membership.community_id == community_id)
     }
 
+    pub fn is_community_member(&self, community_id: u32) -> bool {
+        self.community_memberships
+            .iter()
+            .any(|community_membership| community_membership.community_id == community_id)
+    }
+
     /// Reruns score for a trait_id with optional community context
     pub fn get_trait_score(&self, trait_id: u32, community_id: u32) -> u32 {
         for trait_score in self.trait_scores.iter() {

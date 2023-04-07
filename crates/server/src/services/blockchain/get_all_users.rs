@@ -19,7 +19,7 @@ impl Handler<GetAllUsers> for BlockChainService {
     async fn handle(
         &mut self,
         _ctx: &mut Context<Self>,
-        _msg: GetAllUsers,
+        msg: GetAllUsers,
     ) -> Result<GetAllUsersResponse> {
         let mut users = vec![];
 
@@ -30,11 +30,18 @@ impl Handler<GetAllUsers> for BlockChainService {
         })
         .await?;
 
-        info!("We got {} users", data.items.len());
+        info!(
+            "We got {} users (pre community filtering)",
+            data.items.len()
+        );
+        let community_id = msg.0.community_id;
 
         for item in data.items.iter() {
             match User::decode(item.1.value.as_ref()) {
                 Ok(user) => {
+                    if community_id != 0 && !user.is_community_member(community_id) {
+                        continue;
+                    }
                     info!("User: {}", user);
                     users.push(user);
                 }
@@ -43,6 +50,8 @@ impl Handler<GetAllUsers> for BlockChainService {
                 }
             }
         }
+
+        info!("returning {} users", users.len());
 
         Ok(GetAllUsersResponse { users })
     }

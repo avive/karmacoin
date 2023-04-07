@@ -76,6 +76,7 @@ message Contact {
     AccountId account_id = 2;
     MobileNumber mobile_number = 3;
     repeated CommunityMembership community_memberships = 4;
+    repeated TraitScore trait_scores = 5;
 }
 
 message CommunityMembership {

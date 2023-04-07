@@ -64,14 +64,14 @@ impl Handler<GetContacts> for BlockChainService {
                 }
             };
 
-            if let Some(mut user) = user_data {
+            if let Some(user) = user_data {
                 if user.mobile_number.is_none() {
                     continue;
                 }
 
                 // if caller asked for only members of a community and user is not a member of it
                 // then skip this user
-                if community_id != 0 && user.get_community_membership(community_id).is_none() {
+                if community_id != 0 && !user.is_community_member(community_id) {
                     continue;
                 }
 
@@ -81,6 +81,7 @@ impl Handler<GetContacts> for BlockChainService {
                     account_id: Some(user.account_id.unwrap()),
                     mobile_number: Some(user.mobile_number.unwrap()),
                     community_memberships: user.community_memberships,
+                    trait_scores: user.trait_scores,
                 })
             }
         }

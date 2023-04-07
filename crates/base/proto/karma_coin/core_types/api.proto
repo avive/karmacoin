@@ -106,7 +106,7 @@ message GetTransactionsFromHashesResponse {
 }
 
 message GetAllUsersRequest {
-
+  uint32 community_id = 1;
 }
 
 message GetAllUsersResponse {

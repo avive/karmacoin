@@ -113,6 +113,8 @@ pub struct Contact {
     pub mobile_number: ::core::option::Option<MobileNumber>,
     #[prost(message, repeated, tag = "4")]
     pub community_memberships: ::prost::alloc::vec::Vec<CommunityMembership>,
+    #[prost(message, repeated, tag = "5")]
+    pub trait_scores: ::prost::alloc::vec::Vec<TraitScore>,
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]

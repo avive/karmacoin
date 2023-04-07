@@ -61,7 +61,10 @@ pub struct GetTransactionsFromHashesResponse {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct GetAllUsersRequest {}
+pub struct GetAllUsersRequest {
+    #[prost(uint32, tag = "1")]
+    pub community_id: u32,
+}
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct GetAllUsersResponse {
