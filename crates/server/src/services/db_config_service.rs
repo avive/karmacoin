@@ -108,6 +108,8 @@ impl Actor for BlockchainConfigService {
             .await?
             .unwrap();
 
+        info!("drop on exit: {}", drop_on_exit);
+
         // configure the db
         DatabaseService::config_db(db::db_service::Configure {
             drop_on_exit,

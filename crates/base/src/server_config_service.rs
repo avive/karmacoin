@@ -34,7 +34,7 @@ pub const DEFAULT_START_GRPC_SERVER: bool = true;
 /// Start the verification service
 pub const DEFAULT_START_VERIFIER_SERVICE: bool = true;
 pub const DEFAULT_START_API_SERVICE: bool = true;
-pub const DEFAULT_DROP_DB_ON_EXIT: bool = true;
+pub const DEFAULT_DROP_DB_ON_EXIT: bool = false;
 
 /// ConfigService for servers
 
