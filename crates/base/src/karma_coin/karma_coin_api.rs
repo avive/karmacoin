@@ -1,17 +1,26 @@
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SetCommunityAdminRequest {
+    /// Caller serialized SetCommunityAdminData protobufs message
     #[prost(message, optional, tag = "1")]
     pub from_account_id: ::core::option::Option<super::core_types::AccountId>,
+    #[prost(bytes = "vec", tag = "2")]
+    pub data: ::prost::alloc::vec::Vec<u8>,
+    /// Caller signature on the data
+    #[prost(bytes = "vec", tag = "3")]
+    pub signature: ::prost::alloc::vec::Vec<u8>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SetCommunityAdminData {
+    #[prost(uint64, tag = "1")]
+    pub timestamp: u64,
     #[prost(message, optional, tag = "2")]
     pub target_account_id: ::core::option::Option<super::core_types::AccountId>,
     #[prost(uint32, tag = "3")]
     pub community_id: u32,
     #[prost(bool, tag = "4")]
     pub admin: bool,
-    /// signature of all of the above
-    #[prost(bytes = "vec", tag = "5")]
-    pub signature: ::prost::alloc::vec::Vec<u8>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

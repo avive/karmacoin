@@ -67,12 +67,18 @@ service ApiService {
 }
 
 message SetCommunityAdminRequest {
+  // Caller serialized SetCommunityAdminData protobufs message
   core_types.AccountId from_account_id = 1;
+  bytes data = 2;
+  // Caller signature on the data
+  bytes signature = 3;
+}
+
+message SetCommunityAdminData {
+  uint64 timestamp = 1;
   core_types.AccountId target_account_id = 2;
   uint32 community_id = 3;
   bool admin = 4;
-  // signature of all of the above
-  bytes signature = 5;
 }
 
 message SetCommunityAdminResponse {

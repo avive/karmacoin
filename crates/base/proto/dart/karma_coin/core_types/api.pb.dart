@@ -19,33 +19,23 @@ export 'api.pbenum.dart';
 class SetCommunityAdminRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SetCommunityAdminRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'karma_coin.api'), createEmptyInstance: create)
     ..aOM<$3.AccountId>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'fromAccountId', subBuilder: $3.AccountId.create)
-    ..aOM<$3.AccountId>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'targetAccountId', subBuilder: $3.AccountId.create)
-    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'communityId', $pb.PbFieldType.OU3)
-    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'admin')
-    ..a<$core.List<$core.int>>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'signature', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'signature', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
 
   SetCommunityAdminRequest._() : super();
   factory SetCommunityAdminRequest({
     $3.AccountId? fromAccountId,
-    $3.AccountId? targetAccountId,
-    $core.int? communityId,
-    $core.bool? admin,
+    $core.List<$core.int>? data,
     $core.List<$core.int>? signature,
   }) {
     final _result = create();
     if (fromAccountId != null) {
       _result.fromAccountId = fromAccountId;
     }
-    if (targetAccountId != null) {
-      _result.targetAccountId = targetAccountId;
-    }
-    if (communityId != null) {
-      _result.communityId = communityId;
-    }
-    if (admin != null) {
-      _result.admin = admin;
+    if (data != null) {
+      _result.data = data;
     }
     if (signature != null) {
       _result.signature = signature;
@@ -85,6 +75,86 @@ class SetCommunityAdminRequest extends $pb.GeneratedMessage {
   $3.AccountId ensureFromAccountId() => $_ensure(0);
 
   @$pb.TagNumber(2)
+  $core.List<$core.int> get data => $_getN(1);
+  @$pb.TagNumber(2)
+  set data($core.List<$core.int> v) { $_setBytes(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasData() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearData() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.List<$core.int> get signature => $_getN(2);
+  @$pb.TagNumber(3)
+  set signature($core.List<$core.int> v) { $_setBytes(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasSignature() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearSignature() => clearField(3);
+}
+
+class SetCommunityAdminData extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SetCommunityAdminData', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'karma_coin.api'), createEmptyInstance: create)
+    ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timestamp', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOM<$3.AccountId>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'targetAccountId', subBuilder: $3.AccountId.create)
+    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'communityId', $pb.PbFieldType.OU3)
+    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'admin')
+    ..hasRequiredFields = false
+  ;
+
+  SetCommunityAdminData._() : super();
+  factory SetCommunityAdminData({
+    $fixnum.Int64? timestamp,
+    $3.AccountId? targetAccountId,
+    $core.int? communityId,
+    $core.bool? admin,
+  }) {
+    final _result = create();
+    if (timestamp != null) {
+      _result.timestamp = timestamp;
+    }
+    if (targetAccountId != null) {
+      _result.targetAccountId = targetAccountId;
+    }
+    if (communityId != null) {
+      _result.communityId = communityId;
+    }
+    if (admin != null) {
+      _result.admin = admin;
+    }
+    return _result;
+  }
+  factory SetCommunityAdminData.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SetCommunityAdminData.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SetCommunityAdminData clone() => SetCommunityAdminData()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SetCommunityAdminData copyWith(void Function(SetCommunityAdminData) updates) => super.copyWith((message) => updates(message as SetCommunityAdminData)) as SetCommunityAdminData; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SetCommunityAdminData create() => SetCommunityAdminData._();
+  SetCommunityAdminData createEmptyInstance() => create();
+  static $pb.PbList<SetCommunityAdminData> createRepeated() => $pb.PbList<SetCommunityAdminData>();
+  @$core.pragma('dart2js:noInline')
+  static SetCommunityAdminData getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SetCommunityAdminData>(create);
+  static SetCommunityAdminData? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get timestamp => $_getI64(0);
+  @$pb.TagNumber(1)
+  set timestamp($fixnum.Int64 v) { $_setInt64(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasTimestamp() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTimestamp() => clearField(1);
+
+  @$pb.TagNumber(2)
   $3.AccountId get targetAccountId => $_getN(1);
   @$pb.TagNumber(2)
   set targetAccountId($3.AccountId v) { setField(2, v); }
@@ -112,15 +182,6 @@ class SetCommunityAdminRequest extends $pb.GeneratedMessage {
   $core.bool hasAdmin() => $_has(3);
   @$pb.TagNumber(4)
   void clearAdmin() => clearField(4);
-
-  @$pb.TagNumber(5)
-  $core.List<$core.int> get signature => $_getN(4);
-  @$pb.TagNumber(5)
-  set signature($core.List<$core.int> v) { $_setBytes(4, v); }
-  @$pb.TagNumber(5)
-  $core.bool hasSignature() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearSignature() => clearField(5);
 }
 
 class SetCommunityAdminResponse extends $pb.GeneratedMessage {

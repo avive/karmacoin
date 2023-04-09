@@ -24,15 +24,26 @@ const SetCommunityAdminRequest$json = const {
   '1': 'SetCommunityAdminRequest',
   '2': const [
     const {'1': 'from_account_id', '3': 1, '4': 1, '5': 11, '6': '.karma_coin.core_types.AccountId', '10': 'fromAccountId'},
-    const {'1': 'target_account_id', '3': 2, '4': 1, '5': 11, '6': '.karma_coin.core_types.AccountId', '10': 'targetAccountId'},
-    const {'1': 'community_id', '3': 3, '4': 1, '5': 13, '10': 'communityId'},
-    const {'1': 'admin', '3': 4, '4': 1, '5': 8, '10': 'admin'},
-    const {'1': 'signature', '3': 5, '4': 1, '5': 12, '10': 'signature'},
+    const {'1': 'data', '3': 2, '4': 1, '5': 12, '10': 'data'},
+    const {'1': 'signature', '3': 3, '4': 1, '5': 12, '10': 'signature'},
   ],
 };
 
 /// Descriptor for `SetCommunityAdminRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List setCommunityAdminRequestDescriptor = $convert.base64Decode('ChhTZXRDb21tdW5pdHlBZG1pblJlcXVlc3QSSAoPZnJvbV9hY2NvdW50X2lkGAEgASgLMiAua2FybWFfY29pbi5jb3JlX3R5cGVzLkFjY291bnRJZFINZnJvbUFjY291bnRJZBJMChF0YXJnZXRfYWNjb3VudF9pZBgCIAEoCzIgLmthcm1hX2NvaW4uY29yZV90eXBlcy5BY2NvdW50SWRSD3RhcmdldEFjY291bnRJZBIhCgxjb21tdW5pdHlfaWQYAyABKA1SC2NvbW11bml0eUlkEhQKBWFkbWluGAQgASgIUgVhZG1pbhIcCglzaWduYXR1cmUYBSABKAxSCXNpZ25hdHVyZQ==');
+final $typed_data.Uint8List setCommunityAdminRequestDescriptor = $convert.base64Decode('ChhTZXRDb21tdW5pdHlBZG1pblJlcXVlc3QSSAoPZnJvbV9hY2NvdW50X2lkGAEgASgLMiAua2FybWFfY29pbi5jb3JlX3R5cGVzLkFjY291bnRJZFINZnJvbUFjY291bnRJZBISCgRkYXRhGAIgASgMUgRkYXRhEhwKCXNpZ25hdHVyZRgDIAEoDFIJc2lnbmF0dXJl');
+@$core.Deprecated('Use setCommunityAdminDataDescriptor instead')
+const SetCommunityAdminData$json = const {
+  '1': 'SetCommunityAdminData',
+  '2': const [
+    const {'1': 'timestamp', '3': 1, '4': 1, '5': 4, '10': 'timestamp'},
+    const {'1': 'target_account_id', '3': 2, '4': 1, '5': 11, '6': '.karma_coin.core_types.AccountId', '10': 'targetAccountId'},
+    const {'1': 'community_id', '3': 3, '4': 1, '5': 13, '10': 'communityId'},
+    const {'1': 'admin', '3': 4, '4': 1, '5': 8, '10': 'admin'},
+  ],
+};
+
+/// Descriptor for `SetCommunityAdminData`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List setCommunityAdminDataDescriptor = $convert.base64Decode('ChVTZXRDb21tdW5pdHlBZG1pbkRhdGESHAoJdGltZXN0YW1wGAEgASgEUgl0aW1lc3RhbXASTAoRdGFyZ2V0X2FjY291bnRfaWQYAiABKAsyIC5rYXJtYV9jb2luLmNvcmVfdHlwZXMuQWNjb3VudElkUg90YXJnZXRBY2NvdW50SWQSIQoMY29tbXVuaXR5X2lkGAMgASgNUgtjb21tdW5pdHlJZBIUCgVhZG1pbhgEIAEoCFIFYWRtaW4=');
 @$core.Deprecated('Use setCommunityAdminResponseDescriptor instead')
 const SetCommunityAdminResponse$json = const {
   '1': 'SetCommunityAdminResponse',

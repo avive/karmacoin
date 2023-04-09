@@ -28,7 +28,7 @@ impl Actor for ClientConfigService {
         info!("Client ConfigService started");
 
         let mut config = Config::builder()
-            .set_default(DROP_DB_CONFIG_KEY, true)
+            .set_default(DROP_DB_CONFIG_KEY, false)
             .unwrap()
             .set_default(GRPC_SERVER_HOST_PORT_CONFIG_KEY, 8081)
             .unwrap()
