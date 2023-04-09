@@ -12,6 +12,7 @@ use crate::services::blockchain::get_user_by_account_id::GetUserInfoByAccountId;
 use crate::services::blockchain::get_user_by_number::GetUserInfoByNumber;
 use crate::services::blockchain::get_user_by_user_name::GetUserInfoByUserName;
 use crate::services::blockchain::mem_pool_service::{AddTransaction, MemPoolService};
+use crate::services::blockchain::set_community_admin::SetCommunityAdmin;
 use crate::services::blockchain::stats::GetStats;
 use crate::services::blockchain::tx_event::GetTransactionEvents;
 use crate::services::blockchain::txs_processor::ProcessTransactions;
@@ -37,9 +38,22 @@ pub(crate) struct ApiService {}
 impl ApiServiceTrait for ApiService {
     async fn set_community_admin(
         &self,
-        _request: Request<SetCommunityAdminRequest>,
+        request: Request<SetCommunityAdminRequest>,
     ) -> std::result::Result<Response<SetCommunityAdminResponse>, Status> {
-        unimplemented!("not implemented yet")
+        let req = request.into_inner();
+        info!("api call - set admin");
+
+        let service = BlockChainService::from_registry()
+            .await
+            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?;
+
+        let res = service
+            .call(SetCommunityAdmin(req))
+            .await
+            .map_err(|e| Status::internal(format!("failed to call api: {}", e)))?
+            .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
+
+        Ok(Response::new(res))
     }
 
     async fn get_leader_board(
