@@ -2,6 +2,8 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+pub(crate) mod backup_chain_service;
+pub(crate) mod backup_chain_task;
 pub(crate) mod block_creator;
 pub(crate) mod block_event;
 /// Blockchain module provides low-level blockchain functionality such as creating blocks and processing transactions

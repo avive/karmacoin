@@ -34,7 +34,7 @@ impl Service for KarmaRewardsService {}
 #[async_trait::async_trait]
 impl Actor for KarmaRewardsService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
-        info!("started. Registering periodic task...");
+        info!("started. Registering karma rewards periodic task...");
 
         let task_period_minutes = GenesisConfigService::get_u64(KARMA_REWARD_PERIOD_MINUTES.into())
             .await?

@@ -88,6 +88,9 @@ pub const BLOCK_REWARDS_AMOUNT: &str = "block_rewards_amount";
 /// Karma reward amount in KCents per reward
 pub const KARMA_REWARD_AMOUNT: &str = "karma_reward_amount";
 
+/// Backup users task period
+pub const BACKUP_CHAIN_TASK_PERIOD_MINUTES: &str = "backup_chain_task_period_minutes";
+
 /// Karma rewards period
 pub const KARMA_REWARD_PERIOD_MINUTES: &str = "karma_reward_period_minutes";
 
@@ -289,6 +292,8 @@ impl Actor for GenesisConfigService {
             // Karma rewards computation period in hours (1 for dev mode, 24 for testnet, 1 week for mainnet, etc...)
             // 60 * 24 * 2
             .set_default(KARMA_REWARD_PERIOD_MINUTES, 60 * 24 * 2)
+            .unwrap()
+            .set_default(BACKUP_CHAIN_TASK_PERIOD_MINUTES, 60 * 12)
             .unwrap()
             // min num of appreciations  in period to be eligible for reward
             .set_default(KARMA_REWARDS_ELIGIBILITY, 2)

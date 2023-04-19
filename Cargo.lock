@@ -2703,6 +2703,7 @@ dependencies = [
  "rocksdb",
  "serde",
  "serde_bytes",
+ "serde_json",
  "sha2 0.10.6",
  "tokio",
  "tokio-stream",

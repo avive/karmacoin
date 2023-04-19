@@ -34,6 +34,7 @@ impl Handler<GetAllUsers> for BlockChainService {
             "We got {} users (pre community filtering)",
             data.items.len()
         );
+
         let community_id = msg.0.community_id;
 
         for item in data.items.iter() {
@@ -42,7 +43,7 @@ impl Handler<GetAllUsers> for BlockChainService {
                     if community_id != 0 && !user.is_community_member(community_id) {
                         continue;
                     }
-                    info!("User: {}", user);
+                    // info!("User: {}", user);
                     users.push(user);
                 }
                 Err(e) => {

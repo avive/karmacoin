@@ -81,7 +81,7 @@ impl Actor for VerifierService {
                     error!("VerifierService not available");
                     return;
                 }
-                info!("Starting periodic send sms invites task...");
+                info!("starting periodic send sms invites task...");
                 match service.unwrap().call(SendInvites).await {
                     Ok(res) => {
                         info!("Invites sent task completed");

@@ -23,6 +23,7 @@ use crate::services::blockchain::karma_rewards_service::KarmaRewardsService;
 //    KarmaRewardsService, ProcessKarmaRewards,
 //};
 
+use crate::services::blockchain::backup_chain_service::BackupChainService;
 use base::karma_coin::karma_coin_api::GetGenesisDataRequest;
 use tonic_web::GrpcWebLayer;
 use tower_http::cors::CorsLayer;
@@ -67,11 +68,11 @@ impl Actor for ServerService {
 
         info!("starting karma rewards service...");
 
+        // start the karma rewards service
         KarmaRewardsService::from_registry().await?;
 
-        // uncomment following to process rewards on server startup
-        //let karma_rewards_service = KarmaRewardsService::from_registry().await?;
-        //karma_rewards_service.call(ProcessKarmaRewards).await??;
+        // start the backup chain service
+        BackupChainService::from_registry().await?;
 
         info!("started");
         Ok(())
@@ -151,7 +152,6 @@ impl ServerService {
             .register_encoded_file_descriptor_set(base::GRPC_DESCRIPTOR)
             .build()?;
 
-        // todo: add reflection support for grpc_ci and grpcurl
         spawn(async move {
             // this only return when server is stopped due to error or shutdown
             let mut router = Server::builder()

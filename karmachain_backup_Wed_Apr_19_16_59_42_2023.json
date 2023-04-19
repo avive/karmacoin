@@ -1,0 +1,129 @@
+{
+  "time": "Wed Apr 19 16:59:42 2023",
+  "stats": {
+    "last_block_time": 1681723409343,
+    "tip_height": 1,
+    "transactions_count": 1,
+    "payments_transactions_count": 0,
+    "appreciations_transactions_count": 0,
+    "users_count": 1,
+    "fees_amount": 1,
+    "minted_amount": 10000001,
+    "circulation": 0,
+    "fee_subs_count": 1,
+    "fee_subs_amount": 1,
+    "signup_rewards_count": 1,
+    "signup_rewards_amount": 10000000,
+    "referral_rewards_count": 0,
+    "referral_rewards_amount": 0,
+    "validator_rewards_count": 0,
+    "validator_rewards_amount": 0,
+    "update_user_transactions_count": 0,
+    "exchange_rate": 0.2,
+    "causes_rewards_amount": 0,
+    "karma_rewards_count": 0,
+    "karma_rewards_amount": 0
+  },
+  "users": [
+    {
+      "account_id": {
+        "data": [
+          177,
+          96,
+          43,
+          142,
+          138,
+          54,
+          120,
+          244,
+          120,
+          72,
+          176,
+          21,
+          53,
+          91,
+          60,
+          127,
+          164,
+          68,
+          189,
+          20,
+          61,
+          117,
+          180,
+          57,
+          85,
+          206,
+          123,
+          203,
+          205,
+          229,
+          188,
+          40
+        ]
+      },
+      "nonce": 1,
+      "user_name": "avive1",
+      "mobile_number": {
+        "number": "+972549805381"
+      },
+      "balance": 10000000,
+      "trait_scores": [
+        {
+          "trait_id": 1,
+          "score": 1,
+          "community_id": 0
+        }
+      ],
+      "pre_keys": [],
+      "karma_score": 1,
+      "community_memberships": []
+    },
+    {
+      "account_id": {
+        "data": [
+          236,
+          61,
+          132,
+          216,
+          231,
+          222,
+          212,
+          212,
+          56,
+          182,
+          126,
+          174,
+          137,
+          206,
+          63,
+          185,
+          76,
+          141,
+          119,
+          254,
+          8,
+          22,
+          175,
+          121,
+          127,
+          196,
+          12,
+          154,
+          104,
+          7,
+          165,
+          205
+        ]
+      },
+      "nonce": 0,
+      "user_name": "Block producer 1",
+      "mobile_number": null,
+      "balance": 1000001,
+      "trait_scores": [],
+      "pre_keys": [],
+      "karma_score": 1,
+      "community_memberships": []
+    }
+  ]
+}
