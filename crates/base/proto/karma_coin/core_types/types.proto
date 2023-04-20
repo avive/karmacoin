@@ -410,9 +410,9 @@ message GenesisData {
     uint64 karma_rewards_eligibility = 21;
     uint64 karma_rewards_period_hours = 22;
 
-    uint64 treasury_premint_amount = 23;
-    string treasury_account_id = 24;
-    string treasury_account_name = 25;
+    uint64 validators_pool_amount = 23;
+    string validators_pool_account_id = 24;
+    string validators_pool_account_name = 25;
 
     repeated core_types.CharTrait char_traits = 26;
     repeated core_types.PhoneVerifier verifiers = 27;

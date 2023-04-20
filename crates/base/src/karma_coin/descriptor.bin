@@ -1,5 +1,5 @@
 
-ú”
+¥”
 !karma_coin/core_types/types.protokarma_coin.core_types"
 	AccountId
 data (Rdata"y
@@ -206,7 +206,7 @@ feesAmount2
  (RsignupRewardsAmount6
 referral_rewards_amount (RreferralRewardsAmount4
 referral_rewards_count (RreferralRewardsCount
-reward (Rreward"‰
+reward (Rreward"¸
 GenesisData
 net_id (RnetId
 net_name (	RnetName!
@@ -230,10 +230,10 @@ feesAmount2
 karma_reward_alloc (RkarmaRewardAlloc6
 karma_reward_top_n_users (RkarmaRewardTopNUsers:
 karma_rewards_eligibility (RkarmaRewardsEligibility;
-karma_rewards_period_hours (RkarmaRewardsPeriodHours6
-treasury_premint_amount (RtreasuryPremintAmount.
-treasury_account_id (	RtreasuryAccountId2
-treasury_account_name (	RtreasuryAccountNameA
+karma_rewards_period_hours (RkarmaRewardsPeriodHours4
+validators_pool_amount (RvalidatorsPoolAmount;
+validators_pool_account_id (	RvalidatorsPoolAccountId?
+validators_pool_account_name (	RvalidatorsPoolAccountNameA
 char_traits (2 .karma_coin.core_types.CharTraitR
 charTraitsB
 	verifiers (2$.karma_coin.core_types.PhoneVerifierR	verifiers*#
@@ -2294,32 +2294,32 @@ X
 
 ö(*
 
-ú(
+ú'
 
 ú
 
 
-ú"
+ú!
 
-ú%'
+ú$&
 
-ù$
+ù+
 
 ù
 
 
-ù
+ù%
 
-ù!#
+ù(*
 
-û&
+û-
 
 û
 
 
-û 
+û'
 
-û#%
+û*,
 
 †3
 

@@ -8,6 +8,8 @@ use crate::services::db_config_service::{
     BLOCKS_COL_FAMILY, USERS_COL_FAMILY, USERS_NAMES_COL_FAMILY,
 };
 use anyhow::Result;
+use base::genesis_config_service::VALIDATORS_POOL_COINS_AMOUNT_KEY;
+use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_core_types::*;
 use base::server_config_service::{ServerConfigService, BLOCK_PRODUCER_USER_NAME};
 use base::signed_trait::SignedTrait;
@@ -52,6 +54,19 @@ impl BlockChainService {
                     ));
                 }
 
+                // block producer starts with the validators pool amount
+                let initial_balance_kc =
+                    ServerConfigService::get_u64(VALIDATORS_POOL_COINS_AMOUNT_KEY.into())
+                        .await?
+                        .unwrap()
+                        * 1_000_000;
+
+                info!(
+                    "created block producer account with account id {}. Inital balance: {} KC",
+                    short_hex_string(account_id.as_ref()),
+                    initial_balance_kc.to_string()
+                );
+
                 User {
                     account_id: Some(AccountId {
                         data: account_id.clone(),
@@ -59,7 +74,7 @@ impl BlockChainService {
                     nonce: 0,
                     user_name,
                     mobile_number: None, // block producer account starts w/o a verified mobile number
-                    balance: 0,
+                    balance: initial_balance_kc,
                     trait_scores: vec![],
                     pre_keys: vec![],
                     karma_score: 1,

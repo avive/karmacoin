@@ -38,9 +38,36 @@ pub struct ServerService {}
 impl Actor for ServerService {
     async fn started(&mut self, _ctx: &mut Context<Self>) -> Result<()> {
         // start the config services to config db, blockchain and the server
-        BlockchainConfigService::from_registry().await?;
         let genesis_config_service = GenesisConfigService::from_registry().await?;
-        let server_config_server = ServerConfigService::from_registry().await?;
+        let server_config_service = ServerConfigService::from_registry().await?;
+
+        /*
+        // generate some keys
+        let key1 = KeyPair::new();
+        info!(
+            "key1 private: {}",
+            hex_string(key1.private_key.unwrap().key.as_ref())
+        );
+        info!(
+            "key1 public: {}",
+            hex_string(key1.public_key.unwrap().key.as_ref())
+        );
+
+        let key2 = KeyPair::new();
+        info!(
+            "key2 private: {}",
+            hex_string(key2.private_key.unwrap().key.as_ref())
+        );
+        info!(
+            "key2 public: {}",
+            hex_string(key2.public_key.unwrap().key.as_ref())
+        );*/
+
+        server_config_service
+            .call(SetConfigFile {
+                config_file: "./config.yaml".to_string(),
+            })
+            .await??;
 
         let genesis_data = genesis_config_service
             .call(GetGenesisData {
@@ -52,17 +79,13 @@ impl Actor for ServerService {
 
         info!("genesis data: {}", genesis_data);
 
+        BlockchainConfigService::from_registry().await?;
+
         // if we start a verifier then load private secrets from an external verifier config file
         if ServerConfigService::get_bool(START_VERIFIER_SERVICE_CONFIG_KEY.into())
             .await?
             .unwrap()
         {
-            server_config_server
-                .call(SetConfigFile {
-                    config_file: "./verifier_config.yaml".to_string(),
-                })
-                .await??;
-
             VerifierService::from_registry().await?;
         }
 
@@ -100,13 +123,13 @@ impl Handler<DestroyDb> for ServerService {
 ///////////////////////////
 
 #[message(result = "Result<()>")]
-pub struct Startup {}
+pub struct Startup;
 
 /// Start the grpc server
 #[async_trait::async_trait]
 impl Handler<Startup> for ServerService {
     async fn handle(&mut self, _ctx: &mut Context<Self>, _msg: Startup) -> Result<()> {
-        info!("configuring api server...");
+        info!("configuring server...");
 
         let server_name = ServerConfigService::get(SERVER_NAME_CONFIG_KEY.into())
             .await?

@@ -12,9 +12,9 @@ use std::path::Path;
 use xactor::*;
 
 // Verifier data
-pub const VERIFIER_NAME: &str = "KCV0.1";
-pub const VERIFIER_ID_PRIVATE_KEY: &str = "verifier_id_key_private";
-pub const VERIFIER_ID_PUBLIC_KEY: &str = "verifier_id_key_public";
+pub const VERIFIER_NAME: &str = "verifier.name";
+pub const VERIFIER_ID_PRIVATE_KEY: &str = "verifier.private_key";
+pub const VERIFIER_ID_PUBLIC_KEY: &str = "verifier.public_key";
 pub const START_VERIFIER_SERVICE_CONFIG_KEY: &str = "start_verifier_service";
 
 /// When true, verify will send invite sms messages
@@ -50,9 +50,9 @@ pub const MEM_POOL_MAX_ITEMS_KEY: &str = "mem_pool_max_items_key";
 pub const MEM_POOL_MAX_TX_AGE_HOURS: &str = "mem_pool_max_tx_age_key";
 
 // private identity key (ed25519)
-pub const BLOCK_PRODUCER_ID_PRIVATE_KEY: &str = "block_producer_id_key_private";
-pub const BLOCK_PRODUCER_ID_PUBLIC_KEY: &str = "block_producer_id_key_public";
-pub const BLOCK_PRODUCER_USER_NAME: &str = "block_producer_user_name";
+pub const BLOCK_PRODUCER_ID_PRIVATE_KEY: &str = "block_producer.private_key";
+pub const BLOCK_PRODUCER_ID_PUBLIC_KEY: &str = "block_producer.public_key";
+pub const BLOCK_PRODUCER_USER_NAME: &str = "block_producer.name";
 
 pub struct ServerConfigService {
     config: Config,
@@ -78,7 +78,7 @@ impl ServerConfigService {
             .set_default(GRPC_SERVER_HOST_CONFIG_KEY, "[::]")
             .unwrap()
             // we always want to have a peer name - even a generic one
-            .set_default(SERVER_NAME_CONFIG_KEY, "KCBP0.1")
+            .set_default(SERVER_NAME_CONFIG_KEY, "Karmachain1.0")
             .unwrap()
             .set_default(DB_NAME_CONFIG_KEY, "karmacoin_db")
             .unwrap()
@@ -86,41 +86,16 @@ impl ServerConfigService {
             .unwrap()
             .set_default(MEM_POOL_MAX_TX_AGE_HOURS, 168)
             .unwrap()
-            .set_default(BLOCK_PRODUCER_USER_NAME, "Block producer 1")
-            .unwrap()
-            .set_default(BLOCK_PRODUCER_USER_NAME, "Block producer 1")
-            .unwrap()
             // off by default to prevent charges - set to true to test sms messages
             .set_default(SEND_INVITE_SMS_MESSAGES_CONFIG_KEY, true)
             .unwrap()
-            // how frequently to send sms
-            .set_default(SEND_INVITE_SMS_TASK_FREQ_SECS_CONFIG_KEY, 30)
+            // how frequently to send sms in seconds
+            .set_default(SEND_INVITE_SMS_TASK_FREQ_SECS_CONFIG_KEY, 60)
             .unwrap()
             .set_default(MAX_SMS_INVITES_PER_NUMBER_CONFIG_KEY, 2)
             .unwrap()
             // don't send invite sms more frequently then this cool down period
             .set_default(SEND_INVITE_SMS_TIME_BETWEEN_SMS_SECS_CONFIG_KEY, 3600)
-            .unwrap()
-            .set_default(
-                BLOCK_PRODUCER_ID_PRIVATE_KEY,
-                "67c31f3fb18572e97a851f757fc64fc1d0f8ed77c36abdd210f93711eb14f062",
-            )
-            .unwrap()
-            .set_default(
-                BLOCK_PRODUCER_ID_PUBLIC_KEY,
-                "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd",
-            )
-            .unwrap()
-            // dev mode values
-            .set_default(
-                VERIFIER_ID_PRIVATE_KEY,
-                "67c31f3fb18572e97a851f757fc64fc1d0f8ed77c36abdd210f93711eb14f062",
-            )
-            .unwrap()
-            .set_default(
-                VERIFIER_ID_PUBLIC_KEY,
-                "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd",
-            )
             .unwrap()
             .set_default(AUTH_SERVICE_PORT_KEY, 8080)
             .unwrap()
@@ -150,6 +125,8 @@ impl Actor for ServerConfigService {
             self.config
                 .merge(config::File::with_name(config_file))
                 .unwrap();
+
+            info!("merged server config file: {}", config_file);
         }
 
         // todo: if id private key not set then generate random keypair and store private key
@@ -246,8 +223,7 @@ impl Handler<GetVerifierIdKeyPair> for ServerConfigService {
                 }
             }
             Err(_) => {
-                info!("no block producer private key in config - generating a new random verifier id key pair");
-                Ok(KeyPair::new())
+                panic!("expected verifier private key via config");
             }
         }
     }
@@ -283,8 +259,8 @@ impl Handler<GetBlockProducerIdKeyPair> for ServerConfigService {
                 }
             }
             Err(_) => {
-                info!("no block producer private key in config - generating a new random block producer id key pair");
-                Ok(KeyPair::new())
+                panic!("expected block producer private key via config");
+                //Ok(KeyPair::new())
             }
         }
     }

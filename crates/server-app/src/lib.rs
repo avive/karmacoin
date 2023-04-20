@@ -9,7 +9,6 @@ extern crate clap;
 extern crate db;
 
 use base::logging_service::{InitLogger, LoggingService};
-use base::server_config_service::{ServerConfigService, SetConfigFile, SERVER_NAME_CONFIG_KEY};
 use server::server_service::{ServerService, Startup};
 use tokio::signal;
 
@@ -20,7 +19,7 @@ use xactor::*;
 
 // Start a client app - good for testability / integration testing
 pub async fn start() -> std::result::Result<(), Box<dyn std::error::Error>> {
-    let matches = App::new("KarmaCoin Server")
+    let _matches = App::new("KarmaCoin Server")
         .version("0.1.0")
         .author("AE  <a@karmaco.in>")
         .about("The coin for all of us")
@@ -35,6 +34,17 @@ pub async fn start() -> std::result::Result<(), Box<dyn std::error::Error>> {
         )
         .get_matches();
 
+    // Start app logger
+    let logging = LoggingService::from_registry().await.unwrap();
+    let _ = logging
+        .call(InitLogger {
+            peer_name: "Karmachain 1.0 Server".into(),
+            brief: false, // todo: take from config
+        })
+        .await
+        .unwrap();
+
+    /*
     let config = ServerConfigService::from_registry().await.unwrap();
 
     // merge values from config file over default config it it is provided via flag
@@ -45,21 +55,7 @@ pub async fn start() -> std::result::Result<(), Box<dyn std::error::Error>> {
             })
             .await?
             .unwrap();
-    }
-
-    let server_name = ServerConfigService::get(SERVER_NAME_CONFIG_KEY.into())
-        .await?
-        .unwrap();
-
-    // Start app logger
-    let logging = LoggingService::from_registry().await.unwrap();
-    let _ = logging
-        .call(InitLogger {
-            peer_name: server_name.clone(),
-            brief: false, // todo: take from config
-        })
-        .await
-        .unwrap();
+    }*/
 
     // Start network server
     let server = ServerService::from_registry().await.unwrap();

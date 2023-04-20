@@ -14,7 +14,7 @@ Cargo.lock
 /node_modules
 .run/
 *.log
-**/verifier_config.yaml
+**/*config.yaml
 my_ca.key
 my_ca.pem
 my_ca.srl

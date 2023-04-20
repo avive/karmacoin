@@ -82,7 +82,7 @@ pub const CAUSES_REWARDS_ALLOCATION: &str = "causes_rewards_allocation";
 /// last block alienable for block reward
 pub const BLOCK_REWARDS_LAST_BLOCK: &str = "block_rewards_last_block";
 
-/// Block reward amount
+/// Block reward amount in KCents
 pub const BLOCK_REWARDS_AMOUNT: &str = "block_rewards_amount";
 
 /// Karma reward amount in KCents per reward
@@ -103,14 +103,14 @@ pub const KARAM_REWARDS_ALLOCATION_KEY: &str = "karma_rewards_allocation";
 /// min number of appreciations to qualify for karma rewards in a period
 pub const KARMA_REWARDS_ELIGIBILITY: &str = "karma_rewards_min_appreciations";
 
-/// Treasury account id
-pub const TREASURY_ACCOUNT_ID_KEY: &str = "treasury_account_id";
+/// Validators pool account id
+pub const VALIDATORS_POOL_ACCOUNT_ID_KEY: &str = "validators_pool_account_id";
 
-/// Treasury account name
-pub const TREASURY_ACCOUNT_NAME_KEY: &str = "treasury";
+/// Validators pool account name
+pub const VALIDATORS_ACCOUNT_NAME_KEY: &str = "Validators pool";
 
-/// Treasury pre-minted amount in KCents
-pub const TREASURY_PREMINT_COINS_AMOUNT_KEY: &str = "treasury_premint_coins";
+/// Validators pool amount in KCoins
+pub const VALIDATORS_POOL_COINS_AMOUNT_KEY: &str = "validates_pool_account";
 
 /// A set of canonical mobile phone verifiers accounts ids
 pub const VERIFIERS_ACCOUNTS_IDS: &str = "verifiers_accounts_ids";
@@ -233,9 +233,9 @@ impl Actor for GenesisConfigService {
             closed: true,
         }]);
 
-        // default supported verifiers
+        // default verifiers on genesis
         let verifiers: HashMap<String, String> = map! {
-            "verifier1".into() => "a885bf7ac670b0f01a3551740020e115641005a93f59472002bfd1dc665f4a4e".into(),
+            "Verifier 1".into() => "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd".into(),
         };
 
         let builder = Config::builder();
@@ -247,7 +247,7 @@ impl Actor for GenesisConfigService {
             .unwrap()
             .set_default(GENESIS_TIMESTAMP_MS_KEY, 1672860236)
             .unwrap()
-            .set_default(DEF_TX_FEE_KEY, 100)
+            .set_default(DEF_TX_FEE_KEY, 1)
             .unwrap()
             //
             // 10 KC per signup in phase 1
@@ -282,26 +282,26 @@ impl Actor for GenesisConfigService {
             // Last block eligible for block rewards
             .set_default(BLOCK_REWARDS_LAST_BLOCK, 500_000_000)
             .unwrap()
-            // The block reward constant amount
-            .set_default(BLOCK_REWARDS_AMOUNT, 1_000_000)
+            // The block reward constant amount in KCents - 1000 KC
+            .set_default(BLOCK_REWARDS_AMOUNT, 1000_000_000)
             .unwrap()
             //
-            // Karma rewards amount per user - 10 KC
+            // Karma rewards amount per user in KCents - 10 KC
             .set_default(KARMA_REWARD_AMOUNT, 10_000_000)
             .unwrap()
-            // Karma rewards computation period in hours (1 for dev mode, 24 for testnet, 1 week for mainnet, etc...)
-            // 60 * 24 * 2
-            .set_default(KARMA_REWARD_PERIOD_MINUTES, 60 * 24 * 2)
+            // Karma rewards computation period in hours
+            .set_default(KARMA_REWARD_PERIOD_MINUTES, 60 * 24 * 7)
             .unwrap()
-            .set_default(BACKUP_CHAIN_TASK_PERIOD_MINUTES, 60 * 12)
+            // genesis todo: change to 12 hours and add g drive
+            .set_default(BACKUP_CHAIN_TASK_PERIOD_MINUTES, 60)
             .unwrap()
             // min num of appreciations  in period to be eligible for reward
             .set_default(KARMA_REWARDS_ELIGIBILITY, 2)
             .unwrap()
-            // The top 1000 users who didn't get karma reward are eligible every period
-            .set_default(KARMA_REWARD_MAX_USERS_KEY, 2)
+            // The top max users who didn't get karma reward are eligible every period
+            .set_default(KARMA_REWARD_MAX_USERS_KEY, 1000)
             .unwrap()
-            // karma rewards allocation - 300M KCs
+            // karma rewards allocation in KC - 300M KCs
             .set_default(KARAM_REWARDS_ALLOCATION_KEY, 300_000_000)
             .unwrap()
             //
@@ -327,19 +327,19 @@ impl Actor for GenesisConfigService {
             // Total coin allocated for causes rewards - 225M KCs
             .set_default(CAUSES_REWARDS_ALLOCATION, 225_000_000)
             .unwrap()
-            //
-            //
+            // trusted verifiers ids
             .set_default(VERIFIERS_ACCOUNTS_IDS, verifiers)
             .unwrap()
-            .set_default(TREASURY_PREMINT_COINS_AMOUNT_KEY, 5_000_000)
+            // Validators pool coins amount in KCs
+            .set_default(VALIDATORS_POOL_COINS_AMOUNT_KEY, 0)
             .unwrap()
             // todo: replace it with 3 accounts with 3 different keys
             .set_default(
-                TREASURY_ACCOUNT_ID_KEY,
-                "ec3d84d8e7ded4d438b67eae89ce3fb94c8d77fe0816af797fc40c9a6807a5cd",
+                VALIDATORS_POOL_ACCOUNT_ID_KEY,
+                "fe9d0c0df86c72ae733bf9ec0eeaff6e43e29bad4488f5e4845e455ea1095bf3",
             )
             .unwrap()
-            .set_default(TREASURY_ACCOUNT_NAME_KEY, "treasury")
+            .set_default(VALIDATORS_ACCOUNT_NAME_KEY, "Validator 1")
             .unwrap()
             .add_source(
                 Environment::with_prefix("GENESIS")
@@ -625,9 +625,9 @@ impl Handler<GetGenesisData> for GenesisConfigService {
             karma_rewards_eligibility: self.config.get_int(KARMA_REWARDS_ELIGIBILITY)? as u64,
             karma_rewards_period_hours: self.config.get_int(KARMA_REWARD_PERIOD_MINUTES)? as u64,
 
-            treasury_premint_amount: self.config.get_int(TREASURY_PREMINT_COINS_AMOUNT_KEY)? as u64,
-            treasury_account_id: self.config.get_string(TREASURY_ACCOUNT_ID_KEY)?,
-            treasury_account_name: self.config.get_string(TREASURY_ACCOUNT_NAME_KEY)?,
+            validators_pool_amount: self.config.get_int(VALIDATORS_POOL_COINS_AMOUNT_KEY)? as u64,
+            validators_pool_account_id: self.config.get_string(VALIDATORS_POOL_ACCOUNT_ID_KEY)?,
+            validators_pool_account_name: self.config.get_string(VALIDATORS_ACCOUNT_NAME_KEY)?,
 
             verifiers: self.get_verifiers().await?,
 

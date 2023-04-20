@@ -2,10 +2,23 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
+use crate::hex_utils::hex_string;
 use bytes::{BufMut, BytesMut};
 use ed25519_dalek::{Keypair, KEYPAIR_LENGTH};
+use std::fmt::{Display, Formatter};
 
 use crate::karma_coin::karma_coin_core_types::{KeyPair, PrivateKey, PublicKey};
+
+impl Display for KeyPair {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Private Key: {}, Public Key: {}",
+            hex_string(self.private_key.as_ref().unwrap().key.as_ref()),
+            hex_string(self.public_key.as_ref().unwrap().key.as_ref()),
+        )
+    }
+}
 
 impl KeyPair {
     pub fn to_ed2559_keypair(&self) -> Keypair {

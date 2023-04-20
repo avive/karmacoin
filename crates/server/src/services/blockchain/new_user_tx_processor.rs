@@ -16,7 +16,7 @@ use base::karma_coin::karma_coin_core_types::{
     TransactionBody, TransactionEvent, TransactionType, User,
 };
 use bytes::Bytes;
-use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
+use db::db_service::{DataItem, DatabaseService, DeleteItem, ReadItem, WriteItem};
 use prost::Message;
 
 #[derive(Debug, Clone)]
@@ -131,11 +131,8 @@ impl BlockChainService {
             });
         }
 
-        // we allow creation of a new account with a number that already has a different account on chain
-        // to handle the case where user lost access to his old account private key.
-        // a new account will be created with the user requested accountId and associated with this number
-        // the old account is still on-chain and is accessible via transactions that use account id
-        /*
+        // check for existing account with this phone number
+        let mut existing_account: Option<User> = None;
         if let Some(data) = DatabaseService::read(ReadItem {
             key: Bytes::from(mobile_number.number.as_bytes().to_vec()),
             cf: MOBILE_NUMBERS_COL_FAMILY,
@@ -145,15 +142,25 @@ impl BlockChainService {
             execution_info: ExecutionInfo::InvalidData,
             error_message: "internal node error".into(),
         })? {
-            let existing_user =
-                User::decode(data.0.as_ref()).map_err(|_| NewUserProcessingError {
-                    execution_info: ExecutionInfo::InvalidData,
-                    error_message: "internal node error".into(),
-                })?;
+            existing_account =
+                Some(
+                    User::decode(data.0.as_ref()).map_err(|_| NewUserProcessingError {
+                        execution_info: ExecutionInfo::InvalidData,
+                        error_message: "internal node error".into(),
+                    })?,
+                );
 
             info!(
                 "There's already a user with account id {} for this mobile number",
-                short_hex_string(existing_user.account_id.as_ref().unwrap().data.as_ref())
+                short_hex_string(
+                    existing_account
+                        .unwrap()
+                        .account_id
+                        .as_ref()
+                        .unwrap()
+                        .data
+                        .as_ref()
+                )
             );
 
             return Err(NewUserProcessingError {
@@ -161,14 +168,14 @@ impl BlockChainService {
                 error_message: "account already exists for the provided mobile number. consider updating your existing account".into(),
             });
         } else {
-            info!('there is no existing user account with th)
-        }*/
+            info!("there is no existing user account for this number");
+        }
 
         info!(
-            "new user transaction for {}, {}, accountId: {}",
+            "new user transaction for {}, {}, accountId: {}. existing user",
             verification_evidence.requested_user_name,
             mobile_number.number,
-            short_hex_string(account_id.data.as_ref())
+            short_hex_string(account_id.data.as_ref()),
         );
 
         // Check user account id is not already on chain
@@ -190,7 +197,8 @@ impl BlockChainService {
             });
         }
 
-        // Check requested user name is not already on chain
+        // Check requested user name is not already on chain only if we are
+        // not migrating an old account with this tx
         if (DatabaseService::read(ReadItem {
             key: Bytes::from(verification_evidence.requested_user_name.clone()),
             cf: USERS_NAMES_COL_FAMILY,
@@ -201,10 +209,11 @@ impl BlockChainService {
             error_message: "internal node error".into(),
         }))?
         .is_some()
+            && existing_account.is_none()
         {
             return Err(NewUserProcessingError {
                 execution_info: ExecutionInfo::NicknameNotAvailable,
-                error_message: "there's already an account with requested user name".into(),
+                error_message: "there's already an account with requested user name that belongs to another phone number".into(),
             });
         }
 
@@ -223,7 +232,7 @@ impl BlockChainService {
         let mut community_memberships: Vec<CommunityMembership> = vec![];
 
         // hack to set admin for specific numbers in test community
-        // should be handeled by admin api / sudo
+        // should be handled by admin api / sudo
         if mobile_number.number == "+972549805380"
         /*|| mobile_number.number == "+972549805381"*/
         {
@@ -246,15 +255,7 @@ impl BlockChainService {
             community_memberships,
         };
 
-        let apply_subsidy = tokenomics
-            .should_subsidise_transaction_fee(0, tx_fee_amount, TransactionType::NewUserV1)
-            .await
-            .map_err(|_| NewUserProcessingError {
-                execution_info: ExecutionInfo::InternalNodeError,
-                error_message: "internal node error".into(),
-            })?;
-
-        let signup_reward_amount =
+        let mut signup_reward_amount =
             tokenomics
                 .get_signup_reward_amount()
                 .await
@@ -263,12 +264,35 @@ impl BlockChainService {
                     error_message: "internal node error".into(),
                 })?;
 
-        info!("Current signup reward amount: {}", signup_reward_amount);
+        if let Some(old_user) = existing_account.as_ref() {
+            info!("migrating old account to new one...");
+            // we copy over old user nickname as this is what user will expect
+            new_user.user_name = old_user.user_name.clone();
+            // copy over balance from old user
+            new_user.balance = old_user.balance;
+            // overwrite with existing user scores
+            new_user.trait_scores = old_user.trait_scores.clone();
+            // copy memberships and karma score
+            new_user.community_memberships = old_user.community_memberships.clone();
+            new_user.karma_score = old_user.karma_score;
+            // no signup reward when migrating an old account
+            signup_reward_amount = 0;
+        }
+
+        let apply_subsidy = tokenomics
+            .should_subsidise_transaction_fee(0, tx_fee_amount, TransactionType::NewUserV1)
+            .await
+            .map_err(|_| NewUserProcessingError {
+                execution_info: ExecutionInfo::InternalNodeError,
+                error_message: "internal node error".into(),
+            })?;
+
+        info!("signup reward amount: {}", signup_reward_amount);
 
         let user_tx_fee_amount = if apply_subsidy { 0 } else { tx_fee_amount };
 
         if !apply_subsidy && tx_fee_amount >= signup_reward_amount {
-            // invalid tx - tx fee is higher than the block award and no tx fee subsidy is applied
+            // invalid tx - tx fee is higher than the signup award and no tx fee subsidy is applied
             return Err(NewUserProcessingError {
                 execution_info: ExecutionInfo::TxFeeTooLow,
                 error_message:
@@ -288,8 +312,6 @@ impl BlockChainService {
         info!("new user balance: {}", new_user.balance);
 
         // add the new user to db
-
-        // todo: update existing user if it exists - this will happen for a block producer or a verifier
 
         let mut buf = Vec::with_capacity(new_user.encoded_len());
         new_user
@@ -318,12 +340,7 @@ impl BlockChainService {
         // update user name index
         DatabaseService::write(WriteItem {
             data: DataItem {
-                key: Bytes::from(
-                    verification_evidence
-                        .requested_user_name
-                        .as_bytes()
-                        .to_vec(),
-                ),
+                key: Bytes::from(new_user.user_name.as_bytes().to_vec()),
                 value: Bytes::from(account_id.data.to_vec()),
             },
             cf: USERS_NAMES_COL_FAMILY,
@@ -349,6 +366,20 @@ impl BlockChainService {
             execution_info: ExecutionInfo::InternalNodeError,
             error_message: "internal node error".into(),
         })?;
+
+        if let Some(old_user) = existing_account {
+            // delete old user account from the db
+            DatabaseService::delete(DeleteItem {
+                key: Bytes::from(old_user.account_id.unwrap().data.to_vec()),
+                cf: USERS_COL_FAMILY,
+            })
+            .await
+            .map_err(|_| NewUserProcessingError {
+                execution_info: ExecutionInfo::InternalNodeError,
+                error_message: "internal node error".into(),
+            })?;
+            info!("deleted old account from store");
+        }
 
         let mut tx_data = Vec::with_capacity(signed_transaction.encoded_len());
         info!(

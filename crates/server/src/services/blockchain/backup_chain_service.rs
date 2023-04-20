@@ -43,7 +43,7 @@ impl Actor for BackupChainService {
         });
         spawn(task);
 
-        self.backup_chain().await?;
+        //self.backup_chain().await?;
 
         Ok(())
     }

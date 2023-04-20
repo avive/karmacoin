@@ -567,11 +567,11 @@ pub struct GenesisData {
     #[prost(uint64, tag = "22")]
     pub karma_rewards_period_hours: u64,
     #[prost(uint64, tag = "23")]
-    pub treasury_premint_amount: u64,
+    pub validators_pool_amount: u64,
     #[prost(string, tag = "24")]
-    pub treasury_account_id: ::prost::alloc::string::String,
+    pub validators_pool_account_id: ::prost::alloc::string::String,
     #[prost(string, tag = "25")]
-    pub treasury_account_name: ::prost::alloc::string::String,
+    pub validators_pool_account_name: ::prost::alloc::string::String,
     #[prost(message, repeated, tag = "26")]
     pub char_traits: ::prost::alloc::vec::Vec<CharTrait>,
     #[prost(message, repeated, tag = "27")]

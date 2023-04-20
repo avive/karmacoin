@@ -166,7 +166,7 @@ impl Tokenomics {
         Ok(true)
     }
 
-    /// Gets the current block reward for block producer based on block height
+    /// Gets the current block reward for block producer based on block height in KCents
     pub async fn get_block_reward_amount(&self, block_height: u64) -> Result<u64> {
         if block_height
             > GenesisConfigService::get_u64(BLOCK_REWARDS_LAST_BLOCK.into())

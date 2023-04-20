@@ -1,0 +1,18 @@
+# Server configuration yaml file
+# These configs override the default config values
+
+verifier:
+  name: Verifier 1
+  private_key: [private key hex]
+  public_key: [pub key hex]
+
+  # Verifier SMS invites configuration
+  sms_gateway:
+    auth_value: [ TWILIO AUTH TOKEN ]
+    from_number: [ TWILIO SMS SENDER PHONE NUMBER ]
+    api_endpoint: [ TWILIO API ENDPOINT ]
+
+block_producer:
+  name: Block producer 1
+  private_key: [private key hex]
+  public_key: [public key hex]
