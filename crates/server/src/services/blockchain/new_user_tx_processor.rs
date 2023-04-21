@@ -133,7 +133,8 @@ impl BlockChainService {
 
         // check for existing account with this phone number
         let mut existing_account: Option<User> = None;
-        if let Some(data) = DatabaseService::read(ReadItem {
+
+        if let Some(user_account_id_data) = DatabaseService::read(ReadItem {
             key: Bytes::from(mobile_number.number.as_bytes().to_vec()),
             cf: MOBILE_NUMBERS_COL_FAMILY,
         })
@@ -142,33 +143,29 @@ impl BlockChainService {
             execution_info: ExecutionInfo::InvalidData,
             error_message: "internal node error".into(),
         })? {
-            existing_account =
-                Some(
-                    User::decode(data.0.as_ref()).map_err(|_| NewUserProcessingError {
-                        execution_info: ExecutionInfo::InvalidData,
-                        error_message: "internal node error".into(),
-                    })?,
-                );
-
-            info!(
-                "There's already a user with account id {} for this mobile number",
-                short_hex_string(
-                    existing_account
-                        .unwrap()
-                        .account_id
-                        .as_ref()
-                        .unwrap()
-                        .data
-                        .as_ref()
-                )
-            );
-
-            return Err(NewUserProcessingError {
-                execution_info: ExecutionInfo::AccountAlreadyExists,
-                error_message: "account already exists for the provided mobile number. consider updating your existing account".into(),
-            });
+            match DatabaseService::read(ReadItem {
+                key: user_account_id_data.0,
+                cf: USERS_COL_FAMILY,
+            })
+            .await
+            .map_err(|_| NewUserProcessingError {
+                execution_info: ExecutionInfo::InvalidData,
+                error_message: "internal node error".into(),
+            })? {
+                Some(user_data) => {
+                    existing_account = Some(User::decode(user_data.0.as_ref()).map_err(|_| {
+                        NewUserProcessingError {
+                            execution_info: ExecutionInfo::InvalidData,
+                            error_message: "internal node error".into(),
+                        }
+                    })?);
+                }
+                None => {
+                    warn!("expected to find user data by  phone number on chain");
+                }
+            }
         } else {
-            info!("there is no existing user account for this number");
+            info!("there is no existing user account for tx provided number");
         }
 
         info!(

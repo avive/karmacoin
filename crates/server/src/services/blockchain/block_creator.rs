@@ -8,7 +8,6 @@ use crate::services::db_config_service::{
     BLOCKS_COL_FAMILY, USERS_COL_FAMILY, USERS_NAMES_COL_FAMILY,
 };
 use anyhow::Result;
-use base::genesis_config_service::VALIDATORS_POOL_COINS_AMOUNT_KEY;
 use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_core_types::*;
 use base::server_config_service::{ServerConfigService, BLOCK_PRODUCER_USER_NAME};
@@ -54,17 +53,18 @@ impl BlockChainService {
                     ));
                 }
 
+                /*
                 // block producer starts with the validators pool amount
                 let initial_balance_kc =
                     ServerConfigService::get_u64(VALIDATORS_POOL_COINS_AMOUNT_KEY.into())
                         .await?
                         .unwrap()
                         * 1_000_000;
+                        */
 
                 info!(
-                    "created block producer account with account id {}. Inital balance: {} KC",
-                    short_hex_string(account_id.as_ref()),
-                    initial_balance_kc.to_string()
+                    "created block producer account with account id {}",
+                    short_hex_string(account_id.as_ref())
                 );
 
                 User {
@@ -74,7 +74,7 @@ impl BlockChainService {
                     nonce: 0,
                     user_name,
                     mobile_number: None, // block producer account starts w/o a verified mobile number
-                    balance: initial_balance_kc,
+                    balance: 0,
                     trait_scores: vec![],
                     pre_keys: vec![],
                     karma_score: 1,
@@ -129,6 +129,7 @@ impl BlockChainService {
 
         // set block reward
         block.reward = tokenomics.get_block_reward_amount(height).await?;
+        info!("block reward: {}", block.reward);
 
         // sign the block
         block.signature = Some(block.sign(&key_pair.to_ed2559_keypair())?);
@@ -154,6 +155,7 @@ impl BlockChainService {
 
         // Update and persist block event
         block_event.block_hash = block.digest.clone();
+        block_event.reward = block.reward;
         self.emit_block_event(&block_event).await?;
 
         // Update block producer balance with block reward and with fees and persist

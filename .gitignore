@@ -22,3 +22,6 @@ server.csr
 server.ext
 server.key
 server.pem
+**/*karmacahin_backup*
+*.json
+karmachain_backup_Wed_Apr_19_16_59_42_2023.json

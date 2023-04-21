@@ -110,7 +110,7 @@ pub const VALIDATORS_POOL_ACCOUNT_ID_KEY: &str = "validators_pool_account_id";
 pub const VALIDATORS_ACCOUNT_NAME_KEY: &str = "Validators pool";
 
 /// Validators pool amount in KCoins
-pub const VALIDATORS_POOL_COINS_AMOUNT_KEY: &str = "validates_pool_account";
+pub const VALIDATORS_POOL_COINS_AMOUNT_KEY: &str = "validates_pool_amount";
 
 /// A set of canonical mobile phone verifiers accounts ids
 pub const VERIFIERS_ACCOUNTS_IDS: &str = "verifiers_accounts_ids";

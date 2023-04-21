@@ -95,7 +95,10 @@ impl ServerConfigService {
             .set_default(MAX_SMS_INVITES_PER_NUMBER_CONFIG_KEY, 2)
             .unwrap()
             // don't send invite sms more frequently then this cool down period
-            .set_default(SEND_INVITE_SMS_TIME_BETWEEN_SMS_SECS_CONFIG_KEY, 3600)
+            .set_default(
+                SEND_INVITE_SMS_TIME_BETWEEN_SMS_SECS_CONFIG_KEY,
+                60 * 60 * 48,
+            )
             .unwrap()
             .set_default(AUTH_SERVICE_PORT_KEY, 8080)
             .unwrap()
@@ -245,13 +248,17 @@ impl Handler<GetBlockProducerIdKeyPair> for ServerConfigService {
                 match self.config.get_string(BLOCK_PRODUCER_ID_PUBLIC_KEY) {
                     Ok(pub_data) => {
                         let pub_key_data = hex_from_string(pub_data).unwrap();
-                        Ok(KeyPair {
+
+                        let key_pair = KeyPair {
                             private_key: Some(PrivateKey {
                                 key: private_key_data,
                             }),
                             public_key: Some(PublicKey { key: pub_key_data }),
                             scheme: 0,
-                        })
+                        };
+                        info!("block producer key pair: {}", key_pair);
+
+                        Ok(key_pair)
                     }
                     Err(_) => {
                         panic!("invalid config file: missing block producer public key when private key is provided");
