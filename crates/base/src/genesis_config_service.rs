@@ -2,15 +2,14 @@
 // This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
 //
 
-use anyhow::{anyhow, Result};
-use map_macro::map;
-
 use crate::karma_coin::karma_coin_api::{GetGenesisDataRequest, GetGenesisDataResponse};
 use crate::karma_coin::karma_coin_core_types::{
     AccountId, CharTrait, Community, GenesisData, PhoneVerifier,
 };
+use anyhow::{anyhow, Result};
 use config::{Config, Environment, Map, Value};
 use log::*;
+use map_macro::map;
 use std::collections::HashMap;
 use std::path::Path;
 use xactor::*;
@@ -18,12 +17,12 @@ use xactor::*;
 // Blockchain network id
 pub const NET_ID_KEY: &str = "net_id_key";
 pub const NET_NAME_KEY: &str = "net_name_key";
-
-pub const DEVNET_ID: u32 = 1;
-pub const DEVNET_NAME: &str = "Karmachain Testnet 1";
+pub const NET_ID: u32 = 1;
+pub const NET_NAME: &str = "Karmachain 1.0 Mainnet 0.0.1";
+pub const ONE_KC_IN_KCENTS: u64 = 1_000_000;
 
 // consensus genesis time in milliseconds
-pub const GENESIS_TIMESTAMP_MS_KEY: &str = "genesis_timestamp_key";
+pub const GENESIS_TIMESTAMP_SECONDS_KEY: &str = "genesis_timestamp_key";
 
 // Default tx fee amount
 pub const DEF_TX_FEE_KEY: &str = "def_tx_fee_key";
@@ -241,59 +240,65 @@ impl Actor for GenesisConfigService {
         let builder = Config::builder();
         // Set defaults and merge genesis config file to overwrite
         let config = builder
-            .set_default(NET_ID_KEY, DEVNET_ID)
+            .set_default(NET_ID_KEY, NET_ID)
             .unwrap()
-            .set_default(NET_NAME_KEY, DEVNET_NAME)
+            .set_default(NET_NAME_KEY, NET_NAME)
             .unwrap()
-            .set_default(GENESIS_TIMESTAMP_MS_KEY, 1672860236)
+            .set_default(GENESIS_TIMESTAMP_SECONDS_KEY, 1682088524)
             .unwrap()
             .set_default(DEF_TX_FEE_KEY, 1)
             .unwrap()
             //
             // 10 KC per signup in phase 1
-            .set_default(SIGNUP_REWARD_AMOUNT_PHASE1_KEY, 10_000_000)
+            .set_default(SIGNUP_REWARD_AMOUNT_PHASE1_KEY, 10 * ONE_KC_IN_KCENTS)
             .unwrap()
-            // 100m KCs allocated for signup rewards phase 1
-            .set_default(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY, 100_000_000)
+            // 100m KCs allocated for signup rewards phase 1 (10m users, 10Kc per signup)
+            .set_default(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY, 100 * ONE_KC_IN_KCENTS)
             .unwrap()
             // Signup phase 2 rewards amount - 1 KC
-            .set_default(SIGNUP_REWARD_AMOUNT_PHASE2_KEY, 1_000_000)
+            .set_default(SIGNUP_REWARD_AMOUNT_PHASE2_KEY, ONE_KC_IN_KCENTS)
             .unwrap()
-            // phase 2 rewards amount allocation
-            .set_default(SIGNUP_REWARD_ALLOCATION_PHASE2_KEY, 200_000_000)
+            // phase 2 rewards amount allocation - total
+            .set_default(SIGNUP_REWARD_ALLOCATION_PHASE2_KEY, 200 * ONE_KC_IN_KCENTS)
             .unwrap()
             // Phase 3 reward amount per signup - 1000 KCents
             .set_default(SIGNUP_REWARD_AMOUNT_PHASE3_KEY, 1000)
             .unwrap()
             //
             // phase 1 reward amount per referral - 10 KC
-            .set_default(REFERRAL_REWARD_AMOUNT_PHASE1_KEY, 10_000_000)
+            .set_default(REFERRAL_REWARD_AMOUNT_PHASE1_KEY, 10 * ONE_KC_IN_KCENTS)
             .unwrap()
-            // phase 1 referral rewards allocation - 100M Kcs
-            .set_default(REFERRAL_REWARD_ALLOCATION_PHASE1_KEY, 100_000_000)
+            // phase 1 referral rewards allocation - 100M KCs
+            .set_default(
+                REFERRAL_REWARD_ALLOCATION_PHASE1_KEY,
+                100 * ONE_KC_IN_KCENTS,
+            )
             .unwrap()
             // phase 2 referral reward amount - 1 KC
-            .set_default(REFERRAL_REWARD_AMOUNT_PHASE2_KEY, 10_000_000)
+            .set_default(REFERRAL_REWARD_AMOUNT_PHASE2_KEY, ONE_KC_IN_KCENTS)
             .unwrap()
             // phase 2 referral rewards allocation - 200M Kcs
-            .set_default(REFERRAL_REWARD_ALLOCATION_PHASE2_KEY, 200_000_000)
+            .set_default(
+                REFERRAL_REWARD_ALLOCATION_PHASE2_KEY,
+                200 * ONE_KC_IN_KCENTS,
+            )
             .unwrap()
             //
             // Last block eligible for block rewards
             .set_default(BLOCK_REWARDS_LAST_BLOCK, 500_000_000)
             .unwrap()
-            // The block reward constant amount in KCents - 1000 KC
-            .set_default(BLOCK_REWARDS_AMOUNT, 1000_000_000)
+            // The block reward constant amount in KCents - 100000 KC
+            .set_default(BLOCK_REWARDS_AMOUNT, 100000 * ONE_KC_IN_KCENTS)
             .unwrap()
             //
             // Karma rewards amount per user in KCents - 10 KC
-            .set_default(KARMA_REWARD_AMOUNT, 10_000_000)
+            .set_default(KARMA_REWARD_AMOUNT, 10 * ONE_KC_IN_KCENTS)
             .unwrap()
-            // Karma rewards computation period in hours
-            .set_default(KARMA_REWARD_PERIOD_MINUTES, 60 * 24 * 7)
+            // Karma rewards computation period in minutes
+            .set_default(KARMA_REWARD_PERIOD_MINUTES, 60 * 24 * 30)
             .unwrap()
-            // genesis todo: change to 12 hours and add g drive
-            .set_default(BACKUP_CHAIN_TASK_PERIOD_MINUTES, 60)
+            // backp every 12 hours
+            .set_default(BACKUP_CHAIN_TASK_PERIOD_MINUTES, 60 * 12)
             .unwrap()
             // min num of appreciations  in period to be eligible for reward
             .set_default(KARMA_REWARDS_ELIGIBILITY, 2)
@@ -302,7 +307,7 @@ impl Actor for GenesisConfigService {
             .set_default(KARMA_REWARD_MAX_USERS_KEY, 1000)
             .unwrap()
             // karma rewards allocation in KC - 300M KCs
-            .set_default(KARAM_REWARDS_ALLOCATION_KEY, 300_000_000)
+            .set_default(KARAM_REWARDS_ALLOCATION_KEY, 300 * ONE_KC_IN_KCENTS)
             .unwrap()
             //
             // The max amount for a tx fee subsidy - 1 KCent
@@ -312,7 +317,7 @@ impl Actor for GenesisConfigService {
             .set_default(TX_FEE_SUBSIDY_MAX_AMOUNT_KEY, 1)
             .unwrap()
             // The amount of coins allocated for phase 1 tx fees - 250M KCs
-            .set_default(TX_FEE_SUBSIDY_ALLOCATION_PHASE1_KEY, 250_000_000)
+            .set_default(TX_FEE_SUBSIDY_ALLOCATION_PHASE1_KEY, 250 * ONE_KC_IN_KCENTS)
             .unwrap()
             // The max number of txs that can be subsidised per user
             .set_default(TX_FEE_SUBSIDY_MAX_TXS_PER_USER_KEY, 10)
@@ -325,12 +330,12 @@ impl Actor for GenesisConfigService {
             .set_default(CAUSES_PER_PERIOD, 20)
             .unwrap()
             // Total coin allocated for causes rewards - 225M KCs
-            .set_default(CAUSES_REWARDS_ALLOCATION, 225_000_000)
+            .set_default(CAUSES_REWARDS_ALLOCATION, 225 * ONE_KC_IN_KCENTS)
             .unwrap()
             // trusted verifiers ids
             .set_default(VERIFIERS_ACCOUNTS_IDS, verifiers)
             .unwrap()
-            // Validators pool coins amount in KCs
+            // Validators pool coins amount in KCs on genesis
             .set_default(VALIDATORS_POOL_COINS_AMOUNT_KEY, 0)
             .unwrap()
             // todo: replace it with 3 accounts with 3 different keys
@@ -584,7 +589,7 @@ impl Handler<GetGenesisData> for GenesisConfigService {
             net_id: self.config.get_int(NET_ID_KEY).unwrap() as u32,
             net_name: self.config.get_string(NET_NAME_KEY)?,
 
-            genesis_time: self.config.get_int(GENESIS_TIMESTAMP_MS_KEY)? as u64,
+            genesis_time: self.config.get_int(GENESIS_TIMESTAMP_SECONDS_KEY)? as u64,
 
             signup_reward_phase1_alloc: self.config.get_int(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY)?
                 as u64,

@@ -3117,9 +3117,9 @@ class GenesisData extends $pb.GeneratedMessage {
     ..a<$fixnum.Int64>(20, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'karmaRewardTopNUsers', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$fixnum.Int64>(21, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'karmaRewardsEligibility', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$fixnum.Int64>(22, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'karmaRewardsPeriodHours', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..a<$fixnum.Int64>(23, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'treasuryPremintAmount', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOS(24, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'treasuryAccountId')
-    ..aOS(25, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'treasuryAccountName')
+    ..a<$fixnum.Int64>(23, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'validatorsPoolAmount', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOS(24, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'validatorsPoolAccountId')
+    ..aOS(25, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'validatorsPoolAccountName')
     ..pc<CharTrait>(26, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'charTraits', $pb.PbFieldType.PM, subBuilder: CharTrait.create)
     ..pc<PhoneVerifier>(27, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'verifiers', $pb.PbFieldType.PM, subBuilder: PhoneVerifier.create)
     ..hasRequiredFields = false
@@ -3149,9 +3149,9 @@ class GenesisData extends $pb.GeneratedMessage {
     $fixnum.Int64? karmaRewardTopNUsers,
     $fixnum.Int64? karmaRewardsEligibility,
     $fixnum.Int64? karmaRewardsPeriodHours,
-    $fixnum.Int64? treasuryPremintAmount,
-    $core.String? treasuryAccountId,
-    $core.String? treasuryAccountName,
+    $fixnum.Int64? validatorsPoolAmount,
+    $core.String? validatorsPoolAccountId,
+    $core.String? validatorsPoolAccountName,
     $core.Iterable<CharTrait>? charTraits,
     $core.Iterable<PhoneVerifier>? verifiers,
   }) {
@@ -3222,14 +3222,14 @@ class GenesisData extends $pb.GeneratedMessage {
     if (karmaRewardsPeriodHours != null) {
       _result.karmaRewardsPeriodHours = karmaRewardsPeriodHours;
     }
-    if (treasuryPremintAmount != null) {
-      _result.treasuryPremintAmount = treasuryPremintAmount;
+    if (validatorsPoolAmount != null) {
+      _result.validatorsPoolAmount = validatorsPoolAmount;
     }
-    if (treasuryAccountId != null) {
-      _result.treasuryAccountId = treasuryAccountId;
+    if (validatorsPoolAccountId != null) {
+      _result.validatorsPoolAccountId = validatorsPoolAccountId;
     }
-    if (treasuryAccountName != null) {
-      _result.treasuryAccountName = treasuryAccountName;
+    if (validatorsPoolAccountName != null) {
+      _result.validatorsPoolAccountName = validatorsPoolAccountName;
     }
     if (charTraits != null) {
       _result.charTraits.addAll(charTraits);
@@ -3459,31 +3459,31 @@ class GenesisData extends $pb.GeneratedMessage {
   void clearKarmaRewardsPeriodHours() => clearField(22);
 
   @$pb.TagNumber(23)
-  $fixnum.Int64 get treasuryPremintAmount => $_getI64(22);
+  $fixnum.Int64 get validatorsPoolAmount => $_getI64(22);
   @$pb.TagNumber(23)
-  set treasuryPremintAmount($fixnum.Int64 v) { $_setInt64(22, v); }
+  set validatorsPoolAmount($fixnum.Int64 v) { $_setInt64(22, v); }
   @$pb.TagNumber(23)
-  $core.bool hasTreasuryPremintAmount() => $_has(22);
+  $core.bool hasValidatorsPoolAmount() => $_has(22);
   @$pb.TagNumber(23)
-  void clearTreasuryPremintAmount() => clearField(23);
+  void clearValidatorsPoolAmount() => clearField(23);
 
   @$pb.TagNumber(24)
-  $core.String get treasuryAccountId => $_getSZ(23);
+  $core.String get validatorsPoolAccountId => $_getSZ(23);
   @$pb.TagNumber(24)
-  set treasuryAccountId($core.String v) { $_setString(23, v); }
+  set validatorsPoolAccountId($core.String v) { $_setString(23, v); }
   @$pb.TagNumber(24)
-  $core.bool hasTreasuryAccountId() => $_has(23);
+  $core.bool hasValidatorsPoolAccountId() => $_has(23);
   @$pb.TagNumber(24)
-  void clearTreasuryAccountId() => clearField(24);
+  void clearValidatorsPoolAccountId() => clearField(24);
 
   @$pb.TagNumber(25)
-  $core.String get treasuryAccountName => $_getSZ(24);
+  $core.String get validatorsPoolAccountName => $_getSZ(24);
   @$pb.TagNumber(25)
-  set treasuryAccountName($core.String v) { $_setString(24, v); }
+  set validatorsPoolAccountName($core.String v) { $_setString(24, v); }
   @$pb.TagNumber(25)
-  $core.bool hasTreasuryAccountName() => $_has(24);
+  $core.bool hasValidatorsPoolAccountName() => $_has(24);
   @$pb.TagNumber(25)
-  void clearTreasuryAccountName() => clearField(25);
+  void clearValidatorsPoolAccountName() => clearField(25);
 
   @$pb.TagNumber(26)
   $core.List<CharTrait> get charTraits => $_getList(25);
