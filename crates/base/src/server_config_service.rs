@@ -41,7 +41,7 @@ pub const DEFAULT_DROP_DB_ON_EXIT: bool = false;
 pub const DB_NAME_CONFIG_KEY: &str = "db_name";
 pub const DROP_DB_CONFIG_KEY: &str = "drop_db_on_exit";
 pub const SERVER_NAME_CONFIG_KEY: &str = "server_name";
-pub const GRPC_SERVER_HOST_CONFIG_KEY: &str = "grpc_host"; //
+pub const GRPC_SERVER_HOST_CONFIG_KEY: &str = "grpc_host";
 pub const GRPC_SERVER_HOST_PORT_CONFIG_KEY: &str = "grpc_host_port";
 pub const GRPC_ADMIN_PORT_CONFIG_KEY: &str = "grpc_admin_port";
 pub const START_API_SERVICE_CONFIG_KEY: &str = "start_api_service";
@@ -97,7 +97,7 @@ impl ServerConfigService {
             // don't send invite sms more frequently then this cool down period
             .set_default(
                 SEND_INVITE_SMS_TIME_BETWEEN_SMS_SECS_CONFIG_KEY,
-                60 * 60 * 48,
+                60 * 60 * 48, // 48 hours
             )
             .unwrap()
             .set_default(AUTH_SERVICE_PORT_KEY, 8080)

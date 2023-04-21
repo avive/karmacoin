@@ -10,8 +10,6 @@ pub struct Tokenomics {
     pub stats: BlockchainStats,
 }
 
-const K_CENTS_IN_KC: u64 = 1_000_000;
-
 impl Tokenomics {
     pub fn new(stats: BlockchainStats) -> Self {
         Self { stats }
@@ -24,7 +22,7 @@ impl Tokenomics {
             GenesisConfigService::get_u64(KARAM_REWARDS_ALLOCATION_KEY.into())
                 .await?
                 .unwrap()
-                * K_CENTS_IN_KC;
+                * ONE_KC_IN_KCENTS;
 
         if self.stats.karma_rewards_amount >= karma_rewards_allocation {
             return Ok(0);
@@ -42,14 +40,14 @@ impl Tokenomics {
             GenesisConfigService::get_u64(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY.into())
                 .await?
                 .unwrap()
-                * K_CENTS_IN_KC;
+                * ONE_KC_IN_KCENTS;
 
         // In KCents
         let signup_rewards_alloc_phase2 =
             GenesisConfigService::get_u64(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY.into())
                 .await?
                 .unwrap()
-                * K_CENTS_IN_KC;
+                * ONE_KC_IN_KCENTS;
 
         if self.stats.signup_rewards_amount
             > signup_rewards_alloc_phase1 + signup_rewards_alloc_phase2

@@ -99,8 +99,9 @@ impl BlockChainService {
                     error_message: "missing verification evidence".into(),
                 })?;
 
-        // verify evidence signature
         // todo: verify verifier is valid according to consensus rules and genesis config
+
+        // verify evidence signature
         verification_evidence
             .verify_signature()
             .map_err(|_| NewUserProcessingError {
@@ -131,50 +132,6 @@ impl BlockChainService {
             });
         }
 
-        // check for existing account with this phone number
-        let mut existing_account: Option<User> = None;
-
-        if let Some(user_account_id_data) = DatabaseService::read(ReadItem {
-            key: Bytes::from(mobile_number.number.as_bytes().to_vec()),
-            cf: MOBILE_NUMBERS_COL_FAMILY,
-        })
-        .await
-        .map_err(|_| NewUserProcessingError {
-            execution_info: ExecutionInfo::InvalidData,
-            error_message: "internal node error".into(),
-        })? {
-            match DatabaseService::read(ReadItem {
-                key: user_account_id_data.0,
-                cf: USERS_COL_FAMILY,
-            })
-            .await
-            .map_err(|_| NewUserProcessingError {
-                execution_info: ExecutionInfo::InvalidData,
-                error_message: "internal node error".into(),
-            })? {
-                Some(user_data) => {
-                    existing_account = Some(User::decode(user_data.0.as_ref()).map_err(|_| {
-                        NewUserProcessingError {
-                            execution_info: ExecutionInfo::InvalidData,
-                            error_message: "internal node error".into(),
-                        }
-                    })?);
-                }
-                None => {
-                    warn!("expected to find user data by  phone number on chain");
-                }
-            }
-        } else {
-            info!("there is no existing user account for tx provided number");
-        }
-
-        info!(
-            "new user transaction for {}, {}, accountId: {}. existing user",
-            verification_evidence.requested_user_name,
-            mobile_number.number,
-            short_hex_string(account_id.data.as_ref()),
-        );
-
         // Check user account id is not already on chain
         if (DatabaseService::read(ReadItem {
             key: Bytes::from(account_id.data.clone()),
@@ -194,8 +151,53 @@ impl BlockChainService {
             });
         }
 
+        // check for existing account with this phone number
+        let mut existing_account: Option<User> = None;
+
+        if let Some(existing_user_account_id_data) = DatabaseService::read(ReadItem {
+            key: Bytes::from(mobile_number.number.as_bytes().to_vec()),
+            cf: MOBILE_NUMBERS_COL_FAMILY,
+        })
+        .await
+        .map_err(|_| NewUserProcessingError {
+            execution_info: ExecutionInfo::InvalidData,
+            error_message: "internal node error".into(),
+        })? {
+            match DatabaseService::read(ReadItem {
+                key: existing_user_account_id_data.0,
+                cf: USERS_COL_FAMILY,
+            })
+            .await
+            .map_err(|_| NewUserProcessingError {
+                execution_info: ExecutionInfo::InvalidData,
+                error_message: "internal node error".into(),
+            })? {
+                Some(existing_user_data) => {
+                    existing_account =
+                        Some(User::decode(existing_user_data.0.as_ref()).map_err(|_| {
+                            NewUserProcessingError {
+                                execution_info: ExecutionInfo::InvalidData,
+                                error_message: "internal node error".into(),
+                            }
+                        })?);
+                }
+                None => {
+                    warn!("expected to find user data by  phone number on chain");
+                }
+            }
+        } else {
+            info!("there is no existing user account for tx provided number");
+        }
+
+        info!(
+            "new user transaction for {}, {}, accountId: {}",
+            verification_evidence.requested_user_name,
+            mobile_number.number,
+            short_hex_string(account_id.data.as_ref()),
+        );
+
         // Check requested user name is not already on chain only if we are
-        // not migrating an old account with this tx
+        // NOT migrating an old account with this tx
         if (DatabaseService::read(ReadItem {
             key: Bytes::from(verification_evidence.requested_user_name.clone()),
             cf: USERS_NAMES_COL_FAMILY,
@@ -308,7 +310,7 @@ impl BlockChainService {
 
         info!("new user balance: {}", new_user.balance);
 
-        // add the new user to db
+        // persist the new user to db
 
         let mut buf = Vec::with_capacity(new_user.encoded_len());
         new_user
@@ -367,7 +369,7 @@ impl BlockChainService {
         if let Some(old_user) = existing_account {
             // delete old user account from the db
             DatabaseService::delete(DeleteItem {
-                key: Bytes::from(old_user.account_id.unwrap().data.to_vec()),
+                key: Bytes::from(old_user.account_id.as_ref().unwrap().data.to_vec()),
                 cf: USERS_COL_FAMILY,
             })
             .await
@@ -375,7 +377,10 @@ impl BlockChainService {
                 execution_info: ExecutionInfo::InternalNodeError,
                 error_message: "internal node error".into(),
             })?;
-            info!("deleted old account from store");
+            info!(
+                "deleted old account {} from store",
+                short_hex_string(old_user.account_id.unwrap().data.as_ref())
+            );
         }
 
         let mut tx_data = Vec::with_capacity(signed_transaction.encoded_len());

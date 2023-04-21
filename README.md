@@ -53,14 +53,14 @@ To start a server that runs the KarmaCoin blockchain node and provides the Karma
 ### Running a dev build
 ```bash
 cargo build
-./target/debug/server-app -c   config.yaml
+./target/debug/server-app
 ```
 
 ### Running a release build
 
 ```bash
 cargo build -- release
-./target/debug/server-app -c config.yaml
+./target/debug/server-app
 ```
 
 
