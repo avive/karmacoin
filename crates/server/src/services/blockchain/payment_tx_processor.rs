@@ -55,7 +55,7 @@ impl BlockChainService {
         .await?;
 
         if payee_user_data.is_none() {
-            info!("payee account not found on chain");
+            warn!("payee account not found on chain");
             return Ok(None);
         }
 

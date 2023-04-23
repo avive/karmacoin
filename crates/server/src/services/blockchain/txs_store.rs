@@ -75,10 +75,10 @@ impl BlockChainService {
         })
         .await?
         {
-            Some(data) => User::decode(data.0.as_ref())?,
+            Some(data) => Some(User::decode(data.0.as_ref())?),
             None => {
-                info!("Tx signer user not found on chain");
-                return Err(anyhow!("can't find sender account on chain for tx"));
+                warn!("Tx signer user not found on chain");
+                None
             }
         };
 
@@ -92,7 +92,7 @@ impl BlockChainService {
         };
 
         Ok(SignedTransactionWithStatus {
-            from: Some(sender),
+            from: sender,
             to: receiver,
             transaction: Some(tx.clone()),
             status: OnChain as i32,
@@ -163,7 +163,14 @@ impl BlockChainService {
                 .await?
                 {
                     let tx = SignedTransaction::decode(data.0.as_ref())?;
-                    txs.push(BlockChainService::create_signed_tx_with_status(&tx).await?);
+
+                    if let Ok(signed_tx) =
+                        BlockChainService::create_signed_tx_with_status(&tx).await
+                    {
+                        txs.push(signed_tx);
+                    } else {
+                        warn!("ignoring tx - dead account");
+                    }
                 }
             }
             Ok(txs)
