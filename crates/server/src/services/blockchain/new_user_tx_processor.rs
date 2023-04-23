@@ -357,7 +357,7 @@ impl BlockChainService {
 
             DatabaseService::write(WriteItem {
                 data: DataItem {
-                    key: Bytes::from(account_id.data.to_vec()),
+                    key: Bytes::from(old_user.account_id.unwrap().data.to_vec()),
                     value: Bytes::from(buf1),
                 },
                 cf: USERS_COL_FAMILY,
@@ -370,7 +370,7 @@ impl BlockChainService {
             })?;
         }
 
-        // update user name index
+        // update users names index
         DatabaseService::write(WriteItem {
             data: DataItem {
                 key: Bytes::from(new_user.user_name.as_bytes().to_vec()),
