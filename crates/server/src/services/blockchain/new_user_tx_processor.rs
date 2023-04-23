@@ -16,7 +16,7 @@ use base::karma_coin::karma_coin_core_types::{
     TransactionBody, TransactionEvent, TransactionType, User,
 };
 use bytes::Bytes;
-use db::db_service::{DataItem, DatabaseService, DeleteItem, ReadItem, WriteItem};
+use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use prost::Message;
 
 #[derive(Debug, Clone)]
@@ -263,17 +263,25 @@ impl BlockChainService {
                     error_message: "internal node error".into(),
                 })?;
 
-        if let Some(old_user) = existing_account.as_ref() {
+        if let Some(old_user) = existing_account.as_mut() {
             info!("migrating old account to new one...");
             // we copy over old user nickname as this is what user will expect
             new_user.user_name = old_user.user_name.clone();
+            old_user.user_name += " [old account]";
+
             // copy over balance from old user
             new_user.balance = old_user.balance;
+            old_user.balance = 0;
+
             // overwrite with existing user scores
             new_user.trait_scores = old_user.trait_scores.clone();
+            old_user.trait_scores = vec![];
             // copy memberships and karma score
             new_user.community_memberships = old_user.community_memberships.clone();
+            old_user.community_memberships = vec![];
+
             new_user.karma_score = old_user.karma_score;
+            old_user.karma_score = 0;
             // no signup reward when migrating an old account
             signup_reward_amount = 0;
         }
@@ -336,6 +344,32 @@ impl BlockChainService {
 
         info!("added user to db");
 
+        // update old migrated account
+
+        if let Some(old_user) = existing_account {
+            let mut buf1 = Vec::with_capacity(old_user.encoded_len());
+            old_user
+                .encode(&mut buf1)
+                .map_err(|_| NewUserProcessingError {
+                    execution_info: ExecutionInfo::InternalNodeError,
+                    error_message: "internal node error".into(),
+                })?;
+
+            DatabaseService::write(WriteItem {
+                data: DataItem {
+                    key: Bytes::from(account_id.data.to_vec()),
+                    value: Bytes::from(buf1),
+                },
+                cf: USERS_COL_FAMILY,
+                ttl: 0,
+            })
+            .await
+            .map_err(|_| NewUserProcessingError {
+                execution_info: ExecutionInfo::InternalNodeError,
+                error_message: "internal node error".into(),
+            })?;
+        }
+
         // update user name index
         DatabaseService::write(WriteItem {
             data: DataItem {
@@ -365,23 +399,6 @@ impl BlockChainService {
             execution_info: ExecutionInfo::InternalNodeError,
             error_message: "internal node error".into(),
         })?;
-
-        if let Some(old_user) = existing_account {
-            // delete old user account from the db
-            DatabaseService::delete(DeleteItem {
-                key: Bytes::from(old_user.account_id.as_ref().unwrap().data.to_vec()),
-                cf: USERS_COL_FAMILY,
-            })
-            .await
-            .map_err(|_| NewUserProcessingError {
-                execution_info: ExecutionInfo::InternalNodeError,
-                error_message: "internal node error".into(),
-            })?;
-            info!(
-                "deleted old account {} from store",
-                short_hex_string(old_user.account_id.unwrap().data.as_ref())
-            );
-        }
 
         let mut tx_data = Vec::with_capacity(signed_transaction.encoded_len());
         info!(
