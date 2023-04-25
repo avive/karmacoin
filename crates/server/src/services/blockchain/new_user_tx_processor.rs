@@ -19,6 +19,8 @@ use bytes::Bytes;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use prost::Message;
 
+static OLD_ACCOUNT: &str = " [old account]";
+
 #[derive(Debug, Clone)]
 pub(crate) struct NewUserProcessingResponse {
     pub(crate) mobile_number: String,
@@ -230,18 +232,6 @@ impl BlockChainService {
 
         let mut community_memberships: Vec<CommunityMembership> = vec![];
 
-        // hack to set admin for specific numbers in test community
-        // should be handled by admin api / sudo
-        if mobile_number.number == "+972549805380"
-        /*|| mobile_number.number == "+972549805381"*/
-        {
-            community_memberships.push(CommunityMembership {
-                community_id: 1,
-                karma_score: 1, // initial community karma score is 1 for joining
-                is_admin: true,
-            });
-        }
-
         let mut new_user = User {
             account_id: Some(account_id.clone()),
             nonce: 1, // signup tx nonce is 1, so the next tx nonce should be 2
@@ -251,7 +241,7 @@ impl BlockChainService {
             trait_scores: vec![sign_up_trait_score],
             pre_keys: vec![],
             karma_score: 1, // initial karma score is 1 for getting the signup trait score
-            community_memberships,
+            community_memberships: community_memberships.clone(),
         };
 
         let mut signup_reward_amount =
@@ -267,7 +257,10 @@ impl BlockChainService {
             info!("migrating old account to new one...");
             // we copy over old user nickname as this is what user will expect
             new_user.user_name = old_user.user_name.clone();
-            old_user.user_name += " [old account]";
+
+            if !old_user.user_name.ends_with(OLD_ACCOUNT) {
+                old_user.user_name += OLD_ACCOUNT;
+            }
 
             // copy over balance from old user
             new_user.balance = old_user.balance;
@@ -284,6 +277,17 @@ impl BlockChainService {
             old_user.karma_score = 0;
             // no signup reward when migrating an old account
             signup_reward_amount = 0;
+        }
+
+        // hack to set admin for specific numbers in test community. should be handled by admin api / sudo
+        if (mobile_number.number == "+972549805380" || mobile_number.number == "+972549805381")
+            && new_user.get_community_membership(1).is_none()
+        {
+            new_user.community_memberships.push(CommunityMembership {
+                community_id: 1,
+                karma_score: 1, // initial community karma score is 1 for joining
+                is_admin: true,
+            });
         }
 
         let apply_subsidy = tokenomics
