@@ -30,6 +30,7 @@ pub mod tx_body;
 pub mod update_user_tx;
 pub mod user;
 pub mod user_verification_data;
+pub mod user_verification_data_ex;
 pub mod verify_number_request;
 
 pub const GRPC_DESCRIPTOR: &[u8] = include_bytes!("karma_coin/descriptor.bin");

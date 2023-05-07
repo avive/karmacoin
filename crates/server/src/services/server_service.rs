@@ -24,7 +24,9 @@ use crate::services::blockchain::karma_rewards_service::KarmaRewardsService;
 //};
 
 use crate::services::blockchain::backup_chain_service::BackupChainService;
+use base::hex_utils::hex_string;
 use base::karma_coin::karma_coin_api::GetGenesisDataRequest;
+use base::karma_coin::karma_coin_core_types::KeyPair;
 use tonic_web::GrpcWebLayer;
 use tower_http::cors::CorsLayer;
 use xactor::*;
@@ -41,7 +43,6 @@ impl Actor for ServerService {
         let genesis_config_service = GenesisConfigService::from_registry().await?;
         let server_config_service = ServerConfigService::from_registry().await?;
 
-        /*
         // generate some keys
         let key1 = KeyPair::new();
         info!(
@@ -61,7 +62,7 @@ impl Actor for ServerService {
         info!(
             "key2 public: {}",
             hex_string(key2.public_key.unwrap().key.as_ref())
-        );*/
+        );
 
         server_config_service
             .call(SetConfigFile {

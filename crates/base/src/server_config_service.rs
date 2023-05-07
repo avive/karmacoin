@@ -26,6 +26,7 @@ pub const SEND_INVITE_SMS_TIME_BETWEEN_SMS_SECS_CONFIG_KEY: &str = "send_sms_tim
 pub const AUTH_SERVICE_HOST_KEY: &str = "auth_host_key";
 pub const AUTH_SERVICE_PORT_KEY: &str = "auth_port_key";
 pub const AUTH_SERVICE_PROTOCOL_KEY: &str = "auth_protocol_key";
+pub const AUTH_SERVICE_BYPASS_KEY: &str = "auth_service_bypass_token";
 
 pub const DEFAULT_GRPC_SERVER_PORT: i64 = 9080;
 pub const DEFAULT_GRPC_ADMIN_PORT: i64 = 9888;

@@ -24,14 +24,6 @@ pub struct VerifierInfo {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct VerifyNumberResponse {
-    #[prost(message, optional, tag = "1")]
-    pub user_verification_data: ::core::option::Option<
-        super::core_types::UserVerificationData,
-    >,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct VerifyNumberRequest {
     #[prost(uint64, tag = "1")]
     pub timestamp: u64,
@@ -43,6 +35,51 @@ pub struct VerifyNumberRequest {
     pub requested_user_name: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "5")]
     pub signature: ::core::option::Option<super::core_types::Signature>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct VerifyNumberResponse {
+    #[prost(message, optional, tag = "1")]
+    pub user_verification_data: ::core::option::Option<
+        super::core_types::UserVerificationData,
+    >,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct VerifyNumberRequestDataEx {
+    #[prost(uint64, tag = "1")]
+    pub timestamp: u64,
+    #[prost(message, optional, tag = "2")]
+    pub account_id: ::core::option::Option<super::core_types::AccountId>,
+    #[prost(message, optional, tag = "3")]
+    pub mobile_number: ::core::option::Option<super::core_types::MobileNumber>,
+    #[prost(string, tag = "4")]
+    pub requested_user_name: ::prost::alloc::string::String,
+    #[prost(bytes = "vec", tag = "5")]
+    pub bypass_token: ::prost::alloc::vec::Vec<u8>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct VerifyNumberRequestEx {
+    /// serialized VerifyNumberRequestDataEx
+    #[prost(bytes = "vec", tag = "1")]
+    pub data: ::prost::alloc::vec::Vec<u8>,
+    /// Client public key used to sign the data
+    #[prost(bytes = "vec", tag = "2")]
+    pub public_key: ::prost::alloc::vec::Vec<u8>,
+    /// signature of binary data field 1
+    #[prost(bytes = "vec", tag = "3")]
+    pub signature: ::prost::alloc::vec::Vec<u8>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct VerifyNumberResponseEx {
+    /// a serialized UserVerificationDataEx message
+    #[prost(bytes = "vec", tag = "1")]
+    pub verification_data: ::prost::alloc::vec::Vec<u8>,
+    /// a signature over the binary data above - client has the verifier public key
+    #[prost(bytes = "vec", tag = "2")]
+    pub signature: ::prost::alloc::vec::Vec<u8>,
 }
 /// / Data object stored in db to track invite sms messages
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -156,6 +193,27 @@ pub mod verifier_service_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
+        /// Extended api - supports bypass token for tests and response signs binary part
+        /// should be used in Kchain 2.0
+        pub async fn verify_number_ex(
+            &mut self,
+            request: impl tonic::IntoRequest<super::VerifyNumberRequestEx>,
+        ) -> Result<tonic::Response<super::VerifyNumberResponseEx>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.verifier.VerifierService/VerifyNumberEx",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
     }
 }
 /// Generated server implementations.
@@ -171,6 +229,12 @@ pub mod verifier_service_server {
             &self,
             request: tonic::Request<super::VerifyNumberRequest>,
         ) -> Result<tonic::Response<super::VerifyNumberResponse>, tonic::Status>;
+        /// Extended api - supports bypass token for tests and response signs binary part
+        /// should be used in Kchain 2.0
+        async fn verify_number_ex(
+            &self,
+            request: tonic::Request<super::VerifyNumberRequestEx>,
+        ) -> Result<tonic::Response<super::VerifyNumberResponseEx>, tonic::Status>;
     }
     /// mobile phone numbers verifier api service
     #[derive(Debug)]
@@ -261,6 +325,46 @@ pub mod verifier_service_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = VerifyNumberSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/karma_coin.verifier.VerifierService/VerifyNumberEx" => {
+                    #[allow(non_camel_case_types)]
+                    struct VerifyNumberExSvc<T: VerifierService>(pub Arc<T>);
+                    impl<
+                        T: VerifierService,
+                    > tonic::server::UnaryService<super::VerifyNumberRequestEx>
+                    for VerifyNumberExSvc<T> {
+                        type Response = super::VerifyNumberResponseEx;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::VerifyNumberRequestEx>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move {
+                                (*inner).verify_number_ex(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = VerifyNumberExSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

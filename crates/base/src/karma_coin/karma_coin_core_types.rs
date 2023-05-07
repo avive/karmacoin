@@ -349,10 +349,27 @@ pub struct UserVerificationData {
     pub account_id: ::core::option::Option<AccountId>,
     #[prost(message, optional, tag = "5")]
     pub mobile_number: ::core::option::Option<MobileNumber>,
-    #[prost(string, tag = "7")]
+    #[prost(string, tag = "6")]
     pub requested_user_name: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "8")]
+    #[prost(message, optional, tag = "7")]
     pub signature: ::core::option::Option<Signature>,
+}
+/// Created and signed by a verifier to attest that an account owns a mobile number
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UserVerificationDataEx {
+    #[prost(message, optional, tag = "1")]
+    pub verifier_account_id: ::core::option::Option<AccountId>,
+    #[prost(uint64, tag = "2")]
+    pub timestamp: u64,
+    #[prost(enumeration = "VerificationResult", tag = "3")]
+    pub verification_result: i32,
+    #[prost(message, optional, tag = "4")]
+    pub account_id: ::core::option::Option<AccountId>,
+    #[prost(message, optional, tag = "5")]
+    pub mobile_number: ::core::option::Option<MobileNumber>,
+    #[prost(string, tag = "6")]
+    pub requested_user_name: ::prost::alloc::string::String,
 }
 /// a collection of signed transactions
 #[derive(serde::Serialize, serde::Deserialize)]

@@ -27,6 +27,8 @@ impl Handler<Verify> for VerifierService {
     ) -> Result<UserVerificationData> {
         let req = msg.0;
 
+        info!("verify phone number called");
+
         if self.auth_client.is_none() {
             return Err(anyhow!("internal error - auth client not initialized"));
         }
@@ -49,6 +51,8 @@ impl Handler<Verify> for VerifierService {
                 return self.gen_result(VerificationResult::InvalidSignature).await;
             }
         };
+
+        info!("Phone num: {}", phone_number.number);
 
         let requested_user_name = req.requested_user_name.clone();
 
@@ -131,6 +135,7 @@ impl Handler<Verify> for VerifierService {
         resp.requested_user_name = requested_user_name;
         resp.mobile_number = Some(phone_number);
         resp.signature = Some(resp.sign(&key_pair)?);
+        info!("Returning verification response");
         Ok(resp)
     }
 }

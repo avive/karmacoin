@@ -12,6 +12,10 @@ service VerifierService {
   // Request to verify a number by providing code sent via sms from verifier
   // note that VerifyNumberResponse was lifted to types as it is used in signup transactions
   rpc VerifyNumber(VerifyNumberRequest) returns (VerifyNumberResponse);
+
+  // Extended api - supports bypass token for tests and response signs binary part
+  // should be used in Kchain 2.0
+  rpc VerifyNumberEx(VerifyNumberRequestEx) returns (VerifyNumberResponseEx);
 }
 
 // Verier Info is used to return the network the id and dialup info of active verifiers
@@ -25,10 +29,6 @@ message VerifierInfo {
   core_types.Signature signature = 7;
 }
 
-message VerifyNumberResponse {
-  core_types.UserVerificationData user_verification_data = 1;
-}
-
 message VerifyNumberRequest {
   uint64 timestamp = 1;
   core_types.AccountId account_id = 2;
@@ -36,6 +36,38 @@ message VerifyNumberRequest {
   string requested_user_name = 4;
   core_types.Signature signature = 5;
 }
+
+message VerifyNumberResponse {
+  core_types.UserVerificationData user_verification_data = 1;
+}
+
+message VerifyNumberRequestDataEx {
+  uint64 timestamp = 1;
+  core_types.AccountId account_id = 2;
+  core_types.MobileNumber mobile_number = 3;
+  string requested_user_name = 4;
+  bytes bypass_token = 5;
+}
+
+message VerifyNumberRequestEx {
+  // serialized VerifyNumberRequestDataEx
+  bytes data = 1;
+
+  // Client public key used to sign the data
+  bytes public_key = 2;
+
+  // signature of binary data field 1
+  bytes signature = 3;
+}
+
+message VerifyNumberResponseEx {
+  // a serialized UserVerificationDataEx message
+  bytes verification_data = 1;
+
+  // a signature over the binary data above - client has the verifier public key
+  bytes signature = 2;
+}
+
 
 /// Data object stored in db to track invite sms messages
 message SmsInviteMetadata {

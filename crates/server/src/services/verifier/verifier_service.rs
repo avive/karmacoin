@@ -4,12 +4,15 @@
 
 use crate::services::verifier::sms_invites_sender::SendInvites;
 use crate::services::verifier::verify_number::Verify;
+use crate::services::verifier::verify_number_ex::VerifyEx;
 use anyhow::{anyhow, Result};
 use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_auth::auth_service_client::AuthServiceClient;
 use base::karma_coin::karma_coin_core_types::{AccountId, KeyPair};
 use base::karma_coin::karma_coin_verifier::verifier_service_server::VerifierService as VerifierServiceTrait;
-use base::karma_coin::karma_coin_verifier::{VerifyNumberRequest, VerifyNumberResponse};
+use base::karma_coin::karma_coin_verifier::{
+    VerifyNumberRequest, VerifyNumberRequestEx, VerifyNumberResponse, VerifyNumberResponseEx,
+};
 use base::server_config_service::{
     GetVerifierIdKeyPair, ServerConfigService, AUTH_SERVICE_HOST_KEY, AUTH_SERVICE_PORT_KEY,
     AUTH_SERVICE_PROTOCOL_KEY, SEND_INVITE_SMS_MESSAGES_CONFIG_KEY,
@@ -164,6 +167,27 @@ impl VerifierServiceTrait for VerifierService {
                 Ok(Response::new(VerifyNumberResponse {
                     user_verification_data: Some(data),
                 }))
+            }
+            Err(e) => Err(Status::internal(format!("internal error: {:?}", e))),
+        }
+    }
+
+    async fn verify_number_ex(
+        &self,
+        request: Request<VerifyNumberRequestEx>,
+    ) -> Result<Response<VerifyNumberResponseEx>, Status> {
+        let service = VerifierService::from_registry()
+            .await
+            .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
+
+        match service
+            .call(VerifyEx(request.into_inner()))
+            .await
+            .map_err(|e| Status::internal(format!("failed to call verifier api: {:?}", e)))?
+        {
+            Ok(data) => {
+                info!("verification successful");
+                Ok(Response::new(data))
             }
             Err(e) => Err(Status::internal(format!("internal error: {:?}", e))),
         }

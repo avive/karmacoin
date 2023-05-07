@@ -232,8 +232,18 @@ message UserVerificationData {
     VerificationResult verification_result = 3;
     AccountId account_id = 4;
     MobileNumber mobile_number = 5;
-    string requested_user_name = 7;
-    Signature signature = 8;
+    string requested_user_name = 6;
+    Signature signature = 7;
+}
+
+// Created and signed by a verifier to attest that an account owns a mobile number
+message UserVerificationDataEx {
+    AccountId verifier_account_id = 1;
+    uint64 timestamp = 2;
+    VerificationResult verification_result = 3;
+    AccountId account_id = 4;
+    MobileNumber mobile_number = 5;
+    string requested_user_name = 6;
 }
 
 enum TransactionStatus {

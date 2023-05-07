@@ -101,8 +101,18 @@ impl BlockChainService {
                     error_message: "missing verification evidence".into(),
                 })?;
 
+        // todo: verify verifier is valid according to consensus rules and genesis config
+
+        // verify evidence signature
+        verification_evidence
+            .verify_signature()
+            .map_err(|_| NewUserProcessingError {
+                execution_info: ExecutionInfo::InvalidData,
+                error_message: "invalid verification signature".into(),
+            })?;
+
         // verify verifier is valid according to consensus rules and genesis config
-        let verifer_key = self
+        let verifier_key = self
             .verifier_key_pair
             .as_ref()
             .unwrap()
@@ -112,14 +122,14 @@ impl BlockChainService {
             .key
             .clone();
 
-        if let Some(verifer_account_id) = verification_evidence.verifier_account_id.as_ref() {
-            if verifer_account_id.data != verifer_key {
+        if let Some(verifier_account_id) = verification_evidence.verifier_account_id.as_ref() {
+            if verifier_account_id.data != verifier_key {
                 return Err(NewUserProcessingError {
                     execution_info: ExecutionInfo::InvalidData,
                     error_message: format!(
                         "Unrecognized verifier. provided: {}, evidence: {}",
-                        short_hex_string(verifer_account_id.data.as_ref()),
-                        short_hex_string(verifer_key.as_ref())
+                        short_hex_string(verifier_account_id.data.as_ref()),
+                        short_hex_string(verifier_key.as_ref())
                     ),
                 });
             }
@@ -130,14 +140,6 @@ impl BlockChainService {
             });
         }
 
-        // verify evidence signature
-        verification_evidence
-            .verify_signature()
-            .map_err(|_| NewUserProcessingError {
-                execution_info: ExecutionInfo::InvalidData,
-                error_message: "invalid verification signature".into(),
-            })?;
-
         let mobile_number =
             verification_evidence
                 .mobile_number
@@ -145,15 +147,6 @@ impl BlockChainService {
                     execution_info: ExecutionInfo::InvalidData,
                     error_message: "missing mobile number in evidence".into(),
                 })?;
-
-        let requested_user_name = verification_evidence.requested_user_name.clone();
-
-        if requested_user_name.is_empty() {
-            return Err(NewUserProcessingError {
-                execution_info: ExecutionInfo::InvalidData,
-                error_message: "user name cannot be empty".into(),
-            });
-        }
 
         let evidence_account_id =
             verification_evidence
@@ -229,7 +222,7 @@ impl BlockChainService {
 
         info!(
             "new user transaction for {}, {}, accountId: {}",
-            requested_user_name,
+            verification_evidence.requested_user_name,
             mobile_number.number,
             short_hex_string(account_id.data.as_ref()),
         );
@@ -237,7 +230,7 @@ impl BlockChainService {
         // Check requested user name is not already on chain only if we are
         // NOT migrating an old account with this tx
         if (DatabaseService::read(ReadItem {
-            key: Bytes::from(requested_user_name.clone()),
+            key: Bytes::from(verification_evidence.requested_user_name.clone()),
             cf: USERS_NAMES_COL_FAMILY,
         })
         .await
@@ -266,16 +259,18 @@ impl BlockChainService {
             community_id: 0,
         };
 
+        let community_memberships: Vec<CommunityMembership> = vec![];
+
         let mut new_user = User {
             account_id: Some(account_id.clone()),
             nonce: 1, // signup tx nonce is 1, so the next tx nonce should be 2
-            user_name: requested_user_name.clone(),
+            user_name: verification_evidence.requested_user_name.clone(),
             mobile_number: Some(mobile_number.clone()),
             balance: 0,
             trait_scores: vec![sign_up_trait_score],
             pre_keys: vec![],
             karma_score: 1, // initial karma score is 1 for getting the signup trait score
-            community_memberships: vec![],
+            community_memberships: community_memberships.clone(),
         };
 
         let mut signup_reward_amount =
