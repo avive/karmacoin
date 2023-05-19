@@ -118,7 +118,7 @@ impl Handler<VerifyEx> for VerifierService {
         .unwrap();
 
         if !data.bypass_token.eq(&bypass_token) {
-            // call auth service ubless bypass token was provided
+            // call auth service unless bypass token was provided
             match self
                 .auth_client
                 .as_mut()
