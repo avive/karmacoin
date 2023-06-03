@@ -25,11 +25,12 @@ const TransactionType$json = const {
     const {'1': 'TRANSACTION_TYPE_PAYMENT_V1', '2': 0},
     const {'1': 'TRANSACTION_TYPE_NEW_USER_V1', '2': 1},
     const {'1': 'TRANSACTION_TYPE_UPDATE_USER_V1', '2': 2},
+    const {'1': 'TRANSACTION_TYPE_DELETE_USER_V1', '2': 3},
   ],
 };
 
 /// Descriptor for `TransactionType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List transactionTypeDescriptor = $convert.base64Decode('Cg9UcmFuc2FjdGlvblR5cGUSHwobVFJBTlNBQ1RJT05fVFlQRV9QQVlNRU5UX1YxEAASIAocVFJBTlNBQ1RJT05fVFlQRV9ORVdfVVNFUl9WMRABEiMKH1RSQU5TQUNUSU9OX1RZUEVfVVBEQVRFX1VTRVJfVjEQAg==');
+final $typed_data.Uint8List transactionTypeDescriptor = $convert.base64Decode('Cg9UcmFuc2FjdGlvblR5cGUSHwobVFJBTlNBQ1RJT05fVFlQRV9QQVlNRU5UX1YxEAASIAocVFJBTlNBQ1RJT05fVFlQRV9ORVdfVVNFUl9WMRABEiMKH1RSQU5TQUNUSU9OX1RZUEVfVVBEQVRFX1VTRVJfVjEQAhIjCh9UUkFOU0FDVElPTl9UWVBFX0RFTEVURV9VU0VSX1YxEAM=');
 @$core.Deprecated('Use verificationResultDescriptor instead')
 const VerificationResult$json = const {
   '1': 'VerificationResult',
@@ -358,6 +359,13 @@ const UpdateUserTransactionV1$json = const {
 
 /// Descriptor for `UpdateUserTransactionV1`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List updateUserTransactionV1Descriptor = $convert.base64Decode('ChdVcGRhdGVVc2VyVHJhbnNhY3Rpb25WMRIaCghuaWNrbmFtZRgBIAEoCVIIbmlja25hbWUSSAoNbW9iaWxlX251bWJlchgCIAEoCzIjLmthcm1hX2NvaW4uY29yZV90eXBlcy5Nb2JpbGVOdW1iZXJSDG1vYmlsZU51bWJlchJhChZ1c2VyX3ZlcmlmaWNhdGlvbl9kYXRhGAMgASgLMisua2FybWFfY29pbi5jb3JlX3R5cGVzLlVzZXJWZXJpZmljYXRpb25EYXRhUhR1c2VyVmVyaWZpY2F0aW9uRGF0YQ==');
+@$core.Deprecated('Use deleteUserTransactionV1Descriptor instead')
+const DeleteUserTransactionV1$json = const {
+  '1': 'DeleteUserTransactionV1',
+};
+
+/// Descriptor for `DeleteUserTransactionV1`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List deleteUserTransactionV1Descriptor = $convert.base64Decode('ChdEZWxldGVVc2VyVHJhbnNhY3Rpb25WMQ==');
 @$core.Deprecated('Use transactionBodyDescriptor instead')
 const TransactionBody$json = const {
   '1': 'TransactionBody',

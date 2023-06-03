@@ -1724,6 +1724,35 @@ class UpdateUserTransactionV1 extends $pb.GeneratedMessage {
   UserVerificationData ensureUserVerificationData() => $_ensure(2);
 }
 
+class DeleteUserTransactionV1 extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DeleteUserTransactionV1', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'karma_coin.core_types'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  DeleteUserTransactionV1._() : super();
+  factory DeleteUserTransactionV1() => create();
+  factory DeleteUserTransactionV1.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DeleteUserTransactionV1.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  DeleteUserTransactionV1 clone() => DeleteUserTransactionV1()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  DeleteUserTransactionV1 copyWith(void Function(DeleteUserTransactionV1) updates) => super.copyWith((message) => updates(message as DeleteUserTransactionV1)) as DeleteUserTransactionV1; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static DeleteUserTransactionV1 create() => DeleteUserTransactionV1._();
+  DeleteUserTransactionV1 createEmptyInstance() => create();
+  static $pb.PbList<DeleteUserTransactionV1> createRepeated() => $pb.PbList<DeleteUserTransactionV1>();
+  @$core.pragma('dart2js:noInline')
+  static DeleteUserTransactionV1 getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeleteUserTransactionV1>(create);
+  static DeleteUserTransactionV1? _defaultInstance;
+}
+
 class TransactionBody extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TransactionBody', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'karma_coin.core_types'), createEmptyInstance: create)
     ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timestamp', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)

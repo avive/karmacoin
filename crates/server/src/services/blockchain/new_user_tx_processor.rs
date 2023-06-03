@@ -230,8 +230,6 @@ impl BlockChainService {
             community_id: 0,
         };
 
-        let mut community_memberships: Vec<CommunityMembership> = vec![];
-
         let mut new_user = User {
             account_id: Some(account_id.clone()),
             nonce: 1, // signup tx nonce is 1, so the next tx nonce should be 2
@@ -241,7 +239,7 @@ impl BlockChainService {
             trait_scores: vec![sign_up_trait_score],
             pre_keys: vec![],
             karma_score: 1, // initial karma score is 1 for getting the signup trait score
-            community_memberships: community_memberships.clone(),
+            community_memberships: vec![],
         };
 
         let mut signup_reward_amount =

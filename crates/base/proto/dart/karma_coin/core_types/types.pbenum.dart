@@ -26,11 +26,13 @@ class TransactionType extends $pb.ProtobufEnum {
   static const TransactionType TRANSACTION_TYPE_PAYMENT_V1 = TransactionType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRANSACTION_TYPE_PAYMENT_V1');
   static const TransactionType TRANSACTION_TYPE_NEW_USER_V1 = TransactionType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRANSACTION_TYPE_NEW_USER_V1');
   static const TransactionType TRANSACTION_TYPE_UPDATE_USER_V1 = TransactionType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRANSACTION_TYPE_UPDATE_USER_V1');
+  static const TransactionType TRANSACTION_TYPE_DELETE_USER_V1 = TransactionType._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TRANSACTION_TYPE_DELETE_USER_V1');
 
   static const $core.List<TransactionType> values = <TransactionType> [
     TRANSACTION_TYPE_PAYMENT_V1,
     TRANSACTION_TYPE_NEW_USER_V1,
     TRANSACTION_TYPE_UPDATE_USER_V1,
+    TRANSACTION_TYPE_DELETE_USER_V1,
   ];
 
   static final $core.Map<$core.int, TransactionType> _byValue = $pb.ProtobufEnum.initByValue(values);

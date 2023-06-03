@@ -286,6 +286,9 @@ pub struct UpdateUserTransactionV1 {
     #[prost(message, optional, tag = "3")]
     pub user_verification_data: ::core::option::Option<UserVerificationData>,
 }
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DeleteUserTransactionV1 {}
 /// The generic transaction payload - unsigned
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -608,6 +611,7 @@ pub enum TransactionType {
     PaymentV1 = 0,
     NewUserV1 = 1,
     UpdateUserV1 = 2,
+    DeleteUserV1 = 3,
 }
 impl TransactionType {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -619,6 +623,7 @@ impl TransactionType {
             TransactionType::PaymentV1 => "TRANSACTION_TYPE_PAYMENT_V1",
             TransactionType::NewUserV1 => "TRANSACTION_TYPE_NEW_USER_V1",
             TransactionType::UpdateUserV1 => "TRANSACTION_TYPE_UPDATE_USER_V1",
+            TransactionType::DeleteUserV1 => "TRANSACTION_TYPE_DELETE_USER_V1",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -627,6 +632,7 @@ impl TransactionType {
             "TRANSACTION_TYPE_PAYMENT_V1" => Some(Self::PaymentV1),
             "TRANSACTION_TYPE_NEW_USER_V1" => Some(Self::NewUserV1),
             "TRANSACTION_TYPE_UPDATE_USER_V1" => Some(Self::UpdateUserV1),
+            "TRANSACTION_TYPE_DELETE_USER_V1" => Some(Self::DeleteUserV1),
             _ => None,
         }
     }

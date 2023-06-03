@@ -4,8 +4,8 @@
 
 use crate::genesis_config_service::{GenesisConfigService, NET_ID_KEY};
 use crate::karma_coin::karma_coin_core_types::{
-    NewUserTransactionV1, PaymentTransactionV1, TransactionBody, TransactionType,
-    UpdateUserTransactionV1,
+    DeleteUserTransactionV1, NewUserTransactionV1, PaymentTransactionV1, TransactionBody,
+    TransactionType, UpdateUserTransactionV1,
 };
 use anyhow::{anyhow, Result};
 use chrono::{Duration, Utc};
@@ -110,6 +110,20 @@ impl TransactionBody {
         }
 
         Ok(NewUserTransactionV1::decode(
+            data.transaction_data.as_ref(),
+        )?)
+    }
+
+    pub fn get_delete_user_transaction_v1(&self) -> Result<DeleteUserTransactionV1> {
+        let data = self
+            .transaction_data
+            .as_ref()
+            .ok_or_else(|| anyhow!("missing tx data"))?;
+        if data.transaction_type != TransactionType::DeleteUserV1 as i32 {
+            return Err(anyhow!("unexpected transaction type"));
+        }
+
+        Ok(DeleteUserTransactionV1::decode(
             data.transaction_data.as_ref(),
         )?)
     }

@@ -205,7 +205,7 @@ impl VerifierService {
             "👋 I just appreciated you and sent you some Karma Coins! 🙏
 - {} ({})
 
-☥ To get these, sign up with this mobile number to the Karma Coin App: https://karmaco.in/testnet",
+☥ To get these, get the Karma Coin App from https://karmaco.in",
             inviter.user_name.clone(),
             inviter_phone_number
         );

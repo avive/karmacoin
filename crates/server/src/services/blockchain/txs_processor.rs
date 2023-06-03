@@ -206,7 +206,78 @@ impl Handler<ProcessTransactions> for BlockChainService {
                     {
                         Some(data) => {
                             info!("user found on chain");
-                            User::decode(data.0.as_ref())?
+                            let mut user = User::decode(data.0.as_ref())?;
+
+                            match self
+                                .process_update_transaction(
+                                    tx,
+                                    &tokenomics,
+                                    &mut tx_event,
+                                    &mut user,
+                                )
+                                .await
+                            {
+                                Ok(_) => {
+                                    info!("update user transaction processed: {}", tx_event);
+                                    tx_hashes.push(tx_hash.to_vec());
+                                    block_event.add_fee(tx_body.fee);
+                                    block_event.add_transaction_event(tx_event.clone());
+                                    block_event.user_updates_count += 1;
+                                }
+                                Err(e) => {
+                                    error!("Failed to process update user transaction: {:?}", e);
+                                    tx_event.result = ExecutionResult::Invalid as i32;
+                                    tx_event.error_message = e.to_string();
+                                }
+                            }
+                            self.emit_tx_event(tx_event).await?;
+                        }
+                        None => {
+                            info!("Tx signer not on chain - rejecting & removing tx from pool");
+
+                            mem_pool
+                                .call(RemoveTransactionByHash(tx_hash.to_vec()))
+                                .await??;
+                            tx_event.result = ExecutionResult::Invalid as i32;
+                            tx_event.error_message =
+                                "Tx signer user not found on chain - discarding tx from mem pool"
+                                    .to_string();
+
+                            self.emit_tx_event(tx_event.clone()).await?;
+                        }
+                    };
+                }
+                TransactionType::DeleteUserV1 => {
+                    info!("processing delete user transaction");
+                    match DatabaseService::read(ReadItem {
+                        key: Bytes::from(tx.signer.as_ref().unwrap().data.clone()),
+                        cf: USERS_COL_FAMILY,
+                    })
+                    .await?
+                    {
+                        Some(data) => {
+                            info!("user found on chain");
+                            let user = User::decode(data.0.as_ref())?;
+                            match self
+                                .process_delete_user_transaction(tx, &user, &mut tx_event)
+                                .await
+                            {
+                                Ok(_) => {
+                                    info!("delete user transaction processed: {}", tx_event);
+                                    tx_hashes.push(tx_hash.to_vec());
+                                    block_event.add_fee(tx_body.fee);
+                                    block_event.add_transaction_event(tx_event.clone());
+                                }
+                                Err(e) => {
+                                    error!(
+                                        "Failed to process delete user transaction: {:?}",
+                                        e.execution_info
+                                    );
+                                    tx_event.result = ExecutionResult::Invalid as i32;
+                                    tx_event.error_message = e.error_message;
+                                }
+                            }
+                            self.emit_tx_event(tx_event).await?;
                         }
                         None => {
                             info!("Tx signer not on chain - rejecting & removing tx from pool");
@@ -223,25 +294,6 @@ impl Handler<ProcessTransactions> for BlockChainService {
                             continue;
                         }
                     };
-
-                    match self
-                        .process_update_transaction(tx, &tokenomics, &mut tx_event)
-                        .await
-                    {
-                        Ok(_) => {
-                            info!("update user transaction processed: {}", tx_event);
-                            tx_hashes.push(tx_hash.to_vec());
-                            block_event.add_fee(tx_body.fee);
-                            block_event.add_transaction_event(tx_event.clone());
-                            block_event.user_updates_count += 1;
-                        }
-                        Err(e) => {
-                            error!("Failed to process update user transaction: {:?}", e);
-                            tx_event.result = ExecutionResult::Invalid as i32;
-                            tx_event.error_message = e.to_string();
-                        }
-                    }
-                    self.emit_tx_event(tx_event).await?;
                 }
                 _ => {
                     // ignore any other transaction types

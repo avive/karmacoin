@@ -68,6 +68,7 @@ impl BlockChainService {
         signed_transaction: &SignedTransaction,
         tokenomics: &Tokenomics,
         event: &mut TransactionEvent,
+        user: &mut User,
     ) -> Result<()> {
         let account_id = signed_transaction
             .signer
@@ -78,19 +79,6 @@ impl BlockChainService {
         // validate tx syntax, fields, signature, net_id before processing it
         signed_transaction.validate().await?;
         let tx_body = signed_transaction.get_body()?;
-
-        // Check user account id is not already on chain
-        let user_data = DatabaseService::read(ReadItem {
-            key: Bytes::from(account_id.data.clone()),
-            cf: USERS_COL_FAMILY,
-        })
-        .await?;
-
-        if user_data.is_none() {
-            return Err(anyhow!("user account not found on chain"));
-        }
-
-        let mut user = User::decode(user_data.unwrap().0.as_ref())?;
 
         tx_body.validate(user.nonce).await?;
 
@@ -146,7 +134,7 @@ impl BlockChainService {
         // handle nickname update request...
 
         if user.user_name != requested_nickname {
-            self.update_username(&mut user, requested_nickname, event)
+            self.update_username(user, requested_nickname, event)
                 .await?;
         }
 

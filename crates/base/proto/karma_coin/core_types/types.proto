@@ -150,6 +150,7 @@ enum TransactionType {
     TRANSACTION_TYPE_PAYMENT_V1 = 0;
     TRANSACTION_TYPE_NEW_USER_V1 = 1;
     TRANSACTION_TYPE_UPDATE_USER_V1 = 2;
+    TRANSACTION_TYPE_DELETE_USER_V1 = 3;
 }
 
 // new user transactions submitted by users
@@ -188,6 +189,9 @@ message UpdateUserTransactionV1 {
 
     // verifier attestation regarding the number and the account
     UserVerificationData user_verification_data = 3;
+}
+
+message DeleteUserTransactionV1 {
 }
 
 // The generic transaction payload - unsigned
