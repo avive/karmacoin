@@ -15,6 +15,7 @@ pub mod genesis_data;
 pub mod hasher;
 pub mod hex_utils;
 pub mod karma_coin;
+pub mod karma_coin_format;
 pub mod key_pair;
 pub mod logging_service;
 pub mod new_user_tx;

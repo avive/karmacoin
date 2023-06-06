@@ -19,7 +19,7 @@ xactor = { path = "../xactor", version = "0.7.9", features = ["runtime-tokio"], 
 xactor-derive = { path = "../xactor-derive" }
 
 rocksdb = "0.20.1"
-
+data-encoding = "2.4.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_bytes = "0.11"
 serde_json = "1.0"
@@ -34,7 +34,7 @@ tower-http = { version = "0.3.5", features = ["cors"] }
 http = "0.2.8"
 prost = "0.11.6"
 prost-types = "0.11.6"
-reqwest = "0.11.14"
+reqwest = {version = "0.11.14", features = ["json"] }
 
 config = "0.13.1"
 uint = "0.9.0"

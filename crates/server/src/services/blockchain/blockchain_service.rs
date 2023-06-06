@@ -4,7 +4,9 @@
 
 use anyhow::Result;
 use base::karma_coin::karma_coin_core_types::KeyPair;
-use base::server_config_service::{GetBlockProducerIdKeyPair, ServerConfigService};
+use base::server_config_service::{
+    GetBlockProducerIdKeyPair, GetVerifierIdKeyPair, ServerConfigService,
+};
 use xactor::*;
 
 /// Blockchain service mocks a blockchain node
@@ -14,6 +16,7 @@ use xactor::*;
 pub(crate) struct BlockChainService {
     /// block producer id pair
     pub(crate) id_key_pair: Option<KeyPair>,
+    pub(crate) verifier_key_pair: Option<KeyPair>,
 }
 
 #[async_trait::async_trait]
@@ -30,6 +33,14 @@ impl Actor for BlockChainService {
         );
 
         // todo: set block producer unique name
+
+        // verifier key pair for validation
+        self.verifier_key_pair = Some(
+            ServerConfigService::from_registry()
+                .await?
+                .call(GetVerifierIdKeyPair)
+                .await??,
+        );
 
         Ok(())
     }

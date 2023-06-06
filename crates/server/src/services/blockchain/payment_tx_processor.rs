@@ -7,13 +7,15 @@ use crate::services::blockchain::tokenomics::Tokenomics;
 use crate::services::db_config_service::{
     MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY,
 };
+use crate::services::push_notes::{send_tx_push_note, PaymentTxPushNotesData};
 use anyhow::{anyhow, Result};
 use base::genesis_config_service::{AMBASSADOR_CHAR_TRAIT_ID, SPENDER_CHAR_TRAIT_ID};
-use base::hex_utils::short_hex_string;
+use base::hex_utils::{hex_string, short_hex_string};
 use base::karma_coin::karma_coin_core_types::{
     CommunityMembership, ExecutionResult, FeeType, PaymentTransactionV1, SignedTransaction,
     TransactionBody, TransactionEvent, TransactionType, User,
 };
+use base::karma_coin_format::format_kc_amount;
 use bytes::Bytes;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use prost::Message;
@@ -219,6 +221,7 @@ impl BlockChainService {
 
         let referral_reward_amount = tokenomics.get_referral_reward_amount().await?;
 
+        let mut referral_reward_awarded = false;
         if let Some(payee_number) = payment_tx.to_number {
             let number = payee_number.number;
             // apply new user referral reward to the payer if applicable
@@ -238,6 +241,7 @@ impl BlockChainService {
                 // Give payer the ambassador trait and 1 karma point for helping to grow the network
                 payer.inc_trait_score(AMBASSADOR_CHAR_TRAIT_ID, 0);
                 payer.karma_score += 1;
+                referral_reward_awarded = true;
             };
         }
 
@@ -322,6 +326,33 @@ impl BlockChainService {
         event.fee_type = fee_type as i32;
         event.fee = tx_body.fee;
         event.result = ExecutionResult::Executed as i32;
+
+        // handle push notes
+        if referral_reward_awarded {
+            info!("Send push note about referral reward to payer - todo: implement me");
+            // this was payment on signup and payer got referral reward
+            // send payer push note about it - no need to send push to payee
+        } else {
+            // send a push note to payee about the push
+            use data_encoding::BASE64;
+
+            let to_id = BASE64.encode(payee.account_id.as_ref().unwrap().data.as_ref());
+            let amount = format_kc_amount(payment_amount);
+            let data = PaymentTxPushNotesData {
+                tx_id: hex_string(tx_hash.as_ref()),
+                amount,
+                to_id,
+                char_id: payment_tx.char_trait_id,
+                // todo: get emoji for chart_trait if it is non zero
+                emoji: "".to_string(),
+            };
+
+            // don't fail operation if push note fails
+            match send_tx_push_note(data).await {
+                Ok(_) => info!("sent push note to payee"),
+                Err(e) => error!("failed to send push note to payee: {}", e),
+            }
+        }
 
         Ok(())
     }
