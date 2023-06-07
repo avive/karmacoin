@@ -14,6 +14,7 @@ pub(crate) struct PaymentTxPushNotesData {
 
 /// Sends a push notification to the user regarding new tx sent to him going onchain
 pub(crate) async fn send_tx_push_note(params: PaymentTxPushNotesData) -> Result<()> {
+    // todo: put into actor and load this at construction time as these are immutable
     let token = ServerConfigService::get("cloud_functions.token".into())
         .await?
         .unwrap();

@@ -334,6 +334,7 @@ impl BlockChainService {
             // send payer push note about it - no need to send push to payee
         } else {
             // send a push note to payee about the push
+            // todo: add community info when applicable to make it more personalized to community
             use data_encoding::BASE64;
 
             let to_id = BASE64.encode(payee.account_id.as_ref().unwrap().data.as_ref());
