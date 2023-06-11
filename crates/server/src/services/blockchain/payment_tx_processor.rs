@@ -7,7 +7,8 @@ use crate::services::blockchain::tokenomics::Tokenomics;
 use crate::services::db_config_service::{
     MOBILE_NUMBERS_COL_FAMILY, TRANSACTIONS_COL_FAMILY, USERS_COL_FAMILY,
 };
-use crate::services::push_notes::{send_tx_push_note, PaymentTxPushNotesData};
+use crate::services::referral_push_note::{send_referral_push_note, ReferralPushNotesData};
+use crate::services::tx_push_note::{send_tx_push_note, PaymentTxPushNotesData};
 use anyhow::{anyhow, Result};
 use base::genesis_config_service::{AMBASSADOR_CHAR_TRAIT_ID, SPENDER_CHAR_TRAIT_ID};
 use base::hex_utils::{hex_string, short_hex_string};
@@ -17,6 +18,7 @@ use base::karma_coin::karma_coin_core_types::{
 };
 use base::karma_coin_format::format_kc_amount;
 use bytes::Bytes;
+use data_encoding::BASE64;
 use db::db_service::{DataItem, DatabaseService, ReadItem, WriteItem};
 use prost::Message;
 use std::collections::HashMap;
@@ -332,10 +334,18 @@ impl BlockChainService {
             info!("Send push note about referral reward to payer - todo: implement me");
             // this was payment on signup and payer got referral reward
             // send payer push note about it - no need to send push to payee
+
+            let to_id = BASE64.encode(payer.account_id.as_ref().unwrap().data.as_ref());
+            let amount = format_kc_amount(referral_reward_amount);
+            let data = ReferralPushNotesData { to_id, amount };
+            // don't fail operation if push note fails
+            match send_referral_push_note(data).await {
+                Ok(_) => info!("sent referral push note to payer"),
+                Err(e) => error!("failed to send referral push note to payee: {}", e),
+            }
         } else {
             // send a push note to payee about the push
             // todo: add community info when applicable to make it more personalized to community
-            use data_encoding::BASE64;
 
             let to_id = BASE64.encode(payee.account_id.as_ref().unwrap().data.as_ref());
             let amount = format_kc_amount(payment_amount);
@@ -350,8 +360,8 @@ impl BlockChainService {
 
             // don't fail operation if push note fails
             match send_tx_push_note(data).await {
-                Ok(_) => info!("sent push note to payee"),
-                Err(e) => error!("failed to send push note to payee: {}", e),
+                Ok(_) => info!("sent tx push note to payee"),
+                Err(e) => error!("failed to send tx push note to payee: {}", e),
             }
         }
 

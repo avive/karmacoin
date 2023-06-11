@@ -7,6 +7,7 @@
 pub(crate) mod api;
 pub(crate) mod blockchain;
 pub(crate) mod db_config_service;
-pub(crate) mod push_notes;
+pub(crate) mod referral_push_note;
 pub mod server_service;
+pub(crate) mod tx_push_note;
 pub(crate) mod verifier;

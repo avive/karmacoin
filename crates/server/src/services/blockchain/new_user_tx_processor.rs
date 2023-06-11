@@ -127,7 +127,7 @@ impl BlockChainService {
                 return Err(NewUserProcessingError {
                     execution_info: ExecutionInfo::InvalidData,
                     error_message: format!(
-                        "Unrecognized verifier. provided: {}, evidence: {}",
+                        "Unrecognized verifier. provided: {}, expected: {}",
                         short_hex_string(verifier_account_id.data.as_ref()),
                         short_hex_string(verifier_key.as_ref())
                     ),
@@ -139,6 +139,8 @@ impl BlockChainService {
                 error_message: "Missing verifier account id in verification evidence".into(),
             });
         }
+
+        info!("verifier verified :-)");
 
         let mobile_number =
             verification_evidence
