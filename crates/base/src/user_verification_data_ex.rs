@@ -11,7 +11,7 @@ impl From<VerificationResult> for UserVerificationDataEx {
             timestamp: chrono::Utc::now().timestamp_millis() as u64,
             verification_result: value as i32,
             verifier_account_id: None,
-            mobile_number: None,
+            mobile_number_hash: "".into(),
             requested_user_name: "".into(),
         }
     }

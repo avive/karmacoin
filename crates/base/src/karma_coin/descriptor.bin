@@ -1,5 +1,5 @@
 
-®Û
+à
 !karma_coin/core_types/types.protokarma_coin.core_types"
 	AccountId
 data (Rdata"y
@@ -102,7 +102,10 @@ discordUrl$
  (RcharTraitIds
 closed (Rclosed"y
 NewUserTransactionV1a
-verify_number_response (2+.karma_coin.core_types.UserVerificationDataRverifyNumberResponse"³
+verify_number_response (2+.karma_coin.core_types.UserVerificationDataRverifyNumberResponse"¢
+NewUserTransactionV29
+user_verification_data_ex (RuserVerificationDataExO
+verifier_signature (2 .karma_coin.core_types.SignatureRverifierSignature"³
 PaymentTransactionV14
 from (2 .karma_coin.core_types.AccountIdRfrom
 amount (Ramount@
@@ -136,14 +139,14 @@ discordUrl$
 account_id (2 .karma_coin.core_types.AccountIdR	accountIdH
 mobile_number (2#.karma_coin.core_types.MobileNumberRmobileNumber.
 requested_user_name (	RrequestedUserName>
-	signature (2 .karma_coin.core_types.SignatureR	signature"Ÿ
+	signature (2 .karma_coin.core_types.SignatureR	signature"ƒ
 UserVerificationDataExP
 verifier_account_id (2 .karma_coin.core_types.AccountIdRverifierAccountId
 	timestamp (R	timestampZ
 verification_result (2).karma_coin.core_types.VerificationResultRverificationResult?
 
-account_id (2 .karma_coin.core_types.AccountIdR	accountIdH
-mobile_number (2#.karma_coin.core_types.MobileNumberRmobileNumber.
+account_id (2 .karma_coin.core_types.AccountIdR	accountId,
+mobile_number_hash (	RmobileNumberHash.
 requested_user_name (	RrequestedUserName"2
 SignedTransactionsHashes
 hashes (Rhashes"W
@@ -247,12 +250,13 @@ feesAmount2
 charTraitsB
 	verifiers (2$.karma_coin.core_types.PhoneVerifierR	verifiers*#
 	KeyScheme
-KEY_SCHEME_ED25519 *
+KEY_SCHEME_ED25519 *Â
 TransactionType
 TRANSACTION_TYPE_PAYMENT_V1  
 TRANSACTION_TYPE_NEW_USER_V1#
 TRANSACTION_TYPE_UPDATE_USER_V1#
-TRANSACTION_TYPE_DELETE_USER_V1*£
+TRANSACTION_TYPE_DELETE_USER_V1"
+TRANSACTION_TYPE_DELETE_USER_V*£
 VerificationResult#
 VERIFICATION_RESULT_UNSPECIFIED '
 #VERIFICATION_RESULT_USER_NAME_TAKEN 
@@ -285,8 +289,8 @@ $VERIFICATION_RESULT_ACCOUNT_MISMATCH*½
 %EXECUTION_INFO_ACCOUNT_ALREADY_EXISTS!
 EXECUTION_INFO_TX_FEE_TOO_LOW	&
 "EXECUTION_INFO_INTERNAL_NODE_ERROR
-J¡‰
- ±
+JÇŒ
+ ¼
 ¨
  2 Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
  This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
@@ -1033,7 +1037,7 @@ Q
 
 
 
-” ™/ transactions
+” š/ transactions
 
 
 ”
@@ -1061,86 +1065,115 @@ Q
 ˜#
 
 ˜&'
+
+™'
+
+™"
+
+™%&
 8
-œ Ÿ* new user transactions submitted by users
+  * new user transactions submitted by users
 
 
-œ
+
 A
- 43 Evidence from a valid verifier about the new user
+ Ÿ43 Evidence from a valid verifier about the new user
 
 
- 
+ Ÿ
 
- /
+ Ÿ/
 
- 23
-—
-£ ¬ˆ Basic payment transaction with optional character appreciation
- Receiver must be identified by phone number or a karma coin account id
+ Ÿ23
+8
+£ §* new user transactions submitted by users
 
 
 £
+b
+ ¥(T Serialized UserVerifcationDataEx evidence from a valid verifier about the new user
+
+
+ ¥	
+
+ ¥
+#
+
+ ¥&'
+
+¦%
+
+¦
+
+¦ 
+
+¦#$
+—
+« ´ˆ Basic payment transaction with optional character appreciation
+ Receiver must be identified by phone number or a karma coin account id
+
+
+«
 X
- ¤"J must be included so it is part of signed message and part of the tx hash
+ ¬"J must be included so it is part of signed message and part of the tx hash
 
 
- ¤
+ ¬
 
- ¤
+ ¬
 
- ¤
+ ¬
 ,
-¥" amount in tokens to transfer
+­" amount in tokens to transfer
 
 
-¥
+­
 
 
-¥
+­
 
-¥
+­
 ¤
-¨| IMPORTANT: one of the next fields must be provided as the payee for the tx to be valid
+°| IMPORTANT: one of the next fields must be provided as the payee for the tx to be valid
  todo: use oneof proto feature here
 " pay to a mobile number
 
 
-¨
+°
 
-¨
+°
 
-¨
+°
 .
-© "  pay to a Karma Coin account id
+± "  pay to a Karma Coin account id
 
 
-©
+±
 
-©
+±
 
-©
+±
 7
-ª") char trait id set by sender. e.g. smart
+²") char trait id set by sender. e.g. smart
 
 
-ª
+²
 
 
-ª
+²
 
-ª
+²
 
-«
+³
 
-«
+³
 
 
-«
+³
 
-«
+³
 Ü
-µ ¿Í Update user info
+½ ÇÍ Update user info
  User can update his nickname, mobile phone number or accountId in case
  he wants to associate his number with a new accountId.
  in that case, only way to transact from old account with old account id is via
@@ -1149,1273 +1182,1276 @@ X
  and the user's phone number is going to be assoicated with the new account
 
 
-µ
+½
 &
- ¸ new requested nickname
+ À new requested nickname
 
 
- ¸
+ À
 
 
- ¸
+ À
 
- ¸
+ À
 5
-»#' Updated mobile number or existing one
+Ã#' Updated mobile number or existing one
 
 
-»
+Ã
 
-»
+Ã
 
-»!"
+Ã!"
 I
-¾4; verifier attestation regarding the number and the account
+Æ4; verifier attestation regarding the number and the account
 
 
-¾
+Æ
 
-¾/
+Æ/
 
-¾23
+Æ23
 
-Á Â
+É Ê
 
-Á
+É
 :
-Å Ë, The generic transaction payload - unsigned
+Í Ó, The generic transaction payload - unsigned
 
 
-Å
+Í
 +
- Æ" time transaction was signed
+ Î" time transaction was signed
 
 
- Æ
+ Î
 
 
- Æ
+ Î
 
- Æ
+ Î
 
-Ç"
+Ï"
  tx nonce
 
 
-Ç
+Ï
 
 
-Ç
+Ï
 
-Ç
+Ï
 .
-È"  network fee provided by sender
+Ğ"  network fee provided by sender
 
 
-È
+Ğ
 
 
-È
+Ğ
 
-È
+Ğ
 '
-É)" binary transaction data
+Ñ)" binary transaction data
 
 
-É
+Ñ
 
-É$
+Ñ$
 
-É'(
+Ñ'(
 ;
-Ê"- network id to avoid confusion with testnets
+Ò"- network id to avoid confusion with testnets
 
 
-Ê
+Ò
 
 
-Ê
+Ò
 
-Ê
+Ò
 +
-Î Ñ serialized transaction data
+Ö Ù serialized transaction data
 
 
-Î
+Ö
 M
- Ï"? binary transaction data (e.g. NewUserTxV1, PaymentV1, etc...)
+ ×"? binary transaction data (e.g. NewUserTxV1, PaymentV1, etc...)
 
 
- Ï	
+ ×	
 
- Ï
+ ×
 
 
- Ï
+ ×
 4
-Ğ)"& transaction type for deserialization
+Ø)"& transaction type for deserialization
 
 
-Ğ
+Ø
 
-Ğ$
+Ø$
 
-Ğ'(
+Ø'(
 
-Ó ×
+Û ß
 
-Ó
+Û
 ,
- Ô" account this tx is signed by
+ Ü" account this tx is signed by
 
 
- Ô
+ Ü
 
- Ô
+ Ü
 
- Ô
+ Ü
  
-Õ" Transaction data
+İ" Transaction data
 
 
-Õ	
+İ	
 
-Õ
+İ
 
 
-Õ
+İ
 9
-Ö"+ signer signature on all of the above data
+Ş"+ signer signature on all of the above data
 
 
-Ö
+Ş
 
-Ö
+Ş
 
-Ö
+Ş
 
-Ù á
+á é
 
-Ù
+á
 
- Ú(
+ â(
 
- Ú#
+ â#
 
- Ú&'
+ â&'
 C
-Û,"5 there's already a user with the requested user name
+ã,"5 there's already a user with the requested user name
 
 
-Û'
+ã'
 
-Û*+
+ã*+
 5
-Ü%"' user is verified using provided token
+ä%"' user is verified using provided token
 
 
-Ü 
+ä 
 
-Ü#$
+ä#$
 9
-İ'"+ user is not verifier using provided token
+å'"+ user is not verifier using provided token
 
 
-İ"
+å"
 
-İ%&
+å%&
 0
-Ş)"" request is missing required data
+æ)"" request is missing required data
 
 
-Ş$
+æ$
 
-Ş'(
+æ'(
 $
-ß." bad client signature
+ç." bad client signature
 
 
-ß)
+ç)
 
-ß,-
+ç,-
 >
-à-"0 different account associated with phone number
+è-"0 different account associated with phone number
 
 
-à(
+è(
 
-à+,
+è+,
 _
-ä ìQ Created and signed by a verifier to attest that an account owns a mobile number
+ì ôQ Created and signed by a verifier to attest that an account owns a mobile number
 
 
-ä
+ì
 
- å&
+ í&
 
- å
+ í
 
- å!
+ í!
 
- å$%
+ í$%
 
-æ
+î
 
-æ
+î
 
 
-æ
+î
 
-æ
+î
 
-ç/
+ï/
 
-ç
+ï
 
-ç*
+ï*
 
-ç-.
+ï-.
 
-è
+ğ
 
-è
+ğ
 
-è
+ğ
 
-è
+ğ
 
-é#
+ñ#
 
-é
+ñ
 
-é
+ñ
 
-é!"
+ñ!"
 
-ê#
+ò#
 
-ê
+ò
 
 
-ê
+ò
 
-ê!"
+ò!"
 
-ë
+ó
 
-ë
+ó
 
-ë
+ó
 
-ë
-_
-ï öQ Created and signed by a verifier to attest that an account owns a mobile number
+ó
+Å
+ú ¶ Created and signed by a verifier to attest that an account owns a mobile number
+ Includes mobile number hash instead of mobile number in response
+ Signature is externally available
 
 
-ï
+ú
 
- ğ&
+ û&
 
- ğ
+ û
 
- ğ!
+ û!
 
- ğ$%
+ û$%
 
-ñ
+ü
 
-ñ
+ü
 
 
-ñ
+ü
 
-ñ
+ü
 
-ò/
+ı/
 
-ò
+ı
 
-ò*
+ı*
 
-ò-.
+ı-.
 
-ó
+ş
 
-ó
+ş
 
-ó
+ş
 
-ó
+ş
 
-ô#
+ÿ"
 
-ô
+ÿ
 
-ô
 
-ô!"
+ÿ
+
+ÿ !
 
-õ#
+€#
 
-õ
+€
 
 
-õ
+€
 
-õ!"
+€!"
 
-ø ş
+ƒ ‰
 
-ø
+ƒ
 
- ù#
+ „#
 
- ù
+ „
 
- ù!"
+ „!"
 
-ú)
+…)
 
-ú$
+…$
 
-ú'(
+…'(
 
-û%
+†%
 
-û 
+† 
 
-û#$
+†#$
 
-ü$
+‡$
 
-ü
+‡
 
-ü"#
+‡"#
 
-ı$
+ˆ$
 
-ı
+ˆ
 
-ı"#
+ˆ"#
 3
- ƒ% a collection of signed transactions
+Œ % a collection of signed transactions
 
 
- 
+Œ 
 
- ‚
+ 
 
- ‚
+ 
 
- ‚
+ 
 
- ‚
+ 
 
- ‚
+ 
 O
-† ˆA Pending transactions are transactions that are not yet on chain
+‘ “A Pending transactions are transactions that are not yet on chain
 
 
-†
+‘
 
- ‡0
+ ’0
 
- ‡
+ ’
 
- ‡
+ ’
 
- ‡+
+ ’+
 
- ‡./
+ ’./
 
-Š 
+• š
 
-Š#
+•#
 
- ‹&
+ –&
 
- ‹
+ –
 
- ‹!
+ –!
 
- ‹$%
+ –$%
 "
-Œ!" transaction status
+—!" transaction status
 
 
-Œ
+—
 
-Œ
+—
 
-Œ 
+— 
 
-" sender
+˜" sender
 
 
-
+˜
 
-
+˜
 
-
+˜
 
-"
+™"
  receiver
 
 
-
+™
 
-
+™
 
-
+™
 
-‘ ”
+œ Ÿ
 
-‘
+œ
 ,
- ’" fee provided by the protocol
+ " fee provided by the protocol
 
 
- ’
+ 
 
- ’
+ 
 6
-“"( fee provided by the transaction signer
+"( fee provided by the transaction signer
 
 
-“
+
 
-“
+
 +
-— ¥ Transaction added to ledger
+¢ ° Transaction added to ledger
 
 
-—
+¢
 
- ˜
+ £
 
- ˜
+ £
 
 
- ˜
+ £
 
- ˜
+ £
 *
-™" ledger height of execution
+¤" ledger height of execution
 
 
-™
+¤
 
 
-™
+¤
 
-™
+¤
 
-š&
+¥&
 
-š
+¥
 
-š!
+¥!
 
-š$%
+¥$%
 
-›
+¦
 
-›	
+¦	
 
-›
+¦
 
 
-›
+¦
 
-œ
+§
 
-œ
+§
 
-œ
+§
 
-œ
+§
 
-
+¨
 
-
+¨
 
-
+¨
 
-
+¨
 
-
+©
 
-
+©
 
 
-
+©
 
-
+©
 
-Ÿ
+ª
 
-Ÿ
+ª
 
-Ÿ
+ª
 
-Ÿ
+ª
 
- 
+«
 
- 
+«
 
 
- 
+«
 
- 
+«
 
-	¡ 
+	¬ 
 
-	¡
+	¬
 
 
-	¡
+	¬
 
-	¡
+	¬
 
-
-¢,
+
+­,
 
-
-¢
+
+­
 
 
-
-¢&
+
+­&
 
-
-¢)+
+
+­)+
 
-£*
+®*
 
-£
+®
 
 
-£$
+®$
 
-£')
+®')
 
-¤
+¯
 
-¤
+¯
 
 
-¤
+¯
 
-¤
+¯
 8
-¨ ª* A collection of events for a transaction
+³ µ* A collection of events for a transaction
 
 
-¨
+³
 
- ©)
+ ´)
 
- ©
+ ´
 
- ©
+ ´
 
- ©$
+ ´$
 
- ©'(
+ ´'(
 *
-­ æ Blockchain aggregated data
+ ¸ ñ Blockchain aggregated data
 
 
-­
+ ¸
 *
- ° last block production time
+  » last block production time
 
 
- °
+  »
 
 
- °
+  »
 
- °
+  »
 $
-³ current block height
+ ¾ current block height
 
 
-³
+ ¾
 
 
-³
+ ¾
 
-³
+ ¾
 5
-¶"' total number of executed transactions
+ Á"' total number of executed transactions
 
 
-¶
+ Á
 
 
-¶
+ Á
 
-¶ !
+ Á !
 4
-¹+& total number of payment transactions
+ Ä+& total number of payment transactions
 
 
-¹
+ Ä
 
 
-¹&
+ Ä&
 
-¹)*
+ Ä)*
 I
-¼0; total number of payment transactions with an appreciation
+ Ç0; total number of payment transactions with an appreciation
 
 
-¼
+ Ç
 
 
-¼+
+ Ç+
 
-¼./
+ Ç./
 6
-¿( total number of verified user accounts
+ Ê( total number of verified user accounts
 
 
-¿
+ Ê
 
 
-¿
+ Ê
 
-¿
+ Ê
 :
-Â, total tx fees collected by block producers
+ Í, total tx fees collected by block producers
 
 
-Â
+ Í
 
 
-Â
+ Í
 
-Â
+ Í
 K
-Å= total number of kCents minted by the protocol since genesis
+ Ğ= total number of kCents minted by the protocol since genesis
 
 
-Å
+ Ğ
 
 
-Å
+ Ğ
 
-Å
+ Ğ
 X
-ÈJ total number of kCents in circulation by minting. Not including pre-mint
+ ÓJ total number of kCents in circulation by minting. Not including pre-mint
 
 
-È
+ Ó
 
 
-È
+ Ó
 
-È
+ Ó
 =
-	Ë/ total tx fee subsidies issued by the protocol
+ 	Ö/ total tx fee subsidies issued by the protocol
 
 
-	Ë
+ 	Ö
 
 
-	Ë
+ 	Ö
 
-	Ë
-
-
-Ì 
-
-
-Ì
-
-
-
-Ì
-
-
-Ì
-
-Î%
-
-Î
-
-
-Î
-
-Î"$
-
-Ï&
-
-Ï
-
-
-Ï 
-
-Ï#%
-
-Ñ'
-
-Ñ
-
-
-Ñ!
-
-Ñ$&
-
-Ò(
-
-Ò
-
-
-Ò"
-
-Ò%'
-
-Ô(
-
-Ô
-
-
-Ô"
-
-Ô%'
-
-Õ)
-
-Õ
-
-
-Õ#
-
-Õ&(
-4
-Ø/& total number of payment transactions
-
-
-Ø
-
-
-Ø)
-
-Ø,.
-1
-Û# estimated KC to USD exchange rate
-
-
-Û
-
-
-Û
-
-Û
-0
-Ş&" amount of rewards paid to causes
-
-
-Ş
-
-
-Ş 
-
-Ş#%
-#
-á$ karma rewards given
-
-
-á
-
-
-á
-
-á!#
-.
-ä%  karma rewards amount allocated
-
-
-ä
-
-
-ä
-
-ä"$
-
- é ÷ Block events
-
-
- é
-
-  ê
-
-  ê
-
-
-  ê
-
-  ê
-
- ë
-
- ë
-
-
- ë
-
- ë
-
- ì
-
- ì	
-
- ì
-
-
- ì
-
- í6
-
- í
-
- í
-
- í1
-
- í45
-
- î
-
- î
-
-
- î
-
- î
-
- ï
-
- ï
-
-
- ï
-
- ï
-
- ğ#
-
- ğ
-
-
- ğ
-
- ğ!"
-
- ñ"
-
- ñ
-
-
- ñ
-
- ñ !
-
- ò
-
- ò
-
-
- ò
-
- ò
-
- 	ó&
-
- 	ó
-
-
- 	ó 
-
- 	ó#%
+ 	Ö
 
  
-ô(
+× 
 
  
-ô
+×
 
 
  
-ô"
+×
 
  
-ô%'
+×
 
- õ'
+ Ù%
 
- õ
+ Ù
 
 
- õ!
+ Ù
 
- õ$&
+ Ù"$
 
- ö
+ Ú&
 
- ö
+ Ú
 
 
- ö
+ Ú 
 
- ö
+ Ú#%
 
-ù ü
+ Ü'
+
+ Ü
+
+
+ Ü!
+
+ Ü$&
+
+ İ(
+
+ İ
+
+
+ İ"
+
+ İ%'
+
+ ß(
+
+ ß
+
+
+ ß"
+
+ ß%'
+
+ à)
+
+ à
+
+
+ à#
+
+ à&(
+4
+ ã/& total number of payment transactions
+
+
+ ã
+
+
+ ã)
+
+ ã,.
+1
+ æ# estimated KC to USD exchange rate
+
+
+ æ
+
+
+ æ
+
+ æ
+0
+ é&" amount of rewards paid to causes
+
+
+ é
+
+
+ é 
+
+ é#%
+#
+ ì$ karma rewards given
+
+
+ ì
+
+
+ ì
+
+ ì!#
+.
+ ï%  karma rewards amount allocated
+
+
+ ï
+
+
+ ï
+
+ ï"$
+
+!ô ‚ Block events
+
 
-ù
+!ô
 
- ú"
+! õ
 
- ú
-
- ú !
-
-û!" invalid syntax
+! õ
 
 
-û
+! õ
 
-û 
+! õ
 
-ş Š
-
-ş
+!ö
+
+!ö
+
+
+!ö
+
+!ö
 
- ÿ
+!÷
 
- ÿ
+!÷	
 
- ÿ
+!÷
+
+
+!÷
 
-€(
+!ø6
 
-€#
+!ø
 
-€&'
+!ø
+
+!ø1
+
+!ø45
 
-.
+!ù
 
-)
+!ù
 
-,-
+
+!ù
+
+!ù
 
-‚(
+!ú
 
-‚#
+!ú
 
-‚&'
+
+!ú
+
+!ú
 
-ƒ&
+!û#
 
-ƒ!
+!û
 
-ƒ$%
+
+!û
+
+!û!"
 
-„'
+!ü"
 
-„"
+!ü
 
-„%&
+
+!ü
+
+!ü !
 
-…)
+!ı
 
-…$
+!ı
 
-…'(
+
+!ı
+
+!ı
 
-†$
+!	ş&
 
-†
-
-†"#
-
-‡.
-
-‡)
-
-‡,-
-
-	ˆ&
-
-	ˆ!
-
-	ˆ$%
-
-
-‰,
-
-
-‰&
-
-
-‰)+
-
-!Œ ±
-
-!Œ
-
-! 
-
-! 
+!	ş
 
 
-! 
+!	ş 
 
-! 
-
-!
-
-!
-
-
-!
-
-!
-
-!
-
-!
-
-
-!
-
-!
-
-!*
-
-!
-
-
-!%
-
-!()
-
-!‘*
-
-!‘
-
-
-!‘%
-
-!‘()
-
-!“+
-
-!“
-
-
-!“&
-
-!“)*
-
-!”+
-
-!”
-
-
-!”&
-
-!”)*
-
-!•*
-
-!•
-
-
-!•%
-
-!•()
-
-!—,
-
-!—
-
-
-!—'
-
-!—*+
-
-!	˜-
-
-!	˜
-
-
-!	˜'
-
-!	˜*,
+!	ş#%
 
 !
-š.
+ÿ(
 
 !
-š
+ÿ
 
 
 !
-š(
+ÿ"
 
 !
-š+-
+ÿ%'
 
-!›.
+!€'
 
-!›
+!€
 
 
-!›(
+!€!
 
-!›+-
+!€$&
 
-!,
+!
 
-!
+!
 
 
-!&
+!
 
-!)+
+!
 
-!'
-
-!
-
-
-!!
-
-!$&
+„ ‡
+
+„
 
-!Ÿ*
+ …"
 
-!Ÿ
+ …
+
+ … !
+
+†!" invalid syntax
 
 
-!Ÿ$
+†
 
-!Ÿ')
+† 
 
-!¡$
-
-!¡
-
-
-!¡
-
-!¡!#
+‰ •
+
+‰
 
-!¢(
+ Š
 
-!¢
+ Š
 
-
-!¢"
-
-!¢%'
+ Š
 
-!¤$
+‹(
 
-!¤
+‹#
 
-
-!¤
-
-!¤!#
+‹&'
 
-!¥#
+Œ.
 
-!¥
+Œ)
 
-
-!¥
-
-!¥ "
+Œ,-
 
-!¦)
+(
 
-!¦
+#
 
-
-!¦#
-
-!¦&(
+&'
 
-!§*
+&
 
-!§
+!
 
-
-!§$
-
-!§')
+$%
 
-!¨+
+'
 
-!¨
+"
 
-
-!¨%
-
-!¨(*
+%&
 
-!ª'
+)
 
-!ª
+$
 
-
-!ª!
-
-!ª$&
+'(
 
-!«+
+‘$
 
-!«
+‘
 
-
-!«%
-
-!«(*
+‘"#
 
-!¬-
+’.
 
-!¬
+’)
 
-
-!¬'
-
-!¬*,
+’,-
 
-!®3
+	“&
 
-!®
+	“!
 
-!®!
-
-!®"-
-
-!®02
+	“$%
 
-!¯5
+
+”,
 
-!¯
+
+”&
 
-!¯%
+
+”)+
+
+"— ¼
+
+"—
+
+" ˜
 
-!¯&/
+" ˜
 
-!¯24bproto3
-Ş&
+
+" ˜
+
+" ˜
+
+"™
+
+"™
+
+
+"™
+
+"™
+
+"š
+
+"š
+
+
+"š
+
+"š
+
+"›*
+
+"›
+
+
+"›%
+
+"›()
+
+"œ*
+
+"œ
+
+
+"œ%
+
+"œ()
+
+"+
+
+"
+
+
+"&
+
+")*
+
+"Ÿ+
+
+"Ÿ
+
+
+"Ÿ&
+
+"Ÿ)*
+
+" *
+
+" 
+
+
+" %
+
+" ()
+
+"¢,
+
+"¢
+
+
+"¢'
+
+"¢*+
+
+"	£-
+
+"	£
+
+
+"	£'
+
+"	£*,
+
+"
+¥.
+
+"
+¥
+
+
+"
+¥(
+
+"
+¥+-
+
+"¦.
+
+"¦
+
+
+"¦(
+
+"¦+-
+
+"¨,
+
+"¨
+
+
+"¨&
+
+"¨)+
+
+"©'
+
+"©
+
+
+"©!
+
+"©$&
+
+"ª*
+
+"ª
+
+
+"ª$
+
+"ª')
+
+"¬$
+
+"¬
+
+
+"¬
+
+"¬!#
+
+"­(
+
+"­
+
+
+"­"
+
+"­%'
+
+"¯$
+
+"¯
+
+
+"¯
+
+"¯!#
+
+"°#
+
+"°
+
+
+"°
+
+"° "
+
+"±)
+
+"±
+
+
+"±#
+
+"±&(
+
+"²*
+
+"²
+
+
+"²$
+
+"²')
+
+"³+
+
+"³
+
+
+"³%
+
+"³(*
+
+"µ'
+
+"µ
+
+
+"µ!
+
+"µ$&
+
+"¶+
+
+"¶
+
+
+"¶%
+
+"¶(*
+
+"·-
+
+"·
+
+
+"·'
+
+"·*,
+
+"¹3
+
+"¹
+
+"¹!
+
+"¹"-
+
+"¹02
+
+"º5
+
+"º
+
+"º%
+
+"º&/
+
+"º24bproto3
+º&
 $karma_coin/core_types/verifier.protokarma_coin.verifier!karma_coin/core_types/types.proto"ß
 VerifierInfo
 name (	Rname?
@@ -2441,12 +2477,10 @@ account_id (2 .karma_coin.core_types.AccountIdR	accountIdH
 account_id (2 .karma_coin.core_types.AccountIdR	accountIdH
 mobile_number (2#.karma_coin.core_types.MobileNumberRmobileNumber.
 requested_user_name (	RrequestedUserName!
-bypass_token (RbypassToken"h
+bypass_token (RbypassToken"I
 VerifyNumberRequestEx
-data (Rdata
-
-public_key (R	publicKey
-	signature (R	signature"c
+data (Rdata
+	signature (R	signature"c
 VerifyNumberResponseEx+
 verification_data (RverificationData
 	signature (R	signature"¸
@@ -2458,8 +2492,8 @@ public_key (R	publicKey
 invite_tx_hash (RinviteTxHash2á
 VerifierServicec
 VerifyNumber(.karma_coin.verifier.VerifyNumberRequest).karma_coin.verifier.VerifyNumberResponsei
-VerifyNumberEx*.karma_coin.verifier.VerifyNumberRequestEx+.karma_coin.verifier.VerifyNumberResponseExJß
- S
+VerifyNumberEx*.karma_coin.verifier.VerifyNumberRequestEx+.karma_coin.verifier.VerifyNumberResponseExJÚ
+ R
 ¨
  2 Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
  This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
@@ -2487,9 +2521,9 @@ public_key (R	publicKey
   &
 
   1E
-z
- Mm Extended api - supports bypass token for tests and response signs binary part
- should be used in Kchain 2.0
+|
+ Mo Extended api - supports bypass token for tests and response signs binary part
+ should be used in Kchain 2.0 -
 
 
  
@@ -2625,7 +2659,7 @@ b
  (;<
 
 
-+ 1
++ 2
 
 
 +!
@@ -2661,122 +2695,115 @@ b
 /	
 
 / 
-
-0
+4
+1' optional token to bypass verification
+
 
-0
+1
 
-0
+1
 
-0
+1
 
 
-3 <
+4 ;
 
 
-3
+4
 3
- 5& serialized VerifyNumberRequestDataEx
+ 6& serialized VerifyNumberRequestDataEx
 
 
- 5
+ 6
 
- 5
+ 6
 
- 5
-6
-8) Client public key used to sign the data
-
-
-8
-
-8
-
-8
-/
-;" signature of binary data field 1
-
-
-;
-
-;
-
-;
-
-
-> D
-
-
->
-:
- @- a serialized UserVerificationDataEx message
-
-
- @
-
- @
-
- @
+ 6
 Z
-CM a signature over the binary data above - client has the verifier public key
+:M User signature of binary data field 1
+ Public key is account_id in the data
 
 
-C
+:
 
-C
+:
 
-C
+:
+
+
+= C
+
+
+=
+:
+ ?- a serialized UserVerificationDataEx message
+
+
+ ?
+
+ ?
+
+ ?
+a
+BT Verifier signature over the binary data above - client has the verifier public key
+
+
+B
+
+B
+
+B
 D
-H S8/ Data object stored in db to track invite sms messages
+G R8/ Data object stored in db to track invite sms messages
 
 
 
-H
+G
 1
- J,$ invited person mobile phone number
+ I,$ invited person mobile phone number
 
 
- J
+ I
 
- J'
+ I'
 
- J*+
+ I*+
 ;
-L*. the time of the last invite sms message sent
+K*. the time of the last invite sms message sent
 
 
-L
+K
 
-L	%
+K	%
 
-L()
+K()
 7
-N* total number of invite sms messages sent
+M* total number of invite sms messages sent
 
 
-N
+M
 
-N	
+M	
 
-N
+M
 A
-P.4 inviter mobile phone number (from appreciation tx)
+O.4 inviter mobile phone number (from appreciation tx)
 
 
-P
+O
 
-P)
+O)
 
-P,-
+O,-
 C
-R6 the hash of the payment tx that triggers this invite
+Q6 the hash of the payment tx that triggers this invite
 
 
-R
+Q
 
-R
+Q
 
-Rbproto3
+Qbproto3
 ¿
  karma_coin/core_types/auth.protokarma_coin.auth!karma_coin/core_types/types.proto"q
 AuthRequest?

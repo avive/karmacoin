@@ -240,6 +240,16 @@ pub struct NewUserTransactionV1 {
     #[prost(message, optional, tag = "1")]
     pub verify_number_response: ::core::option::Option<UserVerificationData>,
 }
+/// new user transactions submitted by users
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct NewUserTransactionV2 {
+    /// Serialized UserVerifcationDataEx evidence from a valid verifier about the new user
+    #[prost(bytes = "vec", tag = "1")]
+    pub user_verification_data_ex: ::prost::alloc::vec::Vec<u8>,
+    #[prost(message, optional, tag = "2")]
+    pub verifier_signature: ::core::option::Option<Signature>,
+}
 /// Basic payment transaction with optional character appreciation
 /// Receiver must be identified by phone number or a karma coin account id
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -355,6 +365,8 @@ pub struct UserVerificationData {
     pub signature: ::core::option::Option<Signature>,
 }
 /// Created and signed by a verifier to attest that an account owns a mobile number
+/// Includes mobile number hash instead of mobile number in response
+/// Signature is externally available
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UserVerificationDataEx {
@@ -366,8 +378,8 @@ pub struct UserVerificationDataEx {
     pub verification_result: i32,
     #[prost(message, optional, tag = "4")]
     pub account_id: ::core::option::Option<AccountId>,
-    #[prost(message, optional, tag = "5")]
-    pub mobile_number: ::core::option::Option<MobileNumber>,
+    #[prost(string, tag = "5")]
+    pub mobile_number_hash: ::prost::alloc::string::String,
     #[prost(string, tag = "6")]
     pub requested_user_name: ::prost::alloc::string::String,
 }
@@ -629,6 +641,7 @@ pub enum TransactionType {
     NewUserV1 = 1,
     UpdateUserV1 = 2,
     DeleteUserV1 = 3,
+    DeleteUserV = 4,
 }
 impl TransactionType {
     /// String value of the enum field names used in the ProtoBuf definition.
@@ -641,6 +654,7 @@ impl TransactionType {
             TransactionType::NewUserV1 => "TRANSACTION_TYPE_NEW_USER_V1",
             TransactionType::UpdateUserV1 => "TRANSACTION_TYPE_UPDATE_USER_V1",
             TransactionType::DeleteUserV1 => "TRANSACTION_TYPE_DELETE_USER_V1",
+            TransactionType::DeleteUserV => "TRANSACTION_TYPE_DELETE_USER_V",
         }
     }
     /// Creates an enum from field names used in the ProtoBuf definition.
@@ -650,6 +664,7 @@ impl TransactionType {
             "TRANSACTION_TYPE_NEW_USER_V1" => Some(Self::NewUserV1),
             "TRANSACTION_TYPE_UPDATE_USER_V1" => Some(Self::UpdateUserV1),
             "TRANSACTION_TYPE_DELETE_USER_V1" => Some(Self::DeleteUserV1),
+            "TRANSACTION_TYPE_DELETE_USER_V" => Some(Self::DeleteUserV),
             _ => None,
         }
     }

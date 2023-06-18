@@ -15,7 +15,6 @@ use bytes::Bytes;
 use db::db_service::{DatabaseService, ReadItem};
 use ed25519_dalek::{Signer, Verifier};
 use prost::Message;
-use uint::hex;
 use xactor::*;
 
 #[message(result = "Result<VerifyNumberResponseEx>")]
@@ -37,50 +36,74 @@ impl Handler<VerifyEx> for VerifierService {
             return Err(anyhow!("internal error - auth client not initialized"));
         }
 
-        use ed25519_dalek::ed25519::signature::Signature;
-        let signature = &Signature::from_bytes(&req.signature.as_ref()).unwrap();
-        let message = &req.data;
-        let pub_key = &ed25519_dalek::PublicKey::from_bytes(req.public_key.as_ref()).unwrap();
-
-        // verify request signature
-        if pub_key.verify(message, signature).is_err() {
-            return self
-                .gen_result_ex(VerificationResult::InvalidSignature)
-                .await;
+        // decode request data
+        let user_data = match VerifyNumberRequestDataEx::decode(req.data.as_ref()) {
+            Ok(user_data) => user_data,
+            Err(_) => {
+                return self.gen_result_ex(VerificationResult::MissingData).await;
+            }
         };
 
-        // create VerifyNumberRequestDataEx from data
-        let data = VerifyNumberRequestDataEx::decode(req.data.as_ref())?;
-
-        let account_id = match data.account_id {
-            Some(id) => id,
+        let account_id = match user_data.account_id {
+            Some(id) => id.clone(),
             None => {
                 return self.gen_result_ex(VerificationResult::MissingData).await;
             }
         };
 
-        if !req.public_key.eq(&account_id.data) {
-            // request public key used to verify signature doesn't match provided account id
+        // verify request signature
+        use ed25519_dalek::ed25519::signature::Signature;
+        let signature = &Signature::from_bytes(req.signature.as_ref()).unwrap();
+        let pub_key = &ed25519_dalek::PublicKey::from_bytes(account_id.data.as_ref()).unwrap();
+
+        // verify request data signature
+        if pub_key.verify(req.data.as_ref(), signature).is_err() {
             return self
-                .gen_result_ex(VerificationResult::AccountMismatch)
+                .gen_result_ex(VerificationResult::InvalidSignature)
                 .await;
+        };
+
+        let requested_user_name = user_data.requested_user_name.clone();
+
+        if requested_user_name.is_empty() {
+            return self.gen_result_ex(VerificationResult::MissingData).await;
         }
 
-        let phone_number = match data.mobile_number {
+        let phone_number = match user_data.mobile_number {
             Some(n) => n,
             None => {
-                return self
-                    .gen_result_ex(VerificationResult::InvalidSignature)
-                    .await;
+                return self.gen_result_ex(VerificationResult::MissingData).await;
             }
         };
 
         info!("Phone num: {}", phone_number.number);
 
-        let requested_user_name = data.requested_user_name.clone();
-
-        if requested_user_name.is_empty() {
-            return self.gen_result_ex(VerificationResult::MissingData).await;
+        // check if there's a user for the accountId
+        if let Some(user_data) = DatabaseService::read(ReadItem {
+            key: Bytes::from(account_id.data.clone()),
+            cf: USERS_COL_FAMILY,
+        })
+        .await?
+        {
+            // An existing user is asking to update his mobile number
+            let user = User::decode(user_data.0.as_ref())?;
+            if user.user_name != requested_user_name {
+                // don't allow giving evidence on new requested user name in case of existing user
+                return self.gen_result_ex(VerificationResult::UserNameTaken).await;
+            }
+        } else {
+            // no user for account id - check requested name availability
+            // verify that the requested username not already registered to another user
+            let user_name_key = Bytes::from(requested_user_name.as_bytes().to_vec());
+            if (DatabaseService::read(ReadItem {
+                key: user_name_key.clone(),
+                cf: USERS_NAMES_COL_FAMILY,
+            })
+            .await?)
+                .is_some()
+            {
+                return self.gen_result_ex(VerificationResult::UserNameTaken).await;
+            }
         }
 
         // check if there's a user for the accountId
@@ -117,8 +140,8 @@ impl Handler<VerifyEx> for VerifierService {
         )
         .unwrap();
 
-        if !data.bypass_token.eq(&bypass_token) {
-            // call auth service unless bypass token was provided
+        // call auth service unless bypass token was provided and matches the configured one
+        if !user_data.bypass_token.eq(&bypass_token) {
             match self
                 .auth_client
                 .as_mut()
@@ -169,7 +192,16 @@ impl Handler<VerifyEx> for VerifierService {
         resp.account_id = Some(account_id);
         resp.verifier_account_id = Some(self.get_account_id().await?);
         resp.requested_user_name = requested_user_name;
-        resp.mobile_number = Some(phone_number);
+
+        // todo: hash the phone number in the response and set it
+        // resp.mobile_number = Some(phone_number);
+
+        use blake2::{Blake2b512, Digest};
+        let mut hasher = Blake2b512::new();
+        hasher.update(&phone_number.number);
+        let hash = hasher.finalize();
+        resp.mobile_number_hash = hex::encode(hash.as_slice());
+        info!("Hash: {}", resp.mobile_number_hash);
 
         let mut buf = Vec::with_capacity(resp.encoded_len());
         resp.encode(&mut buf)?;

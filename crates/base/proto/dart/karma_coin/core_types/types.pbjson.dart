@@ -412,13 +412,28 @@ const UserVerificationData$json = const {
     const {'1': 'verification_result', '3': 3, '4': 1, '5': 14, '6': '.karma_coin.core_types.VerificationResult', '10': 'verificationResult'},
     const {'1': 'account_id', '3': 4, '4': 1, '5': 11, '6': '.karma_coin.core_types.AccountId', '10': 'accountId'},
     const {'1': 'mobile_number', '3': 5, '4': 1, '5': 11, '6': '.karma_coin.core_types.MobileNumber', '10': 'mobileNumber'},
-    const {'1': 'requested_user_name', '3': 7, '4': 1, '5': 9, '10': 'requestedUserName'},
-    const {'1': 'signature', '3': 8, '4': 1, '5': 11, '6': '.karma_coin.core_types.Signature', '10': 'signature'},
+    const {'1': 'requested_user_name', '3': 6, '4': 1, '5': 9, '10': 'requestedUserName'},
+    const {'1': 'signature', '3': 7, '4': 1, '5': 11, '6': '.karma_coin.core_types.Signature', '10': 'signature'},
   ],
 };
 
 /// Descriptor for `UserVerificationData`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List userVerificationDataDescriptor = $convert.base64Decode('ChRVc2VyVmVyaWZpY2F0aW9uRGF0YRJQChN2ZXJpZmllcl9hY2NvdW50X2lkGAEgASgLMiAua2FybWFfY29pbi5jb3JlX3R5cGVzLkFjY291bnRJZFIRdmVyaWZpZXJBY2NvdW50SWQSHAoJdGltZXN0YW1wGAIgASgEUgl0aW1lc3RhbXASWgoTdmVyaWZpY2F0aW9uX3Jlc3VsdBgDIAEoDjIpLmthcm1hX2NvaW4uY29yZV90eXBlcy5WZXJpZmljYXRpb25SZXN1bHRSEnZlcmlmaWNhdGlvblJlc3VsdBI/CgphY2NvdW50X2lkGAQgASgLMiAua2FybWFfY29pbi5jb3JlX3R5cGVzLkFjY291bnRJZFIJYWNjb3VudElkEkgKDW1vYmlsZV9udW1iZXIYBSABKAsyIy5rYXJtYV9jb2luLmNvcmVfdHlwZXMuTW9iaWxlTnVtYmVyUgxtb2JpbGVOdW1iZXISLgoTcmVxdWVzdGVkX3VzZXJfbmFtZRgHIAEoCVIRcmVxdWVzdGVkVXNlck5hbWUSPgoJc2lnbmF0dXJlGAggASgLMiAua2FybWFfY29pbi5jb3JlX3R5cGVzLlNpZ25hdHVyZVIJc2lnbmF0dXJl');
+final $typed_data.Uint8List userVerificationDataDescriptor = $convert.base64Decode('ChRVc2VyVmVyaWZpY2F0aW9uRGF0YRJQChN2ZXJpZmllcl9hY2NvdW50X2lkGAEgASgLMiAua2FybWFfY29pbi5jb3JlX3R5cGVzLkFjY291bnRJZFIRdmVyaWZpZXJBY2NvdW50SWQSHAoJdGltZXN0YW1wGAIgASgEUgl0aW1lc3RhbXASWgoTdmVyaWZpY2F0aW9uX3Jlc3VsdBgDIAEoDjIpLmthcm1hX2NvaW4uY29yZV90eXBlcy5WZXJpZmljYXRpb25SZXN1bHRSEnZlcmlmaWNhdGlvblJlc3VsdBI/CgphY2NvdW50X2lkGAQgASgLMiAua2FybWFfY29pbi5jb3JlX3R5cGVzLkFjY291bnRJZFIJYWNjb3VudElkEkgKDW1vYmlsZV9udW1iZXIYBSABKAsyIy5rYXJtYV9jb2luLmNvcmVfdHlwZXMuTW9iaWxlTnVtYmVyUgxtb2JpbGVOdW1iZXISLgoTcmVxdWVzdGVkX3VzZXJfbmFtZRgGIAEoCVIRcmVxdWVzdGVkVXNlck5hbWUSPgoJc2lnbmF0dXJlGAcgASgLMiAua2FybWFfY29pbi5jb3JlX3R5cGVzLlNpZ25hdHVyZVIJc2lnbmF0dXJl');
+@$core.Deprecated('Use userVerificationDataExDescriptor instead')
+const UserVerificationDataEx$json = const {
+  '1': 'UserVerificationDataEx',
+  '2': const [
+    const {'1': 'verifier_account_id', '3': 1, '4': 1, '5': 11, '6': '.karma_coin.core_types.AccountId', '10': 'verifierAccountId'},
+    const {'1': 'timestamp', '3': 2, '4': 1, '5': 4, '10': 'timestamp'},
+    const {'1': 'verification_result', '3': 3, '4': 1, '5': 14, '6': '.karma_coin.core_types.VerificationResult', '10': 'verificationResult'},
+    const {'1': 'account_id', '3': 4, '4': 1, '5': 11, '6': '.karma_coin.core_types.AccountId', '10': 'accountId'},
+    const {'1': 'mobile_number', '3': 5, '4': 1, '5': 11, '6': '.karma_coin.core_types.MobileNumber', '10': 'mobileNumber'},
+    const {'1': 'requested_user_name', '3': 6, '4': 1, '5': 9, '10': 'requestedUserName'},
+  ],
+};
+
+/// Descriptor for `UserVerificationDataEx`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List userVerificationDataExDescriptor = $convert.base64Decode('ChZVc2VyVmVyaWZpY2F0aW9uRGF0YUV4ElAKE3ZlcmlmaWVyX2FjY291bnRfaWQYASABKAsyIC5rYXJtYV9jb2luLmNvcmVfdHlwZXMuQWNjb3VudElkUhF2ZXJpZmllckFjY291bnRJZBIcCgl0aW1lc3RhbXAYAiABKARSCXRpbWVzdGFtcBJaChN2ZXJpZmljYXRpb25fcmVzdWx0GAMgASgOMikua2FybWFfY29pbi5jb3JlX3R5cGVzLlZlcmlmaWNhdGlvblJlc3VsdFISdmVyaWZpY2F0aW9uUmVzdWx0Ej8KCmFjY291bnRfaWQYBCABKAsyIC5rYXJtYV9jb2luLmNvcmVfdHlwZXMuQWNjb3VudElkUglhY2NvdW50SWQSSAoNbW9iaWxlX251bWJlchgFIAEoCzIjLmthcm1hX2NvaW4uY29yZV90eXBlcy5Nb2JpbGVOdW1iZXJSDG1vYmlsZU51bWJlchIuChNyZXF1ZXN0ZWRfdXNlcl9uYW1lGAYgASgJUhFyZXF1ZXN0ZWRVc2VyTmFtZQ==');
 @$core.Deprecated('Use signedTransactionsHashesDescriptor instead')
 const SignedTransactionsHashes$json = const {
   '1': 'SignedTransactionsHashes',

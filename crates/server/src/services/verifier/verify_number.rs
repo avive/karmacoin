@@ -62,7 +62,7 @@ impl Handler<Verify> for VerifierService {
 
         // check if there's a user for the accountId
         if let Some(user_data) = DatabaseService::read(ReadItem {
-            key: Bytes::from(requested_user_name.clone()),
+            key: Bytes::from(account_id.data.clone()),
             cf: USERS_COL_FAMILY,
         })
         .await?

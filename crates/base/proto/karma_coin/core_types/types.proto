@@ -151,12 +151,20 @@ enum TransactionType {
     TRANSACTION_TYPE_NEW_USER_V1 = 1;
     TRANSACTION_TYPE_UPDATE_USER_V1 = 2;
     TRANSACTION_TYPE_DELETE_USER_V1 = 3;
+    TRANSACTION_TYPE_DELETE_USER_V = 4;
 }
 
 // new user transactions submitted by users
 message NewUserTransactionV1 {
     // Evidence from a valid verifier about the new user
     UserVerificationData verify_number_response = 1;
+}
+
+// new user transactions submitted by users
+message NewUserTransactionV2 {
+    // Serialized UserVerifcationDataEx evidence from a valid verifier about the new user
+    bytes user_verification_data_ex = 1;
+    Signature verifier_signature = 2;
 }
 
 // Basic payment transaction with optional character appreciation
@@ -236,13 +244,16 @@ message UserVerificationData {
     Signature signature = 7;
 }
 
+
 // Created and signed by a verifier to attest that an account owns a mobile number
+// Includes mobile number hash instead of mobile number in response
+// Signature is externally available
 message UserVerificationDataEx {
     AccountId verifier_account_id = 1;
     uint64 timestamp = 2;
     VerificationResult verification_result = 3;
     AccountId account_id = 4;
-    MobileNumber mobile_number = 5;
+    string mobile_number_hash = 5;
     string requested_user_name = 6;
 }
 

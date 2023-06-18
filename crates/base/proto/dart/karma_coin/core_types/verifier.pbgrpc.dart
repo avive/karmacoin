@@ -20,6 +20,12 @@ class VerifierServiceClient extends $grpc.Client {
           ($2.VerifyNumberRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $2.VerifyNumberResponse.fromBuffer(value));
+  static final _$verifyNumberEx =
+      $grpc.ClientMethod<$2.VerifyNumberRequestEx, $2.VerifyNumberResponseEx>(
+          '/karma_coin.verifier.VerifierService/VerifyNumberEx',
+          ($2.VerifyNumberRequestEx value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $2.VerifyNumberResponseEx.fromBuffer(value));
 
   VerifierServiceClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -30,6 +36,12 @@ class VerifierServiceClient extends $grpc.Client {
       $2.VerifyNumberRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$verifyNumber, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$2.VerifyNumberResponseEx> verifyNumberEx(
+      $2.VerifyNumberRequestEx request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$verifyNumberEx, request, options: options);
   }
 }
 
@@ -46,6 +58,15 @@ abstract class VerifierServiceBase extends $grpc.Service {
             ($core.List<$core.int> value) =>
                 $2.VerifyNumberRequest.fromBuffer(value),
             ($2.VerifyNumberResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$2.VerifyNumberRequestEx,
+            $2.VerifyNumberResponseEx>(
+        'VerifyNumberEx',
+        verifyNumberEx_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $2.VerifyNumberRequestEx.fromBuffer(value),
+        ($2.VerifyNumberResponseEx value) => value.writeToBuffer()));
   }
 
   $async.Future<$2.VerifyNumberResponse> verifyNumber_Pre(
@@ -54,6 +75,14 @@ abstract class VerifierServiceBase extends $grpc.Service {
     return verifyNumber(call, await request);
   }
 
+  $async.Future<$2.VerifyNumberResponseEx> verifyNumberEx_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$2.VerifyNumberRequestEx> request) async {
+    return verifyNumberEx(call, await request);
+  }
+
   $async.Future<$2.VerifyNumberResponse> verifyNumber(
       $grpc.ServiceCall call, $2.VerifyNumberRequest request);
+  $async.Future<$2.VerifyNumberResponseEx> verifyNumberEx(
+      $grpc.ServiceCall call, $2.VerifyNumberRequestEx request);
 }

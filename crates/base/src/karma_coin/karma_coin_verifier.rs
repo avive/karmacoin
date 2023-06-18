@@ -55,6 +55,7 @@ pub struct VerifyNumberRequestDataEx {
     pub mobile_number: ::core::option::Option<super::core_types::MobileNumber>,
     #[prost(string, tag = "4")]
     pub requested_user_name: ::prost::alloc::string::String,
+    /// optional token to bypass verification
     #[prost(bytes = "vec", tag = "5")]
     pub bypass_token: ::prost::alloc::vec::Vec<u8>,
 }
@@ -64,11 +65,9 @@ pub struct VerifyNumberRequestEx {
     /// serialized VerifyNumberRequestDataEx
     #[prost(bytes = "vec", tag = "1")]
     pub data: ::prost::alloc::vec::Vec<u8>,
-    /// Client public key used to sign the data
+    /// User signature of binary data field 1
+    /// Public key is account_id in the data
     #[prost(bytes = "vec", tag = "2")]
-    pub public_key: ::prost::alloc::vec::Vec<u8>,
-    /// signature of binary data field 1
-    #[prost(bytes = "vec", tag = "3")]
     pub signature: ::prost::alloc::vec::Vec<u8>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -77,7 +76,7 @@ pub struct VerifyNumberResponseEx {
     /// a serialized UserVerificationDataEx message
     #[prost(bytes = "vec", tag = "1")]
     pub verification_data: ::prost::alloc::vec::Vec<u8>,
-    /// a signature over the binary data above - client has the verifier public key
+    /// Verifier signature over the binary data above - client has the verifier public key
     #[prost(bytes = "vec", tag = "2")]
     pub signature: ::prost::alloc::vec::Vec<u8>,
 }
@@ -194,7 +193,7 @@ pub mod verifier_service_client {
             self.inner.unary(request.into_request(), path, codec).await
         }
         /// Extended api - supports bypass token for tests and response signs binary part
-        /// should be used in Kchain 2.0
+        /// should be used in Kchain 2.0 -
         pub async fn verify_number_ex(
             &mut self,
             request: impl tonic::IntoRequest<super::VerifyNumberRequestEx>,
@@ -230,7 +229,7 @@ pub mod verifier_service_server {
             request: tonic::Request<super::VerifyNumberRequest>,
         ) -> Result<tonic::Response<super::VerifyNumberResponse>, tonic::Status>;
         /// Extended api - supports bypass token for tests and response signs binary part
-        /// should be used in Kchain 2.0
+        /// should be used in Kchain 2.0 -
         async fn verify_number_ex(
             &self,
             request: tonic::Request<super::VerifyNumberRequestEx>,

@@ -2005,8 +2005,8 @@ class UserVerificationData extends $pb.GeneratedMessage {
     ..e<VerificationResult>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'verificationResult', $pb.PbFieldType.OE, defaultOrMaker: VerificationResult.VERIFICATION_RESULT_UNSPECIFIED, valueOf: VerificationResult.valueOf, enumValues: VerificationResult.values)
     ..aOM<AccountId>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'accountId', subBuilder: AccountId.create)
     ..aOM<MobileNumber>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'mobileNumber', subBuilder: MobileNumber.create)
-    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'requestedUserName')
-    ..aOM<Signature>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'signature', subBuilder: Signature.create)
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'requestedUserName')
+    ..aOM<Signature>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'signature', subBuilder: Signature.create)
     ..hasRequiredFields = false
   ;
 
@@ -2116,25 +2116,148 @@ class UserVerificationData extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   MobileNumber ensureMobileNumber() => $_ensure(4);
 
-  @$pb.TagNumber(7)
+  @$pb.TagNumber(6)
   $core.String get requestedUserName => $_getSZ(5);
-  @$pb.TagNumber(7)
+  @$pb.TagNumber(6)
   set requestedUserName($core.String v) { $_setString(5, v); }
-  @$pb.TagNumber(7)
+  @$pb.TagNumber(6)
   $core.bool hasRequestedUserName() => $_has(5);
-  @$pb.TagNumber(7)
-  void clearRequestedUserName() => clearField(7);
+  @$pb.TagNumber(6)
+  void clearRequestedUserName() => clearField(6);
 
-  @$pb.TagNumber(8)
+  @$pb.TagNumber(7)
   Signature get signature => $_getN(6);
-  @$pb.TagNumber(8)
-  set signature(Signature v) { setField(8, v); }
-  @$pb.TagNumber(8)
+  @$pb.TagNumber(7)
+  set signature(Signature v) { setField(7, v); }
+  @$pb.TagNumber(7)
   $core.bool hasSignature() => $_has(6);
-  @$pb.TagNumber(8)
-  void clearSignature() => clearField(8);
-  @$pb.TagNumber(8)
+  @$pb.TagNumber(7)
+  void clearSignature() => clearField(7);
+  @$pb.TagNumber(7)
   Signature ensureSignature() => $_ensure(6);
+}
+
+class UserVerificationDataEx extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UserVerificationDataEx', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'karma_coin.core_types'), createEmptyInstance: create)
+    ..aOM<AccountId>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'verifierAccountId', subBuilder: AccountId.create)
+    ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timestamp', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..e<VerificationResult>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'verificationResult', $pb.PbFieldType.OE, defaultOrMaker: VerificationResult.VERIFICATION_RESULT_UNSPECIFIED, valueOf: VerificationResult.valueOf, enumValues: VerificationResult.values)
+    ..aOM<AccountId>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'accountId', subBuilder: AccountId.create)
+    ..aOM<MobileNumber>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'mobileNumber', subBuilder: MobileNumber.create)
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'requestedUserName')
+    ..hasRequiredFields = false
+  ;
+
+  UserVerificationDataEx._() : super();
+  factory UserVerificationDataEx({
+    AccountId? verifierAccountId,
+    $fixnum.Int64? timestamp,
+    VerificationResult? verificationResult,
+    AccountId? accountId,
+    MobileNumber? mobileNumber,
+    $core.String? requestedUserName,
+  }) {
+    final _result = create();
+    if (verifierAccountId != null) {
+      _result.verifierAccountId = verifierAccountId;
+    }
+    if (timestamp != null) {
+      _result.timestamp = timestamp;
+    }
+    if (verificationResult != null) {
+      _result.verificationResult = verificationResult;
+    }
+    if (accountId != null) {
+      _result.accountId = accountId;
+    }
+    if (mobileNumber != null) {
+      _result.mobileNumber = mobileNumber;
+    }
+    if (requestedUserName != null) {
+      _result.requestedUserName = requestedUserName;
+    }
+    return _result;
+  }
+  factory UserVerificationDataEx.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UserVerificationDataEx.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  UserVerificationDataEx clone() => UserVerificationDataEx()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  UserVerificationDataEx copyWith(void Function(UserVerificationDataEx) updates) => super.copyWith((message) => updates(message as UserVerificationDataEx)) as UserVerificationDataEx; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static UserVerificationDataEx create() => UserVerificationDataEx._();
+  UserVerificationDataEx createEmptyInstance() => create();
+  static $pb.PbList<UserVerificationDataEx> createRepeated() => $pb.PbList<UserVerificationDataEx>();
+  @$core.pragma('dart2js:noInline')
+  static UserVerificationDataEx getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UserVerificationDataEx>(create);
+  static UserVerificationDataEx? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  AccountId get verifierAccountId => $_getN(0);
+  @$pb.TagNumber(1)
+  set verifierAccountId(AccountId v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasVerifierAccountId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearVerifierAccountId() => clearField(1);
+  @$pb.TagNumber(1)
+  AccountId ensureVerifierAccountId() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get timestamp => $_getI64(1);
+  @$pb.TagNumber(2)
+  set timestamp($fixnum.Int64 v) { $_setInt64(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasTimestamp() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTimestamp() => clearField(2);
+
+  @$pb.TagNumber(3)
+  VerificationResult get verificationResult => $_getN(2);
+  @$pb.TagNumber(3)
+  set verificationResult(VerificationResult v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasVerificationResult() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearVerificationResult() => clearField(3);
+
+  @$pb.TagNumber(4)
+  AccountId get accountId => $_getN(3);
+  @$pb.TagNumber(4)
+  set accountId(AccountId v) { setField(4, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasAccountId() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearAccountId() => clearField(4);
+  @$pb.TagNumber(4)
+  AccountId ensureAccountId() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  MobileNumber get mobileNumber => $_getN(4);
+  @$pb.TagNumber(5)
+  set mobileNumber(MobileNumber v) { setField(5, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasMobileNumber() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearMobileNumber() => clearField(5);
+  @$pb.TagNumber(5)
+  MobileNumber ensureMobileNumber() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  $core.String get requestedUserName => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set requestedUserName($core.String v) { $_setString(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasRequestedUserName() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearRequestedUserName() => clearField(6);
 }
 
 class SignedTransactionsHashes extends $pb.GeneratedMessage {
