@@ -331,7 +331,7 @@ impl BlockChainService {
 
         // handle push notes
         if referral_reward_awarded {
-            info!("Send push note about referral reward to payer - todo: implement me");
+            info!("Send push note about referral reward to payer");
             // this was payment on signup and payer got referral reward
             // send payer push note about it - no need to send push to payee
 

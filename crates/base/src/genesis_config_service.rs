@@ -253,7 +253,10 @@ impl Actor for GenesisConfigService {
             .set_default(SIGNUP_REWARD_AMOUNT_PHASE1_KEY, 10 * ONE_KC_IN_KCENTS)
             .unwrap()
             // 100m KCs allocated for signup rewards phase 1 (10m users, 10Kc per signup)
-            .set_default(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY, 100 * ONE_KC_IN_KCENTS)
+            .set_default(
+                SIGNUP_REWARD_ALLOCATION_PHASE1_KEY,
+                100_000_000 * ONE_KC_IN_KCENTS,
+            )
             .unwrap()
             // Signup phase 2 rewards amount - 1 KC
             .set_default(SIGNUP_REWARD_AMOUNT_PHASE2_KEY, ONE_KC_IN_KCENTS)
@@ -271,7 +274,7 @@ impl Actor for GenesisConfigService {
             // phase 1 referral rewards allocation - 100M KCs
             .set_default(
                 REFERRAL_REWARD_ALLOCATION_PHASE1_KEY,
-                100 * ONE_KC_IN_KCENTS,
+                100_000_000 * ONE_KC_IN_KCENTS,
             )
             .unwrap()
             // phase 2 referral reward amount - 1 KC
@@ -280,7 +283,7 @@ impl Actor for GenesisConfigService {
             // phase 2 referral rewards allocation - 200M Kcs
             .set_default(
                 REFERRAL_REWARD_ALLOCATION_PHASE2_KEY,
-                200 * ONE_KC_IN_KCENTS,
+                200_000_0000 * ONE_KC_IN_KCENTS,
             )
             .unwrap()
             //
