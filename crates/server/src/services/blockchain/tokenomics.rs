@@ -35,6 +35,12 @@ impl Tokenomics {
 
     /// Get current signup reward amount based on consensus rules, genesis config and blockchain data
     pub async fn get_signup_reward_amount(&self) -> Result<u64> {
+        Ok(
+            GenesisConfigService::get_u64(SIGNUP_REWARD_AMOUNT_PHASE1_KEY.into())
+                .await?
+                .unwrap(),
+        )
+        /*
         // In KCents
         let signup_rewards_alloc_phase1 =
             GenesisConfigService::get_u64(SIGNUP_REWARD_ALLOCATION_PHASE1_KEY.into())
@@ -73,11 +79,17 @@ impl Tokenomics {
                     .await?
                     .unwrap(),
             )
-        }
+        }*/
     }
 
     /// Get current referral; reward amount based on consensus rules, genesis config and blockchain data
     pub async fn get_referral_reward_amount(&self) -> Result<u64> {
+        Ok(
+            GenesisConfigService::get_u64(REFERRAL_REWARD_AMOUNT_PHASE1_KEY.into())
+                .await?
+                .unwrap(),
+        )
+        /*
         let rewards_alloc_phase1 =
             GenesisConfigService::get_u64(REFERRAL_REWARD_ALLOCATION_PHASE1_KEY.into())
                 .await?
@@ -102,7 +114,7 @@ impl Tokenomics {
                     .await?
                     .unwrap(),
             )
-        }
+        }*/
     }
 
     /// Return true iff transaction should be subsidised by the protocol
