@@ -132,7 +132,10 @@ impl Handler<SendInvites> for VerifierService {
                     &inviter,
                 )
                 .await
-                .map_err(|e| info!("failed to send invite: {}", e));
+                .map_err(|e| {
+                    // todo: don't try again to send invites to this phone number - bad mobile number
+                    info!("failed to send invite: {}", e)
+                });
         }
 
         Ok(())

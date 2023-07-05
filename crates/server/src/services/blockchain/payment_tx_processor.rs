@@ -343,26 +343,25 @@ impl BlockChainService {
                 Ok(_) => info!("sent referral push note to payer"),
                 Err(e) => error!("failed to send referral push note to payee: {}", e),
             }
-        } else {
-            // send a push note to payee about the push
-            // todo: add community info when applicable to make it more personalized to community
+        }
+        // send a push note to payee about the push
+        // todo: add community info when applicable to make it more personalized to community
 
-            let to_id = BASE64.encode(payee.account_id.as_ref().unwrap().data.as_ref());
-            let amount = format_kc_amount(payment_amount);
-            let data = PaymentTxPushNotesData {
-                tx_id: hex_string(tx_hash.as_ref()),
-                amount,
-                to_id,
-                char_id: payment_tx.char_trait_id,
-                // todo: get emoji for chart_trait if it is non zero
-                emoji: "".to_string(),
-            };
+        let to_id = BASE64.encode(payee.account_id.as_ref().unwrap().data.as_ref());
+        let amount = format_kc_amount(payment_amount);
+        let data = PaymentTxPushNotesData {
+            tx_id: hex_string(tx_hash.as_ref()),
+            amount,
+            to_id,
+            char_id: payment_tx.char_trait_id,
+            // todo: get emoji for chart_trait if it is non zero
+            emoji: "".to_string(),
+        };
 
-            // don't fail operation if push note fails
-            match send_tx_push_note(data).await {
-                Ok(_) => info!("sent tx push note to payee"),
-                Err(e) => error!("failed to send tx push note to payee: {}", e),
-            }
+        // don't fail operation if push note fails
+        match send_tx_push_note(data).await {
+            Ok(_) => info!("sent tx push note to payee"),
+            Err(e) => error!("failed to send tx push note to payee: {}", e),
         }
 
         Ok(())

@@ -17,11 +17,9 @@ use base::server_config_service::{SetConfigFile, START_VERIFIER_SERVICE_CONFIG_K
 use db::db_service::{DatabaseService, Destroy};
 use tonic::transport::*;
 
-use crate::services::blockchain::karma_rewards_service::KarmaRewardsService;
-
-//use crate::services::blockchain::karma_rewards_service::{
-//    KarmaRewardsService, ProcessKarmaRewards,
-//};
+use crate::services::blockchain::karma_rewards_service::{
+    KarmaRewardsService, ProcessKarmaRewards,
+};
 
 use crate::services::blockchain::backup_chain_service::BackupChainService;
 use base::hex_utils::hex_string;
@@ -93,7 +91,18 @@ impl Actor for ServerService {
         info!("starting karma rewards service...");
 
         // start the karma rewards service
-        KarmaRewardsService::from_registry().await?;
+        let karma_rewards_service = KarmaRewardsService::from_registry().await?;
+
+        // Send karma rewards on server startup
+        // Comment below to disable once we fix the periodic sending to account for server restarts
+        info!("Starting periodic karma rewards processing task...");
+        match karma_rewards_service.call(ProcessKarmaRewards).await {
+            Ok(res) => match res {
+                Ok(_) => info!("Karma Rewards processing task completed"),
+                Err(e) => error!("Karma Rewards processing task error: {}", e),
+            },
+            Err(e) => error!("Error running invites task: {}", e),
+        }
 
         // start the backup chain service
         BackupChainService::from_registry().await?;

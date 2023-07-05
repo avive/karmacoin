@@ -142,6 +142,13 @@ impl BlockChainService {
 
         info!("verifier verified :-)");
 
+        if verification_evidence.requested_user_name.trim().is_empty() {
+            return Err(NewUserProcessingError {
+                execution_info: ExecutionInfo::InvalidData,
+                error_message: "Requested user name must not be empty".into(),
+            });
+        }
+
         let mobile_number =
             verification_evidence
                 .mobile_number
