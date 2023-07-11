@@ -161,9 +161,16 @@ impl VerifierService {
             .as_ref()
             .ok_or_else(|| anyhow!("missing tx receiver's mobile number"))?;
 
-        info!("Computing sms invite to: {}", invite_mobile_number.number);
+        let invite_number = invite_mobile_number.number.clone();
 
-        let invite_db_key = Bytes::from(invite_mobile_number.number.as_bytes().to_vec());
+        if invite_number.len() < 5 {
+            info!("skipping invite to mobile number {}", invite_number);
+            return Ok(());
+        }
+
+        info!("Computing sms invite to: {}", invite_number);
+
+        let invite_db_key = Bytes::from(invite_number.as_bytes().to_vec());
 
         let mut sms_invite_data = match DatabaseService::read(ReadItem {
             key: invite_db_key.clone(),
