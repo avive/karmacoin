@@ -26,11 +26,12 @@ const TransactionType$json = const {
     const {'1': 'TRANSACTION_TYPE_NEW_USER_V1', '2': 1},
     const {'1': 'TRANSACTION_TYPE_UPDATE_USER_V1', '2': 2},
     const {'1': 'TRANSACTION_TYPE_DELETE_USER_V1', '2': 3},
+    const {'1': 'TRANSACTION_TYPE_DELETE_USER_V', '2': 4},
   ],
 };
 
 /// Descriptor for `TransactionType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List transactionTypeDescriptor = $convert.base64Decode('Cg9UcmFuc2FjdGlvblR5cGUSHwobVFJBTlNBQ1RJT05fVFlQRV9QQVlNRU5UX1YxEAASIAocVFJBTlNBQ1RJT05fVFlQRV9ORVdfVVNFUl9WMRABEiMKH1RSQU5TQUNUSU9OX1RZUEVfVVBEQVRFX1VTRVJfVjEQAhIjCh9UUkFOU0FDVElPTl9UWVBFX0RFTEVURV9VU0VSX1YxEAM=');
+final $typed_data.Uint8List transactionTypeDescriptor = $convert.base64Decode('Cg9UcmFuc2FjdGlvblR5cGUSHwobVFJBTlNBQ1RJT05fVFlQRV9QQVlNRU5UX1YxEAASIAocVFJBTlNBQ1RJT05fVFlQRV9ORVdfVVNFUl9WMRABEiMKH1RSQU5TQUNUSU9OX1RZUEVfVVBEQVRFX1VTRVJfVjEQAhIjCh9UUkFOU0FDVElPTl9UWVBFX0RFTEVURV9VU0VSX1YxEAMSIgoeVFJBTlNBQ1RJT05fVFlQRV9ERUxFVEVfVVNFUl9WEAQ=');
 @$core.Deprecated('Use verificationResultDescriptor instead')
 const VerificationResult$json = const {
   '1': 'VerificationResult',
@@ -332,6 +333,17 @@ const NewUserTransactionV1$json = const {
 
 /// Descriptor for `NewUserTransactionV1`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List newUserTransactionV1Descriptor = $convert.base64Decode('ChROZXdVc2VyVHJhbnNhY3Rpb25WMRJhChZ2ZXJpZnlfbnVtYmVyX3Jlc3BvbnNlGAEgASgLMisua2FybWFfY29pbi5jb3JlX3R5cGVzLlVzZXJWZXJpZmljYXRpb25EYXRhUhR2ZXJpZnlOdW1iZXJSZXNwb25zZQ==');
+@$core.Deprecated('Use newUserTransactionV2Descriptor instead')
+const NewUserTransactionV2$json = const {
+  '1': 'NewUserTransactionV2',
+  '2': const [
+    const {'1': 'user_verification_data_ex', '3': 1, '4': 1, '5': 12, '10': 'userVerificationDataEx'},
+    const {'1': 'verifier_signature', '3': 2, '4': 1, '5': 11, '6': '.karma_coin.core_types.Signature', '10': 'verifierSignature'},
+  ],
+};
+
+/// Descriptor for `NewUserTransactionV2`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List newUserTransactionV2Descriptor = $convert.base64Decode('ChROZXdVc2VyVHJhbnNhY3Rpb25WMhI5Chl1c2VyX3ZlcmlmaWNhdGlvbl9kYXRhX2V4GAEgASgMUhZ1c2VyVmVyaWZpY2F0aW9uRGF0YUV4Ek8KEnZlcmlmaWVyX3NpZ25hdHVyZRgCIAEoCzIgLmthcm1hX2NvaW4uY29yZV90eXBlcy5TaWduYXR1cmVSEXZlcmlmaWVyU2lnbmF0dXJl');
 @$core.Deprecated('Use paymentTransactionV1Descriptor instead')
 const PaymentTransactionV1$json = const {
   '1': 'PaymentTransactionV1',
@@ -427,13 +439,13 @@ const UserVerificationDataEx$json = const {
     const {'1': 'timestamp', '3': 2, '4': 1, '5': 4, '10': 'timestamp'},
     const {'1': 'verification_result', '3': 3, '4': 1, '5': 14, '6': '.karma_coin.core_types.VerificationResult', '10': 'verificationResult'},
     const {'1': 'account_id', '3': 4, '4': 1, '5': 11, '6': '.karma_coin.core_types.AccountId', '10': 'accountId'},
-    const {'1': 'mobile_number', '3': 5, '4': 1, '5': 11, '6': '.karma_coin.core_types.MobileNumber', '10': 'mobileNumber'},
+    const {'1': 'mobile_number_hash', '3': 5, '4': 1, '5': 9, '10': 'mobileNumberHash'},
     const {'1': 'requested_user_name', '3': 6, '4': 1, '5': 9, '10': 'requestedUserName'},
   ],
 };
 
 /// Descriptor for `UserVerificationDataEx`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List userVerificationDataExDescriptor = $convert.base64Decode('ChZVc2VyVmVyaWZpY2F0aW9uRGF0YUV4ElAKE3ZlcmlmaWVyX2FjY291bnRfaWQYASABKAsyIC5rYXJtYV9jb2luLmNvcmVfdHlwZXMuQWNjb3VudElkUhF2ZXJpZmllckFjY291bnRJZBIcCgl0aW1lc3RhbXAYAiABKARSCXRpbWVzdGFtcBJaChN2ZXJpZmljYXRpb25fcmVzdWx0GAMgASgOMikua2FybWFfY29pbi5jb3JlX3R5cGVzLlZlcmlmaWNhdGlvblJlc3VsdFISdmVyaWZpY2F0aW9uUmVzdWx0Ej8KCmFjY291bnRfaWQYBCABKAsyIC5rYXJtYV9jb2luLmNvcmVfdHlwZXMuQWNjb3VudElkUglhY2NvdW50SWQSSAoNbW9iaWxlX251bWJlchgFIAEoCzIjLmthcm1hX2NvaW4uY29yZV90eXBlcy5Nb2JpbGVOdW1iZXJSDG1vYmlsZU51bWJlchIuChNyZXF1ZXN0ZWRfdXNlcl9uYW1lGAYgASgJUhFyZXF1ZXN0ZWRVc2VyTmFtZQ==');
+final $typed_data.Uint8List userVerificationDataExDescriptor = $convert.base64Decode('ChZVc2VyVmVyaWZpY2F0aW9uRGF0YUV4ElAKE3ZlcmlmaWVyX2FjY291bnRfaWQYASABKAsyIC5rYXJtYV9jb2luLmNvcmVfdHlwZXMuQWNjb3VudElkUhF2ZXJpZmllckFjY291bnRJZBIcCgl0aW1lc3RhbXAYAiABKARSCXRpbWVzdGFtcBJaChN2ZXJpZmljYXRpb25fcmVzdWx0GAMgASgOMikua2FybWFfY29pbi5jb3JlX3R5cGVzLlZlcmlmaWNhdGlvblJlc3VsdFISdmVyaWZpY2F0aW9uUmVzdWx0Ej8KCmFjY291bnRfaWQYBCABKAsyIC5rYXJtYV9jb2luLmNvcmVfdHlwZXMuQWNjb3VudElkUglhY2NvdW50SWQSLAoSbW9iaWxlX251bWJlcl9oYXNoGAUgASgJUhBtb2JpbGVOdW1iZXJIYXNoEi4KE3JlcXVlc3RlZF91c2VyX25hbWUYBiABKAlSEXJlcXVlc3RlZFVzZXJOYW1l');
 @$core.Deprecated('Use signedTransactionsHashesDescriptor instead')
 const SignedTransactionsHashes$json = const {
   '1': 'SignedTransactionsHashes',

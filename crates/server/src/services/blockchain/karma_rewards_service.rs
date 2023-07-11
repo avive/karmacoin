@@ -92,7 +92,6 @@ impl Handler<ProcessKarmaRewards> for KarmaRewardsService {
         })
         .await?;
 
-        // todo: use deterministic random number generator based on some block blocks ago hash
         let mut rng = OsRng;
         let winners_data: Vec<_> = data.items.choose_multiple(&mut rng, max_winners).collect();
         info!(
@@ -151,6 +150,12 @@ impl KarmaRewardsService {
         // make sure user has not already been rewarded
         if user.get_trait_score(KARMA_REWARD_TRAIT_ID, 0) > 0 {
             // user already got a karma reward
+            return Ok(0);
+        }
+
+        // make sure this is not a migrated account
+        if user.user_name.ends_with("[old account]") {
+            // migrated account
             return Ok(0);
         }
 

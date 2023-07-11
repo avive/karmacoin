@@ -197,7 +197,10 @@ impl BlockChainService {
         if payer.balance < payment_amount + user_tx_fee_amount {
             // we reject the transaction and don't mint tx fee subsidy in this case
             // to avoid spamming the network with txs with insufficient funds
-            return Err(anyhow!("payer has insufficient balance to pay"));
+            return Err(anyhow!(format!(
+                "payer has insufficient balance to pay. balance: {}, amount: {}, user tx fee: {}",
+                payer.balance, payment_amount, user_tx_fee_amount
+            )));
         }
 
         // update payee balance to reflect payment and tx fee (when applicable)

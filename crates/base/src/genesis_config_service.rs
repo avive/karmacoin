@@ -151,7 +151,7 @@ impl Actor for GenesisConfigService {
         self.char_traits = Some(vec![
             // no appreciation is index 0
             CharTrait::new(0, "".into(), "".into()),
-            // user gets 1 in this trait for signing up
+            // user gets 1 in this trait for signing upK
             CharTrait::new(1, "a Karma Grower".into(), "💚".into()),
             // User gets this for every sent transaction / appreciation
             CharTrait::new(2, "a Karma Appreciator".into(), "🙏".into()),
@@ -304,7 +304,7 @@ impl Actor for GenesisConfigService {
             .set_default(KARMA_REWARDS_ELIGIBILITY, 2)
             .unwrap()
             // The top max users who didn't get karma reward are eligible every period
-            .set_default(KARMA_REWARD_MAX_USERS_KEY, 1000)
+            .set_default(KARMA_REWARD_MAX_USERS_KEY, 500)
             .unwrap()
             // karma rewards allocation in KC - 300M KCs
             .set_default(KARAM_REWARDS_ALLOCATION_KEY, 300 * ONE_KC_IN_KCENTS)

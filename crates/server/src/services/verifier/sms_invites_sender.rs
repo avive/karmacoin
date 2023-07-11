@@ -134,6 +134,7 @@ impl Handler<SendInvites> for VerifierService {
                 .await
                 .map_err(|e| {
                     // todo: don't try again to send invites to this phone number - bad mobile number
+                    // track all bad numbers and don't send again to them
                     info!("failed to send invite: {}", e)
                 });
         }

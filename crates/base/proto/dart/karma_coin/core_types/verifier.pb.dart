@@ -415,23 +415,18 @@ class VerifyNumberRequestDataEx extends $pb.GeneratedMessage {
 class VerifyNumberRequestEx extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'VerifyNumberRequestEx', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'karma_coin.verifier'), createEmptyInstance: create)
     ..a<$core.List<$core.int>>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'data', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'publicKey', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'signature', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'signature', $pb.PbFieldType.OY)
     ..hasRequiredFields = false
   ;
 
   VerifyNumberRequestEx._() : super();
   factory VerifyNumberRequestEx({
     $core.List<$core.int>? data,
-    $core.List<$core.int>? publicKey,
     $core.List<$core.int>? signature,
   }) {
     final _result = create();
     if (data != null) {
       _result.data = data;
-    }
-    if (publicKey != null) {
-      _result.publicKey = publicKey;
     }
     if (signature != null) {
       _result.signature = signature;
@@ -469,22 +464,13 @@ class VerifyNumberRequestEx extends $pb.GeneratedMessage {
   void clearData() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.List<$core.int> get publicKey => $_getN(1);
+  $core.List<$core.int> get signature => $_getN(1);
   @$pb.TagNumber(2)
-  set publicKey($core.List<$core.int> v) { $_setBytes(1, v); }
+  set signature($core.List<$core.int> v) { $_setBytes(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasPublicKey() => $_has(1);
+  $core.bool hasSignature() => $_has(1);
   @$pb.TagNumber(2)
-  void clearPublicKey() => clearField(2);
-
-  @$pb.TagNumber(3)
-  $core.List<$core.int> get signature => $_getN(2);
-  @$pb.TagNumber(3)
-  set signature($core.List<$core.int> v) { $_setBytes(2, v); }
-  @$pb.TagNumber(3)
-  $core.bool hasSignature() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearSignature() => clearField(3);
+  void clearSignature() => clearField(2);
 }
 
 class VerifyNumberResponseEx extends $pb.GeneratedMessage {

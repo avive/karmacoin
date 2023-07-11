@@ -7,7 +7,8 @@ use crate::services::blockchain::tokenomics::Tokenomics;
 use crate::services::db_config_service::{
     BLOCKS_COL_FAMILY, USERS_COL_FAMILY, USERS_NAMES_COL_FAMILY,
 };
-use anyhow::Result;
+use anyhow::{anyhow, Result};
+use base::genesis_config_service::ONE_KC_IN_KCENTS;
 use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_core_types::*;
 use base::server_config_service::{ServerConfigService, BLOCK_PRODUCER_USER_NAME};
@@ -20,6 +21,76 @@ use prost::Message;
 
 /// BlockchainService block creation implementation
 impl BlockChainService {
+    /// apply one-time patch on startup
+    pub(crate) async fn apply_patch(&self) -> Result<()> {
+        info!("applying patch...");
+        // get block producer user
+        let mut block_producer: User = self
+            .get_block_producer_user_account(self.id_key_pair.as_ref().unwrap())
+            .await?;
+
+        // spending account id (newdeal, +972549805384
+        let spending_account_id = vec![
+            27, 43, 232, 126, 102, 10, 33, 116, 152, 152, 131, 189, 236, 71, 27, 84, 58, 199, 170,
+            204, 80, 179, 111, 53, 25, 101, 50, 89, 140, 26, 197, 35,
+        ];
+
+        let mut spending_user = match DatabaseService::read(ReadItem {
+            key: Bytes::from(spending_account_id.clone()),
+            cf: USERS_COL_FAMILY,
+        })
+        .await?
+        {
+            Some(data) => User::decode(data.0.as_ref())?,
+            None => {
+                return Err(anyhow!("spending account not found"));
+            }
+        };
+
+        let amount = 10_000 * ONE_KC_IN_KCENTS;
+
+        info!("Transferring {} to {}...", amount, spending_user.user_name);
+
+        if block_producer.balance < amount {
+            return Err(anyhow!("insufficient producer balance"));
+        }
+
+        // update balances
+
+        spending_user.balance += amount;
+        block_producer.balance -= amount;
+
+        // store users in db
+
+        let mut buf = Vec::with_capacity(spending_user.encoded_len());
+        spending_user.encode(&mut buf)?;
+        DatabaseService::write(WriteItem {
+            data: DataItem {
+                key: Bytes::from(spending_account_id),
+                value: Bytes::from(buf),
+            },
+            cf: USERS_COL_FAMILY,
+            ttl: 0,
+        })
+        .await?;
+
+        let mut buf = Vec::with_capacity(block_producer.encoded_len());
+        block_producer.encode(&mut buf)?;
+        DatabaseService::write(WriteItem {
+            data: DataItem {
+                key: Bytes::from(block_producer.account_id.as_ref().unwrap().data.to_vec()),
+                value: Bytes::from(buf),
+            },
+            cf: USERS_COL_FAMILY,
+            ttl: 0,
+        })
+        .await?;
+
+        info!("Transferred {} to {}...", amount, spending_user.user_name);
+
+        Ok(())
+    }
+
     /// Returns this block producer on-chain user account.
     /// Attempts to create one if it doesn't exist using config data (account id and nickname)
     async fn get_block_producer_user_account(&self, key_pair: &KeyPair) -> Result<User> {
@@ -52,15 +123,6 @@ impl BlockChainService {
                         user_name
                     ));
                 }
-
-                /*
-                // block producer starts with the validators pool amount
-                let initial_balance_kc =
-                    ServerConfigService::get_u64(VALIDATORS_POOL_COINS_AMOUNT_KEY.into())
-                        .await?
-                        .unwrap()
-                        * 1_000_000;
-                        */
 
                 info!(
                     "created block producer account with account id {}",

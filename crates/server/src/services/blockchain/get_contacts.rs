@@ -46,7 +46,7 @@ impl Handler<GetContacts> for BlockChainService {
         info!("got {} items from db", data.items.len());
 
         for item in data.items.iter() {
-            info!("account key: {}", short_hex_string(item.1.value.as_ref()));
+            // info!("account key: {}", short_hex_string(item.1.value.as_ref()));
             let user_data = match DatabaseService::read(ReadItem {
                 key: item.1.value.clone(),
                 cf: USERS_COL_FAMILY,

@@ -67,13 +67,12 @@ const VerifyNumberRequestEx$json = const {
   '1': 'VerifyNumberRequestEx',
   '2': const [
     const {'1': 'data', '3': 1, '4': 1, '5': 12, '10': 'data'},
-    const {'1': 'public_key', '3': 2, '4': 1, '5': 12, '10': 'publicKey'},
-    const {'1': 'signature', '3': 3, '4': 1, '5': 12, '10': 'signature'},
+    const {'1': 'signature', '3': 2, '4': 1, '5': 12, '10': 'signature'},
   ],
 };
 
 /// Descriptor for `VerifyNumberRequestEx`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List verifyNumberRequestExDescriptor = $convert.base64Decode('ChVWZXJpZnlOdW1iZXJSZXF1ZXN0RXgSEgoEZGF0YRgBIAEoDFIEZGF0YRIdCgpwdWJsaWNfa2V5GAIgASgMUglwdWJsaWNLZXkSHAoJc2lnbmF0dXJlGAMgASgMUglzaWduYXR1cmU=');
+final $typed_data.Uint8List verifyNumberRequestExDescriptor = $convert.base64Decode('ChVWZXJpZnlOdW1iZXJSZXF1ZXN0RXgSEgoEZGF0YRgBIAEoDFIEZGF0YRIcCglzaWduYXR1cmUYAiABKAxSCXNpZ25hdHVyZQ==');
 @$core.Deprecated('Use verifyNumberResponseExDescriptor instead')
 const VerifyNumberResponseEx$json = const {
   '1': 'VerifyNumberResponseEx',
