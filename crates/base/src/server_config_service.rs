@@ -91,7 +91,7 @@ impl ServerConfigService {
             .set_default(SEND_INVITE_SMS_MESSAGES_CONFIG_KEY, true)
             .unwrap()
             // how frequently to send sms in seconds
-            .set_default(SEND_INVITE_SMS_TASK_FREQ_SECS_CONFIG_KEY, 60 * 10)
+            .set_default(SEND_INVITE_SMS_TASK_FREQ_SECS_CONFIG_KEY, 60 * 15)
             .unwrap()
             .set_default(MAX_SMS_INVITES_PER_NUMBER_CONFIG_KEY, 2)
             .unwrap()

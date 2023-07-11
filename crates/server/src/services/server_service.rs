@@ -90,10 +90,11 @@ impl Actor for ServerService {
         info!("starting karma rewards service...");
 
         // start the karma rewards service
-        let karma_rewards_service = KarmaRewardsService::from_registry().await?;
+        let _karma_rewards_service = KarmaRewardsService::from_registry().await?;
 
         // Send karma rewards on server startup
         // Comment below to disable once we fix the periodic sending to account for server restarts
+        /*
         info!("Starting periodic karma rewards processing task...");
         match karma_rewards_service.call(ProcessKarmaRewards).await {
             Ok(res) => match res {
@@ -101,7 +102,7 @@ impl Actor for ServerService {
                 Err(e) => error!("Karma Rewards processing task error: {}", e),
             },
             Err(e) => error!("Error running invites task: {}", e),
-        }
+        }*/
 
         // start the backup chain service
         BackupChainService::from_registry().await?;
