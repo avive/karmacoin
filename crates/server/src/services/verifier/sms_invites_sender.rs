@@ -3,7 +3,7 @@ use crate::services::verifier::verifier_service::VerifierService;
 use anyhow::anyhow;
 use base::hex_utils::short_hex_string;
 use base::karma_coin::karma_coin_core_types::{
-    SignedTransaction, TransactionBody, TransactionType, User,
+    CharTrait, SignedTransaction, TransactionBody, TransactionType, User,
 };
 use base::karma_coin::karma_coin_verifier::SmsInviteMetadata;
 use base::server_config_service::{
@@ -11,6 +11,7 @@ use base::server_config_service::{
     SEND_INVITE_SMS_TIME_BETWEEN_SMS_SECS_CONFIG_KEY,
 };
 // use base64::{engine::general_purpose, Engine as _};
+use base::genesis_config_service::{GenesisConfigService, GetCharTraits, NO_CHAR_TRAIT_ID};
 use bytes::Bytes;
 use chrono::Duration;
 use chrono::Utc;
@@ -75,6 +76,11 @@ impl Handler<SendInvites> for VerifierService {
             );
         }
 
+        let char_traits = GenesisConfigService::from_registry()
+            .await?
+            .call(GetCharTraits)
+            .await?;
+
         // shared http client for this iteration
         let client = reqwest::Client::new();
 
@@ -121,9 +127,13 @@ impl Handler<SendInvites> for VerifierService {
                 info!("tx payee already has an on-chain account - skipping");
             }
 
+            // get payment tx body to figure out if this is an appreciation or not
+            // let payment_tx = tx_body.get_payment_transaction_v1()?;
+
             // payment transaction to a non-user - send him an invite!
             let _ = self
                 .send_invite(
+                    &char_traits,
                     tx,
                     &tx_body,
                     max_invites_per_number,
@@ -146,6 +156,7 @@ impl Handler<SendInvites> for VerifierService {
 impl VerifierService {
     async fn send_invite(
         &self,
+        char_traits: &Vec<CharTrait>,
         signed_tx: &SignedTransaction,
         tx_body: &TransactionBody,
         max_invites_per_number: u64,
@@ -163,12 +174,12 @@ impl VerifierService {
 
         let invite_number = invite_mobile_number.number.clone();
 
-        if invite_number.len() < 5 {
+        if invite_number.trim().len() < 5 {
             info!("skipping invite to mobile number {}", invite_number);
             return Ok(());
         }
 
-        info!("Computing sms invite to: {}", invite_number);
+        // info!("Computing sms invite to: {}", invite_number);
 
         let invite_db_key = Bytes::from(invite_number.as_bytes().to_vec());
 
@@ -212,14 +223,31 @@ impl VerifierService {
 
         // todo: move this out of the loop as these don't change per server instance
 
-        let sms_body = format!(
-            "👋 I just appreciated you and sent you some Karma Coins! 🙏
-- {} ({})
+        let appreciation = payment_tx.char_trait_id != NO_CHAR_TRAIT_ID;
 
-☥ To get these, get the Karma Coin App from https://karmaco.in",
-            inviter.user_name.clone(),
-            inviter_phone_number
-        );
+        let sms_body: String = {
+            if appreciation {
+                let t = char_traits
+                    .get(payment_tx.char_trait_id as usize)
+                    .ok_or_else(|| {
+                        anyhow!("char trait id {} not found", payment_tx.char_trait_id)
+                    })?;
+
+                format!(
+                    "{} ({}) says that you are {} {} and sent you Karma Coins. Get them on the Karma Coin App available at https://karmaco.in",
+                    inviter.user_name.clone(),
+                    inviter_phone_number,
+                    t.name,
+                    t.emoji
+                )
+            } else {
+                format!(
+                    "{} ({}) just sent you Karma Coins! Get them on the Karma Coin App available at https://karmaco.in",
+                    inviter.user_name.clone(),
+                    inviter_phone_number
+                )
+            }
+        };
 
         // todo: take from number from config file
         let params = [
@@ -230,8 +258,6 @@ impl VerifierService {
                 self.sms_gateway_from_number.as_ref().unwrap().as_str(),
             ),
         ];
-
-        info!("calling sms gateway api...");
 
         // todo: get api endpoint url from config file
         match client
@@ -245,9 +271,16 @@ impl VerifierService {
             .await?
             .status()
         {
-            StatusCode::CREATED => info!("sms sent via gateway :-)"),
+            StatusCode::CREATED => info!(
+                "sms sent via gateway to: {}. Message: {} :-)",
+                invite_mobile_number.number.as_str(),
+                sms_body
+            ),
             status => {
-                return Err(anyhow!(format!("sms gateway api call failed: {}", status)));
+                return Err(anyhow!(format!(
+                    "sms gateway api call failed with status code {}",
+                    status
+                )));
             }
         }
 

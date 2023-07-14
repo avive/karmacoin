@@ -85,7 +85,8 @@ impl ServerConfigService {
             .unwrap()
             .set_default(MEM_POOL_MAX_ITEMS_KEY, 5000)
             .unwrap()
-            .set_default(MEM_POOL_MAX_TX_AGE_HOURS, 168)
+            // Keep txs in pool for 7 days only
+            .set_default(MEM_POOL_MAX_TX_AGE_HOURS, 24 * 7)
             .unwrap()
             // off by default to prevent charges - set to true to test sms messages
             .set_default(SEND_INVITE_SMS_MESSAGES_CONFIG_KEY, true)
@@ -93,7 +94,7 @@ impl ServerConfigService {
             // how frequently to send sms in seconds
             .set_default(SEND_INVITE_SMS_TASK_FREQ_SECS_CONFIG_KEY, 60 * 15)
             .unwrap()
-            .set_default(MAX_SMS_INVITES_PER_NUMBER_CONFIG_KEY, 2)
+            .set_default(MAX_SMS_INVITES_PER_NUMBER_CONFIG_KEY, 3)
             .unwrap()
             // don't send invite sms more frequently then this cool down period
             .set_default(

@@ -84,7 +84,7 @@ impl BlockChainService {
         payment_tx: &PaymentTransactionV1,
         event: &mut TransactionEvent,
     ) {
-        // leadaerboard processing
+        // leaderboard processing
 
         // community appreciation processing
         let community_id = payment_tx.community_id;

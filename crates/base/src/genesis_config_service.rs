@@ -288,7 +288,7 @@ impl Actor for GenesisConfigService {
             .set_default(BLOCK_REWARDS_LAST_BLOCK, 500_000_000)
             .unwrap()
             // The block reward constant amount in KCents - 100000 KC
-            .set_default(BLOCK_REWARDS_AMOUNT, 100000 * ONE_KC_IN_KCENTS)
+            .set_default(BLOCK_REWARDS_AMOUNT, 10 * ONE_KC_IN_KCENTS)
             .unwrap()
             //
             // Karma rewards amount per user in KCents - 10 KC
@@ -297,7 +297,7 @@ impl Actor for GenesisConfigService {
             // Karma rewards computation period in minutes
             .set_default(KARMA_REWARD_PERIOD_MINUTES, 60 * 24 * 30)
             .unwrap()
-            // backp every 12 hours
+            // backup every 12 hours
             .set_default(BACKUP_CHAIN_TASK_PERIOD_MINUTES, 60 * 12)
             .unwrap()
             // min num of appreciations  in period to be eligible for reward
@@ -530,6 +530,16 @@ impl Handler<GetValue> for GenesisConfigService {
             Ok(res) => Some(res),
             Err(_) => None,
         }
+    }
+}
+
+#[message(result = "Vec<CharTrait>")]
+pub struct GetCharTraits;
+
+#[async_trait::async_trait]
+impl Handler<GetCharTraits> for GenesisConfigService {
+    async fn handle(&mut self, _ctx: &mut Context<Self>, _msg: GetCharTraits) -> Vec<CharTrait> {
+        self.char_traits.as_ref().unwrap().clone()
     }
 }
 

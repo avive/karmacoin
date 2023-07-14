@@ -17,9 +17,7 @@ use base::server_config_service::{SetConfigFile, START_VERIFIER_SERVICE_CONFIG_K
 use db::db_service::{DatabaseService, Destroy};
 use tonic::transport::*;
 
-use crate::services::blockchain::karma_rewards_service::{
-    KarmaRewardsService, ProcessKarmaRewards,
-};
+use crate::services::blockchain::karma_rewards_service::KarmaRewardsService;
 
 use crate::services::blockchain::backup_chain_service::BackupChainService;
 use base::karma_coin::karma_coin_api::GetGenesisDataRequest;
