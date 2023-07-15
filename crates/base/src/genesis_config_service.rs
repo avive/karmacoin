@@ -288,7 +288,7 @@ impl Actor for GenesisConfigService {
             .set_default(BLOCK_REWARDS_LAST_BLOCK, 500_000_000)
             .unwrap()
             // The block reward constant amount in KCents - 100000 KC
-            .set_default(BLOCK_REWARDS_AMOUNT, 10 * ONE_KC_IN_KCENTS)
+            .set_default(BLOCK_REWARDS_AMOUNT, 10000 * ONE_KC_IN_KCENTS)
             .unwrap()
             //
             // Karma rewards amount per user in KCents - 10 KC
