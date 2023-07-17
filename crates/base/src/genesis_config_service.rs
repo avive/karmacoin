@@ -266,7 +266,7 @@ impl Actor for GenesisConfigService {
             .unwrap()
             //
             // phase 1 reward amount per referral - 10 KC
-            .set_default(REFERRAL_REWARD_AMOUNT_PHASE1_KEY, 10 * ONE_KC_IN_KCENTS)
+            .set_default(REFERRAL_REWARD_AMOUNT_PHASE1_KEY, 100 * ONE_KC_IN_KCENTS)
             .unwrap()
             // phase 1 referral rewards allocation - 100M KCs
             .set_default(
