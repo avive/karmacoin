@@ -1,3 +1,15 @@
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SendVerificationCodeRequest {
+    #[prost(string, tag = "1")]
+    pub mobile_number: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct SendVerificationCodeResponse {
+    #[prost(string, tag = "1")]
+    pub session_id: ::prost::alloc::string::String,
+}
 /// Verier Info is used to return the network the id and dial-up info of active verifiers
 #[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -208,6 +220,29 @@ pub mod verifier_service_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
+        /// Send verification code to the user's mobile number via whatsapp
+        pub async fn send_verification_code(
+            &mut self,
+            request: impl tonic::IntoRequest<super::SendVerificationCodeRequest>,
+        ) -> Result<
+            tonic::Response<super::SendVerificationCodeResponse>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/karma_coin.verifier.VerifierService/SendVerificationCode",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
     }
 }
 /// Generated server implementations.
@@ -228,6 +263,11 @@ pub mod verifier_service_server {
             &self,
             request: tonic::Request<super::VerifyNumberRequestEx>,
         ) -> Result<tonic::Response<super::VerifyNumberResponse>, tonic::Status>;
+        /// Send verification code to the user's mobile number via whatsapp
+        async fn send_verification_code(
+            &self,
+            request: tonic::Request<super::SendVerificationCodeRequest>,
+        ) -> Result<tonic::Response<super::SendVerificationCodeResponse>, tonic::Status>;
     }
     /// mobile phone numbers verifier api service
     #[derive(Debug)]
@@ -358,6 +398,46 @@ pub mod verifier_service_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = VerifyNumberExSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/karma_coin.verifier.VerifierService/SendVerificationCode" => {
+                    #[allow(non_camel_case_types)]
+                    struct SendVerificationCodeSvc<T: VerifierService>(pub Arc<T>);
+                    impl<
+                        T: VerifierService,
+                    > tonic::server::UnaryService<super::SendVerificationCodeRequest>
+                    for SendVerificationCodeSvc<T> {
+                        type Response = super::SendVerificationCodeResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::SendVerificationCodeRequest>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move {
+                                (*inner).send_verification_code(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = SendVerificationCodeSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

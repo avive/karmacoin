@@ -15,6 +15,17 @@ service VerifierService {
 
   // Extended api - verifies number via Twilio whatsapp given user code
   rpc VerifyNumberEx(VerifyNumberRequestEx) returns (VerifyNumberResponse);
+
+  // Send verification code to the user's mobile number via whatsapp
+  rpc SendVerificationCode(SendVerificationCodeRequest) returns (SendVerificationCodeResponse);
+}
+
+message SendVerificationCodeRequest {
+  string mobile_number = 1;
+}
+
+message SendVerificationCodeResponse {
+  string session_id = 1;
 }
 
 // Verier Info is used to return the network the id and dial-up info of active verifiers

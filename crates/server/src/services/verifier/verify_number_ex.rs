@@ -4,7 +4,7 @@
 
 use crate::services::db_config_service::{USERS_COL_FAMILY, USERS_NAMES_COL_FAMILY};
 use crate::services::verifier::verifier_service::VerifierService;
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use base::karma_coin::karma_coin_core_types::{User, UserVerificationData, VerificationResult};
 use base::karma_coin::karma_coin_verifier::{VerifyNumberRequestDataEx, VerifyNumberRequestEx};
 use base::server_config_service::{ServerConfigService, AUTH_SERVICE_BYPASS_KEY};
@@ -38,10 +38,6 @@ impl Handler<VerifyEx> for VerifierService {
         let req = msg.0;
 
         info!("verify phone number ex called");
-
-        if self.auth_client.is_none() {
-            return Err(anyhow!("internal error - auth client not initialized"));
-        }
 
         // decode request data
         let user_data = match VerifyNumberRequestDataEx::decode(req.data.as_ref()) {

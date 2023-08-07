@@ -26,6 +26,12 @@ class VerifierServiceClient extends $grpc.Client {
           ($2.VerifyNumberRequestEx value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $2.VerifyNumberResponse.fromBuffer(value));
+  static final _$sendVerificationCode = $grpc.ClientMethod<
+          $2.SendVerificationCodeRequest, $2.SendVerificationCodeResponse>(
+      '/karma_coin.verifier.VerifierService/SendVerificationCode',
+      ($2.SendVerificationCodeRequest value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) =>
+          $2.SendVerificationCodeResponse.fromBuffer(value));
 
   VerifierServiceClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -42,6 +48,12 @@ class VerifierServiceClient extends $grpc.Client {
       $2.VerifyNumberRequestEx request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$verifyNumberEx, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$2.SendVerificationCodeResponse> sendVerificationCode(
+      $2.SendVerificationCodeRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$sendVerificationCode, request, options: options);
   }
 }
 
@@ -67,6 +79,15 @@ abstract class VerifierServiceBase extends $grpc.Service {
             ($core.List<$core.int> value) =>
                 $2.VerifyNumberRequestEx.fromBuffer(value),
             ($2.VerifyNumberResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$2.SendVerificationCodeRequest,
+            $2.SendVerificationCodeResponse>(
+        'SendVerificationCode',
+        sendVerificationCode_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $2.SendVerificationCodeRequest.fromBuffer(value),
+        ($2.SendVerificationCodeResponse value) => value.writeToBuffer()));
   }
 
   $async.Future<$2.VerifyNumberResponse> verifyNumber_Pre(
@@ -81,8 +102,16 @@ abstract class VerifierServiceBase extends $grpc.Service {
     return verifyNumberEx(call, await request);
   }
 
+  $async.Future<$2.SendVerificationCodeResponse> sendVerificationCode_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$2.SendVerificationCodeRequest> request) async {
+    return sendVerificationCode(call, await request);
+  }
+
   $async.Future<$2.VerifyNumberResponse> verifyNumber(
       $grpc.ServiceCall call, $2.VerifyNumberRequest request);
   $async.Future<$2.VerifyNumberResponse> verifyNumberEx(
       $grpc.ServiceCall call, $2.VerifyNumberRequestEx request);
+  $async.Future<$2.SendVerificationCodeResponse> sendVerificationCode(
+      $grpc.ServiceCall call, $2.SendVerificationCodeRequest request);
 }

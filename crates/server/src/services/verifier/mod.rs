@@ -9,3 +9,5 @@ pub(crate) mod sms_invites_sender;
 pub(crate) mod verifier_service;
 pub(crate) mod verify_number;
 pub(crate) mod verify_number_ex;
+
+pub(crate) mod send_verification_code;

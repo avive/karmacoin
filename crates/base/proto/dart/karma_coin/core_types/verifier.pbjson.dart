@@ -8,6 +8,26 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
+@$core.Deprecated('Use sendVerificationCodeRequestDescriptor instead')
+const SendVerificationCodeRequest$json = const {
+  '1': 'SendVerificationCodeRequest',
+  '2': const [
+    const {'1': 'mobile_number', '3': 1, '4': 1, '5': 9, '10': 'mobileNumber'},
+  ],
+};
+
+/// Descriptor for `SendVerificationCodeRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sendVerificationCodeRequestDescriptor = $convert.base64Decode('ChtTZW5kVmVyaWZpY2F0aW9uQ29kZVJlcXVlc3QSIwoNbW9iaWxlX251bWJlchgBIAEoCVIMbW9iaWxlTnVtYmVy');
+@$core.Deprecated('Use sendVerificationCodeResponseDescriptor instead')
+const SendVerificationCodeResponse$json = const {
+  '1': 'SendVerificationCodeResponse',
+  '2': const [
+    const {'1': 'session_id', '3': 1, '4': 1, '5': 9, '10': 'sessionId'},
+  ],
+};
+
+/// Descriptor for `SendVerificationCodeResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List sendVerificationCodeResponseDescriptor = $convert.base64Decode('ChxTZW5kVmVyaWZpY2F0aW9uQ29kZVJlc3BvbnNlEh0KCnNlc3Npb25faWQYASABKAlSCXNlc3Npb25JZA==');
 @$core.Deprecated('Use verifierInfoDescriptor instead')
 const VerifierInfo$json = const {
   '1': 'VerifierInfo',

@@ -22,7 +22,7 @@ use prost::Message;
 /// BlockchainService block creation implementation
 impl BlockChainService {
     /// apply one-time patch on startup
-    pub(crate) async fn apply_patch(&self) -> Result<()> {
+    pub(crate) async fn _apply_patch(&self) -> Result<()> {
         info!("applying patch...");
         // get block producer user
         let mut block_producer: User = self

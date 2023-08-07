@@ -2451,8 +2451,13 @@ X
 "∫&/
 
 "∫24bproto3
-ﬁ%
-$karma_coin/core_types/verifier.protokarma_coin.verifier!karma_coin/core_types/types.proto"ﬂ
+ˆ)
+$karma_coin/core_types/verifier.protokarma_coin.verifier!karma_coin/core_types/types.proto"B
+SendVerificationCodeRequest#
+mobile_number (	RmobileNumber"=
+SendVerificationCodeResponse
+
+session_id (	R	sessionId"ﬂ
 VerifierInfo
 name (	Rname?
 
@@ -2488,11 +2493,12 @@ account_id (2 .karma_coin.core_types.AccountIdR	accountIdH
 last_message_sent_time_stamp (RlastMessageSentTimeStamp#
 messages_sent (RmessagesSentN
 inviter_account_id (2 .karma_coin.core_types.AccountIdRinviterAccountId$
-invite_tx_hash (RinviteTxHash2ﬂ
+invite_tx_hash (RinviteTxHash2‹
 VerifierServicec
 VerifyNumber(.karma_coin.verifier.VerifyNumberRequest).karma_coin.verifier.VerifyNumberResponseg
-VerifyNumberEx*.karma_coin.verifier.VerifyNumberRequestEx).karma_coin.verifier.VerifyNumberResponseJç
- M
+VerifyNumberEx*.karma_coin.verifier.VerifyNumberRequestEx).karma_coin.verifier.VerifyNumberResponse{
+SendVerificationCode0.karma_coin.verifier.SendVerificationCodeRequest1.karma_coin.verifier.SendVerificationCodeResponseJ•
+ X
 ®
  2ù Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
  This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
@@ -2504,7 +2510,7 @@ account_id (2 .karma_coin.core_types.AccountIdR	accountIdH
   +
 7
  
- + mobile phone numbers verifier api service
+ + mobile phone numbers verifier api service
 
 
 
@@ -2529,273 +2535,310 @@ Q
  *
 
  5I
+N
+ _A Send verification code to the user's mobile number via whatsapp
+
+
+ 
+
+ 6
+
+ A]
+
+
+  
+
+
+ #
+
+  
+
+  
+
+  	
+
+  
+
+
+ 
+
+
+$
+
+ 
+
+ 
+
+ 	
+
+ 
 c
-  W Verier Info is used to return the network the id and dial-up info of active verifiers
+ 'W Verier Info is used to return the network the id and dial-up info of active verifiers
 
 
 
- 
+
 
-  
+  
 
-  
+  
 
-  	
+  	
 
-  
+  
 
- &
+!&
 
- 
+!
 
- !
+!!
 
- $%
+!$%
 
- #"	 ip:port
+"#"	 ip:port
 
 
- 
+"
 
- 	
+"	
 
- !"
+"!"
 
- #"	 ip:port
+##"	 ip:port
 
 
- 
+#
 
- 	
+#	
 
- !"
+#!"
 
- "	 ip:port
+$"	 ip:port
 
 
- 
+$
 
- 	
+$	
 
- 
+$
 
- "	 ip:port
+%"	 ip:port
 
 
- 
+%
 
- 	
+%	
 
- 
+%
 
- %
+&%
 
- 
+&
 
-  
+& 
 
- #$
+&#$
 
 
- $
+) /
 
 
-
+)
 
- 
+ *
 
- 
+ *
 
- 	
+ *	
 
- 
+ *
 
- &
++&
 
- 
++
 
- !
++!
 
- $%
++$%
 
-!,
+,,
 
-!
+,
 
-!'
+,'
 
-!*+
+,*+
 
-"!
+-!
 
-"
+-
 
-"	
+-	
 
-" 
+- 
 
-#%
+.%
 
-#
+.
 
-# 
+. 
 
-##$
+.#$
 
 
-& (
+1 3
 
 
-&
+1
 
- '=
+ 2=
 
- '!
+ 2!
 
- '"8
+ 2"8
 
- ';<
+ 2;<
 
 
-* 5
+5 @
 
 
-*!
+5!
 
- +
+ 6
 
- +
+ 6
 
- +	
+ 6	
 
- +
+ 6
 
-,&
+7&
 
-,
+7
 
-,!
+7!
 
-,$%
+7$%
 
--,
+8,
 
--
+8
 
--'
+8'
 
--*+
+8*+
 
-.!
+9!
 
-.
+9
 
-.	
+9	
 
-. 
+9 
 4
-0' optional token to bypass verification
+;' optional token to bypass verification
 
 
-0
+;
 
-0
+;
 
-0
+;
 0
-2# Twilio whatsapp verification code
+=# Twilio whatsapp verification code
 
 
-2
+=
 
-2	
+=	
 
-2
+=
 `
-4S Twilio verification sid (obtained when verify was called from client in response)
+?S Twilio verification sid (obtained when verify was called from client in response)
 
 
-4
+?
 
-4	
+?	
 
-4
+?
 
 
-7 >
+B I
 
 
-7
+B
 3
- 9& serialized VerifyNumberRequestDataEx
+ D& serialized VerifyNumberRequestDataEx
 
 
- 9
+ D
 
- 9
+ D
 
- 9
+ D
 Z
-=M User signature of binary data field 1
+HM User signature of binary data field 1
  Public key is account_id in the data
 
 
-=
+H
 
-=
+H
 
-=
+H
 D
-B M8/ Data object stored in db to track invite sms messages
+M X8/ Data object stored in db to track invite sms messages
 
 
 
-B
+M
 1
- D,$ invited person mobile phone number
+ O,$ invited person mobile phone number
 
 
- D
+ O
 
- D'
+ O'
 
- D*+
+ O*+
 ;
-F*. the time of the last invite sms message sent
+Q*. the time of the last invite sms message sent
 
 
-F
+Q
 
-F	%
+Q	%
 
-F()
+Q()
 7
-H* total number of invite sms messages sent
+S* total number of invite sms messages sent
 
 
-H
+S
 
-H	
+S	
 
-H
+S
 A
-J.4 inviter mobile phone number (from appreciation tx)
+U.4 inviter mobile phone number (from appreciation tx)
 
 
-J
+U
 
-J)
+U)
 
-J,-
+U,-
 C
-L6 the hash of the payment tx that triggers this invite
+W6 the hash of the payment tx that triggers this invite
 
 
-L
+W
 
-L
+W
 
-Lbproto3
+Wbproto3
 ø
  karma_coin/core_types/auth.protokarma_coin.auth!karma_coin/core_types/types.proto"q
 AuthRequest?
