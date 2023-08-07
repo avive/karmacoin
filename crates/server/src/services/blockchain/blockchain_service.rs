@@ -43,7 +43,7 @@ impl Actor for BlockChainService {
         );
 
         // apply patch
-        self.apply_patch().await?;
+        // self.apply_patch().await?;
 
         Ok(())
     }

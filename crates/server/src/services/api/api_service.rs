@@ -161,6 +161,7 @@ impl ApiServiceTrait for ApiService {
             .map_err(|e| Status::internal(format!("failed to call api: {:?}", e)))?
             .map_err(|e| Status::internal(format!("internal error: {}", e)))?;
 
+        info!("Returning result");
         Ok(Response::new(res))
     }
 

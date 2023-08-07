@@ -12,7 +12,7 @@ use base::signed_trait::SignedTrait;
 use bytes::Bytes;
 use db::db_service::{DatabaseService, ReadItem};
 use ed25519_dalek::Verifier;
-use http::header;
+use http::{header, StatusCode};
 use prost::Message;
 use reqwest::Client;
 use serde::Deserialize;
@@ -193,6 +193,11 @@ impl Handler<VerifyEx> for VerifierService {
 
             match res {
                 Ok(response) => {
+                    if response.status() != StatusCode::OK {
+                        info!("twilio response status code != 200");
+                        return self.gen_result(VerificationResult::Unverified).await;
+                    }
+
                     let data = response.json::<OTPVerifyResponse>().await;
                     match data {
                         Ok(result) => {
