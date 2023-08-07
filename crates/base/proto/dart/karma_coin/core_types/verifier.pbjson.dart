@@ -57,11 +57,13 @@ const VerifyNumberRequestDataEx$json = const {
     const {'1': 'mobile_number', '3': 3, '4': 1, '5': 11, '6': '.karma_coin.core_types.MobileNumber', '10': 'mobileNumber'},
     const {'1': 'requested_user_name', '3': 4, '4': 1, '5': 9, '10': 'requestedUserName'},
     const {'1': 'bypass_token', '3': 5, '4': 1, '5': 12, '10': 'bypassToken'},
+    const {'1': 'verification_code', '3': 6, '4': 1, '5': 9, '10': 'verificationCode'},
+    const {'1': 'verification_sid', '3': 7, '4': 1, '5': 9, '10': 'verificationSid'},
   ],
 };
 
 /// Descriptor for `VerifyNumberRequestDataEx`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List verifyNumberRequestDataExDescriptor = $convert.base64Decode('ChlWZXJpZnlOdW1iZXJSZXF1ZXN0RGF0YUV4EhwKCXRpbWVzdGFtcBgBIAEoBFIJdGltZXN0YW1wEj8KCmFjY291bnRfaWQYAiABKAsyIC5rYXJtYV9jb2luLmNvcmVfdHlwZXMuQWNjb3VudElkUglhY2NvdW50SWQSSAoNbW9iaWxlX251bWJlchgDIAEoCzIjLmthcm1hX2NvaW4uY29yZV90eXBlcy5Nb2JpbGVOdW1iZXJSDG1vYmlsZU51bWJlchIuChNyZXF1ZXN0ZWRfdXNlcl9uYW1lGAQgASgJUhFyZXF1ZXN0ZWRVc2VyTmFtZRIhCgxieXBhc3NfdG9rZW4YBSABKAxSC2J5cGFzc1Rva2Vu');
+final $typed_data.Uint8List verifyNumberRequestDataExDescriptor = $convert.base64Decode('ChlWZXJpZnlOdW1iZXJSZXF1ZXN0RGF0YUV4EhwKCXRpbWVzdGFtcBgBIAEoBFIJdGltZXN0YW1wEj8KCmFjY291bnRfaWQYAiABKAsyIC5rYXJtYV9jb2luLmNvcmVfdHlwZXMuQWNjb3VudElkUglhY2NvdW50SWQSSAoNbW9iaWxlX251bWJlchgDIAEoCzIjLmthcm1hX2NvaW4uY29yZV90eXBlcy5Nb2JpbGVOdW1iZXJSDG1vYmlsZU51bWJlchIuChNyZXF1ZXN0ZWRfdXNlcl9uYW1lGAQgASgJUhFyZXF1ZXN0ZWRVc2VyTmFtZRIhCgxieXBhc3NfdG9rZW4YBSABKAxSC2J5cGFzc1Rva2VuEisKEXZlcmlmaWNhdGlvbl9jb2RlGAYgASgJUhB2ZXJpZmljYXRpb25Db2RlEikKEHZlcmlmaWNhdGlvbl9zaWQYByABKAlSD3ZlcmlmaWNhdGlvblNpZA==');
 @$core.Deprecated('Use verifyNumberRequestExDescriptor instead')
 const VerifyNumberRequestEx$json = const {
   '1': 'VerifyNumberRequestEx',
@@ -73,17 +75,6 @@ const VerifyNumberRequestEx$json = const {
 
 /// Descriptor for `VerifyNumberRequestEx`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List verifyNumberRequestExDescriptor = $convert.base64Decode('ChVWZXJpZnlOdW1iZXJSZXF1ZXN0RXgSEgoEZGF0YRgBIAEoDFIEZGF0YRIcCglzaWduYXR1cmUYAiABKAxSCXNpZ25hdHVyZQ==');
-@$core.Deprecated('Use verifyNumberResponseExDescriptor instead')
-const VerifyNumberResponseEx$json = const {
-  '1': 'VerifyNumberResponseEx',
-  '2': const [
-    const {'1': 'verification_data', '3': 1, '4': 1, '5': 12, '10': 'verificationData'},
-    const {'1': 'signature', '3': 2, '4': 1, '5': 12, '10': 'signature'},
-  ],
-};
-
-/// Descriptor for `VerifyNumberResponseEx`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List verifyNumberResponseExDescriptor = $convert.base64Decode('ChZWZXJpZnlOdW1iZXJSZXNwb25zZUV4EisKEXZlcmlmaWNhdGlvbl9kYXRhGAEgASgMUhB2ZXJpZmljYXRpb25EYXRhEhwKCXNpZ25hdHVyZRgCIAEoDFIJc2lnbmF0dXJl');
 @$core.Deprecated('Use smsInviteMetadataDescriptor instead')
 const SmsInviteMetadata$json = const {
   '1': 'SmsInviteMetadata',

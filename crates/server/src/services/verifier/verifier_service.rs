@@ -11,7 +11,7 @@ use base::karma_coin::karma_coin_auth::auth_service_client::AuthServiceClient;
 use base::karma_coin::karma_coin_core_types::{AccountId, KeyPair};
 use base::karma_coin::karma_coin_verifier::verifier_service_server::VerifierService as VerifierServiceTrait;
 use base::karma_coin::karma_coin_verifier::{
-    VerifyNumberRequest, VerifyNumberRequestEx, VerifyNumberResponse, VerifyNumberResponseEx,
+    VerifyNumberRequest, VerifyNumberRequestEx, VerifyNumberResponse,
 };
 use base::server_config_service::{
     GetVerifierIdKeyPair, ServerConfigService, AUTH_SERVICE_HOST_KEY, AUTH_SERVICE_PORT_KEY,
@@ -175,7 +175,7 @@ impl VerifierServiceTrait for VerifierService {
     async fn verify_number_ex(
         &self,
         request: Request<VerifyNumberRequestEx>,
-    ) -> Result<Response<VerifyNumberResponseEx>, Status> {
+    ) -> Result<Response<VerifyNumberResponse>, Status> {
         let service = VerifierService::from_registry()
             .await
             .map_err(|e| Status::internal(format!("internal error: {:?}", e)))?;
@@ -187,7 +187,9 @@ impl VerifierServiceTrait for VerifierService {
         {
             Ok(data) => {
                 info!("verification successful");
-                Ok(Response::new(data))
+                Ok(Response::new(VerifyNumberResponse {
+                    user_verification_data: Some(data),
+                }))
             }
             Err(e) => Err(Status::internal(format!("internal error: {:?}", e))),
         }

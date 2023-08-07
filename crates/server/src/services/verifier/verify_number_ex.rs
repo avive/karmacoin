@@ -5,21 +5,28 @@
 use crate::services::db_config_service::{USERS_COL_FAMILY, USERS_NAMES_COL_FAMILY};
 use crate::services::verifier::verifier_service::VerifierService;
 use anyhow::{anyhow, Result};
-use base::karma_coin::karma_coin_auth::{AuthRequest, AuthResult};
-use base::karma_coin::karma_coin_core_types::{User, UserVerificationDataEx, VerificationResult};
-use base::karma_coin::karma_coin_verifier::{
-    VerifyNumberRequestDataEx, VerifyNumberRequestEx, VerifyNumberResponseEx,
-};
+use base::karma_coin::karma_coin_core_types::{User, UserVerificationData, VerificationResult};
+use base::karma_coin::karma_coin_verifier::{VerifyNumberRequestDataEx, VerifyNumberRequestEx};
 use base::server_config_service::{ServerConfigService, AUTH_SERVICE_BYPASS_KEY};
+use base::signed_trait::SignedTrait;
 use bytes::Bytes;
 use db::db_service::{DatabaseService, ReadItem};
-use ed25519_dalek::{Signer, Verifier};
+use ed25519_dalek::Verifier;
+use http::header;
 use prost::Message;
+use reqwest::Client;
+use serde::Deserialize;
+use std::collections::HashMap;
 use xactor::*;
 
-#[message(result = "Result<VerifyNumberResponseEx>")]
+#[message(result = "Result<UserVerificationData>")]
 pub(crate) struct VerifyEx(pub VerifyNumberRequestEx);
 
+#[derive(Deserialize, Debug, Clone)]
+pub struct OTPVerifyResponse {
+    pub status: String,
+    pub sid: String,
+}
 /// Request to complete verification and sign up
 #[async_trait::async_trait]
 impl Handler<VerifyEx> for VerifierService {
@@ -27,7 +34,7 @@ impl Handler<VerifyEx> for VerifierService {
         &mut self,
         _ctx: &mut Context<Self>,
         msg: VerifyEx,
-    ) -> Result<VerifyNumberResponseEx> {
+    ) -> Result<UserVerificationData> {
         let req = msg.0;
 
         info!("verify phone number ex called");
@@ -40,14 +47,14 @@ impl Handler<VerifyEx> for VerifierService {
         let user_data = match VerifyNumberRequestDataEx::decode(req.data.as_ref()) {
             Ok(user_data) => user_data,
             Err(_) => {
-                return self.gen_result_ex(VerificationResult::MissingData).await;
+                return self.gen_result(VerificationResult::MissingData).await;
             }
         };
 
         let account_id = match user_data.account_id {
             Some(id) => id.clone(),
             None => {
-                return self.gen_result_ex(VerificationResult::MissingData).await;
+                return self.gen_result(VerificationResult::MissingData).await;
             }
         };
 
@@ -58,21 +65,22 @@ impl Handler<VerifyEx> for VerifierService {
 
         // verify request data signature
         if pub_key.verify(req.data.as_ref(), signature).is_err() {
-            return self
-                .gen_result_ex(VerificationResult::InvalidSignature)
-                .await;
+            return self.gen_result(VerificationResult::InvalidSignature).await;
         };
+
+        // verify provided Twilio code
+        // let code = user_data.
 
         let requested_user_name = user_data.requested_user_name.clone();
 
         if requested_user_name.is_empty() {
-            return self.gen_result_ex(VerificationResult::MissingData).await;
+            return self.gen_result(VerificationResult::MissingData).await;
         }
 
         let phone_number = match user_data.mobile_number {
             Some(n) => n,
             None => {
-                return self.gen_result_ex(VerificationResult::MissingData).await;
+                return self.gen_result(VerificationResult::MissingData).await;
             }
         };
 
@@ -89,7 +97,7 @@ impl Handler<VerifyEx> for VerifierService {
             let user = User::decode(user_data.0.as_ref())?;
             if user.user_name != requested_user_name {
                 // don't allow giving evidence on new requested user name in case of existing user
-                return self.gen_result_ex(VerificationResult::UserNameTaken).await;
+                return self.gen_result(VerificationResult::UserNameTaken).await;
             }
         } else {
             // no user for account id - check requested name availability
@@ -102,7 +110,7 @@ impl Handler<VerifyEx> for VerifierService {
             .await?)
                 .is_some()
             {
-                return self.gen_result_ex(VerificationResult::UserNameTaken).await;
+                return self.gen_result(VerificationResult::UserNameTaken).await;
             }
         }
 
@@ -117,7 +125,7 @@ impl Handler<VerifyEx> for VerifierService {
             let user = User::decode(user_data.0.as_ref())?;
             if user.user_name != requested_user_name {
                 // don't allow giving evidence on requested user name in case of existing user
-                return self.gen_result_ex(VerificationResult::UserNameTaken).await;
+                return self.gen_result(VerificationResult::UserNameTaken).await;
             }
         } else {
             // verify that the requested username not already registered to another user
@@ -129,9 +137,11 @@ impl Handler<VerifyEx> for VerifierService {
             .await?)
                 .is_some()
             {
-                return self.gen_result_ex(VerificationResult::UserNameTaken).await;
+                return self.gen_result(VerificationResult::UserNameTaken).await;
             }
         }
+
+        // ignore bypass token for now
 
         let bypass_token = hex::decode(
             ServerConfigService::get(AUTH_SERVICE_BYPASS_KEY.into())
@@ -142,43 +152,71 @@ impl Handler<VerifyEx> for VerifierService {
 
         // call auth service unless bypass token was provided and matches the configured one
         if !user_data.bypass_token.eq(&bypass_token) {
-            match self
-                .auth_client
-                .as_mut()
-                .unwrap()
-                .authenticate(AuthRequest {
-                    account_id: Some(account_id.clone()),
-                    phone_number: phone_number.number.clone(),
-                })
-                .await
-            {
-                Ok(resp) => {
-                    let res = AuthResult::from_i32(resp.into_inner().result);
-                    if res.is_none() {
-                        return Err(anyhow!(
-                            "internal error - auth service returned an invalid result"
-                        ));
-                    }
+            // verify code
 
-                    match res.unwrap() {
-                        AuthResult::AccountIdMismatch => {
-                            return self
-                                .gen_result_ex(VerificationResult::AccountMismatch)
-                                .await
+            // todo: move to consts
+            let twilio_account_id: String = ServerConfigService::get("twilio.account_sid".into())
+                .await?
+                .unwrap();
+
+            let twilio_service_id: String = ServerConfigService::get("twilio.service_id".into())
+                .await?
+                .unwrap();
+
+            let twilio_token: String = ServerConfigService::get("twilio.auth_token".into())
+                .await?
+                .unwrap();
+
+            let url = format!(
+                "https://verify.twilio.com/v2/Services/{serv_id}/VerificationCheck",
+                serv_id = twilio_service_id,
+            );
+
+            let mut headers = header::HeaderMap::new();
+            headers.insert(
+                "Content-Type",
+                "application/x-www-form-urlencoded".parse().unwrap(),
+            );
+
+            let mut form_body: HashMap<&str, &String> = HashMap::new();
+            form_body.insert("To", &phone_number.number);
+            form_body.insert("Code", &user_data.verification_code);
+
+            let client = Client::new();
+            let res = client
+                .post(url)
+                .basic_auth(twilio_account_id, Some(twilio_token))
+                .headers(headers)
+                .form(&form_body)
+                .send()
+                .await;
+
+            match res {
+                Ok(response) => {
+                    let data = response.json::<OTPVerifyResponse>().await;
+                    match data {
+                        Ok(result) => {
+                            if result.status == "approved" {
+                                // validate sid
+                                if result.sid != user_data.verification_sid {
+                                    info!("twilio sid mismatch");
+                                    return self.gen_result(VerificationResult::MissingData).await;
+                                }
+                                info!("Twilio approved code!");
+                            } else {
+                                info!("Twilio result != approved");
+                                return self.gen_result(VerificationResult::Unverified).await;
+                            }
                         }
-                        AuthResult::UserNotFound => {
-                            return self.gen_result_ex(VerificationResult::Unverified).await
-                        }
-                        AuthResult::UserAuthenticated => {
-                            info!("user phone and account id verifier")
+                        Err(e) => {
+                            info!("error parsing twilio resp: {}", e);
+                            return self.gen_result(VerificationResult::Unverified).await;
                         }
                     }
                 }
                 Err(e) => {
-                    return Err(anyhow!(
-                        "internal error - auth service call failed: {:?}",
-                        e
-                    ));
+                    info!("error calling twilio: {}", e);
+                    return self.gen_result(VerificationResult::Unverified).await;
                 }
             }
         }
@@ -186,47 +224,15 @@ impl Handler<VerifyEx> for VerifierService {
         // create signed verified response and return it
         let key_pair = self.get_key_pair().await?.to_ed2559_keypair();
 
-        let mut resp = UserVerificationDataEx::from(VerificationResult::Verified);
+        let mut resp = UserVerificationData::from(VerificationResult::Verified);
 
         // signed attestation details - user account id, nickname and verified mobile number
         resp.account_id = Some(account_id);
         resp.verifier_account_id = Some(self.get_account_id().await?);
         resp.requested_user_name = requested_user_name;
-
-        // todo: hash the phone number in the response and set it
-        // resp.mobile_number = Some(phone_number);
-
-        use blake2::{Blake2b512, Digest};
-        let mut hasher = Blake2b512::new();
-        hasher.update(&phone_number.number);
-        let hash = hasher.finalize();
-        resp.mobile_number_hash = hex::encode(hash.as_slice());
-        info!("Hash: {}", resp.mobile_number_hash);
-
-        let mut buf = Vec::with_capacity(resp.encoded_len());
-        resp.encode(&mut buf)?;
-
-        Ok(VerifyNumberResponseEx {
-            verification_data: buf.to_vec(),
-            signature: key_pair.sign(&buf.to_vec()).as_ref().to_vec(),
-        })
-    }
-}
-
-impl VerifierService {
-    /// private helper function to generate a signed user verification data
-    async fn gen_result_ex(&mut self, value: VerificationResult) -> Result<VerifyNumberResponseEx> {
-        let mut data = UserVerificationDataEx::from(value);
-
-        let verifier_key_pair = self.get_key_pair().await?.to_ed2559_keypair();
-        data.verifier_account_id = Some(self.get_account_id().await?);
-
-        let mut buf = Vec::with_capacity(data.encoded_len());
-        data.encode(&mut buf)?;
-
-        Ok(VerifyNumberResponseEx {
-            verification_data: buf.to_vec(),
-            signature: verifier_key_pair.sign(&buf.to_vec()).as_ref().to_vec(),
-        })
+        resp.mobile_number = Some(phone_number);
+        resp.signature = Some(resp.sign(&key_pair)?);
+        info!("Returning verification response");
+        Ok(resp)
     }
 }

@@ -2451,7 +2451,7 @@ X
 "∫&/
 
 "∫24bproto3
-∫&
+ﬁ%
 $karma_coin/core_types/verifier.protokarma_coin.verifier!karma_coin/core_types/types.proto"ﬂ
 VerifierInfo
 name (	Rname?
@@ -2470,30 +2470,29 @@ account_id (2 .karma_coin.core_types.AccountIdR	accountIdH
 requested_user_name (	RrequestedUserName>
 	signature (2 .karma_coin.core_types.SignatureR	signature"y
 VerifyNumberResponsea
-user_verification_data (2+.karma_coin.core_types.UserVerificationDataRuserVerificationData"ó
+user_verification_data (2+.karma_coin.core_types.UserVerificationDataRuserVerificationData"Ô
 VerifyNumberRequestDataEx
 	timestamp (R	timestamp?
 
 account_id (2 .karma_coin.core_types.AccountIdR	accountIdH
 mobile_number (2#.karma_coin.core_types.MobileNumberRmobileNumber.
 requested_user_name (	RrequestedUserName!
-bypass_token (RbypassToken"I
+bypass_token (RbypassToken+
+verification_code (	RverificationCode)
+verification_sid (	RverificationSid"I
 VerifyNumberRequestEx
 data (Rdata
-	signature (R	signature"c
-VerifyNumberResponseEx+
-verification_data (RverificationData
 	signature (R	signature"∏
 SmsInviteMetadataH
 mobile_number (2#.karma_coin.core_types.MobileNumberRmobileNumber>
 last_message_sent_time_stamp (RlastMessageSentTimeStamp#
 messages_sent (RmessagesSentN
 inviter_account_id (2 .karma_coin.core_types.AccountIdRinviterAccountId$
-invite_tx_hash (RinviteTxHash2·
+invite_tx_hash (RinviteTxHash2ﬂ
 VerifierServicec
-VerifyNumber(.karma_coin.verifier.VerifyNumberRequest).karma_coin.verifier.VerifyNumberResponsei
-VerifyNumberEx*.karma_coin.verifier.VerifyNumberRequestEx+.karma_coin.verifier.VerifyNumberResponseExJ⁄
- R
+VerifyNumber(.karma_coin.verifier.VerifyNumberRequest).karma_coin.verifier.VerifyNumberResponseg
+VerifyNumberEx*.karma_coin.verifier.VerifyNumberRequestEx).karma_coin.verifier.VerifyNumberResponseJç
+ M
 ®
  2ù Copyright (c) 2022, KarmaCoin Authors. a@karmaco.in.
  This work is licensed under the KarmaCoin v0.1.0 license published in the LICENSE file of this repo.
@@ -2505,7 +2504,7 @@ account_id (2 .karma_coin.core_types.AccountIdR	accountIdH
   +
 7
  
- + mobile phone numbers verifier api service
+ + mobile phone numbers verifier api service
 
 
 
@@ -2521,289 +2520,282 @@ account_id (2 .karma_coin.core_types.AccountIdR	accountIdH
   &
 
   1E
-|
- Mo Extended api - supports bypass token for tests and response signs binary part
- should be used in Kchain 2.0 -
+Q
+ KD Extended api - verifies number via Twilio whatsapp given user code
 
 
- 
+ 
 
- *
+ *
 
- 5K
-b
-  V Verier Info is used to return the network the id and dialup info of active verifiers
+ 5I
+c
+  W Verier Info is used to return the network the id and dial-up info of active verifiers
 
 
 
- 
+ 
 
-  
+  
 
-  
+  
 
-  	
+  	
 
-  
+  
 
- &
+ &
 
- 
+ 
 
- !
+ !
 
- $%
+ $%
 
- #"	 ip:port
+ #"	 ip:port
 
 
- 
+ 
 
- 	
+ 	
 
- !"
+ !"
 
- #"	 ip:port
+ #"	 ip:port
 
 
- 
+ 
 
- 	
+ 	
 
- !"
+ !"
 
- "	 ip:port
+ "	 ip:port
 
 
- 
+ 
 
- 	
+ 	
 
- 
+ 
 
- "	 ip:port
+ "	 ip:port
 
 
- 
+ 
 
- 	
+ 	
 
- 
+ 
 
- %
+ %
 
- 
+ 
 
-  
+  
 
- #$
+ #$
 
 
- %
+ $
 
 
-
+
 
-  
+ 
 
-  
+ 
 
-  	
+ 	
 
-  
+ 
 
-!&
+ &
 
-!
+ 
 
-!!
+ !
 
-!$%
+ $%
 
-",
+!,
 
-"
+!
 
-"'
+!'
 
-"*+
+!*+
 
-#!
+"!
 
-#
+"
 
-#	
+"	
 
-# 
+" 
 
-$%
+#%
 
-$
+#
 
-$ 
+# 
 
-$#$
+##$
 
 
-' )
+& (
 
 
-'
+&
 
- (=
+ '=
 
- (!
+ '!
 
- ("8
+ '"8
 
- (;<
+ ';<
 
 
-+ 2
+* 5
 
 
-+!
+*!
 
- ,
+ +
 
- ,
+ +
 
- ,	
+ +	
 
- ,
+ +
 
--&
+,&
 
--
+,
 
--!
+,!
 
--$%
+,$%
 
-.,
+-,
 
-.
+-
 
-.'
+-'
 
-.*+
+-*+
 
-/!
+.!
 
-/
+.
 
-/	
+.	
 
-/ 
+. 
 4
-1' optional token to bypass verification
+0' optional token to bypass verification
 
 
-1
+0
 
-1
+0
 
-1
+0
+0
+2# Twilio whatsapp verification code
+
+
+2
+
+2	
+
+2
+`
+4S Twilio verification sid (obtained when verify was called from client in response)
+
+
+4
+
+4	
+
+4
 
 
-4 ;
+7 >
 
 
-4
+7
 3
- 6& serialized VerifyNumberRequestDataEx
+ 9& serialized VerifyNumberRequestDataEx
 
 
- 6
+ 9
 
- 6
+ 9
 
- 6
+ 9
 Z
-:M User signature of binary data field 1
+=M User signature of binary data field 1
  Public key is account_id in the data
 
 
-:
+=
 
-:
+=
 
-:
-
-
-= C
-
-
-=
-:
- ?- a serialized UserVerificationDataEx message
-
-
- ?
-
- ?
-
- ?
-a
-BT Verifier signature over the binary data above - client has the verifier public key
-
-
-B
-
-B
-
-B
+=
 D
-G R8/ Data object stored in db to track invite sms messages
+B M8/ Data object stored in db to track invite sms messages
 
 
 
-G
+B
 1
- I,$ invited person mobile phone number
+ D,$ invited person mobile phone number
 
 
- I
+ D
 
- I'
+ D'
 
- I*+
+ D*+
 ;
-K*. the time of the last invite sms message sent
+F*. the time of the last invite sms message sent
 
 
-K
+F
 
-K	%
+F	%
 
-K()
+F()
 7
-M* total number of invite sms messages sent
+H* total number of invite sms messages sent
 
 
-M
+H
 
-M	
+H	
 
-M
+H
 A
-O.4 inviter mobile phone number (from appreciation tx)
+J.4 inviter mobile phone number (from appreciation tx)
 
 
-O
+J
 
-O)
+J)
 
-O,-
+J,-
 C
-Q6 the hash of the payment tx that triggers this invite
+L6 the hash of the payment tx that triggers this invite
 
 
-Q
+L
 
-Q
+L
 
-Qbproto3
+Lbproto3
 ø
  karma_coin/core_types/auth.protokarma_coin.auth!karma_coin/core_types/types.proto"q
 AuthRequest?

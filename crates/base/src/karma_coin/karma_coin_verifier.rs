@@ -1,4 +1,4 @@
-/// Verier Info is used to return the network the id and dialup info of active verifiers
+/// Verier Info is used to return the network the id and dial-up info of active verifiers
 #[derive(serde::Serialize, serde::Deserialize)]
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -58,6 +58,12 @@ pub struct VerifyNumberRequestDataEx {
     /// optional token to bypass verification
     #[prost(bytes = "vec", tag = "5")]
     pub bypass_token: ::prost::alloc::vec::Vec<u8>,
+    /// Twilio whatsapp verification code
+    #[prost(string, tag = "6")]
+    pub verification_code: ::prost::alloc::string::String,
+    /// Twilio verification sid (obtained when verify was called from client in response)
+    #[prost(string, tag = "7")]
+    pub verification_sid: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -67,16 +73,6 @@ pub struct VerifyNumberRequestEx {
     pub data: ::prost::alloc::vec::Vec<u8>,
     /// User signature of binary data field 1
     /// Public key is account_id in the data
-    #[prost(bytes = "vec", tag = "2")]
-    pub signature: ::prost::alloc::vec::Vec<u8>,
-}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct VerifyNumberResponseEx {
-    /// a serialized UserVerificationDataEx message
-    #[prost(bytes = "vec", tag = "1")]
-    pub verification_data: ::prost::alloc::vec::Vec<u8>,
-    /// Verifier signature over the binary data above - client has the verifier public key
     #[prost(bytes = "vec", tag = "2")]
     pub signature: ::prost::alloc::vec::Vec<u8>,
 }
@@ -192,12 +188,11 @@ pub mod verifier_service_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        /// Extended api - supports bypass token for tests and response signs binary part
-        /// should be used in Kchain 2.0 -
+        /// Extended api - verifies number via Twilio whatsapp given user code
         pub async fn verify_number_ex(
             &mut self,
             request: impl tonic::IntoRequest<super::VerifyNumberRequestEx>,
-        ) -> Result<tonic::Response<super::VerifyNumberResponseEx>, tonic::Status> {
+        ) -> Result<tonic::Response<super::VerifyNumberResponse>, tonic::Status> {
             self.inner
                 .ready()
                 .await
@@ -228,12 +223,11 @@ pub mod verifier_service_server {
             &self,
             request: tonic::Request<super::VerifyNumberRequest>,
         ) -> Result<tonic::Response<super::VerifyNumberResponse>, tonic::Status>;
-        /// Extended api - supports bypass token for tests and response signs binary part
-        /// should be used in Kchain 2.0 -
+        /// Extended api - verifies number via Twilio whatsapp given user code
         async fn verify_number_ex(
             &self,
             request: tonic::Request<super::VerifyNumberRequestEx>,
-        ) -> Result<tonic::Response<super::VerifyNumberResponseEx>, tonic::Status>;
+        ) -> Result<tonic::Response<super::VerifyNumberResponse>, tonic::Status>;
     }
     /// mobile phone numbers verifier api service
     #[derive(Debug)]
@@ -342,7 +336,7 @@ pub mod verifier_service_server {
                         T: VerifierService,
                     > tonic::server::UnaryService<super::VerifyNumberRequestEx>
                     for VerifyNumberExSvc<T> {
-                        type Response = super::VerifyNumberResponseEx;
+                        type Response = super::VerifyNumberResponse;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
                             tonic::Status,

@@ -142,7 +142,10 @@ impl Handler<Verify> for VerifierService {
 
 impl VerifierService {
     /// private helper function to generate a signed user verification data
-    async fn gen_result(&mut self, value: VerificationResult) -> Result<UserVerificationData> {
+    pub(crate) async fn gen_result(
+        &mut self,
+        value: VerificationResult,
+    ) -> Result<UserVerificationData> {
         let mut data = UserVerificationData::from(value);
         let verifier_key_pair = self.get_key_pair().await?.to_ed2559_keypair();
         data.verifier_account_id = Some(self.get_account_id().await?);

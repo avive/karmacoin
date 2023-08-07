@@ -116,7 +116,7 @@ impl Handler<ProcessTransactions> for BlockChainService {
             self.emit_tx_event(tx_event).await?;
         }
 
-        // process other transactions types (update user and payment
+        // process other transactions types (update user and payments)
         for (tx_hash, tx) in mem_pool.call(GetTransactions).await??.iter() {
             let tx_body = match tx.get_body() {
                 Ok(body) => body,
